@@ -2,8 +2,8 @@ package com.ziguonnana.ziguserver.security.dto;
 
 import java.io.Serializable;
 
-import com.ziguonnana.ziguserver.domain.member.Member;
-import com.ziguonnana.ziguserver.domain.member.RoleType;
+import com.ziguonnana.ziguserver.domain.member.dto.RoleType;
+import com.ziguonnana.ziguserver.domain.member.entity.Member;
 
 import lombok.Builder;
 
