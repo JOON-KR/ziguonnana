@@ -1,47 +1,24 @@
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import "./styles/App.css";
 import Home from "./pages/Home";
-import MyPage from "./pages/MyPage";
+import MyPage from "./pages/user/MyPage";
+import GamePages from "./routes/GamePages";
+import UserPages from "./routes/UserPages";
 
 function App() {
   const navigate = useNavigate();
   return (
     <div className="App">
-      <header className="App-header">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div>
-                <p>
-                  Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <h1>세상에 이런 폰트가 나오다니 천재인듯</h1>
-                <a
-                  className="App-link"
-                  href="https://reactjs.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Learn React
-                </a>
-                <div>
-                  <Link to={"/home"}>홈으로 by Link</Link>
-                </div>
-                <div
-                  onClick={() => {
-                    navigate("/home");
-                  }}
-                >
-                  홈으로 by useNavigate
-                </div>
-              </div>
-            }
-          />
-          <Route path="/home" element={<Home />} />
-          <Route path="/mypage" element={<MyPage />} />
-        </Routes>
-      </header>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/mypage" element={<MyPage />} />
+
+        {/* 게임 페이지들 묶음, 하위 페이지는 /games/???와 같이 접근*/}
+        <Route path="/games/*" element={<GamePages />} />
+
+        {/* 유저 관련 페이지들 묶음 */}
+        <Route path="/user/*" element={<UserPages />} />
+      </Routes>
     </div>
   );
 }
