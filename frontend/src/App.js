@@ -4,6 +4,10 @@ import Home from "./pages/Home";
 import MyPage from "./pages/user/MyPage";
 import GamePages from "./routes/GamePages";
 import UserPages from "./routes/UserPages";
+import PageTemplate from "./pages/iceBreaking/IceBreaking";
+import IceBreaking from "./pages/iceBreaking/IceBreaking";
+import Loading from "./pages/iceBreaking/Loading";
+import Introduce from "./pages/iceBreaking/Introduce";
 
 function App() {
   const navigate = useNavigate();
@@ -18,6 +22,13 @@ function App() {
 
         {/* 유저 관련 페이지들 묶음 */}
         <Route path="/user/*" element={<UserPages />} />
+
+        <Route path="/icebreaking" element={<IceBreaking />}>
+          <Route path="" element={<Loading />} />
+          <Route path="intro" element={<Introduce />} />
+        </Route>
+
+        <Route path="/sample" element={<PageTemplate />} />
       </Routes>
     </div>
   );
