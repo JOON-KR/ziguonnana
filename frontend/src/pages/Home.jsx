@@ -5,6 +5,7 @@ import gray from "../assets/icons/gray.png";
 import GameInfoModal from "../components/common/GameInfoModal";
 import { useNavigate } from "react-router-dom";
 
+//스타일 컴포넌트
 const HomeWrap = styled.div`
   background-image: url(${main_bg});
   background-size: cover;
@@ -75,6 +76,7 @@ const SubTitle = styled.h3`
   color: white;
 `;
 
+//리액트 컴포넌트
 const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,13 +105,22 @@ const Home = () => {
       <Header>
         <HeaderText onClick={() => setIsModalOpen(true)}>모달모달</HeaderText>
         {isLoggedIn ? (
-          <HeaderText
-            onClick={() => {
-              setIsLoggedIn(!isLoggedIn);
-            }}
-          >
-            로그아웃
-          </HeaderText>
+          <>
+            <HeaderText
+              onClick={() => {
+                navigate("/MyPage")
+              }}>
+              마이페이지
+            </HeaderText>
+            <HeaderText
+              onClick={() => {
+                setIsLoggedIn(!isLoggedIn);
+              }}
+            >
+              로그아웃
+            </HeaderText>
+          </>
+          
         ) : (
           <HeaderText
             onClick={() => {

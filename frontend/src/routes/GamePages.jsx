@@ -6,6 +6,7 @@ import Game2 from "../pages/games/Game2";
 import Game3 from "../pages/games/Game3";
 import Game4 from "../pages/games/Game4";
 import Game5 from "../pages/games/Game5";
+import GameRecord from "../pages/games/GameRecord";
 
 const GamePages = () => {
   return (
@@ -17,6 +18,7 @@ const GamePages = () => {
         <Route path="game3" element={<Game3 />} />
         <Route path="game4" element={<Game4 />} />
         <Route path="game5" element={<Game5 />} />
+        <Route path="gameRecord" element={<GameRecord />} />
       </Routes>
     </div>
   );
