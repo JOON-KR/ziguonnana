@@ -1,5 +1,6 @@
-FROM node:20.15-alpine
-WORKDIR /react-to-do/frontend
-COPY package.json package-lock.json ./
-RUN npm install 
-COPY . ./
+FROM node:latest as build
+WORKDIR /app
+COPY package*.json ./
+COPY . .
+RUN npm install
+CMD ["npm", "start"]
