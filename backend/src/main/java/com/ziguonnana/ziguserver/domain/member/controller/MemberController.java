@@ -48,22 +48,22 @@ public class MemberController {
 	}
 	
 	@PostMapping("login")
-	public ResponseEntity<TokenResponse> login(
+	public ResponseEntity<?> login(
 		@Valid @RequestBody LoginRequest request
 	) {
 		String accessToken = memberService.login(request);
 		CustomUserInfo userInfo = memberService.getUserInfo(request.email());
 		String refreshToken = jwtUtil.createRefreshToken(userInfo);
 		redisService.saveRefreshToken(request.email(), refreshToken);
-		return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(accessToken, refreshToken));
+		return ResponseEntity.status(201).body(ResponseDto.success(new TokenResponse(accessToken, refreshToken)));
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
+	public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request) {
 		String email = request.email();
 		String refreshToken = request.refreshToken();
 		memberService.logout(email, refreshToken);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(201).body(ResponseDto.success(""));
 	}
 	
 
@@ -77,15 +77,15 @@ public class MemberController {
 	}
 
 	@PutMapping("update")
-	public ResponseEntity<UpdateResponse> update(@Valid @RequestBody UpdateRequest request) {
+	public ResponseEntity<?> update(@Valid @RequestBody UpdateRequest request) {
 		Member updateMember = memberService.update(request);
-		return ResponseEntity.status(HttpStatus.OK).body(UpdateResponse.create(updateMember));
+		return ResponseEntity.status(201).body(ResponseDto.success(UpdateResponse.create(updateMember)));
 	}
 
 	@DeleteMapping("delete")
-	public ResponseEntity<String> delete() {
+	public ResponseEntity<?> delete() {
 		memberService.delete();
-		return ResponseEntity.status(HttpStatus.OK).body("삭제 완료");
+		return ResponseEntity.status(201).body(ResponseDto.success(""));
 	}
 
 	@GetMapping("all")

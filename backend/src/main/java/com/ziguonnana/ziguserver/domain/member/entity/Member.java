@@ -1,17 +1,9 @@
 package com.ziguonnana.ziguserver.domain.member.entity;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
 
-import com.ziguonnana.ziguserver.domain.article.avatar.entity.AvatarArticle;
-import com.ziguonnana.ziguserver.domain.avatar.entity.Avatar;
-import com.ziguonnana.ziguserver.domain.like.entity.AvatarLike;
-import com.ziguonnana.ziguserver.domain.like.entity.VideoLike;
 import com.ziguonnana.ziguserver.domain.member.dto.MemberRequest;
 import com.ziguonnana.ziguserver.domain.member.dto.RoleType;
-import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
-import com.ziguonnana.ziguserver.domain.records.entity.Records;
-import com.ziguonnana.ziguserver.domain.team.entity.MemberTeam;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,14 +12,17 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Member {
 
     @Id
