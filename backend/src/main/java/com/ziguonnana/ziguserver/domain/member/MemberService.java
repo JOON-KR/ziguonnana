@@ -10,6 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ziguonnana.ziguserver.TokenInfo;
+import com.ziguonnana.ziguserver.domain.member.dto.EmailListResponse;
+import com.ziguonnana.ziguserver.domain.member.dto.LoginRequest;
+import com.ziguonnana.ziguserver.domain.member.dto.MemberResponse;
+import com.ziguonnana.ziguserver.domain.member.dto.UpdateRequest;
+import com.ziguonnana.ziguserver.domain.member.entity.Member;
+import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
 import com.ziguonnana.ziguserver.redis.RedisService;
 import com.ziguonnana.ziguserver.security.dto.CustomUserInfo;
 import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;
@@ -93,21 +99,30 @@ public class MemberService {
 	}
 
 	public void delete() {
-		Long memberId = TokenInfo.getMemberId();
-		Optional<Member> originMember = memberRepository.findById(memberId);
+	    Long memberId = TokenInfo.getMemberId();
+	    Optional<Member> originMember = Optional.ofNullable(memberRepository.findById(memberId)
+	    		.orElseThrow(() ->  new MemberNotFoundException("멤버가 존재하지 않습니다.")));
 
-		if(originMember.isEmpty()) {
-			throw new MemberNotFoundException();
-		}
+	    Member origin = originMember.get();
+	    origin.setIsDelete(true); 
 
-		memberRepository.delete(originMember.get());
+	    memberRepository.saveAndFlush(origin); 
 	}
 
-	public Member getMember() {
-		Long memberId = TokenInfo.getMemberId();
-		log.info("memberId {}", memberId);
-		return memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberNotFoundException("멤버가 존재하지 않습니다."));
+
+	public MemberResponse getMember() {
+	    Long memberId = TokenInfo.getMemberId();
+	    log.info("memberId {}", memberId);
+	    Member member = memberRepository.findById(memberId)
+	            .orElseThrow(() -> new MemberNotFoundException("멤버가 존재하지 않습니다."));
+
+	    // Member 객체를 MemberResponse 객체로 변환
+	    return MemberResponse.builder()
+	            .email(member.getEmail())
+	            .profileImage(member.getProfileImage())
+	            .name(member.getName())
+	            .regDate(member.getRegDate())
+	            .build();
 	}
 
 	public Optional<Member> getMember(Long memberId) {
