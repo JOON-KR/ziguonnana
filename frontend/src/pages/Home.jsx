@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import main_bg from "../assets/images/main_bg.png";
 import gray from "../assets/icons/gray.png";
-import GameInfoModal from "../components/common/GameInfoModal";
+import ProfileRegisterModal from "../components/common/ProfileRegisterModal";
 import { useNavigate } from "react-router-dom";
 
 const HomeWrap = styled.div`
@@ -88,7 +88,7 @@ const Home = () => {
   return (
     <HomeWrap>
       {isModalOpen && (
-        <GameInfoModal
+        <ProfileRegisterModal
           onClose={() => setIsModalOpen(false)}
           modalText={
             "포즈 따라하기 게임을 선택하셨습니다. 나나가 제시하는 사진을 따라하세요!"
