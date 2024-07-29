@@ -1,6 +1,8 @@
 package com.ziguonnana.ziguserver.domain.member;
 
 
+import com.ziguonnana.ziguserver.domain.member.entity.Member;
+
 import lombok.Builder;
 
 @Builder

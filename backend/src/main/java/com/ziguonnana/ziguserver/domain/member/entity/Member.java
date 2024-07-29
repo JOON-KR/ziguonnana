@@ -44,26 +44,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
 	@Column(name = "ROLE", nullable = false)
 	private RoleType role;
-    @OneToMany(mappedBy = "member")
-    private List<Profile> profiles;
-
-    @OneToMany(mappedBy = "member")
-    private List<Records> records;
-
-    @OneToMany(mappedBy = "member")
-    private List<Avatar> avatars;
-
-    @OneToMany(mappedBy = "member")
-    private List<AvatarArticle> avatarArticles;
-
-    @OneToMany(mappedBy = "member")
-    private List<AvatarLike> avatarLikes;
-
-    @OneToMany(mappedBy = "member")
-    private List<VideoLike> videoLikes;
-
-    @OneToMany(mappedBy = "member")
-    private List<MemberTeam> memberTeam;
 
     @PrePersist
     protected void onCreate() {
