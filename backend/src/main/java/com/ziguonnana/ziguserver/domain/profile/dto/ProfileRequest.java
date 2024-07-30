@@ -14,13 +14,12 @@ import lombok.NoArgsConstructor;
 public class ProfileRequest {
     private String feature;
     private String profileImage;
-    private Boolean isDelete;
-
+    private Long profileId;
     public static ProfileRequest from(Profile profile) {
         return ProfileRequest.builder()
                 .feature(profile.getFeature())
                 .profileImage(profile.getProfileImage())
-                .isDelete(profile.getIsDelete())
+                .profileId(profile.getId())
                 .build();
     }
 }

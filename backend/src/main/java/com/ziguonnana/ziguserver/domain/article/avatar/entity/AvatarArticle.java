@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.ziguonnana.ziguserver.domain.avatar.entity.Avatar;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
+import com.ziguonnana.ziguserver.domain.article.avatar.dto.AvatarArticleRequest;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -55,26 +56,25 @@ public class AvatarArticle {
         }
     }
 
-    public void update(String title, Avatar avatar, Boolean isDelete, Integer likeCount, Integer viewCount) {
-        if (title != null) {
-            this.title = title;
+    public void update(AvatarArticleRequest req, Avatar avatar) {
+        if (req.getTitle() != null) {
+            this.title = req.getTitle();
         }
         if (avatar != null) {
             this.avatar = avatar;
         }
-        if (isDelete != null) {
-            this.isDelete = isDelete;
+        if (req.getIsDelete() != null) {
+            this.isDelete = req.getIsDelete();
         }
-        if (likeCount != null) {
-            this.likeCount = likeCount;
+        if (req.getLikeCount() != null) {
+            this.likeCount = req.getLikeCount();
         }
-        if (viewCount != null) {
-            this.viewCount = viewCount;
+        if (req.getViewCount() != null) {
+            this.viewCount = req.getViewCount();
         }
     }
+
     public void delete() {
-        if (isDelete != null) {
-            this.isDelete = true;
-        }
+        this.isDelete = true;
     }
 }

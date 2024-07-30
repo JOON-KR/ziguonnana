@@ -53,13 +53,7 @@ public class AvatarArticleService {
         AvatarArticle avatarArticle = findArticleById(articleId);
         Avatar avatar = getAvatar(articleRequest.getAvatarId());
 
-        avatarArticle.update(
-                articleRequest.getTitle(),
-                avatar,
-                articleRequest.getIsDelete(),
-                articleRequest.getLikeCount(),
-                articleRequest.getViewCount()
-        );
+        avatarArticle.update(articleRequest,avatar);
 
         avatarArticleRepository.save(avatarArticle);
         return AvatarArticleResponse.from(avatarArticle);
@@ -69,7 +63,7 @@ public class AvatarArticleService {
         Long memberId = TokenInfo.getMemberId();
         AvatarArticle avatarArticle = findArticleById(articleId);
         if (!avatarArticle.getMember().getId().equals(memberId)) {
-            throw new ArticleNotFoundException("해당 사용자의 기사가 아닙니다.");
+            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
         }
         avatarArticle.delete();
         avatarArticleRepository.save(avatarArticle);
