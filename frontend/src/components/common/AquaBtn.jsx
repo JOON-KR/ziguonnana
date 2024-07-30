@@ -3,10 +3,10 @@ import styled from "styled-components";
 
 const BtnAqua = styled.button`
   background-color: #58fff5;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   color: #54595e;
-  width: 163px;
+  width: 179px;
   height: 44px;
   border-radius: 8px;
   border: none;
