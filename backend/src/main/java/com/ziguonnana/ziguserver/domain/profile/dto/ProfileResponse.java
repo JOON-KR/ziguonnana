@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Builder
 public class ProfileResponse {
-    private Integer id;
+    private Long id;
     private String memberEmail;
     private String feature;
     private String profileImage;
