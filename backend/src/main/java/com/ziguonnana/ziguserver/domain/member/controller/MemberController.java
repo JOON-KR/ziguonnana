@@ -43,12 +43,12 @@ public class MemberController {
 	private final JwtUtil jwtUtil;
 
 	@GetMapping
-	public ResponseEntity<MemberResponse> getMember(){
+	public ResponseEntity<MemberResponse> getMember() {
 		return ResponseEntity.status(HttpStatus.OK).body(memberService.getMember());
 	}
 	
 	@PostMapping("login")
-	public ResponseEntity<?> login(
+	public ResponseEntity<ResponseDto<TokenResponse>> login(
 		@Valid @RequestBody LoginRequest request
 	) {
 		String accessToken = memberService.login(request);
@@ -59,16 +59,15 @@ public class MemberController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request) {
+	public ResponseEntity<ResponseDto<String>> logout(@Valid @RequestBody LogoutRequest request) {
 		String email = request.email();
 		String refreshToken = request.refreshToken();
 		memberService.logout(email, refreshToken);
 		return ResponseEntity.status(201).body(ResponseDto.success(""));
 	}
 	
-
 	@PostMapping("signup")
-	public ResponseEntity<?> signup(@Valid @RequestBody MemberRequest member) {
+	public ResponseEntity<ResponseDto<MemberResponse>> signup(@Valid @RequestBody MemberRequest member) {
 		log.info("member info {}", member);
 		Member entity = Member.from(member);
 		log.info("after ModelMapper info {}", entity.toString());
@@ -77,13 +76,13 @@ public class MemberController {
 	}
 
 	@PutMapping("update")
-	public ResponseEntity<?> update(@Valid @RequestBody UpdateRequest request) {
+	public ResponseEntity<ResponseDto<UpdateResponse>> update(@Valid @RequestBody UpdateRequest request) {
 		Member updateMember = memberService.update(request);
 		return ResponseEntity.status(201).body(ResponseDto.success(UpdateResponse.create(updateMember)));
 	}
 
 	@DeleteMapping("delete")
-	public ResponseEntity<?> delete() {
+	public ResponseEntity<ResponseDto<String>> delete() {
 		memberService.delete();
 		return ResponseEntity.status(201).body(ResponseDto.success(""));
 	}

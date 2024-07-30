@@ -1,6 +1,6 @@
 package com.ziguonnana.ziguserver.domain.records.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
 
@@ -10,15 +10,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class Records {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String resultImage;
 
@@ -26,5 +29,10 @@ public class Records {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private Timestamp regDate;
+    private LocalDateTime regDate;
+
+    @PrePersist
+    protected void onCreate() {
+        this.regDate = LocalDateTime.now();
+    }
 }
