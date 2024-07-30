@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
-import recordBtn from "../../assets/icons/aqua_btn.png";
-import gameRcordIcon from "../../assets/icons/game_record.png";
+import recordIcon from "../../assets/icons/record.png";
 import avartarIcon from "../../assets/icons/avartar.png";
+import gameRecordIcon from "../../assets/icons/game_record.png";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -32,14 +32,14 @@ const BodyContainer = styled.div`
   height: 80vh;
 `;
 
-const Section = styled.div`
+const AvartarSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-right: 10px;
   color: white;
 `;
 
@@ -51,6 +51,17 @@ const RecordSection = styled.div`
   border-radius: 15px;
   padding: 20px;
   color: white;
+`;
+
+const GameSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 10px;
+  color: white;
+  margin-bottom: 10px;
 `;
 
 const Title = styled.h2`
@@ -65,9 +76,9 @@ const RecordTitle = styled.h2`
 
 const AvartarContainer = styled.div`
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
+  width: 200px;
 `;
 
 const AvartarIconImage = styled.img`
@@ -75,26 +86,9 @@ const AvartarIconImage = styled.img`
   margin: 5px;
 `;
 
-const RecordIconImage = styled.img`
-  height: 36px;
-  margin: 20px;
-`;
-
-const GameRecordContainer = styled.div`
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-const GameRecordItem = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+const IconImage = styled.img`
+  height: 50px;
+  margin: 10px;
 `;
 
 const GameRecordText = styled.span`
@@ -104,38 +98,42 @@ const GameRecordText = styled.span`
   align-items: center;
 `;
 
+const avatars = [
+  avartarIcon, avartarIcon, avartarIcon, 
+  avartarIcon, avartarIcon, avartarIcon
+];
+
 const GameRecordDetail = () => {
   return (
     <PageWrap>
       <Header>오늘의 게임 기록</Header>
       <BodyContainer>
-        <Section>
+        <AvartarSection>
           <Title>우리 팀의 아바타</Title>
           <AvartarContainer>
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
-            <AvartarIconImage src={avartarIcon} alt="avartar" />
+            {avatars.map((src, index) => (
+              <AvartarIconImage key={index} src={src} alt={`avatar-${index}`} />
+            ))}
           </AvartarContainer>
-        </Section>
+        </AvartarSection>
+
         <RecordSection>
           <RecordTitle>게임 기록</RecordTitle>
-          <GameRecordContainer>
-            <GameRecordItem>
-            <RecordIconImage src={gameRcordIcon} alt="gameRecord" />
-            <GameRecordText>몸으로 말해요 6/6</GameRecordText>
-            </GameRecordItem>
-            <GameRecordItem>
-              <RecordIconImage src={gameRcordIcon} alt="gameRecord" />
+            <GameSection>
+              <IconImage src={gameRecordIcon} alt="gameRecord" />
+              <GameRecordText>몸으로 말해요 6/6</GameRecordText>
+            </GameSection>
+
+            <GameSection>
+              <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordText>이구동성 게임 4/6</GameRecordText>
-            </GameRecordItem>
-            <GameRecordItem>
-              <RecordIconImage src={gameRcordIcon} alt="gameRecord" />
+            </GameSection>
+
+            <GameSection>
+              <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordText>포즈 따라하기 1등!</GameRecordText>
-            </GameRecordItem>
-          </GameRecordContainer>
+            </GameSection>
+
         </RecordSection>
       </BodyContainer>
     </PageWrap>

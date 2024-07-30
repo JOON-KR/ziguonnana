@@ -7,7 +7,7 @@ import leftIcon from "../../assets/icons/left.png";
 import rightIcon from "../../assets/icons/right.png";
 import recordIcon from "../../assets/icons/record.png";
 import recordBtn from "../../assets/icons/aqua_btn.png";
-import gameRcordIcon from "../../assets/icons/game_record.png";
+import gameRecordIcon from "../../assets/icons/game_record.png";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -153,13 +153,14 @@ const GameRecord = () => {
             <IconImage src={rightIcon} alt="Right" />
           </Slide>
         </Section>
+
         <RecordSection>
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>게임 기록</RecordTitle>
           <GameSection>
             <Slide>
               <GameRecordIconImage src={leftIcon} alt="Left" />
-              <IconImage src={gameRcordIcon} alt="gameRecord" />
+              <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordIconImage src={rightIcon} alt="Right" />
             </Slide>
             {/* 게임 이름 & 인원 */}
@@ -170,6 +171,7 @@ const GameRecord = () => {
             <IconImage src={recordBtn} alt="gameRecordBtn" />
           </ButtonContainer>
         </RecordSection>
+        
         <RecordSection>
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>숏폼 기록</RecordTitle>
