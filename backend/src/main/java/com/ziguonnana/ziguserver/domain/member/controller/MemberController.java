@@ -44,7 +44,7 @@ public class MemberController {
 
 	@GetMapping
 	public ResponseEntity<MemberResponse> getMember() {
-		return ResponseEntity.status(HttpStatus.OK).body(memberService.getMember());
+		return ResponseEntity.status(200).body(memberService.getMember());
 	}
 	
 	@PostMapping("login")
@@ -55,15 +55,15 @@ public class MemberController {
 		CustomUserInfo userInfo = memberService.getUserInfo(request.email());
 		String refreshToken = jwtUtil.createRefreshToken(userInfo);
 		redisService.saveRefreshToken(request.email(), refreshToken);
-		return ResponseEntity.status(201).body(ResponseDto.success(new TokenResponse(accessToken, refreshToken)));
+		return ResponseEntity.status(200).body(ResponseDto.success(new TokenResponse(accessToken, refreshToken)));
 	}
 
-	@PostMapping("/logout")
+	@PostMapping("logout")
 	public ResponseEntity<ResponseDto<String>> logout(@Valid @RequestBody LogoutRequest request) {
 		String email = request.email();
 		String refreshToken = request.refreshToken();
 		memberService.logout(email, refreshToken);
-		return ResponseEntity.status(201).body(ResponseDto.success(""));
+		return ResponseEntity.status(200).body(ResponseDto.success(""));
 	}
 	
 	@PostMapping("signup")
@@ -75,38 +75,38 @@ public class MemberController {
 		return ResponseEntity.status(201).body(ResponseDto.success(MemberResponse.from(entity)));
 	}
 
-	@PutMapping("update")
+	@PutMapping
 	public ResponseEntity<ResponseDto<UpdateResponse>> update(@Valid @RequestBody UpdateRequest request) {
 		Member updateMember = memberService.update(request);
-		return ResponseEntity.status(201).body(ResponseDto.success(UpdateResponse.create(updateMember)));
+		return ResponseEntity.status(200).body(ResponseDto.success(UpdateResponse.create(updateMember)));
 	}
 
-	@DeleteMapping("delete")
+	@DeleteMapping
 	public ResponseEntity<ResponseDto<String>> delete() {
 		memberService.delete();
-		return ResponseEntity.status(201).body(ResponseDto.success(""));
+		return ResponseEntity.status(200).body(ResponseDto.success(""));
 	}
 
-	@GetMapping("all")
-	public ResponseEntity<EmailListResponse> getAllEmails() {
-		return ResponseEntity.status(HttpStatus.OK).body(memberService.getEmails());
-	}
-
-	@PostMapping("refresh")
-	public ResponseEntity<TokenResponse> refresh(@RequestBody String refreshToken) {
-		if (redisService.isTokenBlacklisted(refreshToken)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TokenResponse(null, "블랙리스트에 등록된 토큰입니다."));
-		}
-
-		if (!jwtUtil.isValidToken(refreshToken)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse(null, "유효하지 않은 토큰입니다."));
-		}
-
-		String email = jwtUtil.getUsernameFromToken(refreshToken);
-		Member member = memberService.getMemberByEmail(email)
-			.orElseThrow(() -> new UsernameNotFoundException("멤버가 존재하지 않습니다."));
-		CustomUserInfo info = CustomUserInfo.from(member);
-		String newAccessToken = jwtUtil.createAccessToken(info);
-		return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(newAccessToken, refreshToken));
-	}
+//	@GetMapping("all")
+//	public ResponseEntity<EmailListResponse> getAllEmails() {
+//		return ResponseEntity.status(HttpStatus.OK).body(memberService.getEmails());
+//	}
+//
+//	@PostMapping("refresh")
+//	public ResponseEntity<TokenResponse> refresh(@RequestBody String refreshToken) {
+//		if (redisService.isTokenBlacklisted(refreshToken)) {
+//			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TokenResponse(null, "블랙리스트에 등록된 토큰입니다."));
+//		}
+//
+//		if (!jwtUtil.isValidToken(refreshToken)) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse(null, "유효하지 않은 토큰입니다."));
+//		}
+//
+//		String email = jwtUtil.getUsernameFromToken(refreshToken);
+//		Member member = memberService.getMemberByEmail(email)
+//			.orElseThrow(() -> new UsernameNotFoundException("멤버가 존재하지 않습니다."));
+//		CustomUserInfo info = CustomUserInfo.from(member);
+//		String newAccessToken = jwtUtil.createAccessToken(info);
+//		return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(newAccessToken, refreshToken));
+//	}
 }

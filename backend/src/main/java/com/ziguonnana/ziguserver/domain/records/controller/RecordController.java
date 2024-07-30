@@ -26,7 +26,7 @@ public class RecordController {
 
 	@GetMapping
 	public ResponseEntity<ResponseDto> getMemberRecords() {
-		return ResponseEntity.ok(ResponseDto.success(recordService.getRecords()));
+		return ResponseEntity.status(200).body(ResponseDto.success(recordService.getRecords()));
 	}
 	
 	@PostMapping

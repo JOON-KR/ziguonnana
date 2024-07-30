@@ -7,7 +7,6 @@ import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
 @Builder
 public class ProfileResponse {
     private Integer id;
