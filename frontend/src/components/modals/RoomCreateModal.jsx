@@ -3,6 +3,7 @@ import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
+import { useNavigate } from "react-router-dom";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -64,6 +65,27 @@ const InputField = styled.input`
   }
 `;
 
+const ToggleWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const ToggleButton = styled.button`
+  width: 50px;
+  height: 50px;
+  font-size: 18px;
+  font-weight: bold;
+  color: ${(props) => (props.selected ? "#ffffff" : "#54595e")};
+  background-color: ${(props) => (props.selected ? "#58FFF5" : "#d4d7d9")};
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+`;
+
 const BtnWrap = styled.div`
   margin-top: 20px;
   display: flex;
@@ -72,7 +94,19 @@ const BtnWrap = styled.div`
   gap: 20px; /* 버튼 사이 간격 설정 */
 `;
 
-const RoomJoinModal = ({ onClose, onJoinRoom }) => {
+const RoomCreateModal = ({ onClose }) => {
+  const [selectedCapacity, setSelectedCapacity] = useState(1); // 기본값을 1로 설정
+  const navigate = useNavigate();
+
+  const handleToggleClick = (capacity) => {
+    setSelectedCapacity(capacity);
+  };
+
+  const handleCreateRoom = () => {
+    // navigate 함수만 사용하여 페이지 이동
+    navigate("/ProfilePick");
+  };
+
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
@@ -80,17 +114,28 @@ const RoomJoinModal = ({ onClose, onJoinRoom }) => {
           e.stopPropagation();
         }}
       >
-        <Title>이글루에 초대받으셨나요?</Title>
+        <Title>이글루를 만들어주세요!</Title>
         <InputWrapper>
-          <InputField type="password" placeholder="초대코드를 입력해주세요." />
+          <InputField type="text" placeholder="이글루 이름을 입력해주세요." />
+          <ToggleWrapper>
+            {[1, 2, 3, 4, 5, 6].map((number) => (
+              <ToggleButton
+                key={number}
+                selected={selectedCapacity === number}
+                onClick={() => handleToggleClick(number)}
+              >
+                {number}
+              </ToggleButton>
+            ))}
+          </ToggleWrapper>
         </InputWrapper>
         <BtnWrap>
           <GrayBtn text="취소" BtnFn={onClose} />
-          <AquaBtn text="입장" BtnFn={onJoinRoom} />
+          <AquaBtn text="생성" BtnFn={handleCreateRoom} />
         </BtnWrap>
       </ModalWrap>
     </BlackBg>
   );
 };
 
-export default RoomJoinModal;
+export default RoomCreateModal;
