@@ -15,7 +15,6 @@ public class ProfileResponse {
     private String profileImage;
     private LocalDateTime regDate;
     private LocalDateTime editDate;
-    private Boolean isDelete;
 
     public static ProfileResponse from(Profile profile) {
         return ProfileResponse.builder()
@@ -25,7 +24,6 @@ public class ProfileResponse {
                 .profileImage(profile.getProfileImage())
                 .regDate(profile.getRegDate())
                 .editDate(profile.getEditDate())
-                .isDelete(profile.getIsDelete())
                 .build();
     }
 }

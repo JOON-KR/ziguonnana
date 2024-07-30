@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver;
+package com.ziguonnana.ziguserver.global;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 

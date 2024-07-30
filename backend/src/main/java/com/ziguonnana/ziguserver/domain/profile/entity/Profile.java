@@ -32,17 +32,25 @@ public class Profile {
     private String profileImage;
     private LocalDateTime regDate;
     private LocalDateTime editDate;
-    private Boolean isDelete;
 
     @PrePersist
     protected void onCreate() {
         this.regDate = LocalDateTime.now();
         this.editDate = LocalDateTime.now();
-        this.isDelete = false; // 기본값 설정
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.editDate = LocalDateTime.now();
+    }
+
+    public void update(String feature, String profileImage) {
+        if (feature != null) {
+            this.feature = feature;
+        }
+        if (profileImage != null) {
+            this.profileImage = profileImage;
+        }
+        onUpdate();
     }
 }
