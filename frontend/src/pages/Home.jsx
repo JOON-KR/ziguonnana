@@ -108,8 +108,9 @@ const Home = () => {
           <>
             <HeaderText
               onClick={() => {
-                navigate("/MyPage")
-              }}>
+                navigate("/MyPage");
+              }}
+            >
               마이페이지
             </HeaderText>
             <HeaderText
@@ -120,7 +121,6 @@ const Home = () => {
               로그아웃
             </HeaderText>
           </>
-          
         ) : (
           <HeaderText
             onClick={() => {

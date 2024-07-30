@@ -23,9 +23,9 @@ function App() {
         <Route path="/user/*" element={<UserPages />} />
 
         <Route path="/icebreaking" element={<IceBreaking />}>
+          <Route path="/icebreaking/games/*" element={<GamePages />} />
           <Route path="" element={<Loading />} />
           <Route path="intro" element={<Intro />} />
-          <Route path="games/*" element={<GamePages />} />
         </Route>
 
         <Route path="/sample" element={<PageTemplate />} />

@@ -78,7 +78,7 @@ const Introduce = () => {
         <Image
           src={firstGame}
           onClick={() => {
-            navigate("/games");
+            navigate("/icebreaking/games/game1");
           }}
         />
       )}
