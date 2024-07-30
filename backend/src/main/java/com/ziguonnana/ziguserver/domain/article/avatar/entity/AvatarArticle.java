@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import lombok.Builder;
 import lombok.Data;
+
 @Builder
 @Entity
 @Data
@@ -51,6 +52,29 @@ public class AvatarArticle {
         }
         if (this.viewCount == null) {
             this.viewCount = 0;
+        }
+    }
+
+    public void update(String title, Avatar avatar, Boolean isDelete, Integer likeCount, Integer viewCount) {
+        if (title != null) {
+            this.title = title;
+        }
+        if (avatar != null) {
+            this.avatar = avatar;
+        }
+        if (isDelete != null) {
+            this.isDelete = isDelete;
+        }
+        if (likeCount != null) {
+            this.likeCount = likeCount;
+        }
+        if (viewCount != null) {
+            this.viewCount = viewCount;
+        }
+    }
+    public void delete() {
+        if (isDelete != null) {
+            this.isDelete = true;
         }
     }
 }

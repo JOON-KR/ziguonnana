@@ -37,7 +37,7 @@ public class AvatarArticleController {
     @DeleteMapping("/{articleId}")
     public ResponseEntity<ResponseDto<String>> deleteArticle(@PathVariable Long articleId) {
         avatarArticleService.deleteArticle(articleId);
-        return ResponseEntity.ok(ResponseDto.success("Article deleted successfully"));
+        return ResponseEntity.ok(ResponseDto.success("아바타 아티클 삭제완료"));
     }
 
     @GetMapping

@@ -9,13 +9,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ziguonnana.ziguserver.TokenInfo;
 import com.ziguonnana.ziguserver.domain.member.dto.EmailListResponse;
 import com.ziguonnana.ziguserver.domain.member.dto.LoginRequest;
 import com.ziguonnana.ziguserver.domain.member.dto.MemberResponse;
 import com.ziguonnana.ziguserver.domain.member.dto.UpdateRequest;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
 import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
+import com.ziguonnana.ziguserver.global.TokenInfo;
 import com.ziguonnana.ziguserver.redis.RedisService;
 import com.ziguonnana.ziguserver.security.dto.CustomUserInfo;
 import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;

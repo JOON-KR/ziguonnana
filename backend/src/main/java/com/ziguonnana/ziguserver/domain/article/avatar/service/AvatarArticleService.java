@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ziguonnana.ziguserver.TokenInfo;
 import com.ziguonnana.ziguserver.domain.article.avatar.dto.AvatarArticleRequest;
 import com.ziguonnana.ziguserver.domain.article.avatar.dto.AvatarArticleResponse;
 import com.ziguonnana.ziguserver.domain.article.avatar.entity.AvatarArticle;
@@ -17,6 +16,7 @@ import com.ziguonnana.ziguserver.domain.member.entity.Member;
 import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
 import com.ziguonnana.ziguserver.exception.ArticleNotFoundException;
 import com.ziguonnana.ziguserver.exception.AvatarNotFoundException;
+import com.ziguonnana.ziguserver.global.TokenInfo;
 import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -53,19 +53,25 @@ public class AvatarArticleService {
         AvatarArticle avatarArticle = findArticleById(articleId);
         Avatar avatar = getAvatar(articleRequest.getAvatarId());
 
-        avatarArticle.setTitle(articleRequest.getTitle());
-        avatarArticle.setAvatar(avatar);
-        avatarArticle.setIsDelete(articleRequest.getIsDelete() != null ? articleRequest.getIsDelete() : avatarArticle.getIsDelete());
-        avatarArticle.setLikeCount(articleRequest.getLikeCount() != null ? articleRequest.getLikeCount() : avatarArticle.getLikeCount());
-        avatarArticle.setViewCount(articleRequest.getViewCount() != null ? articleRequest.getViewCount() : avatarArticle.getViewCount());
+        avatarArticle.update(
+                articleRequest.getTitle(),
+                avatar,
+                articleRequest.getIsDelete(),
+                articleRequest.getLikeCount(),
+                articleRequest.getViewCount()
+        );
 
         avatarArticleRepository.save(avatarArticle);
         return AvatarArticleResponse.from(avatarArticle);
     }
 
     public void deleteArticle(Long articleId) {
+        Long memberId = TokenInfo.getMemberId();
         AvatarArticle avatarArticle = findArticleById(articleId);
-        avatarArticle.setIsDelete(true);
+        if (!avatarArticle.getMember().getId().equals(memberId)) {
+            throw new ArticleNotFoundException("해당 사용자의 기사가 아닙니다.");
+        }
+        avatarArticle.delete();
         avatarArticleRepository.save(avatarArticle);
     }
 
