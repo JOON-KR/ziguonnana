@@ -6,6 +6,7 @@ import story3 from "../../assets/images/story3.png";
 import story4 from "../../assets/images/story4.png";
 import nana from "../../assets/icons/nana.png";
 import { useNavigate } from "react-router-dom";
+import firstGame from "../../assets/images/firstGame.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -26,13 +27,15 @@ const Image = styled.div`
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  width: 500px;
-  height: 500px;
+  width: 800px;
+  height: 700px;
+  /* height: 500px; */
 `;
 
 const Introduce = () => {
   const [currentImage, setCurrentImage] = useState(null);
   const [index, setIndex] = useState(0);
+  const [isStoryFinished, setIsStoryFinished] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,19 +56,31 @@ const Introduce = () => {
 
   const handleClick = () => {
     if (index === 4) {
-      navigate("/icebreaking/");
+      setIsStoryFinished(true);
     }
   };
 
   return (
     <Wrap>
-      {currentImage === nana ? (
+      {!isStoryFinished && (
         <>
-          <Text>지금부터 나나의 침략을 막아나나</Text>
-          <Image src={currentImage} onClick={handleClick} />
+          {currentImage === nana ? (
+            <>
+              <Text>지금부터 나나의 침략을 막아나나</Text>
+              <Image src={currentImage} onClick={handleClick} />
+            </>
+          ) : (
+            currentImage && <Image src={currentImage} onClick={handleClick} />
+          )}
         </>
-      ) : (
-        currentImage && <Image src={currentImage} onClick={handleClick} />
+      )}
+      {isStoryFinished && (
+        <Image
+          src={firstGame}
+          onClick={() => {
+            navigate("/games");
+          }}
+        />
       )}
     </Wrap>
   );
