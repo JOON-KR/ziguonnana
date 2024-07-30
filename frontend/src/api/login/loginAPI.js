@@ -6,7 +6,7 @@ const login = async (id, password) => {
   const sendingData = { id, password };
 
   try {
-    const res = await axios.post(`${BASE_URL}api/login`, sendingData);
+    const res = await axios.post(`${BASE_URL}/api/login`, sendingData);
     const jwt = res.headers.authorization;
 
     if (jwt) {

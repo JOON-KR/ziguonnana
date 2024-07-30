@@ -2,15 +2,17 @@
    v2.0 | 20110126
    License: none (public domain)
 */
-@font-face {
+@import url("https://fastly.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css");
+
+/* @font-face {
   font-family: "Pretendard-Regular";
   src: url("https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff")
     format("woff");
   font-weight: 400;
   font-style: normal;
-}
+} */
 * {
-  font-family: "Pretendard-Regular";
+  font-family: "Galmuri11", sans-serif;
 }
 html,
 body,
@@ -135,4 +137,9 @@ q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+body {
+  background-image: url("../assets/images/space_bg.png");
+  color: white;
 }
