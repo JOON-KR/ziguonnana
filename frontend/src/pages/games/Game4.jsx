@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import GameInfoModal from "../../components/common/GameInfoModal";
+import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
 import gray from "../../assets/icons/gray.png";
 

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import main_bg from "../assets/images/main_bg.png";
 import gray from "../assets/icons/gray.png";
-import GameInfoModal from "../components/common/GameInfoModal";
+import GameInfoModal from "../components/modals/GameInfoModal";
 import { useNavigate } from "react-router-dom";
 
 //스타일 컴포넌트

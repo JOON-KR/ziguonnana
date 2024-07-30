@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import GameInfoModal from "../../components/common/GameInfoModal";
+import GameInfoModal from "../../components/modals/GameInfoModal";
 import blue from "../../assets/icons/blue.png";
 import styled from "styled-components";
 
@@ -11,8 +11,6 @@ const Wrap = styled.div`
   flex-direction: column;
   text-align: center;
 `;
-
-
 
 const Game1 = () => {
   const [isModalOpen, setIsModalOpen] = useState(true);
