@@ -84,4 +84,8 @@ public class AvatarArticle {
     public void decreaseLikeCount() {
         this.likeCount--;
     }
+    
+    public void increaseViewCount() {
+    	this.viewCount++;
+    }
 }

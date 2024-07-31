@@ -78,6 +78,8 @@ public class AvatarArticleService {
 
     public AvatarArticleResponse getArticleById(Long articleId) {
         AvatarArticle avatarArticle = findArticleById(articleId);
+        avatarArticle.increaseViewCount();
+        avatarArticleRepository.save(avatarArticle);
         return AvatarArticleResponse.from(avatarArticle);
     }
 

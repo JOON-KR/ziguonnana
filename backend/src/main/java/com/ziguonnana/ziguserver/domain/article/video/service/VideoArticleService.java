@@ -86,6 +86,8 @@ public class VideoArticleService {
 
     public VideoArticleResponse getArticleById(Long articleId) {
         VideoArticle videoArticle = findArticleById(articleId);
+        videoArticle.increaseViewCount();
+        videoArticleRepository.save(videoArticle);
         return VideoArticleResponse.from(videoArticle);
     }
 
