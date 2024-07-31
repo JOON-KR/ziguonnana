@@ -40,7 +40,9 @@ const AvartarSection = styled.div`
   border-radius: 15px;
   padding: 20px;
   margin-right: 10px;
+  width: 50%;
   color: white;
+  height: 510px;
 `;
 
 const RecordSection = styled.div`
@@ -50,7 +52,9 @@ const RecordSection = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 20px;
+  width: 50%;
   color: white;
+  height: 510px;
 `;
 
 const GameSection = styled.div`
@@ -61,7 +65,8 @@ const GameSection = styled.div`
   border-radius: 15px;
   padding: 10px;
   color: white;
-  margin-bottom: 10px;
+  margin: 10px;
+  width: 80%;
 `;
 
 const Title = styled.h2`
@@ -69,20 +74,14 @@ const Title = styled.h2`
   margin-bottom: 20px;
 `;
 
-const RecordTitle = styled.h2`
-  font-size: 28px;
-  margin: 10px;
-`;
-
 const AvartarContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  width: 20%;
 `;
 
 const AvartarIconImage = styled.img`
-  height: 80px;
+  height: 130px;
   margin: 5px;
 `;
 
@@ -96,6 +95,7 @@ const GameRecordText = styled.span`
   margin-left: 10px;
   display: flex;
   align-items: center;
+  font-weight: bold;
 `;
 
 const avatars = [
@@ -118,7 +118,7 @@ const GameRecordDetail = () => {
         </AvartarSection>
 
         <RecordSection>
-          <RecordTitle>게임 기록</RecordTitle>
+          <Title>게임 기록</Title>
             <GameSection>
               <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordText>몸으로 말해요 6/6</GameRecordText>
@@ -133,7 +133,8 @@ const GameRecordDetail = () => {
               <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordText>포즈 따라하기 1등!</GameRecordText>
             </GameSection>
-
+            {/* button */}
+            
         </RecordSection>
       </BodyContainer>
     </PageWrap>
