@@ -13,10 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RecordsRequest {
     private String resultImage;
-
+    private String teamName;
     public static RecordsRequest from(Records records) {
         return RecordsRequest.builder()
                 .resultImage(records.getResultImage())
+                .teamName(records.getTeamName())
                 .build();
     }
 }

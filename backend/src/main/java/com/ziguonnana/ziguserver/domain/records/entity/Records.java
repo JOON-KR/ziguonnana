@@ -30,7 +30,8 @@ public class Records {
     private Member member;
 
     private LocalDateTime regDate;
-
+    
+    private String teamName;
     @PrePersist
     protected void onCreate() {
         this.regDate = LocalDateTime.now();
