@@ -26,7 +26,7 @@ const Header = styled.header`
 const BodyContainer = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-start;
   width: 80%;
   height: 80vh;
@@ -78,7 +78,7 @@ const AvartarContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  width: 200px;
+  width: 20%;
 `;
 
 const AvartarIconImage = styled.img`
