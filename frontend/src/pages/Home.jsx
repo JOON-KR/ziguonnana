@@ -197,10 +197,14 @@ const Home = () => {
             회원가입
           </HeaderText>
         )}
-        <HeaderText onClick={() => navigate("/MyPage")}>
-          마이페이지
+        <HeaderText
+          onClick={() => {
+            navigate("/user/community");
+          }}
+          style={{ marginRight: "12px" }}
+        >
+          커뮤니티
         </HeaderText>
-        <HeaderText style={{ marginRight: "12px" }}>커뮤니티</HeaderText>
       </Header>
       <Wrap>
         <SubTitle>마음속의 얼음을 부수다</SubTitle>

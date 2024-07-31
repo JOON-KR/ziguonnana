@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
-import recordIcon from "../../assets/icons/record.png";
 import avartarIcon from "../../assets/icons/avartar.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
+import { useNavigate } from "react-router-dom";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -98,12 +98,48 @@ const GameRecordText = styled.span`
   font-weight: bold;
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top:30px;
+`;
+
+const AquaBtn = styled.button`
+  background-color: #58fff5;
+  font-size: 18px;
+  font-weight: bold;
+  color: #54595e;
+  width: 80px;
+  height: 36px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+`;
+
+const GrayBtn = styled.button`
+  background-color: #d4d7d9;
+  font-size: 16px;
+  font-weight: bold;
+  color: #54595e;
+  width: 80px;
+  height: 36px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+`;
+
 const avatars = [
   avartarIcon, avartarIcon, avartarIcon, 
   avartarIcon, avartarIcon, avartarIcon
 ];
 
 const GameRecordDetail = () => {
+  const navigate = useNavigate();
+
+  const handleRecord = () => {
+    navigate("/icebreaking/games/gameRecord");
+  };
+
   return (
     <PageWrap>
       <Header>오늘의 게임 기록</Header>
@@ -133,8 +169,12 @@ const GameRecordDetail = () => {
               <IconImage src={gameRecordIcon} alt="gameRecord" />
               <GameRecordText>포즈 따라하기 1등!</GameRecordText>
             </GameSection>
-            {/* button */}
-            
+
+            <ButtonContainer>
+              <GrayBtn onClick={handleRecord}>돌아가기</GrayBtn>
+              {/* 저장 함수 추가 */}
+              <AquaBtn>저장</AquaBtn>
+            </ButtonContainer>
         </RecordSection>
       </BodyContainer>
     </PageWrap>
