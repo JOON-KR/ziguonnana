@@ -1,22 +1,22 @@
 import axios from "axios";
 import BASE_URL from "../APIconfig";
 
-const accesToken = localStorage.getItem("accessToken");
+const accessToken = localStorage.getItem("accessToken");
 
 //영상 업로드
 export const uploadVideo = async ({ name, video }) => {
-  const data = {
-    name,
-    video,
-  };
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("video", video);
+
   try {
     const response = await axios.post(
       `${BASE_URL}/api/v1/article/video`,
-      data,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/formd-data",
         },
       }
     );
@@ -40,21 +40,20 @@ export const getVideoDetail = async (videoId) => {
   }
 };
 
-//영상 게시글 수정
-export const modifyVideoArticle = async ({ code, message, data }) => {
-  const data = {
-    code,
-    message,
-    data,
-  };
+// 영상 게시글 수정
+export const modifyVideoArticle = async ({ name, video, videoId }) => {
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("video", video);
+
   try {
     const response = await axios.put(
       `${BASE_URL}/api/v1/article/video/${videoId}`,
-      data,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       }
     );
@@ -70,7 +69,6 @@ export const deleteVideoArticle = async (videoId) => {
   try {
     const response = await axios.delete(
       `${BASE_URL}/api/v1/article/video/${videoId}`,
-      data,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -79,7 +77,7 @@ export const deleteVideoArticle = async (videoId) => {
       }
     );
     console.log("영상 게시글 삭제");
-    return response.message;
+    return response.data;
   } catch (error) {
     console.log("영상 게시글 수정 에러 : ", error);
   }
@@ -94,7 +92,7 @@ export const getAvatarArticleDetail = async (avatarId) => {
       `${BASE_URL}/api/v1/article/avatar/${avatarId}`,
       {
         headers: {
-          Authorization: `Bearer ${accesToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -112,7 +110,7 @@ export const modifyAvatarArticleDetail = async (avatarId) => {
       `${BASE_URL}/api/v1/article/avatar/${avatarId}`,
       {
         headers: {
-          Authorization: `Bearer ${accesToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -130,7 +128,7 @@ export const deleteAvatarArticleDetail = async (avatarId) => {
       `${BASE_URL}/api/v1/article/avatar/${avatarId}`,
       {
         headers: {
-          Authorization: `Bearer ${accesToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -141,14 +139,14 @@ export const deleteAvatarArticleDetail = async (avatarId) => {
   }
 };
 
-//게시글 좋아요
+//게시글 좋아요 (명세서 수정 필요)
 export const likeArticle = async (avatarId) => {
   try {
     const response = await axios.delete(
       `${BASE_URL}/api/v1/article/avatar/like`,
       {
         headers: {
-          Authorization: `Bearer ${accesToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
