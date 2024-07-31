@@ -1,5 +1,5 @@
 import axios from "axios";
-import BASE_URL from "../Apiconfig";
+import BASE_URL from "../APIconfig";
 
 // 로그인 함수 정의
 const login = async (id, password) => {
