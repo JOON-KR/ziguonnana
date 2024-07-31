@@ -1,6 +1,8 @@
 import React from "react";
+import axios from "axios";
+import BASE_URL from "../../api/APIconfig"
 import styled from "styled-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
@@ -73,8 +75,40 @@ const HeaderText = styled.h4`
 `;
 
 const ProfilePick = () => {
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [existedProfile] = useState(true);  // 프로필 존재 여부
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);  // 프로필 등록 모달
+
+  // get: 프로필 가져오기
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        // request header
+        const headers = {
+          "Content-type" : "application/json",
+          "Authorization" : "Bearer [accessToken]"
+        };
+
+        // get 요청 보내기
+        const res = await axios.get(`${BASE_URL}/api/v1/profile`, {headers});
+
+        // response data
+        setProfiles(res.data);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfiles();
+  }, []);
+
+  // post: 프로필 등록 <- 모달
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   const pickProfile = () => {
     // 프로필 클릭 시, 프로필 선택되게 하는 로직
@@ -86,7 +120,7 @@ const ProfilePick = () => {
   }
 
   // if profiles existed
-  const profiles = [
+  const myProfiles = [
     {
       imgSrc: profileImage1,
       tags: ["활발한", "아저씨", "하트"],
@@ -121,7 +155,7 @@ const ProfilePick = () => {
         </SubTitle>
         <ProfilesContainer>
           {/* 미리 만들어놓은 프로필 가져오기 */}
-          {profiles.map((profile, index) => (
+          {myProfiles.map((profile, index) => (
             <ProfileWrap key={index}>
               <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
               <Tags>

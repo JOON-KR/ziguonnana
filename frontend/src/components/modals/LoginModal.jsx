@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import { login } from "../../api/login/loginAPI";
+
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -129,6 +131,14 @@ const LoginModal = ({
   onGoogleLogin,
   onKakaoLogin,
 }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    AquaBtnFn(email, password);
+  };
+
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
@@ -140,25 +150,31 @@ const LoginModal = ({
         <InputWrapper>
           <LabelInputWrapper>
             <Label>이메일</Label>
-            <InputField type="email" placeholder="이메일을 입력해주세요." />
+            <InputField
+              type="email"
+              placeholder="이메일을 입력해주세요."
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </LabelInputWrapper>
           <LabelInputWrapper>
             <Label>비밀번호</Label>
             <InputField
               type="password"
               placeholder="비밀번호를 입력해주세요."
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </LabelInputWrapper>
         </InputWrapper>
         <FindPassword onClick={onFindPasswordClick}>비밀번호 찾기</FindPassword>
         <BtnWrap>
-          <AquaBtn text="로그인" BtnFn={AquaBtnFn} />
+          <AquaBtn text="로그인" BtnFn={handleSubmit} />
         </BtnWrap>
         <SocialLoginSection>
           <SocialLoginText>소셜 로그인</SocialLoginText>
           <div>
             <SocialLoginButton src={GoogleIcon} onClick={onGoogleLogin} />
-            <SocialLoginButton src={KakaoIcon} onClick={onKakaoLogin} />
           </div>
         </SocialLoginSection>
       </ModalWrap>
