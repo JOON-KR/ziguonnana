@@ -1,6 +1,7 @@
 package com.ziguonnana.ziguserver.domain.records.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,30 +23,32 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Transactional
 public class RecordService {
-	private final RecordRepository recordRepository;
-	private final MemberRepository memberRepository;
-	
-	
-	public List<Records> getRecords() {
-		Long memberId = TokenInfo.getMemberId();
-		return recordRepository.findByMemberId(memberId).orElseThrow(MemberNotFoundException::new);
-	}
+    private final RecordRepository recordRepository;
+    private final MemberRepository memberRepository;
+    
+    public List<RecordsResponse> getRecords() {
+        Long memberId = TokenInfo.getMemberId();
+        List<Records> recordsList = recordRepository.findByMemberId(memberId).orElseThrow(MemberNotFoundException::new);
+        return recordsList.stream()
+                .map(RecordsResponse::from)
+                .collect(Collectors.toList());
+    }
 
-	public RecordsResponse createRecords(RecordsRequest recordsRequest) {
-		Long memberId = TokenInfo.getMemberId();
-		Member member = getMember(memberId);
+    public RecordsResponse createRecords(RecordsRequest recordsRequest) {
+        Long memberId = TokenInfo.getMemberId();
+        Member member = getMember(memberId);
 
-		Records records = Records.builder()
-				.resultImage(recordsRequest.getResultImage())
-				.member(member)
-				.teamName(recordsRequest.getTeamName())
-				.build();
-				
-		recordRepository.save(records);
-		return RecordsResponse.from(records);
-	}
+        Records records = Records.builder()
+                .resultImage(recordsRequest.getResultImage())
+                .member(member)
+                .teamName(recordsRequest.getTeamName())
+                .build();
+                
+        recordRepository.save(records);
+        return RecordsResponse.from(records);
+    }
 
-	private Member getMember(Long memberId) {
-		return memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-	}
+    private Member getMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+    }
 }

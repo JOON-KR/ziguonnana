@@ -28,14 +28,14 @@ public class AvatarArticleController {
         return ResponseEntity.status(201).body(ResponseDto.success(response));
     }
 
-    @PutMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<AvatarArticleResponse>> updateArticle(@PathVariable Long articleId, @RequestBody AvatarArticleRequest articleRequest) {
-        AvatarArticleResponse response = avatarArticleService.updateArticle(articleId, articleRequest);
+    @PutMapping
+    public ResponseEntity<ResponseDto<AvatarArticleResponse>> updateArticle(@RequestBody AvatarArticleRequest articleRequest) {
+        AvatarArticleResponse response = avatarArticleService.updateArticle(articleRequest);
         return ResponseEntity.ok(ResponseDto.success(response));
     }
 
     @DeleteMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<String>> deleteArticle(@PathVariable Long articleId) {
+    public ResponseEntity<ResponseDto<String>> deleteArticle(@PathVariable("articleId") Long articleId) {
         avatarArticleService.deleteArticle(articleId);
         return ResponseEntity.ok(ResponseDto.success("아바타 아티클 삭제완료"));
     }
@@ -47,7 +47,7 @@ public class AvatarArticleController {
     }
 
     @GetMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<AvatarArticleResponse>> getArticleById(@PathVariable Long articleId) {
+    public ResponseEntity<ResponseDto<AvatarArticleResponse>> getArticleById(@PathVariable("articleId") Long articleId) {
         AvatarArticleResponse response = avatarArticleService.getArticleById(articleId);
         return ResponseEntity.ok(ResponseDto.success(response));
     }

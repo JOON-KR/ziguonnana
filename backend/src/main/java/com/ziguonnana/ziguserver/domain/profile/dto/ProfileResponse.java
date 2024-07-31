@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
 
 import lombok.Builder;
-import lombok.Data;
-
+import lombok.Getter;
+@Getter
 @Builder
 public class ProfileResponse {
     private Long id;

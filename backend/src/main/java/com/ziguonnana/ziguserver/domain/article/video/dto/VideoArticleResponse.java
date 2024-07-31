@@ -3,9 +3,8 @@ package com.ziguonnana.ziguserver.domain.article.video.dto;
 import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 
 import lombok.Builder;
-import lombok.Data;
-
-@Data
+import lombok.Getter;
+@Getter
 @Builder
 public class VideoArticleResponse {
     private Long id;

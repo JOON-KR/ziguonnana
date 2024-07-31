@@ -1,8 +1,8 @@
 package com.ziguonnana.ziguserver.domain.like.dto;
 
 import lombok.Builder;
-import lombok.Data;
-
+import lombok.Getter;
+@Getter
 @Builder
 public class LikeResponse {
 	private String type;

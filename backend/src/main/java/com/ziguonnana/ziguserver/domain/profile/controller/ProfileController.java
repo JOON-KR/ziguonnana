@@ -37,13 +37,13 @@ public class ProfileController {
 	}
 	
 	@GetMapping("{profileId}")
-	public ResponseEntity<ResponseDto<ProfileResponse>> getProfile(@PathVariable Long profileId) {
+	public ResponseEntity<ResponseDto<ProfileResponse>> getProfile(@PathVariable("profileId") Long profileId) {
 		ProfileResponse profileResponse = profileService.getProfile(profileId);
 		return ResponseEntity.status(200).body(ResponseDto.success(profileResponse));
 	}
 	
 	@DeleteMapping("{profileId}")
-	public ResponseEntity<ResponseDto<String>> deleteProfile(@PathVariable Long profileId) {
+	public ResponseEntity<ResponseDto<String>> deleteProfile(@PathVariable("profileId") Long profileId) {
 		profileService.deleteProfile(profileId);
 		return ResponseEntity.status(200).body(ResponseDto.success(""));
 	}

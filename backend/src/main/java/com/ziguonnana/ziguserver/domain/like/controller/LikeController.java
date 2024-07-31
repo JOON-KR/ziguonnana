@@ -3,6 +3,7 @@ package com.ziguonnana.ziguserver.domain.like.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,7 @@ public class LikeController {
 	private final LikeService likeService;
 	
 	@PostMapping
-	public ResponseEntity<ResponseDto<LikeResponse>> likeArticle(LikeRequest likeRequest){
+	public ResponseEntity<ResponseDto<LikeResponse>> likeArticle(@RequestBody LikeRequest likeRequest){
 		LikeResponse response = likeService.likeArticle(likeRequest);
 		return ResponseEntity.ok().body(ResponseDto.success(response));
 	}
