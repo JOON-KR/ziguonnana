@@ -18,7 +18,7 @@ const GamePages = () => {
         <Route path="game3" element={<Game3 />} />
         <Route path="game4" element={<Game4 />} />
         <Route path="game5" element={<Game5 />} />
-        <Route path="gameRecord" element={<GameRecord />} />
+        {/* <Route path="gameRecord" element={<GameRecord />} /> */}
       </Routes>
     </div>
   );
