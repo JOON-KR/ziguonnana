@@ -42,6 +42,7 @@ const PageTemplate = () => {
         <VideoBox />
       </Frame>
       <Content>
+        {/* 하위 페이지는 Outlet위치에 박힘(사람 6개는 고정) */}
         <Outlet />
       </Content>
       <Frame>

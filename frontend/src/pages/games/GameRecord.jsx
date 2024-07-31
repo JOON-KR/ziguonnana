@@ -1,9 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
 import cardPic from "../../assets/images/profileCard.png";
 import leftIcon from "../../assets/icons/left.png";
 import rightIcon from "../../assets/icons/right.png";
+import recordIcon from "../../assets/icons/record.png";
+import recordBtn from "../../assets/icons/aqua_btn.png";
+import gameRecordIcon from "../../assets/icons/game_record.png";
+import GameRecordDetail from "../games/GameRecordDetail"
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -17,7 +22,7 @@ const PageWrap = styled.div`
 
 const Header = styled.header`
   font-size: 50px;
-  color: #58FFF5;
+  color: #58fff5;
   font-weight: bold;
   margin-top: 30px;
   margin-bottom: 30px;
@@ -41,7 +46,31 @@ const Section = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 20px;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
+  color: white;
+`;
+
+const RecordSection = styled.div`
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+`;
+
+const GameSection = styled.div`
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 10px;
   color: white;
 `;
 
@@ -51,8 +80,13 @@ const Slide = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 30px;
+  font-size: 28px;
   margin-bottom: 20px;
+`;
+
+const RecordTitle = styled.h2`
+  font-size: 28px;
+  margin: 10px;
 `;
 
 const CardImage = styled.img`
@@ -62,13 +96,55 @@ const CardImage = styled.img`
 
 const IconImage = styled.img`
   height: 50px;
+  margin: 10px;
+`;
+
+const RecordIconImage = styled.img`
+  height: 36px;
+  margin: 15px;
+`;
+
+const GameRecordIconImage = styled.img`
+  height: 36px;
+  margin: 5px;
 `;
 
 const Text = styled.p`
   font-size: 20px;
+  flex: 1;
+  text-align: left;
+  font-weight: bold;
+`;
+
+const ButtonContainer = styled.div`
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  cursor: pointer;
+`;
+
+const ButtonText = styled.span`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  pointer-events: none; // 버튼 텍스트가 클릭되지 않도록 설정
+  margin-bottom: 10px;
 `;
 
 const GameRecord = () => {
+  const navigate = useNavigate();
+
+  const handleRecordDetail = () => {
+    navigate("/icebreaking/games/gameRecordDetail");
+  };
+  const handleCommunity = () => {
+    navigate("/user/community");
+  };
+
   return (
     <PageWrap>
       <Header>RECORD</Header>
@@ -81,14 +157,36 @@ const GameRecord = () => {
             <IconImage src={rightIcon} alt="Right" />
           </Slide>
         </Section>
-        <Section>
-          <Title>게임 기록</Title>
-          <Text>게임 기록 내용</Text>
-        </Section>
-        <Section>
-          <Title>숏폼 기록</Title>
-          <Text>숏폼 기록 내용</Text>
-        </Section>
+
+        <RecordSection>
+          <RecordIconImage src={recordIcon} alt="gameRecord" />
+          <RecordTitle>게임기록</RecordTitle>
+          <GameSection>
+            <Slide>
+              <GameRecordIconImage src={leftIcon} alt="Left" />
+              <IconImage src={gameRecordIcon} alt="gameRecord" />
+              <GameRecordIconImage src={rightIcon} alt="Right" />
+            </Slide>
+            {/* 게임 이름 & 인원 */}
+            <Text>몸으로 말해요  6/6</Text>
+          </GameSection>
+          <ButtonContainer onClick={handleRecordDetail}>
+            <ButtonText>게임상세</ButtonText>
+            <IconImage src={recordBtn} alt="gameRecordBtn" />
+          </ButtonContainer>
+        </RecordSection>
+        
+        <RecordSection>
+          <RecordIconImage src={recordIcon} alt="gameRecord" />
+          <RecordTitle>숏폼기록</RecordTitle>
+          <GameSection>
+            <Text>숏폼 기록 내용</Text>
+          </GameSection>
+          <ButtonContainer onClick={handleCommunity}>
+            <ButtonText>커뮤니티</ButtonText>
+            <IconImage src={recordBtn} alt="gameRecordBtn" />
+          </ButtonContainer>
+        </RecordSection>
       </BodyContainer>
     </PageWrap>
   );
