@@ -18,12 +18,14 @@ public class RecordsResponse {
 	
 	private LocalDateTime regDate;
 	
+	private String teamName;
 	public static RecordsResponse from(Records records) {
 		return RecordsResponse.builder()
 				.id(records.getId())
 				.resultImage(records.getResultImage())
 				.memberId(records.getMember().getId())
 				.regDate(records.getRegDate())
+				.teamName(records.getTeamName())
 				.build();
 	}
 }

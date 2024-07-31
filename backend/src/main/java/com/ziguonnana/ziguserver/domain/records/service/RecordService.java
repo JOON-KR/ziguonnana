@@ -38,6 +38,7 @@ public class RecordService {
 		Records records = Records.builder()
 				.resultImage(recordsRequest.getResultImage())
 				.member(member)
+				.teamName(recordsRequest.getTeamName())
 				.build();
 				
 		recordRepository.save(records);
