@@ -3,21 +3,22 @@ package com.ziguonnana.ziguserver.domain.like.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ziguonnana.ziguserver.domain.article.avatar.entity.AvatarArticle;
+import com.ziguonnana.ziguserver.domain.article.avatar.repository.AvatarArticleRepository;
+import com.ziguonnana.ziguserver.domain.article.video.entity.Video;
+import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
+import com.ziguonnana.ziguserver.domain.article.video.repository.VideoArticleRepository;
+import com.ziguonnana.ziguserver.domain.like.dto.LikeRequest;
+import com.ziguonnana.ziguserver.domain.like.dto.LikeResponse;
+import com.ziguonnana.ziguserver.domain.like.entity.AvatarLike;
+import com.ziguonnana.ziguserver.domain.like.entity.VideoLike;
 import com.ziguonnana.ziguserver.domain.like.repository.AvatarLikeRepository;
 import com.ziguonnana.ziguserver.domain.like.repository.VideoLikeRepository;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
 import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
+import com.ziguonnana.ziguserver.exception.ArticleNotFoundException;
 import com.ziguonnana.ziguserver.global.TokenInfo;
 import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;
-import com.ziguonnana.ziguserver.domain.article.avatar.entity.AvatarArticle;
-import com.ziguonnana.ziguserver.domain.article.avatar.repository.AvatarArticleRepository;
-import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
-import com.ziguonnana.ziguserver.domain.article.video.repository.VideoArticleRepository;
-import com.ziguonnana.ziguserver.domain.like.entity.AvatarLike;
-import com.ziguonnana.ziguserver.domain.like.entity.VideoLike;
-import com.ziguonnana.ziguserver.exception.ArticleNotFoundException;
-import com.ziguonnana.ziguserver.domain.like.dto.LikeRequest;
-import com.ziguonnana.ziguserver.domain.like.dto.LikeResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,6 @@ public class LikeService {
         Long memberId = TokenInfo.getMemberId();
         Member member = getMember(memberId);
         String result;
-
         if ("아바타".equalsIgnoreCase(likeRequest.getType())) {
             AvatarArticle avatarArticle = getAvatarArticle(likeRequest.getArticleId());
             result = handleLikeAvatar(member, avatarArticle);
@@ -82,11 +82,12 @@ public class LikeService {
                     return "좋아요 취소";
                 })
                 .orElseGet(() -> {
-                    VideoLike videoLike = VideoLike.builder()
+                	VideoLike videoLike = VideoLike.builder()
                             .videoArticle(videoArticle)
                             .member(member)
+                            .videoId(videoArticle.getVideo().getId())
                             .build();
-                    videoLikeRepository.save(videoLike);
+                   videoLikeRepository.save(videoLike);
                     videoArticle.increaseLikeCount(); // 좋아요 증가
                     videoArticleRepository.save(videoArticle); // 업데이트된 likeCount 저장
                     return "좋아요";

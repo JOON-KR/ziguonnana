@@ -15,6 +15,6 @@ public class AvatarArticleRequest {
     private Boolean isDelete;
     private Integer likeCount;
     private Integer viewCount;
-
+    private Long articleId;
 
 }

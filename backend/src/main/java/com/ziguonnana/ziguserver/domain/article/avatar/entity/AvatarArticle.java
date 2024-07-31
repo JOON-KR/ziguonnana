@@ -2,9 +2,9 @@ package com.ziguonnana.ziguserver.domain.article.avatar.entity;
 
 import java.time.LocalDateTime;
 
+import com.ziguonnana.ziguserver.domain.article.avatar.dto.AvatarArticleRequest;
 import com.ziguonnana.ziguserver.domain.avatar.entity.Avatar;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
-import com.ziguonnana.ziguserver.domain.article.avatar.dto.AvatarArticleRequest;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,12 +13,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Builder
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AvatarArticle {
 
     @Id

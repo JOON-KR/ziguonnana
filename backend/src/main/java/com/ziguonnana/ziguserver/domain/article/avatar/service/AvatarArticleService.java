@@ -49,11 +49,11 @@ public class AvatarArticleService {
         return AvatarArticleResponse.from(avatarArticle);
     }
 
-    public AvatarArticleResponse updateArticle(Long articleId, AvatarArticleRequest articleRequest) {
-        AvatarArticle avatarArticle = findArticleById(articleId);
+    public AvatarArticleResponse updateArticle(AvatarArticleRequest articleRequest) {
+        AvatarArticle avatarArticle = findArticleById(articleRequest.getArticleId());
         Avatar avatar = getAvatar(articleRequest.getAvatarId());
 
-        avatarArticle.update(articleRequest,avatar);
+        avatarArticle.update(articleRequest, avatar);
 
         avatarArticleRepository.save(avatarArticle);
         return AvatarArticleResponse.from(avatarArticle);
@@ -70,7 +70,7 @@ public class AvatarArticleService {
     }
 
     public List<AvatarArticleResponse> getAllArticles() {
-        List<AvatarArticle> articles = avatarArticleRepository.findAll();
+        List<AvatarArticle> articles = avatarArticleRepository.findAllByIsDeleteFalse();
         return articles.stream()
                 .map(AvatarArticleResponse::from)
                 .collect(Collectors.toList());

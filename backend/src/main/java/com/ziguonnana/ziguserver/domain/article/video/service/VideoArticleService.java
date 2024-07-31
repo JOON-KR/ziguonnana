@@ -49,9 +49,9 @@ public class VideoArticleService {
         return VideoArticleResponse.from(videoArticle);
     }
 
-    public VideoArticleResponse updateArticle(Long articleId, VideoArticleRequest articleRequest) {
+    public VideoArticleResponse updateArticle(VideoArticleRequest articleRequest) {
         Long memberId = TokenInfo.getMemberId();
-        VideoArticle videoArticle = findArticleById(articleId);
+        VideoArticle videoArticle = findArticleById(articleRequest.getArticleId());
 
         if (!videoArticle.getMember().getId().equals(memberId)) {
             throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
@@ -59,7 +59,7 @@ public class VideoArticleService {
 
         Video video = getVideo(articleRequest.getVideoId());
 
-        videoArticle.update(articleRequest,video);
+        videoArticle.update(articleRequest, video);
 
         videoArticleRepository.save(videoArticle);
         return VideoArticleResponse.from(videoArticle);
@@ -78,7 +78,7 @@ public class VideoArticleService {
     }
 
     public List<VideoArticleResponse> getAllArticles() {
-        List<VideoArticle> articles = videoArticleRepository.findAll();
+        List<VideoArticle> articles = videoArticleRepository.findAllByIsDeleteFalse();
         return articles.stream()
                 .map(VideoArticleResponse::from)
                 .collect(Collectors.toList());

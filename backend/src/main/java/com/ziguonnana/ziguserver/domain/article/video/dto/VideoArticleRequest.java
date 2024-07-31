@@ -14,4 +14,5 @@ public class VideoArticleRequest {
     private Integer likeCount;
     private Integer viewCount;
     private Long memberId;
+    private Long articleId;
 }

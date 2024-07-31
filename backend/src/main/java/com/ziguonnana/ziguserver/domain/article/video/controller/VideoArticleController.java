@@ -28,14 +28,14 @@ public class VideoArticleController {
         return ResponseEntity.status(201).body(ResponseDto.success(response));
     }
 
-    @PutMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<VideoArticleResponse>> updateArticle(@PathVariable Long articleId, @RequestBody VideoArticleRequest articleRequest) {
-        VideoArticleResponse response = videoArticleService.updateArticle(articleId, articleRequest);
+    @PutMapping
+    public ResponseEntity<ResponseDto<VideoArticleResponse>> updateArticle(@RequestBody VideoArticleRequest articleRequest) {
+        VideoArticleResponse response = videoArticleService.updateArticle(articleRequest);
         return ResponseEntity.ok(ResponseDto.success(response));
     }
 
     @DeleteMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<String>> deleteArticle(@PathVariable Long articleId) {
+    public ResponseEntity<ResponseDto<String>> deleteArticle(@PathVariable("articleId") Long articleId) {
         videoArticleService.deleteArticle(articleId);
         return ResponseEntity.ok(ResponseDto.success("비디오 아티클 삭제완료"));
     }
@@ -47,7 +47,7 @@ public class VideoArticleController {
     }
 
     @GetMapping("/{articleId}")
-    public ResponseEntity<ResponseDto<VideoArticleResponse>> getArticleById(@PathVariable Long articleId) {
+    public ResponseEntity<ResponseDto<VideoArticleResponse>> getArticleById(@PathVariable("articleId") Long articleId) {
         VideoArticleResponse response = videoArticleService.getArticleById(articleId);
         return ResponseEntity.ok(ResponseDto.success(response));
     }
