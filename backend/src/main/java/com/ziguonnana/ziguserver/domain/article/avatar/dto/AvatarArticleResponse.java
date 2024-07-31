@@ -7,7 +7,6 @@ import com.ziguonnana.ziguserver.domain.article.avatar.entity.AvatarArticle;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
 @Builder
 public class AvatarArticleResponse {
     private Long id;

@@ -9,8 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Data;
-
+@Builder
 @Entity
 @Data
 public class VideoLike {
@@ -20,7 +21,7 @@ public class VideoLike {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "video_id", nullable = false)
+    @JoinColumn(name = "article_id", nullable = false)
     private VideoArticle videoArticle;
 
     @ManyToOne
