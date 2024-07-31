@@ -56,6 +56,8 @@ public class LikeService {
         return avatarLikeRepository.findByAvatarArticleAndMember(avatarArticle, member)
                 .map(existingLike -> {
                     avatarLikeRepository.delete(existingLike);
+                    avatarArticle.decreaseLikeCount(); // 좋아요 감소
+                    avatarArticleRepository.save(avatarArticle); // 업데이트된 likeCount 저장
                     return "좋아요 취소";
                 })
                 .orElseGet(() -> {
@@ -64,14 +66,19 @@ public class LikeService {
                             .member(member)
                             .build();
                     avatarLikeRepository.save(avatarLike);
+                    avatarArticle.increaseLikeCount(); // 좋아요 증가
+                    avatarArticleRepository.save(avatarArticle); // 업데이트된 likeCount 저장
                     return "좋아요";
                 });
     }
+
 
     private String handleLikeVideo(Member member, VideoArticle videoArticle) {
         return videoLikeRepository.findByVideoArticleAndMember(videoArticle, member)
                 .map(existingLike -> {
                     videoLikeRepository.delete(existingLike);
+                    videoArticle.decreaseLikeCount(); // 좋아요 감소
+                    videoArticleRepository.save(videoArticle); // 업데이트된 likeCount 저장
                     return "좋아요 취소";
                 })
                 .orElseGet(() -> {
@@ -80,9 +87,12 @@ public class LikeService {
                             .member(member)
                             .build();
                     videoLikeRepository.save(videoLike);
+                    videoArticle.increaseLikeCount(); // 좋아요 증가
+                    videoArticleRepository.save(videoArticle); // 업데이트된 likeCount 저장
                     return "좋아요";
                 });
     }
+
 
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
