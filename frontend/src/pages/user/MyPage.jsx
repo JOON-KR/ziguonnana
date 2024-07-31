@@ -138,6 +138,10 @@ const MyPage = () => {
     navigate("/games/gameRecord");
   };
 
+  const handleProfileUpdate = () => {
+    navigate("/user/profileupdate");
+  };
+
   return (
     <PageWrap>
       <Header>MYPAGE</Header>
@@ -149,7 +153,7 @@ const MyPage = () => {
           <ProfileKeywords>#개발자, #음악 애호가, #여행자</ProfileKeywords>
           <ButtonContainer>
             <ProfileButton onClick={handleLogout}>로그아웃</ProfileButton>
-            <ProfileButton>내정보수정</ProfileButton>
+            <ProfileButton onClick={handleProfileUpdate}>내정보수정</ProfileButton>
           </ButtonContainer>
         </LeftBox>
         <RightBox>
