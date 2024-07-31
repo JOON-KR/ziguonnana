@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import main_bg from "../assets/images/main_bg.png";
-import LoginModal from "../components/modals/LoginModal"; // LoginModal import
-import SignUpModal from "../components/modals/SignUpModal"; // SignUpModal import
-import RoomCreateModal from "../components/modals/RoomCreateModal"; // RoomCreateModal import
-import RoomJoinModal from "../components/modals/RoomJoinModal"; // RoomJoinModal import
+import main_bg from "../assets/images/우주배경.jpg";
+import main_icon from "../assets/icons/지구픽셀.png";
+import LoginModal from "../components/modals/LoginModal";
+import SignUpModal from "../components/modals/SignUpModal";
+import RoomCreateModal from "../components/modals/RoomCreateModal";
+import RoomJoinModal from "../components/modals/RoomJoinModal";
 import { useNavigate } from "react-router-dom";
+import { login, logout } from "../api/login/loginAPI";
+
 
 // Home 페이지 전체를 감싸는 스타일 컴포넌트
 const HomeWrap = styled.div`
@@ -18,6 +21,7 @@ const HomeWrap = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 `;
 
 // 상단 헤더 스타일 컴포넌트
@@ -28,6 +32,7 @@ const Header = styled.div`
   width: 100%;
   justify-content: flex-end;
   padding: 20px;
+  z-index: 2;
 `;
 
 // 헤더 텍스트 스타일 컴포넌트
@@ -42,6 +47,7 @@ const HeaderText = styled.h4`
 const BtnWrap = styled.div`
   display: flex;
   gap: 51px;
+  z-index: 2;
 `;
 
 // 기본 버튼 스타일 컴포넌트
@@ -69,7 +75,8 @@ const Wrap = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: fixed;
+  position: relative;
+  z-index: 2;
 `;
 
 // 타이틀 스타일 컴포넌트
@@ -78,89 +85,111 @@ const Title = styled.h1`
   font-weight: 600;
   color: white;
   margin: 76px 0px;
+  z-index: 2;
 `;
 
 // 서브 타이틀 스타일 컴포넌트
 const SubTitle = styled.h3`
   font-size: 28px;
   color: white;
+  z-index: 2;
+`;
+
+// 지구 아이콘 스타일 컴포넌트
+const EarthIcon = styled.img`
+  width: 800px;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 `;
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 관리
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // 로그인 모달 열림 상태 관리
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false); // 회원가입 모달 열림 상태 관리
-  const [isRoomCreateModalOpen, setIsRoomCreateModalOpen] = useState(false); // RoomCreateModal 열림 상태 관리
-  const [isRoomJoinModalOpen, setIsRoomJoinModalOpen] = useState(false); // RoomJoinModal 열림 상태 관리
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isRoomCreateModalOpen, setIsRoomCreateModalOpen] = useState(false);
+  const [isRoomJoinModalOpen, setIsRoomJoinModalOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
-  // 로그인 성공 시 호출되는 함수
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setIsLoginModalOpen(false);
+  const handleLogin = async (email, password) => {
+    try {
+      await login(email, password);
+      setIsLoggedIn(true);
+      setIsLoginModalOpen(false);
+    } catch (e) {
+      setError('로그인 실패: ' + e.message);
+    }
   };
 
-  // 회원가입 성공 시 호출되는 함수
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsLoggedIn(false);
+    } catch (e) {
+      setError('로그아웃 실패: ' + e.message)
+    }
+  };
+
   const handleSignUp = () => {
     setIsLoggedIn(true);
     setIsSignUpModalOpen(false);
   };
 
-  // 로그인 모달 닫기 함수
   const closeLoginModal = () => {
     setIsLoginModalOpen(false);
   };
 
-  // 회원가입 모달 닫기 함수
   const closeSignUpModal = () => {
     setIsSignUpModalOpen(false);
   };
 
-  // RoomCreateModal 닫기 함수
   const closeRoomCreateModal = () => {
     setIsRoomCreateModalOpen(false);
   };
 
-  // RoomJoinModal 닫기 함수
   const closeRoomJoinModal = () => {
     setIsRoomJoinModalOpen(false);
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
   return (
     <HomeWrap>
-      {/* 로그인 모달이 열려있을 때 LoginModal을 렌더링 */}
+      {error && <div style={{ color: 'red' }}>{error}</div>}
       {isLoginModalOpen && (
         <LoginModal onClose={closeLoginModal} AquaBtnFn={handleLogin} />
       )}
-      {/* 회원가입 모달이 열려있을 때 SignUpModal을 렌더링 */}
       {isSignUpModalOpen && (
         <SignUpModal onClose={closeSignUpModal} AquaBtnFn={handleSignUp} />
       )}
-      {/* RoomCreateModal이 열려있을 때 RoomCreateModal을 렌더링 */}
       {isRoomCreateModalOpen && (
         <RoomCreateModal onClose={closeRoomCreateModal} />
       )}
-      {/* RoomJoinModal이 열려있을 때 RoomJoinModal을 렌더링 */}
       {isRoomJoinModalOpen && <RoomJoinModal onClose={closeRoomJoinModal} />}
       <Header>
-        <HeaderText
-          onClick={() => {
-            if (isLoggedIn) {
-              setIsLoggedIn(false); // 로그아웃 처리
-            } else {
-              setIsLoginModalOpen(true); // 로그인 모달 열기
-            }
-          }}
-        >
+        <HeaderText onClick={() => {
+          if (isLoggedIn) {
+            handleLogout();
+          } else {
+            setIsLoginModalOpen(true);
+          }
+        }}>
           {isLoggedIn ? "로그아웃" : "로그인"}
         </HeaderText>
         {isLoggedIn ? (
-          <HeaderText
-            onClick={() => {
-              navigate("/MyPage");
-            }}
-          >
+          <HeaderText onClick={() => navigate("/MyPage")}>
             마이페이지
           </HeaderText>
         ) : (
@@ -187,6 +216,7 @@ const Home = () => {
           <Btn onClick={() => setIsRoomJoinModalOpen(true)}>참가하기</Btn>
         </BtnWrap>
       </Wrap>
+      <EarthIcon src={main_icon} alt="지구 아이콘" />
     </HomeWrap>
   );
 };

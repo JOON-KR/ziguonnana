@@ -16,7 +16,7 @@ const BtnAqua = styled.button`
 const AquaBtn = ({ text, BtnFn }) => {
   return (
     <div>
-      <BtnAqua onClick={() => BtnFn()}>{text}</BtnAqua>
+      <BtnAqua onClick={BtnFn}>{text}</BtnAqua>
     </div>
   );
 };
