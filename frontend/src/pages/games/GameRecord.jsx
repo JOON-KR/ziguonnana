@@ -138,8 +138,11 @@ const ButtonText = styled.span`
 const GameRecord = () => {
   const navigate = useNavigate();
 
-  const handleButtonClick = (path) => {
-    navigate(path);
+  const handleRecordDetail = () => {
+    navigate("/icebreaking/games/gameRecordDetail");
+  };
+  const handleCommunity = () => {
+    navigate("/user/community");
   };
 
   return (
@@ -167,7 +170,7 @@ const GameRecord = () => {
             {/* 게임 이름 & 인원 */}
             <Text>몸으로 말해요  6/6</Text>
           </GameSection>
-          <ButtonContainer onClick={() => handleButtonClick('/games/gameRecordDetail')}>
+          <ButtonContainer onClick={handleRecordDetail}>
             <ButtonText>게임상세</ButtonText>
             <IconImage src={recordBtn} alt="gameRecordBtn" />
           </ButtonContainer>
@@ -179,7 +182,7 @@ const GameRecord = () => {
           <GameSection>
             <Text>숏폼 기록 내용</Text>
           </GameSection>
-          <ButtonContainer onClick={() => handleButtonClick('/user/community')}>
+          <ButtonContainer onClick={handleCommunity}>
             <ButtonText>커뮤니티</ButtonText>
             <IconImage src={recordBtn} alt="gameRecordBtn" />
           </ButtonContainer>
