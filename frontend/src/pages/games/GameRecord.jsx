@@ -17,7 +17,7 @@ const PageWrap = styled.div`
 
 const Header = styled.header`
   font-size: 50px;
-  color: #58FFF5;
+  color: #58fff5;
   font-weight: bold;
   margin-top: 30px;
   margin-bottom: 30px;
