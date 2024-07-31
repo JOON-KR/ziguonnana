@@ -3,8 +3,7 @@ import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
 import avartarIcon from "../../assets/icons/avartar.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
-// import GrayBtn from "../../components/common/GrayBtn";
-// import AquaBtn from "../../components/common/AquaBtn";
+import { useNavigate } from "react-router-dom";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -135,8 +134,10 @@ const avatars = [
 ];
 
 const GameRecordDetail = () => {
-  const click1 = () => {
-    alert('sdf');
+  const navigate = useNavigate();
+
+  const handleRecord = () => {
+    navigate("/icebreaking/games/gameRecord");
   };
 
   return (
@@ -170,7 +171,8 @@ const GameRecordDetail = () => {
             </GameSection>
 
             <ButtonContainer>
-              <GrayBtn>돌아가기</GrayBtn>
+              <GrayBtn onClick={handleRecord}>돌아가기</GrayBtn>
+              {/* 저장 함수 추가 */}
               <AquaBtn>저장</AquaBtn>
             </ButtonContainer>
         </RecordSection>
