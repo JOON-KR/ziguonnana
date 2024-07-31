@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import BASE_URL from "../Apiconfig";
+import BASE_URL from "../../api/APIconfig"
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
