@@ -76,4 +76,11 @@ public class VideoArticle {
     public void delete() {
         this.isDelete = true;
     }
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
+    }
 }
