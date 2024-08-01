@@ -80,7 +80,7 @@ const ProfilePick = () => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ setRoomId] = useState(null);
+  const [setRoomId] = useState(null);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
 
   // 로컬 스토리지에서 토큰 가져오기
@@ -112,7 +112,7 @@ const ProfilePick = () => {
   // WebSocket 연결을 통해 roomId 및 memberId 가져오기
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket('wss://your-websocket-server');
+      const ws = new WebSocket('https://i11b303.p.ssafy.io/ws');
 
       ws.onopen = () => {
         console.log('WebSocket Connected');
@@ -174,51 +174,51 @@ const ProfilePick = () => {
 
   return (
     <div>
-      <div>
+      <Wrap>
         {isProfileRegisterModalOpen && (
           <ProfileRegisterModal onClose={closeProfileRegisterModal} />
         )}
-        <div>
-          <h4>마이페이지</h4>
-          <h4>커뮤니티</h4>
-        </div>
-        <h3>
+        <Header>
+          <HeaderText>마이페이지</HeaderText>
+          <HeaderText>커뮤니티</HeaderText>
+        </Header>
+        <SubTitle>
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
-        </h3>
-        <div>
+        </SubTitle>
+        <ProfilesContainer>
           {localToken && profiles.length > 0 ? (
             profiles.map((profile, index) => (
-              <div key={index}>
-                <img src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-                <div>
+              <ProfileWrap key={index}>
+                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <Tags>
                   {profile.tags.map((tag, idx) => (
-                    <div key={idx}>#{tag}</div>
+                    <Tag key={idx}>#{tag}</Tag>
                   ))}
-                </div>
-              </div>
+                </Tags>
+              </ProfileWrap>
             ))
           ) : (
             myProfiles.map((profile, index) => (
-              <div key={index}>
-                <img src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-                <div>
+              <ProfileWrap key={index}>
+                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <Tags>
                   {profile.tags.map((tag, idx) => (
-                    <div key={idx}>#{tag}</div>
+                    <Tag key={idx}>#{tag}</Tag>
                   ))}
-                </div>
-              </div>
+                </Tags>
+              </ProfileWrap>
             ))
           )}
-          <div>
-            <img src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
-            <div>
+          <ProfileWrap>
+            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
+            <Tags>
               {["새로운", "프로필", "만들기"].map((tag, idx) => (
-                <div key={idx}>#{tag}</div>
+                <Tag key={idx}>#{tag}</Tag>
               ))}
-            </div>
-          </div>
-        </div>
-      </div>
+            </Tags>
+          </ProfileWrap>
+        </ProfilesContainer>
+      </Wrap>
       {roomId && <OpenViduComponent roomId={roomId} />}
     </div>
   );
