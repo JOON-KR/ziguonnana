@@ -3,6 +3,7 @@ package com.ziguonnana.ziguserver.domain.profile.entity;
 import java.time.LocalDateTime;
 
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
+import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,12 +32,12 @@ public class Profile {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-
+    private String name;
     private String feature;
     private String profileImage;
     private LocalDateTime regDate;
     private LocalDateTime editDate;
-
+    
     @PrePersist
     protected void onCreate() {
         this.regDate = LocalDateTime.now();
@@ -56,5 +57,16 @@ public class Profile {
             this.profileImage = profileImage;
         }
         onUpdate();
+    }
+    public static Profile from(ProfileRequest profile) {
+        return Profile.builder()
+                .feature(profile.getFeature())
+                .profileImage(profile.getProfileImage())
+                .id(profile.getProfileId())
+                .name(profile.getName())
+                .build();
+    }
+    public String getName() {
+    	return member.getName();
     }
 }
