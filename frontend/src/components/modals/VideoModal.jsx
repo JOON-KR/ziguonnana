@@ -45,11 +45,10 @@ const VideoPlayer = styled.video`
 
 const LikeButton = styled.button`
   position: absolute;
-  top: 10px;
+  top: 350px; /* 위쪽으로 20px 올림 */
   right: 10px;
   width: 40px;
   height: 32px;
-  margin-top: 400px;
   background: url(${(props) => props.icon}) no-repeat center center;
   background-size: cover;
   border: none;
@@ -62,7 +61,7 @@ const LikeButton = styled.button`
 
 const LikeCount = styled.div`
   position: absolute;
-  top: 70px;
+  top: 380px;
   right: 10px;
   color: white;
   font-size: 16px;
@@ -79,7 +78,14 @@ const Title = styled.h3`
 `;
 
 // VideoModal 컴포넌트 정의
-const VideoModal = ({ video, onClose, likeIcon, title, likeCount }) => {
+const VideoModal = ({
+  video,
+  onClose,
+  likeIcon,
+  title,
+  likeCount,
+  showLikeAndTitle = true,
+}) => {
   return (
     <ModalBackground onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -89,9 +95,13 @@ const VideoModal = ({ video, onClose, likeIcon, title, likeCount }) => {
             Your browser does not support the video tag.
           </VideoPlayer>
         </VideoWrapper>
-        <LikeButton icon={likeIcon} />
-        <LikeCount>{likeCount}</LikeCount>
-        <Title>{title}</Title>
+        {showLikeAndTitle && (
+          <>
+            <LikeButton icon={likeIcon} />
+            <LikeCount>{likeCount || 100}</LikeCount>
+            <Title>{title}</Title>
+          </>
+        )}
       </ModalContent>
     </ModalBackground>
   );
