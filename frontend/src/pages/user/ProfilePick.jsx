@@ -76,50 +76,82 @@ const HeaderText = styled.h4`
 
 const ProfilePick = () => {
   const location = useLocation();
-  const { teamName, people, sessionId, inviteCode, isJoin } = location.state || {};
+  const { teamName, people, roomId, inviteCode, isJoin } = location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [token, setToken] = useState(null);
+  const [ setRoomId] = useState(null);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
 
-  // 프로필 데이터를 가져오는 useEffect
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      try {
-        const headers = {
-          "Content-type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        };
-        const res = await axiosInstance.get(`/api/v1/profile`, { headers });
-        setProfiles(res.data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfiles();
-  }, []);
+  // 로컬 스토리지에서 토큰 가져오기
+  const localToken = localStorage.getItem('token');
 
-  // 토큰을 가져오는 useEffect
+  // 로그인된 상태에서 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const response = await axiosInstance.post(`/api/v1/room/${sessionId}`, {
-          groupCode: isJoin ? inviteCode : sessionId
-        });
-        console.log('Token Response:', response);
-        const newToken = response.data.data.token;
-        setToken(newToken);
-      } catch (error) {
-        console.error('토큰 가져오기 오류', error);
-      }
-    };
-    if (sessionId) {
-      fetchToken();
+    if (localToken) {
+      const fetchProfiles = async () => {
+        try {
+          const headers = {
+            "Content-type": "application/json",
+            "Authorization": `Bearer ${localToken}`
+          };
+          const res = await axiosInstance.get(`/api/v1/profile`, { headers });
+          setProfiles(res.data);
+        } catch (error) {
+          setError(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProfiles();
+    } else {
+      setLoading(false);
     }
-  }, [sessionId, inviteCode, isJoin]);
+  }, [localToken]);
+
+  // WebSocket 연결을 통해 roomId 및 memberId 가져오기
+  useEffect(() => {
+    const connectWebSocket = () => {
+      const ws = new WebSocket('wss://your-websocket-server');
+
+      ws.onopen = () => {
+        console.log('WebSocket Connected');
+        const message = {
+          type: isJoin ? 'JOIN' : 'CREATE',
+          roomId: roomId,
+          profile: { teamName, people }
+        };
+        const destination = isJoin ? `/app/game/${roomId}/join` : `/app/game/${roomId}/create`;
+        ws.send(JSON.stringify({ destination, message }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ROOM_ID') {
+          setRoomId(data.roomId);
+        }
+        if (data.type === 'MEMBER_ID') {
+          console.log('Member ID:', data.memberId);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket Disconnected');
+      };
+
+      return () => {
+        ws.close();
+      };
+    };
+
+    if (roomId) { 
+      connectWebSocket();
+    }
+  }, [roomId, inviteCode, isJoin]);
 
   const pickProfile = () => {
     // 프로필 클릭 시, 프로필 선택되게 하는 로직
@@ -142,39 +174,52 @@ const ProfilePick = () => {
 
   return (
     <div>
-      <Wrap>
+      <div>
         {isProfileRegisterModalOpen && (
           <ProfileRegisterModal onClose={closeProfileRegisterModal} />
         )}
-        <Header>
-          <HeaderText>마이페이지</HeaderText>
-          <HeaderText>커뮤니티</HeaderText>
-        </Header>
-        <SubTitle>
+        <div>
+          <h4>마이페이지</h4>
+          <h4>커뮤니티</h4>
+        </div>
+        <h3>
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
-        </SubTitle>
-        <ProfilesContainer>
-          {myProfiles.map((profile, index) => (
-            <ProfileWrap key={index}>
-              <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-              <Tags>
-                {profile.tags.map((tag, idx) => (
-                  <Tag key={idx}>#{tag}</Tag>
-                ))}
-              </Tags>
-            </ProfileWrap>
-          ))}
-          <ProfileWrap>
-            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
-            <Tags>
+        </h3>
+        <div>
+          {localToken && profiles.length > 0 ? (
+            profiles.map((profile, index) => (
+              <div key={index}>
+                <img src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <div>
+                  {profile.tags.map((tag, idx) => (
+                    <div key={idx}>#{tag}</div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            myProfiles.map((profile, index) => (
+              <div key={index}>
+                <img src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <div>
+                  {profile.tags.map((tag, idx) => (
+                    <div key={idx}>#{tag}</div>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+          <div>
+            <img src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
+            <div>
               {["새로운", "프로필", "만들기"].map((tag, idx) => (
-                <Tag key={idx}>#{tag}</Tag>
+                <div key={idx}>#{tag}</div>
               ))}
-            </Tags>
-          </ProfileWrap>
-        </ProfilesContainer>
-      </Wrap>
-      {token && <OpenViduComponent token={token} sessionId={sessionId} />}
+            </div>
+          </div>
+        </div>
+      </div>
+      {roomId && <OpenViduComponent roomId={roomId} />}
     </div>
   );
 };
