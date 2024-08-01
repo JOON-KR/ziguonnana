@@ -7,6 +7,7 @@ import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
+import axiosInstance from "../../api/axiosInstance";
 
 // 스타일 컴포넌트 정의
 const Wrap = styled.div`

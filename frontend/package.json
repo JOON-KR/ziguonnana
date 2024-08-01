@@ -18,7 +18,8 @@
     "react-scripts": "5.0.1",
     "styled-components": "^6.1.12",
     "web-vitals": "^2.1.4",
-    "zustand": "^4.5.4"
+    "zustand": "^4.5.4",
+    "openvidu-browser": "^2.30.0"
   },
   "scripts": {
     "start": "react-scripts start",

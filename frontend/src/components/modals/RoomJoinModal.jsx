@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
-import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
+import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 
@@ -20,9 +19,6 @@ const BlackBg = styled.div`
 `;
 
 const ModalWrap = styled.div`
-  background-image: url(${GoogleModal});
-  background-size: cover;
-  background-position: center;
   width: 721px;
   height: 610px;
   display: flex;
@@ -62,7 +58,7 @@ const InputField = styled.input`
   box-sizing: border-box;
   margin-bottom: 20px;
   ::placeholder {
-    color: #acacac; /* placeholder 글씨 색상 설정 */
+    color: #acacac;
   }
 `;
 
@@ -71,7 +67,7 @@ const BtnWrap = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  gap: 20px; /* 버튼 사이 간격 설정 */
+  gap: 20px;
 `;
 
 const RoomJoinModal = ({ onClose }) => {
@@ -80,31 +76,26 @@ const RoomJoinModal = ({ onClose }) => {
 
   const handleJoinRoom = async () => {
     try {
-      const response = await axiosInstance.post(`/api/v1/team/sessionId`, {
+      const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
         groupCode: inviteCode
       });
       const token = response.data.data.token;
-      navigate("/profilepick", { state:{ inviteCode, token }});      
+      navigate("/ProfilePick", { state: { inviteCode, token, sessionId: inviteCode, isJoin: true } });
     } catch (e) {
       console.error("방참여 오류", e);
     }
-  }
-  
-  
+  };
+
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => { e.stopPropagation(); }}>
         <Title>이글루에 초대받으셨나요?</Title>
         <InputWrapper>
           <InputField 
-          type="password" 
-          placeholder="초대코드를 입력해주세요." 
-          value={inviteCode}
-          onChange={(e) => setInviteCode(e.target.value)}
+            type="password" 
+            placeholder="초대코드를 입력해주세요." 
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
           />
         </InputWrapper>
         <BtnWrap>
