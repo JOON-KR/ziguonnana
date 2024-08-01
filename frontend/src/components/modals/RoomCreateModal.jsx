@@ -107,20 +107,20 @@ const RoomCreateModal = ({ onClose }) => {
     setSelectedCapacity(capacity); 
   };
 
-  //방 생성 API 호출
+  // 방 생성 API 호출
   const handleCreateRoom = async () => {
     try {
-      const response = await axiosInstance.post('/api/v1/team', {
+      const response = await axiosInstance.post('/api/v1/room', {
         teamName: teamName,
         people: selectedCapacity
       });
-      //성공시 세션ID를 받음
-      const sessionId = response.data.data.sessionID;
-      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, sessionId } });
+      const roomId = response.data.data.roomId; // roomId 필드에서 세션 ID 가져오기
+      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, sessionId: roomId } });
     } catch (error) {
-      console.error('방생성 오류', error);
+      console.error('방 생성 오류', error);
     }
   };
+  
 
   return (
     <BlackBg onClick={onClose}>

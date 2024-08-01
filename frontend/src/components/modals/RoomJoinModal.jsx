@@ -80,15 +80,18 @@ const RoomJoinModal = ({ onClose }) => {
 
   const handleJoinRoom = async () => {
     try {
-      const response = await axiosInstance.post(`/api/v1/team/sessionId`, {
+      const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
         groupCode: inviteCode
       });
       const token = response.data.data.token;
-      navigate("/profilepick", { state:{ inviteCode, token }});      
+      navigate("/profilepick", { state: { inviteCode, token } });
     } catch (e) {
       console.error("방참여 오류", e);
     }
-  }
+  };
+
+  
+  
   
   
   return (
