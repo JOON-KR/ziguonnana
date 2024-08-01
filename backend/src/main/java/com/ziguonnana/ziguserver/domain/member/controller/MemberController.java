@@ -55,14 +55,15 @@ public class MemberController {
 		CustomUserInfo userInfo = memberService.getUserInfo(request.email());
 		String refreshToken = jwtUtil.createRefreshToken(userInfo);
 		redisService.saveRefreshToken(request.email(), refreshToken);
+		log.info("req: {},access: {}, refresh: {}",request,accessToken,refreshToken);
 		return ResponseEntity.status(200).body(ResponseDto.success(new TokenResponse(accessToken, refreshToken)));
 	}
 
 	@PostMapping("logout")
 	public ResponseEntity<ResponseDto<String>> logout(@Valid @RequestBody LogoutRequest request) {
 		String email = request.email();
-		String refreshToken = request.refreshToken();
-		memberService.logout(email, refreshToken);
+		String accessToken = request.accessToken();
+		memberService.logout(email, accessToken);
 		return ResponseEntity.status(200).body(ResponseDto.success(""));
 	}
 	
