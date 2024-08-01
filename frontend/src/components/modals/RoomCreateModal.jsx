@@ -4,6 +4,8 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
+import OpenViduComponent from "../OpenViduComponent";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -95,16 +97,29 @@ const BtnWrap = styled.div`
 `;
 
 const RoomCreateModal = ({ onClose }) => {
-  const [selectedCapacity, setSelectedCapacity] = useState(1); // 기본값을 1로 설정
+  //팀이름, 인원수 상태 관리
+  const [teamName, setTeamName] = useState('');
+  const [selectedCapacity, setSelectedCapacity] = useState(1);
   const navigate = useNavigate();
 
+  //인원수 선택 처리
   const handleToggleClick = (capacity) => {
-    setSelectedCapacity(capacity);
+    setSelectedCapacity(capacity); 
   };
 
-  const handleCreateRoom = () => {
-    // navigate 함수만 사용하여 페이지 이동
-    navigate("/ProfilePick");
+  //방 생성 API 호출
+  const handleCreateRoom = async () => {
+    try {
+      const response = await axiosInstance.post('/api/v1/team', {
+        teamName: teamName,
+        people: selectedCapacity
+      });
+      //성공시 세션ID를 받음
+      const sessionId = response.data.data.sessionID;
+      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, sessionId } });
+    } catch (error) {
+      console.error('방생성 오류', error);
+    }
   };
 
   return (
@@ -116,7 +131,12 @@ const RoomCreateModal = ({ onClose }) => {
       >
         <Title>이글루를 만들어주세요!</Title>
         <InputWrapper>
-          <InputField type="text" placeholder="이글루 이름을 입력해주세요." />
+          <InputField 
+            type="text" 
+            placeholder="이글루 이름을 입력해주세요." 
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
+          />
           <ToggleWrapper>
             {[1, 2, 3, 4, 5, 6].map((number) => (
               <ToggleButton
