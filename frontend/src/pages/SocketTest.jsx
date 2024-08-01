@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import profileImg from '../assets/icons/p1.PNG'
 
 const SocketTest = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [ws, setWs] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
+
+  const profile = {
+    image: {profileImg}, 
+    keywords: ['활발한', '아저씨', '하트']
+  };
 
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8080/game');
