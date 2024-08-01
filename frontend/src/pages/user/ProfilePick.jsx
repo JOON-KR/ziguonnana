@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
-import { getProfileList, createProfile } from "../../api/profile/profileAPI"; // API 함수 import
+import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
@@ -9,7 +9,6 @@ import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
 import axiosInstance from "../../api/axiosInstance";
 
-// 스타일 컴포넌트 정의
 const Wrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -76,66 +75,108 @@ const HeaderText = styled.h4`
 `;
 
 const ProfilePick = () => {
-  // 위치 정보 및 상태 관리 변수 선언
   const location = useLocation();
-  const { teamName, people, sessionId, inviteCode, token } =
-    location.state || {};
+  const { teamName, people, roomId, inviteCode, isJoin } = location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
-    useState(false); // 프로필 등록 모달
+  const [setRoomId] = useState(null);
+  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
 
-  // 프로필 목록을 가져오는 함수
+  // 로컬 스토리지에서 토큰 가져오기
+  const localToken = localStorage.getItem('token');
+
+  // 로그인된 상태에서 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
-    const fetchProfiles = async () => {
-      try {
-        const response = await getProfileList();
-        setProfiles(response.data.data); // 프로필 데이터 설정
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfiles();
-  }, []);
+    if (localToken) {
+      const fetchProfiles = async () => {
+        try {
+          const headers = {
+            "Content-type": "application/json",
+            "Authorization": `Bearer ${localToken}`
+          };
+          const res = await axiosInstance.get(`/api/v1/profile`, { headers });
+          setProfiles(res.data);
+        } catch (error) {
+          setError(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProfiles();
+    } else {
+      setLoading(false);
+    }
+  }, [localToken]);
 
-  // 프로필 등록 모달 닫기 함수
+  // WebSocket 연결을 통해 roomId 및 memberId 가져오기
+  useEffect(() => {
+    const connectWebSocket = () => {
+      const ws = new WebSocket('https://i11b303.p.ssafy.io/ws');
+
+      ws.onopen = () => {
+        console.log('WebSocket Connected');
+        const message = {
+          type: isJoin ? 'JOIN' : 'CREATE',
+          roomId: roomId,
+          profile: { teamName, people }
+        };
+        const destination = isJoin ? `/app/game/${roomId}/join` : `/app/game/${roomId}/create`;
+        ws.send(JSON.stringify({ destination, message }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ROOM_ID') {
+          setRoomId(data.roomId);
+        }
+        if (data.type === 'MEMBER_ID') {
+          console.log('Member ID:', data.memberId);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket Disconnected');
+      };
+
+      return () => {
+        ws.close();
+      };
+    };
+
+    if (roomId) { 
+      connectWebSocket();
+    }
+  }, [roomId, inviteCode, isJoin]);
+
+  const pickProfile = () => {
+    // 프로필 클릭 시, 프로필 선택되게 하는 로직
+  };
+
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
-  // 프로필 등록 함수
-  const handleRegisterProfile = async ({ profileImage, name, feature }) => {
-    try {
-      await createProfile({ name, feature, profileImg: profileImage });
-      const response = await getProfileList(); // 등록 후 프로필 목록 다시 불러오기
-      setProfiles(response.data.data); // 새로운 프로필 데이터 설정
-      setIsProfileRegisterModalOpen(false); // 모달 닫기
-    } catch (error) {
-      console.error("프로필 등록 실패:", error);
-    }
-  };
-
-  // 프로필 선택 함수
-  const pickProfile = (profileId) => {
-    // 프로필 클릭 시, 프로필 선택 로직
-  };
-
-  // 로딩 중일 때 표시할 컴포넌트
-  if (loading) return <div>Loading...</div>;
-  // 에러가 발생했을 때 표시할 컴포넌트
-  if (error) return <div>Error: {error.message}</div>;
+  const myProfiles = [
+    {
+      imgSrc: profileImage1,
+      tags: ["활발한", "아저씨", "하트"],
+    },
+    {
+      imgSrc: profileImage2,
+      tags: ["행복한", "소녀", "하트"],
+    },
+  ];
 
   return (
     <div>
       <Wrap>
         {isProfileRegisterModalOpen && (
-          <ProfileRegisterModal
-            onClose={closeProfileRegisterModal}
-            onRegisterProfile={handleRegisterProfile}
-          />
+          <ProfileRegisterModal onClose={closeProfileRegisterModal} />
         )}
         <Header>
           <HeaderText>마이페이지</HeaderText>
@@ -145,37 +186,40 @@ const ProfilePick = () => {
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
         </SubTitle>
         <ProfilesContainer>
-          {profiles.map((profile, index) => (
-            <ProfileWrap key={index}>
-              <Image
-                src={profile.profileImg}
-                alt="Profile Image"
-                onClick={() => pickProfile(profile.id)}
-              />
-              <Tags>
-                {profile.feature.split(", ").map((tag, idx) => (
-                  <Tag key={idx}>#{tag}</Tag>
-                ))}
-              </Tags>
-            </ProfileWrap>
-          ))}
-          {profiles.length < 3 && (
-            <ProfileWrap>
-              <Image
-                src={newProfileImage}
-                alt="Profile Image"
-                onClick={() => setIsProfileRegisterModalOpen(true)}
-              />
-              <Tags>
-                {["새로운", "프로필", "만들기"].map((tag, idx) => (
-                  <Tag key={idx}>#{tag}</Tag>
-                ))}
-              </Tags>
-            </ProfileWrap>
+          {localToken && profiles.length > 0 ? (
+            profiles.map((profile, index) => (
+              <ProfileWrap key={index}>
+                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <Tags>
+                  {profile.tags.map((tag, idx) => (
+                    <Tag key={idx}>#{tag}</Tag>
+                  ))}
+                </Tags>
+              </ProfileWrap>
+            ))
+          ) : (
+            myProfiles.map((profile, index) => (
+              <ProfileWrap key={index}>
+                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+                <Tags>
+                  {profile.tags.map((tag, idx) => (
+                    <Tag key={idx}>#{tag}</Tag>
+                  ))}
+                </Tags>
+              </ProfileWrap>
+            ))
           )}
+          <ProfileWrap>
+            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
+            <Tags>
+              {["새로운", "프로필", "만들기"].map((tag, idx) => (
+                <Tag key={idx}>#{tag}</Tag>
+              ))}
+            </Tags>
+          </ProfileWrap>
         </ProfilesContainer>
       </Wrap>
-      {token && <OpenViduComponent token={token} sessionId={sessionId} />}
+      {roomId && <OpenViduComponent roomId={roomId} />}
     </div>
   );
 };
