@@ -16,6 +16,7 @@ const VideoThumbnail = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  border: 1px solid black; /* 검은색 테두리 추가 */
 `;
 
 const ThumbnailImage = styled.img`
@@ -30,8 +31,8 @@ const VideoCard = ({ videos, onClick }) => {
       {videos.map((video, index) => (
         <VideoThumbnail key={index} onClick={() => onClick(video)}>
           <ThumbnailImage
-            src={`https://via.placeholder.com/220x150?text=Video${index + 1}`}
-            alt={`Video ${index + 1}`}
+            src="https://via.placeholder.com/220x150"
+            alt="Thumbnail"
           />
         </VideoThumbnail>
       ))}
