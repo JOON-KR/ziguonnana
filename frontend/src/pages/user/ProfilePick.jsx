@@ -1,15 +1,14 @@
-import React from "react";
-import axios from "axios";
-import BASE_URL from "../../api/APIconfig"
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { getProfileList, createProfile } from "../../api/profile/profileAPI"; // API 함수 import
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
 
+// 스타일 컴포넌트 정의
 const Wrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -76,25 +75,22 @@ const HeaderText = styled.h4`
 `;
 
 const ProfilePick = () => {
+  // 위치 정보 및 상태 관리 변수 선언
   const location = useLocation();
-  const { teamName, people, sessionId, inviteCode, token } = location.state || {};
+  const { teamName, people, sessionId, inviteCode, token } =
+    location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [existedProfile] = useState(true);  // 프로필 존재 여부
-  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);  // 프로필 등록 모달
-  
-  // get: 프로필 가져오기
+  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
+    useState(false); // 프로필 등록 모달
+
+  // 프로필 목록을 가져오는 함수
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const headers = {
-          "Content-type" : "application/json",
-          "Authorization" : `Bearer ${localStorage.getItem('token')}`
-        };
-        // get 요청 보내기
-        const res = await axios.get(`${BASE_URL}/api/v1/profile`, {headers});
-        setProfiles(res.data); // response data
+        const response = await getProfileList();
+        setProfiles(response.data.data); // 프로필 데이터 설정
       } catch (error) {
         setError(error);
       } finally {
@@ -104,46 +100,41 @@ const ProfilePick = () => {
     fetchProfiles();
   }, []);
 
-  // post: 프로필 등록 <- 모달
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-  const pickProfile = () => {
-    // 프로필 클릭 시, 프로필 선택되게 하는 로직
-  };
-
   // 프로필 등록 모달 닫기 함수
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
-  }
+  };
 
-  // if profiles existed
-  const myProfiles = [
-    {
-      imgSrc: profileImage1,
-      tags: ["활발한", "아저씨", "하트"],
-    },
-    {
-      imgSrc: profileImage2,
-      tags: ["행복한", "소녀", "하트"],
-    },
-  ];
-  
-  // elif profiles not existed, only profileImage3.
-  // const newProfile = [
-  //   {
-  //     imgSrc: newProfileImage,
-  //     tags: ["새로운", "프로필", "만들기"],
-  //   },
-  // ];
+  // 프로필 등록 함수
+  const handleRegisterProfile = async ({ profileImage, name, feature }) => {
+    try {
+      await createProfile({ name, feature, profileImg: profileImage });
+      const response = await getProfileList(); // 등록 후 프로필 목록 다시 불러오기
+      setProfiles(response.data.data); // 새로운 프로필 데이터 설정
+      setIsProfileRegisterModalOpen(false); // 모달 닫기
+    } catch (error) {
+      console.error("프로필 등록 실패:", error);
+    }
+  };
+
+  // 프로필 선택 함수
+  const pickProfile = (profileId) => {
+    // 프로필 클릭 시, 프로필 선택 로직
+  };
+
+  // 로딩 중일 때 표시할 컴포넌트
+  if (loading) return <div>Loading...</div>;
+  // 에러가 발생했을 때 표시할 컴포넌트
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
       <Wrap>
-        {/* ProfileRegisterModal이 열려있을 때 ProfileRegisterModal을 렌더링 */}
         {isProfileRegisterModalOpen && (
-          <ProfileRegisterModal onClose={closeProfileRegisterModal} />
+          <ProfileRegisterModal
+            onClose={closeProfileRegisterModal}
+            onRegisterProfile={handleRegisterProfile}
+          />
         )}
         <Header>
           <HeaderText>마이페이지</HeaderText>
@@ -153,26 +144,34 @@ const ProfilePick = () => {
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
         </SubTitle>
         <ProfilesContainer>
-          {/* 미리 만들어놓은 프로필 가져오기 */}
-          {myProfiles.map((profile, index) => (
+          {profiles.map((profile, index) => (
             <ProfileWrap key={index}>
-              <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+              <Image
+                src={profile.profileImg}
+                alt="Profile Image"
+                onClick={() => pickProfile(profile.id)}
+              />
               <Tags>
-                {profile.tags.map((tag, idx) => (
+                {profile.feature.split(", ").map((tag, idx) => (
                   <Tag key={idx}>#{tag}</Tag>
                 ))}
               </Tags>
             </ProfileWrap>
           ))}
-          {/* 새로운 프로필 만들기 */}
-          <ProfileWrap>
-            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)}/>
-            <Tags>
-              {["새로운", "프로필", "만들기"].map((tag, idx) => (
-                <Tag key={idx}>#{tag}</Tag>
-              ))}
-            </Tags>
-          </ProfileWrap>
+          {profiles.length < 3 && (
+            <ProfileWrap>
+              <Image
+                src={newProfileImage}
+                alt="Profile Image"
+                onClick={() => setIsProfileRegisterModalOpen(true)}
+              />
+              <Tags>
+                {["새로운", "프로필", "만들기"].map((tag, idx) => (
+                  <Tag key={idx}>#{tag}</Tag>
+                ))}
+              </Tags>
+            </ProfileWrap>
+          )}
         </ProfilesContainer>
       </Wrap>
       {token && <OpenViduComponent token={token} sessionId={sessionId} />}

@@ -40,31 +40,10 @@ const Title = styled.h2`
   color: #54595e;
 `;
 
-const InputWrapper = styled.div`
-  width: 100%;
-  max-width: 465px;
+const ProfileWrapper = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
-`;
-
-const LabelInputWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px; /* 입력 필드 사이 간격을 10px로 설정 */
-  width: 100%;
-`;
-
-const Label = styled.label`
-  font-size: 16px;
-  font-weight: bold;
-  color: #54595e;
-  width: 71px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const ProfileImageWrapper = styled.div`
@@ -72,8 +51,8 @@ const ProfileImageWrapper = styled.div`
   height: 105px;
   border-radius: 50%;
   overflow: hidden;
-  margin-right: 20px;
   cursor: pointer;
+  margin-right: 20px;
 `;
 
 const ProfileImage = styled.img`
@@ -86,31 +65,26 @@ const ImageInput = styled.input`
   display: none;
 `;
 
-const HashTagWrapper = styled.div`
+const NameWrapper = styled.div`
   display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
-const HashTagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-`;
-
-const HashTag = styled.div`
-  padding: 5px 10px;
-  background-color: #58fff5;
-  color: #54595e;
-  border-radius: 5px;
+const Label = styled.label`
+  margin-left: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
   font-weight: bold;
+  color: #54595e;
+  margin-bottom: 5px;
 `;
 
 const InputField = styled.input`
   width: 250px;
   height: 48px;
   padding: 0 10px;
+  margin-left: 10px;
   font-size: 14px;
   font-weight: bold;
   color: #54595e;
@@ -120,6 +94,19 @@ const InputField = styled.input`
   ::placeholder {
     color: #acacac; /* placeholder 글씨 색상 설정 */
   }
+`;
+
+const HashTagWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const LabelInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* 입력 필드 사이 간격을 10px로 설정 */
 `;
 
 const BtnWrap = styled.div`
@@ -132,10 +119,10 @@ const BtnWrap = styled.div`
 
 const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [profileImage, setProfileImage] = useState(ProfileNana);
-  const [hashTags, setHashTags] = useState([]);
-  const [hashTagInput, setHashTagInput] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); // 이름 입력 필드 추가
+  const [hashTag1, setHashTag1] = useState("");
+  const [hashTag2, setHashTag2] = useState("");
+  const [hashTag3, setHashTag3] = useState("");
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -143,12 +130,15 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     }
   };
 
-  const handleHashTagKeyPress = (e) => {
-    if (e.key === "Enter" && hashTagInput.trim()) {
-      setHashTags([...hashTags, hashTagInput.trim()]);
-      setHashTagInput("");
-      e.preventDefault();
+  const handleRegister = () => {
+    const hashTags = [hashTag1, hashTag2, hashTag3].filter(
+      (tag) => tag.trim() !== ""
+    );
+    if (hashTags.length > 3) {
+      alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
+      return;
     }
+    onRegisterProfile({ profileImage, name, feature: hashTags.join(", ") });
   };
 
   return (
@@ -159,7 +149,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
         }}
       >
         <Title>프로필에 등록할 정보를 입력하세요.</Title>
-        <HashTagWrapper>
+        <ProfileWrapper>
           <ProfileImageWrapper
             onClick={() => document.getElementById("imageInput").click()}
           >
@@ -171,50 +161,48 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
               onChange={handleImageChange}
             />
           </ProfileImageWrapper>
-          <LabelInputWrapper>
-            <Label>해시태그</Label>
+          <NameWrapper>
+            <Label>이름</Label>
             <InputField
               type="text"
-              placeholder="해시태그를 입력해주세요."
-              value={hashTagInput}
-              onChange={(e) => setHashTagInput(e.target.value)}
-              onKeyPress={handleHashTagKeyPress}
+              placeholder="이름을 입력해주세요."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </NameWrapper>
+        </ProfileWrapper>
+        <HashTagWrapper>
+          <LabelInputWrapper>
+            <Label>해시태그1</Label>
+            <InputField
+              type="text"
+              placeholder="첫번째 해시태그를 입력해주세요."
+              value={hashTag1}
+              onChange={(e) => setHashTag1(e.target.value)}
+            />
+          </LabelInputWrapper>
+          <LabelInputWrapper>
+            <Label>해시태그2</Label>
+            <InputField
+              type="text"
+              placeholder="두번째 해시태그를 입력해주세요."
+              value={hashTag2}
+              onChange={(e) => setHashTag2(e.target.value)}
+            />
+          </LabelInputWrapper>
+          <LabelInputWrapper>
+            <Label>해시태그3</Label>
+            <InputField
+              type="text"
+              placeholder="세번째 해시태그를 입력해주세요."
+              value={hashTag3}
+              onChange={(e) => setHashTag3(e.target.value)}
             />
           </LabelInputWrapper>
         </HashTagWrapper>
-        <HashTagsContainer>
-          {hashTags.map((tag, index) => (
-            <HashTag key={index}>{tag}</HashTag>
-          ))}
-        </HashTagsContainer>
-        <InputWrapper>
-          <LabelInputWrapper>
-            <Label>이메일</Label>
-            <InputField
-              type="email"
-              placeholder="이메일을 입력해주세요."
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </LabelInputWrapper>
-          <LabelInputWrapper>
-            <Label>비밀번호</Label>
-            <InputField
-              type="password"
-              placeholder="비밀번호를 입력해주세요."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </LabelInputWrapper>
-        </InputWrapper>
         <BtnWrap>
           <GrayBtn text="취소" BtnFn={onClose} />
-          <AquaBtn
-            text="프로필 등록"
-            BtnFn={() =>
-              onRegisterProfile({ profileImage, hashTags, email, password })
-            }
-          />
+          <AquaBtn text="프로필 등록" BtnFn={handleRegister} />
         </BtnWrap>
       </ModalWrap>
     </BlackBg>
