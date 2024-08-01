@@ -1,6 +1,4 @@
 import React from "react";
-import axios from "axios";
-import BASE_URL from "../../api/APIconfig"
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -9,6 +7,7 @@ import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
+import axiosInstance from "../../api/axiosInstance";
 
 const Wrap = styled.div`
   width: 100%;
@@ -77,24 +76,23 @@ const HeaderText = styled.h4`
 
 const ProfilePick = () => {
   const location = useLocation();
-  const { teamName, people, sessionId, inviteCode, token } = location.state || {};
+  const { teamName, people, sessionId, inviteCode, isJoin } = location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [existedProfile] = useState(true);  // 프로필 존재 여부
-  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);  // 프로필 등록 모달
-  
-  // get: 프로필 가져오기
+  const [token, setToken] = useState(null);
+  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
+
+  // 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
         const headers = {
-          "Content-type" : "application/json",
-          "Authorization" : `Bearer ${localStorage.getItem('token')}`
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
         };
-        // get 요청 보내기
-        const res = await axios.get(`${BASE_URL}/api/v1/profile`, {headers});
-        setProfiles(res.data); // response data
+        const res = await axiosInstance.get(`/api/v1/profile`, { headers });
+        setProfiles(res.data);
       } catch (error) {
         setError(error);
       } finally {
@@ -104,21 +102,33 @@ const ProfilePick = () => {
     fetchProfiles();
   }, []);
 
-  // post: 프로필 등록 <- 모달
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  // 토큰을 가져오는 useEffect
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const response = await axiosInstance.post(`/api/v1/room/${sessionId}`, {
+          groupCode: isJoin ? inviteCode : sessionId
+        });
+        console.log('Token Response:', response);
+        const newToken = response.data.data.token;
+        setToken(newToken);
+      } catch (error) {
+        console.error('토큰 가져오기 오류', error);
+      }
+    };
+    if (sessionId) {
+      fetchToken();
+    }
+  }, [sessionId, inviteCode, isJoin]);
 
   const pickProfile = () => {
     // 프로필 클릭 시, 프로필 선택되게 하는 로직
   };
 
-  // 프로필 등록 모달 닫기 함수
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
-  }
+  };
 
-  // if profiles existed
   const myProfiles = [
     {
       imgSrc: profileImage1,
@@ -129,19 +139,10 @@ const ProfilePick = () => {
       tags: ["행복한", "소녀", "하트"],
     },
   ];
-  
-  // elif profiles not existed, only profileImage3.
-  // const newProfile = [
-  //   {
-  //     imgSrc: newProfileImage,
-  //     tags: ["새로운", "프로필", "만들기"],
-  //   },
-  // ];
 
   return (
     <div>
       <Wrap>
-        {/* ProfileRegisterModal이 열려있을 때 ProfileRegisterModal을 렌더링 */}
         {isProfileRegisterModalOpen && (
           <ProfileRegisterModal onClose={closeProfileRegisterModal} />
         )}
@@ -153,7 +154,6 @@ const ProfilePick = () => {
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
         </SubTitle>
         <ProfilesContainer>
-          {/* 미리 만들어놓은 프로필 가져오기 */}
           {myProfiles.map((profile, index) => (
             <ProfileWrap key={index}>
               <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
@@ -164,9 +164,8 @@ const ProfilePick = () => {
               </Tags>
             </ProfileWrap>
           ))}
-          {/* 새로운 프로필 만들기 */}
           <ProfileWrap>
-            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)}/>
+            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
             <Tags>
               {["새로운", "프로필", "만들기"].map((tag, idx) => (
                 <Tag key={idx}>#{tag}</Tag>

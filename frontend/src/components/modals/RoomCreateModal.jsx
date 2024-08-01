@@ -114,14 +114,13 @@ const RoomCreateModal = ({ onClose }) => {
         teamName: teamName,
         people: selectedCapacity
       });
-      const roomId = response.data.data.roomId; // roomId 필드에서 세션 ID 가져오기
-      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, sessionId: roomId } });
+      const roomId = response.data.data.roomId;
+      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, sessionId: roomId, isJoin: false } });
     } catch (error) {
       console.error('방 생성 오류', error);
     }
   };
   
-
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
