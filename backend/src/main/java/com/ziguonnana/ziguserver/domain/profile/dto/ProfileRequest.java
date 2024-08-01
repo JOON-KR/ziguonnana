@@ -15,11 +15,5 @@ public class ProfileRequest {
     private String feature;
     private String profileImage;
     private Long profileId;
-    public static ProfileRequest from(Profile profile) {
-        return ProfileRequest.builder()
-                .feature(profile.getFeature())
-                .profileImage(profile.getProfileImage())
-                .profileId(profile.getId())
-                .build();
-    }
+    private String name;
 }
