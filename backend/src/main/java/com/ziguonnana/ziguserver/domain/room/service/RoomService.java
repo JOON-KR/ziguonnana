@@ -1,8 +1,8 @@
-package com.ziguonnana.ziguserver.domain.team.service;
+package com.ziguonnana.ziguserver.domain.room.service;
 
-import com.ziguonnana.ziguserver.domain.team.dto.TeamRequest;
-import com.ziguonnana.ziguserver.domain.team.dto.TeamInviteResponse;
-import com.ziguonnana.ziguserver.domain.team.dto.TeamResponse;
+import com.ziguonnana.ziguserver.domain.room.dto.RoomRequest;
+import com.ziguonnana.ziguserver.domain.room.dto.RoomInviteResponse;
+import com.ziguonnana.ziguserver.domain.room.dto.RoomResponse;
 import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.exception.OpenviduException;
 import io.openvidu.java.client.*;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class TeamService {
+public class RoomService {
     @Value("${openvidu.url}")
     private String OPENVIDU_URL;
 
@@ -31,7 +31,7 @@ public class TeamService {
     }
 
 
-    public TeamInviteResponse createTeam(TeamRequest teamRequest) throws OpenViduJavaClientException, OpenViduHttpException {
+    public RoomInviteResponse createRoom(RoomRequest roomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
         // 10자 내외 회의 초대 코드 생성 - UUID
         String teamCode = "uuid";
         // 세션 속성 지정
@@ -41,15 +41,16 @@ public class TeamService {
 
         // 세션 생성
         Session session = openvidu.createSession(properties);
-        log.info("session id:" + session.getSessionId());
-        return new TeamInviteResponse(teamCode, session.getSessionId());
+        log.info("session id(roomId)" + session.getSessionId());
+        return new RoomInviteResponse(teamCode, session.getSessionId());
     }
 
-    public TeamResponse connectTeam(String sessionId) throws OpenViduJavaClientException, OpenViduHttpException {
-        Session session = openvidu.getActiveSession(sessionId);
+    public RoomResponse connectRoom(String roomId) throws OpenViduJavaClientException, OpenViduHttpException {
+        Session session = openvidu.getActiveSession(roomId);
         if(session == null) throw new OpenviduException(ErrorCode.SESSION_NOT_FOUND);
+        // 방장이 설정한 인원수가 connection이 많으면 예외처리
         Connection connection = session.createConnection();
         log.info("token : " + connection.getToken());
-        return new TeamResponse(connection.getToken());
+        return new RoomResponse(connection.getToken());
     }
 }

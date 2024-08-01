@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.domain.team.dto;
+package com.ziguonnana.ziguserver.domain.room.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamInviteResponse {
+public class RoomInviteResponse {
     private String teamCode;
-    private String sessionId;
+    private String roomId;
 }
