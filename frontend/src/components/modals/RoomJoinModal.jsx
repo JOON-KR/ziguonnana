@@ -4,6 +4,7 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -74,13 +75,22 @@ const BtnWrap = styled.div`
 `;
 
 const RoomJoinModal = ({ onClose }) => {
+  const [inviteCode, setInviteCode] = useState('');
   const navigate = useNavigate();
 
-  const handleJoinRoom = () => {
-    // navigate 함수만 사용하여 페이지 이동
-    navigate("/ProfilePick");
-  };
-
+  const handleJoinRoom = async () => {
+    try {
+      const response = await axiosInstance.post(`/api/v1/team/sessionId`, {
+        groupCode: inviteCode
+      });
+      const token = response.data.data.token;
+      navigate("/profilepick", { state:{ inviteCode, token }});      
+    } catch (e) {
+      console.error("방참여 오류", e);
+    }
+  }
+  
+  
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
@@ -90,7 +100,12 @@ const RoomJoinModal = ({ onClose }) => {
       >
         <Title>이글루에 초대받으셨나요?</Title>
         <InputWrapper>
-          <InputField type="password" placeholder="초대코드를 입력해주세요." />
+          <InputField 
+          type="password" 
+          placeholder="초대코드를 입력해주세요." 
+          value={inviteCode}
+          onChange={(e) => setInviteCode(e.target.value)}
+          />
         </InputWrapper>
         <BtnWrap>
           <GrayBtn text="취소" BtnFn={onClose} />

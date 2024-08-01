@@ -2,12 +2,13 @@ import React from "react";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig"
 import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
-
+import OpenViduComponent from "../../components/OpenViduComponent";
 
 const Wrap = styled.div`
   width: 100%;
@@ -75,27 +76,25 @@ const HeaderText = styled.h4`
 `;
 
 const ProfilePick = () => {
+  const location = useLocation();
+  const { teamName, people, sessionId, inviteCode, token } = location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [existedProfile] = useState(true);  // 프로필 존재 여부
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);  // 프로필 등록 모달
-
+  
   // get: 프로필 가져오기
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        // request header
         const headers = {
           "Content-type" : "application/json",
-          "Authorization" : "Bearer [accessToken]"
+          "Authorization" : `Bearer ${localStorage.getItem('token')}`
         };
-
         // get 요청 보내기
         const res = await axios.get(`${BASE_URL}/api/v1/profile`, {headers});
-
-        // response data
-        setProfiles(res.data);
+        setProfiles(res.data); // response data
       } catch (error) {
         setError(error);
       } finally {
@@ -174,9 +173,9 @@ const ProfilePick = () => {
               ))}
             </Tags>
           </ProfileWrap>
-
         </ProfilesContainer>
       </Wrap>
+      {token && <OpenViduComponent token={token} sessionId={sessionId} />}
     </div>
   );
 };

@@ -9,6 +9,8 @@ import IceBreaking from "./pages/iceBreaking/IceBreaking";
 import Loading from "./pages/iceBreaking/Loading";
 import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
+import RoomCreateModal from "./components/modals/RoomCreateModal";
+import OpenViduComponent from "./components/OpenViduComponent";
 
 function App() {
   const navigate = useNavigate();
@@ -27,7 +29,8 @@ function App() {
           <Route path="" element={<Loading />} />
           <Route path="intro" element={<Intro />} />
         </Route>
-        <Route path="/sample" element={<PageTemplate />} />
+        <Route path="/create-room" element={<RoomCreateModal />} />
+        <Route path="/profilepick" element={<OpenViduComponent />} />
       </Routes>
     </div>
   );
