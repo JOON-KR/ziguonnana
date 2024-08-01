@@ -114,6 +114,7 @@ const RoomCreateModal = ({ onClose }) => {
         teamName: teamName,
         people: selectedCapacity
       });
+      console.log(response.data);
       const roomId = response.data.data.roomId;
       navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, roomId: roomId, isJoin: false } });
     } catch (error) {
