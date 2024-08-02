@@ -53,13 +53,14 @@ const BtnWrap = styled.div`
 // 기본 버튼 스타일 컴포넌트
 const Btn = styled.button`
   background-color: #58fff5;
-  font-size: 18px;
+  font-size: 20px;
   color: black;
   width: 200px;
   height: 68px;
   border-radius: 34px;
   border: none;
   cursor: pointer;
+  font-weight: bold;
 `;
 
 // 검정 버튼 스타일 컴포넌트 (Btn 상속)
