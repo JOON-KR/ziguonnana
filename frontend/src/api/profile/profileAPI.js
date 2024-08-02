@@ -9,7 +9,7 @@ export const createProfile = async ({ name, feature, profileImage }) => {
   formData.append("name", name);
   formData.append("feature", feature);
   formData.append("profileImage", profileImage);
-
+  
   try {
     const response = await axios.post(`${BASE_URL}/api/v1/profile`, formData, {
       headers: {

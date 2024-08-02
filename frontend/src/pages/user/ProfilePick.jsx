@@ -91,9 +91,9 @@ const ProfilePick = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [gameProfile, setGameProfile] = useState(null);
 
-  //웹소켓 연결  
+  //웹소켓 연결
   useEffect(() => {
-    const socket = new SockJS(`https://i11b303.p.ssafy.io/ws`);
+    const socket = new SockJS(`wss://i11b303.p.ssafy.io/ws`);
     const client = Stomp.over(socket);
 
     client.connect({}, (frame) => {
@@ -166,12 +166,14 @@ const ProfilePick = () => {
   };
 
    const handleRegisterProfile = async (profileData) => {
+    
     try {
-      const profile = await createProfile(profileData);
-      setGameProfile(profile);
+      //const profile = await createProfile(profileData);
+      const request = profileData;
+      setGameProfile(request);
       setIsProfileRegisterModalOpen(false);
       if (stompClient && stompClient.connected) {
-        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
+        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(request));
       }
     } catch (error) {
       console.error("프로필 등록 실패:", error);
