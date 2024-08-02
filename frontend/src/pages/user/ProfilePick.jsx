@@ -165,13 +165,15 @@ const ProfilePick = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
+
    const handleRegisterProfile = async (profileData) => {
+
     try {
-      const profile = await createProfile(profileData);
-      setGameProfile(profile);
+      const request = await createProfile(profileData);
+      setGameProfile(request);
       setIsProfileRegisterModalOpen(false);
       if (stompClient && stompClient.connected) {
-        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
+        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(request));
       }
     } catch (error) {
       console.error("프로필 등록 실패:", error);
