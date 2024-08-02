@@ -33,7 +33,7 @@ public class Profile {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     private String name;
-    private String feature;
+    private String[] feature;
     private String profileImage;
     private LocalDateTime regDate;
     private LocalDateTime editDate;
@@ -49,7 +49,7 @@ public class Profile {
         this.editDate = LocalDateTime.now();
     }
 
-    public void update(String feature, String profileImage) {
+    public void update(String[] feature, String profileImage) {
         if (feature != null) {
             this.feature = feature;
         }

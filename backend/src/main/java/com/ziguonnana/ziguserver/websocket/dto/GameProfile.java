@@ -1,6 +1,6 @@
-package com.ziguonnana.ziguserver.domain.profile.dto;
+package com.ziguonnana.ziguserver.websocket.dto;
 
-import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
+import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProfileRequest {
+public class GameProfile {
+    private String name;
     private String[] feature;
     private String profileImage;
-    private Long profileId;
-    private String name;
 }

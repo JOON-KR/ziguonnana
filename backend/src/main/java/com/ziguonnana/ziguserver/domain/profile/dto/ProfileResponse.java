@@ -11,7 +11,7 @@ import lombok.Getter;
 public class ProfileResponse {
     private Long id;
     private String memberEmail;
-    private String feature;
+    private String[] feature;
     private String profileImage;
     private LocalDateTime regDate;
     private LocalDateTime editDate;
