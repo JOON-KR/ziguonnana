@@ -1,20 +1,19 @@
 package com.ziguonnana.ziguserver.websocket.controller;
 
+import com.ziguonnana.ziguserver.websocket.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import com.ziguonnana.ziguserver.websocket.dto.GameMessage;
-import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
-import com.ziguonnana.ziguserver.websocket.dto.GameProfileRequest;
-import com.ziguonnana.ziguserver.websocket.dto.SessionInfo;
 import com.ziguonnana.ziguserver.websocket.service.WebsocketService;
 
 import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Controller
+@Slf4j
 public class WebsocketController {
     private final WebsocketService websocketService;
 
@@ -41,5 +40,13 @@ public class WebsocketController {
     @SendTo("/topic/game/{roomId}")
     public GameMessage sendMessage(@DestinationVariable("roomId") String roomId, @Payload GameMessage message) {
         return message;
+    }
+
+    //   자기소개 문답 답변
+    @MessageMapping("/game/{roomId}/self-introduction")
+    public GameMessage<String> getAnswer(@DestinationVariable("roomId") String roomId, @Payload SelfIntroductionRequest request) {
+        log.info("=======자기소개 문답 답변 전송 시작=======");
+        websocketService.getSelfIntroductionAnswer(roomId, request);
+        return GameMessage.info("자기소개 문답 전송 완료", "");
     }
 }
