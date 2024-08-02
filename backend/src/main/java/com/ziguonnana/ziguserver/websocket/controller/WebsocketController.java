@@ -18,21 +18,21 @@ public class WebsocketController {
 
     @MessageMapping("/game/{roomId}/create")
     @SendTo("topic/game/{roomId}")
-    public GameMessage<String> createRoom(@DestinationVariable String roomId, @Payload ProfileRequest profile) {
+    public GameMessage<String> createRoom(@DestinationVariable("roomId") String roomId, @Payload ProfileRequest profile) {
         String memberId = websocketService.createRoom(profile,roomId);
         return GameMessage.join(profile.getName(),memberId);
     }
     
     @MessageMapping("/game/{roomId}/join")
     @SendTo("/topic/game/{roomId}")
-    public GameMessage<String> joinRoom(@DestinationVariable String roomId, @Payload ProfileRequest profile) {
+    public GameMessage<String> joinRoom(@DestinationVariable("roomId") String roomId, @Payload ProfileRequest profile) {
         String memberId = websocketService.join(roomId,profile);
         return GameMessage.join(profile.getName(),memberId);
     }
 
     @MessageMapping("/game/{roomId}/send")
     @SendTo("/topic/game/{roomId}")
-    public GameMessage sendMessage(@DestinationVariable String roomId, @Payload GameMessage message) {
+    public GameMessage sendMessage(@DestinationVariable("roomId") String roomId, @Payload GameMessage message) {
         return message;
     }
 }
