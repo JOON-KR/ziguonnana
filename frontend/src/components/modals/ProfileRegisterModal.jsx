@@ -4,6 +4,8 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
 import ProfileNana from "../../assets/icons/ProfileNana.png"; // 기본 프로필 이미지
+import axios from "axios";
+import BASE_URL from "../../api/APIconfig";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -130,7 +132,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const hashTags = [hashTag1, hashTag2, hashTag3].filter(
       (tag) => tag.trim() !== ""
     );
@@ -138,7 +140,29 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
       alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
       return;
     }
-    onRegisterProfile({ profileImage, name, feature: hashTags.join(", ") });
+    const profileData = { profileImage, name, feature: hashTags.join(", ") };
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("feature", hashTags.join(", "));
+        formData.append("profileImg", profileImage);
+        const response = await axios.post(`${BASE_URL}/api/v1/profile`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log("프로필 등록 성공:", response);
+        onRegisterProfile(response.data);
+      } catch (error) {
+        console.error("프로필 등록 실패:", error);
+      }
+    } else {
+      onRegisterProfile(profileData);
+    }
   };
 
   return (
