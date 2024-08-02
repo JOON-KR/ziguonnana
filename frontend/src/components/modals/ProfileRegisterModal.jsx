@@ -142,7 +142,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     }
     const profileData = { profileImage, name, feature: hashTags.join(", ") };
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       try {
         const formData = new FormData();
