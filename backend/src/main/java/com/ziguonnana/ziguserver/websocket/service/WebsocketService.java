@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.ziguonnana.ziguserver.exception.ErrorCode;
+import com.ziguonnana.ziguserver.exception.PlayerException;
 import com.ziguonnana.ziguserver.websocket.dto.*;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +66,7 @@ public class WebsocketService {
     }
     
     public Player getPlayer(String roomId, String memberId) {
-        return rooms.get(roomId).getPlayers().get(memberId);
+        return getRoom(roomId).getPlayers().get(memberId);
     }
     
     public SessionInfo join(String roomId, GameProfile profile) {
@@ -115,6 +117,7 @@ public class WebsocketService {
     @Transactional
     public void getSelfIntroductionAnswer(String roomId, SelfIntroductionRequest request) {
         Player player = getPlayer(roomId, request.getMemberId());
+        if(player == null) throw new PlayerException(ErrorCode.PLAYER_NOT_FOUND);
         player.createAnswer(request.getAnswer());
         Room room = getRoom(roomId);
         // 해당 룸의 player 정보 업데이트
