@@ -1,7 +1,7 @@
 package com.ziguonnana.ziguserver.websocket.dto;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-	private List<Player> players = new ArrayList<>();
+	private ConcurrentMap<String,Player> players;
 	private int people;
 	private int status;
 	private int pose;
