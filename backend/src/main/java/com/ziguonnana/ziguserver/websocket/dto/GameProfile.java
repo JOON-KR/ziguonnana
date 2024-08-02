@@ -15,4 +15,12 @@ public class GameProfile {
     private String name;
     private String[] feature;
     private String profileImage;
+    
+    public static GameProfile from(GameProfileRequest req) {
+    	return GameProfile.builder()
+    			.feature(req.getFeature())
+    			.name(req.getName())
+    			.profileImage(req.getProfileImage())
+    			.build();
+    }
 }

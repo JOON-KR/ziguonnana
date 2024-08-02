@@ -22,4 +22,8 @@ public class Player {
 	private String nickName;
 	private String emotionImage;
 	private double[] vector;
+	
+	public void createProfile(GameProfile profile) {
+		this.profile = profile;
+	}
 }
