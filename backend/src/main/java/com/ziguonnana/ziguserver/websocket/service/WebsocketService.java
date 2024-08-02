@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
-import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
+import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
 import com.ziguonnana.ziguserver.websocket.dto.Player;
 import com.ziguonnana.ziguserver.websocket.dto.Room;
 
@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class WebsocketService {
     private final ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, String> membersRoom = new ConcurrentHashMap<>();
@@ -26,7 +27,6 @@ public class WebsocketService {
     public String createRoom(ProfileRequest request, String roomId) {
         List<Player> list = new ArrayList<>();
         String memberId = UUID.randomUUID().toString();
-        Profile profile = Profile.from(request);
         Player player = Player.builder()
                 .memberId(memberId)
                 .profile(profile)

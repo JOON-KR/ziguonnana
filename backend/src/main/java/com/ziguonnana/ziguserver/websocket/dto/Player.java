@@ -3,7 +3,6 @@ package com.ziguonnana.ziguserver.websocket.dto;
 import java.util.List;
 
 import com.ziguonnana.ziguserver.domain.avatar.entity.Avatar;
-import com.ziguonnana.ziguserver.domain.profile.entity.Profile;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,7 @@ public class Player {
 	private String memberId;
 	private String roomId;
 	private List<String>answer;
-	private Profile profile;
+	private GameProfile profile;
 	private Avatar avatar;
 	private String nickName;
 	private String emotionImage;
