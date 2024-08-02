@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.stereotype.Service;
 
-import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
 import com.ziguonnana.ziguserver.websocket.dto.Player;
 import com.ziguonnana.ziguserver.websocket.dto.Room;
+import com.ziguonnana.ziguserver.websocket.dto.SessionInfo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class WebsocketService {
     private final ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, String> membersRoom = new ConcurrentHashMap<>();
 
-    public String createRoom(GameProfile profile, String roomId) {
+    public SessionInfo createRoom(GameProfile profile, String roomId) {
         List<Player> list = new ArrayList<>();
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
@@ -40,7 +40,11 @@ public class WebsocketService {
                 .build();
         rooms.put(roomId, room);
         membersRoom.put(memberId, roomId);
-        return memberId;
+        SessionInfo info = SessionInfo.builder()
+        		.memberId(memberId)
+        		.roomId(roomId)
+        		.build();
+        return info;
     }
 
     public Room getRoom(String roomId) {
@@ -48,7 +52,7 @@ public class WebsocketService {
                 .orElseThrow(() -> new RoomNotFoundException("방을 찾을 수 없습니다.: " + roomId));
     }
 
-    public String join(String roomId, GameProfile profile) {
+    public SessionInfo join(String roomId, GameProfile profile) {
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
                 .memberId(memberId)
@@ -58,7 +62,11 @@ public class WebsocketService {
                 .build();
         addPlayerToRoom(roomId, player);
         membersRoom.put(memberId, roomId);
-        return memberId;
+        SessionInfo info = SessionInfo.builder()
+        		.memberId(memberId)
+        		.roomId(roomId)
+        		.build();
+        return info;
     }
 
     public void addPlayerToRoom(String roomId, Player player) {
