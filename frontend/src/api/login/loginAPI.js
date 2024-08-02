@@ -22,15 +22,9 @@ export const logout = async () => {
   if (!accessToken) return;
 
   try {
-    await axiosInstance.post(
-      "/api/v1/member/logout",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    await axiosInstance.post("/api/v1/member/logout", {
+      accessToken: accessToken,
+    });
   } catch (e) {
     console.log("로그아웃 오류입니다.", e);
     throw e;
