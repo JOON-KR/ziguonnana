@@ -7,7 +7,7 @@ const accessToken = localStorage.getItem("accessToken");
 export const signup = async ({ email, name, password }) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/api/v1/member/signup`, // 여기서 슬래시가 중복되지 않도록 수정합니다.
+      `${BASE_URL}/api/v1/member/signup`,
       { email, name, password },
       {
         headers: {
