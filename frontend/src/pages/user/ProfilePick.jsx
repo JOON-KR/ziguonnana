@@ -1,6 +1,6 @@
 import React from "react";
-import { Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { Stomp } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -84,11 +84,12 @@ const ProfilePick = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(null);
-  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
+  const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
+    useState(false);
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [stompClient, setStompClient] = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState("");
   const [gameProfile, setGameProfile] = useState(null);
 
   //웹소켓 연결
@@ -96,29 +97,33 @@ const ProfilePick = () => {
     const socket = new SockJS(`wss://i11b303.p.ssafy.io/ws`);
     const client = Stomp.over(socket);
 
-    client.connect({}, (frame) => {
-      setStatusMessage('웹소켓 서버와 연결됨!');
-      client.subscribe(`/topic/game/${roomId}`, (message) => {
-        console.log('받은 메시지:', message.body);
-        setMessages((prevMessages) => [...prevMessages, message.body]);
-      });
+    client.connect(
+      {},
+      (frame) => {
+        setStatusMessage("웹소켓 서버와 연결됨!");
+        client.subscribe(`/topic/game/${roomId}`, (message) => {
+          console.log("받은 메시지:", message.body);
+          setMessages((prevMessages) => [...prevMessages, message.body]);
+        });
 
-      // sessionInfo 받아서 memberId 저장
-      client.subscribe(`/user/queue/session`, (message) => {
-        const sessionInfo = JSON.parse(message.body);
-        localStorage.setItem('memberId', sessionInfo.memberId);
-      });
+        // sessionInfo 받아서 memberId 저장
+        client.subscribe(`/user/queue/session`, (message) => {
+          const sessionInfo = JSON.parse(message.body);
+          localStorage.setItem("memberId", sessionInfo.memberId);
+        });
 
-      setStompClient(client);
-    }, (error) => {
-      setStatusMessage('웹소켓 서버와 연결 끊김!');
-      console.error('STOMP error:', error);
-    });
+        setStompClient(client);
+      },
+      (error) => {
+        setStatusMessage("웹소켓 서버와 연결 끊김!");
+        console.error("STOMP error:", error);
+      }
+    );
 
     return () => {
       if (client) {
         client.disconnect(() => {
-          setStatusMessage('웹소켓 서버와 연결 끊김!');
+          setStatusMessage("웹소켓 서버와 연결 끊김!");
         });
       }
     };
@@ -126,11 +131,11 @@ const ProfilePick = () => {
 
   // 디버그용 로그
   useEffect(() => {
-    console.log('Location State:', location.state);
-    console.log('Team Name:', teamName);
-    console.log('People:', people);
-    console.log('Room ID:', roomId);
-    console.log('Is Join:', isJoin);
+    console.log("Location State:", location.state);
+    console.log("Team Name:", teamName);
+    console.log("People:", people);
+    console.log("Room ID:", roomId);
+    console.log("Is Join:", isJoin);
   }, [location.state, teamName, people, roomId, isJoin]);
 
   // 로그인 유저의 프로필 데이터를 가져오는 useEffect
@@ -145,8 +150,9 @@ const ProfilePick = () => {
         setLoading(false);
       }
     };
-    const token = localStorage.getItem('accessToken');
-    if (token) { //토큰이 있으면 가져옴
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      //토큰이 있으면 가져옴
       fetchProfiles();
     } else {
       setLoading(false);
@@ -156,67 +162,83 @@ const ProfilePick = () => {
   const pickProfile = (profile) => {
     setGameProfile(profile);
     if (stompClient && stompClient.connected) {
-      stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
+      stompClient.send(
+        `/app/game/${roomId}/profile`,
+        {},
+        JSON.stringify(profile)
+      );
     }
-
   };
 
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
-   const handleRegisterProfile = async (profileData) => {
-
-   const handleRegisterProfile = (profileData) => {
-    
-    try {
-      //const profile = await createProfile(profileData);
-      const request = profileData;
-      setGameProfile(request);
-      setIsProfileRegisterModalOpen(false);
-      if (stompClient && stompClient.connected) {
-        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(request));
+  const handleRegisterProfile = async (profileData) => {
+    const handleRegisterProfile = (profileData) => {
+      try {
+        //const profile = await createProfile(profileData);
+        const request = profileData;
+        setGameProfile(request);
+        setIsProfileRegisterModalOpen(false);
+        if (stompClient && stompClient.connected) {
+          stompClient.send(
+            `/app/game/${roomId}/profile`,
+            {},
+            JSON.stringify(request)
+          );
+        }
+      } catch (error) {
+        console.error("프로필 등록 실패:", error);
       }
-    } catch (error) {
-      console.error("프로필 등록 실패:", error);
-    }
-  };
+    };
 
-  return (
-    <Wrap>
-      {isProfileRegisterModalOpen && (
-        <ProfileRegisterModal onClose={closeProfileRegisterModal} onRegisterProfile={handleRegisterProfile} />
-      )}
-      <Header>
-        <HeaderText>마이페이지</HeaderText>
-        <HeaderText>커뮤니티</HeaderText>
-      </Header>
-      <SubTitle>
-        사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
-      </SubTitle>
-      <ProfilesContainer>
-        {profiles.map((profile, index) => (
-          <ProfileWrap key={index}>
-            <Image src={profile.profileImage || profileImage1} alt="Profile Image" onClick={() => pickProfile(profile)} />
+    return (
+      <Wrap>
+        {isProfileRegisterModalOpen && (
+          <ProfileRegisterModal
+            onClose={closeProfileRegisterModal}
+            onRegisterProfile={handleRegisterProfile}
+          />
+        )}
+        <Header>
+          <HeaderText>마이페이지</HeaderText>
+          <HeaderText>커뮤니티</HeaderText>
+        </Header>
+        <SubTitle>
+          사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
+        </SubTitle>
+        <ProfilesContainer>
+          {profiles.map((profile, index) => (
+            <ProfileWrap key={index}>
+              <Image
+                src={profile.profileImage || profileImage1}
+                alt="Profile Image"
+                onClick={() => pickProfile(profile)}
+              />
+              <Tags>
+                {profile.feature.split(", ").map((tag, idx) => (
+                  <Tag key={idx}>#{tag}</Tag>
+                ))}
+              </Tags>
+            </ProfileWrap>
+          ))}
+          <ProfileWrap>
+            <Image
+              src={newProfileImage}
+              alt="Profile Image"
+              onClick={() => setIsProfileRegisterModalOpen(true)}
+            />
             <Tags>
-              {profile.feature.split(', ').map((tag, idx) => (
+              {["새로운", "프로필", "만들기"].map((tag, idx) => (
                 <Tag key={idx}>#{tag}</Tag>
               ))}
             </Tags>
           </ProfileWrap>
-        ))}
-        <ProfileWrap>
-          <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
-          <Tags>
-            {["새로운", "프로필", "만들기"].map((tag, idx) => (
-              <Tag key={idx}>#{tag}</Tag>
-            ))}
-          </Tags>
-        </ProfileWrap>
-      </ProfilesContainer>
-      {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
-    </Wrap>
-  );
+        </ProfilesContainer>
+        {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
+      </Wrap>
+    );
+  };
 };
-
 export default ProfilePick;
