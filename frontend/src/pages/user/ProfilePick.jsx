@@ -175,70 +175,68 @@ const ProfilePick = () => {
   };
 
   const handleRegisterProfile = async (profileData) => {
-    const handleRegisterProfile = (profileData) => {
-      try {
-        //const profile = await createProfile(profileData);
-        const request = profileData;
-        setGameProfile(request);
-        setIsProfileRegisterModalOpen(false);
-        if (stompClient && stompClient.connected) {
-          stompClient.send(
-            `/app/game/${roomId}/profile`,
-            {},
-            JSON.stringify(request)
-          );
-        }
-      } catch (error) {
-        console.error("프로필 등록 실패:", error);
+    try {
+      //const profile = await createProfile(profileData);
+      const request = profileData;
+      setGameProfile(request);
+      setIsProfileRegisterModalOpen(false);
+      if (stompClient && stompClient.connected) {
+        stompClient.send(
+          `/app/game/${roomId}/profile`,
+          {},
+          JSON.stringify(request)
+        );
       }
-    };
+    } catch (error) {
+      console.error("프로필 등록 실패:", error);
+    }
+  };
 
-    return (
-      <Wrap>
-        {isProfileRegisterModalOpen && (
-          <ProfileRegisterModal
-            onClose={closeProfileRegisterModal}
-            onRegisterProfile={handleRegisterProfile}
-          />
-        )}
-        <Header>
-          <HeaderText>마이페이지</HeaderText>
-          <HeaderText>커뮤니티</HeaderText>
-        </Header>
-        <SubTitle>
-          사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
-        </SubTitle>
-        <ProfilesContainer>
-          {profiles.map((profile, index) => (
-            <ProfileWrap key={index}>
-              <Image
-                src={profile.profileImage || profileImage1}
-                alt="Profile Image"
-                onClick={() => pickProfile(profile)}
-              />
-              <Tags>
-                {profile.feature.split(", ").map((tag, idx) => (
-                  <Tag key={idx}>#{tag}</Tag>
-                ))}
-              </Tags>
-            </ProfileWrap>
-          ))}
-          <ProfileWrap>
+  return (
+    <Wrap>
+      {isProfileRegisterModalOpen && (
+        <ProfileRegisterModal
+          onClose={closeProfileRegisterModal}
+          onRegisterProfile={handleRegisterProfile}
+        />
+      )}
+      <Header>
+        <HeaderText>마이페이지</HeaderText>
+        <HeaderText>커뮤니티</HeaderText>
+      </Header>
+      <SubTitle>
+        사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
+      </SubTitle>
+      <ProfilesContainer>
+        {profiles.map((profile, index) => (
+          <ProfileWrap key={index}>
             <Image
-              src={newProfileImage}
+              src={profile.profileImage || profileImage1}
               alt="Profile Image"
-              onClick={() => setIsProfileRegisterModalOpen(true)}
+              onClick={() => pickProfile(profile)}
             />
             <Tags>
-              {["새로운", "프로필", "만들기"].map((tag, idx) => (
+              {profile.feature.split(", ").map((tag, idx) => (
                 <Tag key={idx}>#{tag}</Tag>
               ))}
             </Tags>
           </ProfileWrap>
-        </ProfilesContainer>
-        {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
-      </Wrap>
-    );
-  };
+        ))}
+        <ProfileWrap>
+          <Image
+            src={newProfileImage}
+            alt="Profile Image"
+            onClick={() => setIsProfileRegisterModalOpen(true)}
+          />
+          <Tags>
+            {["새로운", "프로필", "만들기"].map((tag, idx) => (
+              <Tag key={idx}>#{tag}</Tag>
+            ))}
+          </Tags>
+        </ProfileWrap>
+      </ProfilesContainer>
+      {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
+    </Wrap>
+  );
 };
 export default ProfilePick;
