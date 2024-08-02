@@ -8,7 +8,7 @@ import RoomCreateModal from "../components/modals/RoomCreateModal";
 import RoomJoinModal from "../components/modals/RoomJoinModal";
 import { useNavigate } from "react-router-dom";
 import { login, logout } from "../api/login/loginAPI";
-
+import { signup } from "../api/signup/signupAPI"; // 회원가입 API 함수 import
 
 // Home 페이지 전체를 감싸는 스타일 컴포넌트
 const HomeWrap = styled.div`
@@ -107,12 +107,12 @@ const EarthIcon = styled.img`
 `;
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isRoomCreateModalOpen, setIsRoomCreateModalOpen] = useState(false);
   const [isRoomJoinModalOpen, setIsRoomJoinModalOpen] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -122,7 +122,7 @@ const Home = () => {
       setIsLoggedIn(true);
       setIsLoginModalOpen(false);
     } catch (e) {
-      setError('로그인 실패: ' + e.message);
+      setError("로그인 실패: " + e.message);
     }
   };
 
@@ -131,13 +131,18 @@ const Home = () => {
       await logout();
       setIsLoggedIn(false);
     } catch (e) {
-      setError('로그아웃 실패: ' + e.message)
+      setError("로그아웃 실패: " + e.message);
     }
   };
 
-  const handleSignUp = () => {
-    setIsLoggedIn(true);
-    setIsSignUpModalOpen(false);
+  const handleSignUp = async ({ email, name, password }) => {
+    try {
+      await signup({ email, name, password });
+      setIsLoggedIn(true);
+      setIsSignUpModalOpen(false);
+    } catch (e) {
+      setError("회원가입 실패: " + e.message);
+    }
   };
 
   const closeLoginModal = () => {
@@ -157,7 +162,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
     } else {
@@ -167,7 +172,7 @@ const Home = () => {
 
   return (
     <HomeWrap>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       {isLoginModalOpen && (
         <LoginModal onClose={closeLoginModal} AquaBtnFn={handleLogin} />
       )}
@@ -179,13 +184,15 @@ const Home = () => {
       )}
       {isRoomJoinModalOpen && <RoomJoinModal onClose={closeRoomJoinModal} />}
       <Header>
-        <HeaderText onClick={() => {
-          if (isLoggedIn) {
-            handleLogout();
-          } else {
-            setIsLoginModalOpen(true);
-          }
-        }}>
+        <HeaderText
+          onClick={() => {
+            if (isLoggedIn) {
+              handleLogout();
+            } else {
+              setIsLoginModalOpen(true);
+            }
+          }}
+        >
           {isLoggedIn ? "로그아웃" : "로그인"}
         </HeaderText>
         {isLoggedIn ? (

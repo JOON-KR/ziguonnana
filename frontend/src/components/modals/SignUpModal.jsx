@@ -31,7 +31,7 @@ const ModalWrap = styled(FlexCenter)`
   background-size: cover;
   background-position: center;
   width: 721px;
-  height: 610px;
+  height: 700px;
   flex-direction: column;
   padding: 40px 20px;
   text-align: center;
@@ -127,18 +127,48 @@ const SocialLoginButton = styled.img`
   cursor: pointer;
 `;
 
+// 이용 약관 동의 체크박스 스타일 컴포넌트
+const CheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+`;
+
+const Checkbox = styled.input`
+  margin-right: 10px;
+`;
+
+const CheckboxLabel = styled.label`
+  font-size: 14px;
+  color: #54595e;
+`;
+
 // 회원가입 모달 컴포넌트
 const SignUpModal = ({ onClose, AquaBtnFn, onGoogleLogin, onKakaoLogin }) => {
   // 상태 변수 선언
   const [email, setEmail] = useState(""); // 이메일 상태
+  const [name, setName] = useState(""); // 이름 상태
   const [password, setPassword] = useState(""); // 비밀번호 상태
   const [confirmPassword, setConfirmPassword] = useState(""); // 비밀번호 확인 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
+  const [isAgreed, setIsAgreed] = useState(false); // 이용 약관 동의 상태
 
   // 이메일 형식을 검증하는 함수
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
+  };
+
+  // 이름 형식을 검증하는 함수
+  const validateName = (name) => {
+    const re = /^[a-zA-Z가-힣]{2,20}$/;
+    return re.test(name);
+  };
+
+  // 비밀번호 형식을 검증하는 함수 (특수문자 포함)
+  const validatePassword = (password) => {
+    const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*]{8,20}$/;
+    return re.test(password);
   };
 
   // 이메일 입력 변경 처리 함수
@@ -151,18 +181,46 @@ const SignUpModal = ({ onClose, AquaBtnFn, onGoogleLogin, onKakaoLogin }) => {
     }
   };
 
+  // 비밀번호 입력 변경 처리 함수
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (error && error === "비밀번호가 일치하지 않습니다.") {
+      setError("");
+    }
+  };
+
+  // 비밀번호 확인 입력 변경 처리 함수
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (error && error === "비밀번호가 일치하지 않습니다.") {
+      setError("");
+    }
+  };
+
   // 회원가입 버튼 클릭 처리 함수
   const handleSignUp = () => {
     if (!validateEmail(email)) {
       setError("이메일 형식이 아닙니다.");
       return;
     }
+    if (!validateName(name)) {
+      setError("이름은 2~20자의 알파벳과 한글로만 구성되어야 합니다.");
+      return;
+    }
+    if (!validatePassword(password)) {
+      setError("비밀번호는 8~20자의 영문과 숫자를 포함해야 합니다.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
     }
+    if (!isAgreed) {
+      setError("이용 약관에 동의해야 합니다.");
+      return;
+    }
     setError("");
-    AquaBtnFn();
+    AquaBtnFn({ email, name, password });
   };
 
   return (
@@ -174,6 +232,15 @@ const SignUpModal = ({ onClose, AquaBtnFn, onGoogleLogin, onKakaoLogin }) => {
       >
         <Title>회원 정보를 입력하세요.</Title>
         <InputWrapper>
+          <LabelInputWrapper>
+            <Label>이름</Label>
+            <InputField
+              type="text"
+              placeholder="이름을 입력해주세요."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </LabelInputWrapper>
           <LabelInputWrapper>
             <Label>이메일</Label>
             <InputField
@@ -192,7 +259,7 @@ const SignUpModal = ({ onClose, AquaBtnFn, onGoogleLogin, onKakaoLogin }) => {
               type="password"
               placeholder="비밀번호를 입력해주세요."
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
             />
           </LabelInputWrapper>
           <LabelInputWrapper>
@@ -201,12 +268,22 @@ const SignUpModal = ({ onClose, AquaBtnFn, onGoogleLogin, onKakaoLogin }) => {
               type="password"
               placeholder="비밀번호를 다시 입력해주세요."
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={handleConfirmPasswordChange}
             />
           </LabelInputWrapper>
-          {error && error !== "이메일 형식이 아닙니다." && (
-            <ErrorMessage>{error}</ErrorMessage>
-          )}
+          <InputWrapper>
+            {error && error !== "이메일 형식이 아닙니다." && (
+              <ErrorMessage>{error}</ErrorMessage>
+            )}
+          </InputWrapper>
+          <CheckboxWrapper>
+            <Checkbox
+              type="checkbox"
+              checked={isAgreed}
+              onChange={(e) => setIsAgreed(e.target.checked)}
+            />
+            <CheckboxLabel>이용 약관에 동의합니다.</CheckboxLabel>
+          </CheckboxWrapper>
         </InputWrapper>
         <BtnWrap>
           <AquaBtn text="회원가입" BtnFn={handleSignUp} />
