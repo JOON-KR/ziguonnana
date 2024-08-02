@@ -166,6 +166,8 @@ const ProfilePick = () => {
   };
 
    const handleRegisterProfile = async (profileData) => {
+
+   const handleRegisterProfile = (profileData) => {
     
     try {
       //const profile = await createProfile(profileData);
