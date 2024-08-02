@@ -71,16 +71,18 @@ const BtnWrap = styled.div`
 `;
 
 const RoomJoinModal = ({ onClose }) => {
-  const [inviteCode, setInviteCode] = useState('');
+  const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
 
   const handleJoinRoom = async () => {
     try {
       const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
-        groupCode: inviteCode
+        groupCode: inviteCode,
       });
       const token = response.data.data.token;
-      navigate("/ProfilePick", { state: { inviteCode, token, sessionId: inviteCode, isJoin: true } });
+      navigate("/user/ProfilePick", {
+        state: { inviteCode, token, sessionId: inviteCode, isJoin: true },
+      });
     } catch (e) {
       console.error("방참여 오류", e);
     }
@@ -88,12 +90,16 @@ const RoomJoinModal = ({ onClose }) => {
 
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap onClick={(e) => { e.stopPropagation(); }}>
+      <ModalWrap
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <Title>이글루에 초대받으셨나요?</Title>
         <InputWrapper>
-          <InputField 
-            type="password" 
-            placeholder="초대코드를 입력해주세요." 
+          <InputField
+            type="password"
+            placeholder="초대코드를 입력해주세요."
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
           />
