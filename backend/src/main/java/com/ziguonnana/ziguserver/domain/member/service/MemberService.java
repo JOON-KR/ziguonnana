@@ -87,7 +87,8 @@ public class MemberService {
 	            .regDate(member.getRegDate())
 	            .build();
 	}
-    public void logout(String email, String accessToken) {
+    public void logout( String accessToken) {
+    	String email = getMember(TokenInfo.getMemberId()).get().getEmail();
         long remainingTime = jwtUtil.getRemainingTime(accessToken);
         redisService.addTokenToBlacklist(accessToken, remainingTime);
         redisService.deleteRefreshToken(email);

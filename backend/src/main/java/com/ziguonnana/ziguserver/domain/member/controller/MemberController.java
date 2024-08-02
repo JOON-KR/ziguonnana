@@ -61,9 +61,8 @@ public class MemberController {
 
 	@PostMapping("logout")
 	public ResponseEntity<ResponseDto<String>> logout(@Valid @RequestBody LogoutRequest request) {
-		String email = request.email();
 		String accessToken = request.accessToken();
-		memberService.logout(email, accessToken);
+		memberService.logout( accessToken);
 		return ResponseEntity.status(200).body(ResponseDto.success(""));
 	}
 	
