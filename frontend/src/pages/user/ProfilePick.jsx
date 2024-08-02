@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
@@ -92,7 +93,7 @@ const ProfilePick = () => {
 
   //웹소켓 연결
   useEffect(() => {
-    const socket = new SockJS(`${BASE_URL}/ws`);
+    const socket = new SockJS(`wss://i11b303.p.ssafy.io/ws`);
     const client = Stomp.over(socket);
 
     client.connect({}, (frame) => {
@@ -100,6 +101,12 @@ const ProfilePick = () => {
       client.subscribe(`/topic/game/${roomId}`, (message) => {
         console.log('받은 메시지:', message.body);
         setMessages((prevMessages) => [...prevMessages, message.body]);
+      });
+
+      // sessionInfo 받아서 memberId 저장
+      client.subscribe(`/user/queue/session`, (message) => {
+        const sessionInfo = JSON.parse(message.body);
+        localStorage.setItem('memberId', sessionInfo.memberId);
       });
 
       setStompClient(client);
@@ -116,8 +123,6 @@ const ProfilePick = () => {
       }
     };
   }, [roomId]);
-
-
 
   // 디버그용 로그
   useEffect(() => {
@@ -148,12 +153,12 @@ const ProfilePick = () => {
     }
   }, []);
 
-
   const pickProfile = (profile) => {
     setGameProfile(profile);
     if (stompClient && stompClient.connected) {
       stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
     }
+
   };
 
   const closeProfileRegisterModal = () => {
@@ -172,8 +177,6 @@ const ProfilePick = () => {
       console.error("프로필 등록 실패:", error);
     }
   };
-
-  
 
   return (
     <Wrap>
