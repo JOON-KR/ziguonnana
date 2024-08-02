@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Stomp } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import profileImage2 from "../../assets/icons/p2.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
-import axiosInstance from "../../api/axiosInstance";
-
+import { getProfileList, createProfile } from "../../api/profile/profileAPI";
+import BASE_URL from "../../api/APIconfig";
 
 const Wrap = styled.div`
   width: 100%;
@@ -83,6 +84,40 @@ const ProfilePick = () => {
   const [error, setError] = useState(null);
   const [token, setToken] = useState(null);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [stompClient, setStompClient] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [gameProfile, setGameProfile] = useState(null);
+
+  //웹소켓 연결
+  useEffect(() => {
+    const socket = new SockJS(`${BASE_URL}/ws`);
+    const client = Stomp.over(socket);
+
+    client.connect({}, (frame) => {
+      setStatusMessage('웹소켓 서버와 연결됨!');
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        console.log('받은 메시지:', message.body);
+        setMessages((prevMessages) => [...prevMessages, message.body]);
+      });
+
+      setStompClient(client);
+    }, (error) => {
+      setStatusMessage('웹소켓 서버와 연결 끊김!');
+      console.error('STOMP error:', error);
+    });
+
+    return () => {
+      if (client) {
+        client.disconnect(() => {
+          setStatusMessage('웹소켓 서버와 연결 끊김!');
+        });
+      }
+    };
+  }, [roomId]);
+
+
 
   // 디버그용 로그
   useEffect(() => {
@@ -93,84 +128,87 @@ const ProfilePick = () => {
     console.log('Is Join:', isJoin);
   }, [location.state, teamName, people, roomId, isJoin]);
 
-  // 프로필 데이터를 가져오는 useEffect
+  // 로그인 유저의 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        setProfiles([
-          { imgSrc: profileImage1, tags: ["활발한", "아저씨", "하트"] },
-          { imgSrc: profileImage2, tags: ["행복한", "소녀", "하트"] }
-        ]);
+        const profileList = await getProfileList();
+        setProfiles(profileList);
       } catch (error) {
         setError(error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProfiles();
+    const token = localStorage.getItem('accessToken');
+    if (token) { //토큰이 있으면 가져옴
+      fetchProfiles();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  // 토큰을 가져오는 useEffect
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await axiosInstance.post(`/api/v1/room/${roomId}`, { groupCode: roomId }, { headers });
-        setToken(response.data.data.token);
-      } catch (error) {
-        console.error('토큰 가져오기 오류', error);
-      }
-    };
-    if (roomId) {
-      fetchToken();
-    }
-  }, [roomId]);
 
-  const pickProfile = () => {
-    // 프로필 클릭 시, 프로필 선택되게 하는 로직
+  const pickProfile = (profile) => {
+    setGameProfile(profile);
+    if (stompClient && stompClient.connected) {
+      stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
+    }
   };
 
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
+   const handleRegisterProfile = async (profileData) => {
+    try {
+      const profile = await createProfile(profileData);
+      setGameProfile(profile);
+      setIsProfileRegisterModalOpen(false);
+      if (stompClient && stompClient.connected) {
+        stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
+      }
+    } catch (error) {
+      console.error("프로필 등록 실패:", error);
+    }
+  };
+
+  
+
   return (
-    <div>
-      <Wrap>
-        {isProfileRegisterModalOpen && (
-          <ProfileRegisterModal onClose={closeProfileRegisterModal} />
-        )}
-        <Header>
-          <HeaderText>마이페이지</HeaderText>
-          <HeaderText>커뮤니티</HeaderText>
-        </Header>
-        <SubTitle>
-          사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
-        </SubTitle>
-        <ProfilesContainer>
-          {profiles.map((profile, index) => (
-            <ProfileWrap key={index}>
-              <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-              <Tags>
-                {profile.tags.map((tag, idx) => (
-                  <Tag key={idx}>#{tag}</Tag>
-                ))}
-              </Tags>
-            </ProfileWrap>
-          ))}
-          <ProfileWrap>
-            <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
+    <Wrap>
+      {isProfileRegisterModalOpen && (
+        <ProfileRegisterModal onClose={closeProfileRegisterModal} onRegisterProfile={handleRegisterProfile} />
+      )}
+      <Header>
+        <HeaderText>마이페이지</HeaderText>
+        <HeaderText>커뮤니티</HeaderText>
+      </Header>
+      <SubTitle>
+        사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
+      </SubTitle>
+      <ProfilesContainer>
+        {profiles.map((profile, index) => (
+          <ProfileWrap key={index}>
+            <Image src={profile.profileImage || profileImage1} alt="Profile Image" onClick={() => pickProfile(profile)} />
             <Tags>
-              {["새로운", "프로필", "만들기"].map((tag, idx) => (
+              {profile.feature.split(', ').map((tag, idx) => (
                 <Tag key={idx}>#{tag}</Tag>
               ))}
             </Tags>
           </ProfileWrap>
-        </ProfilesContainer>
-      </Wrap>
+        ))}
+        <ProfileWrap>
+          <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
+          <Tags>
+            {["새로운", "프로필", "만들기"].map((tag, idx) => (
+              <Tag key={idx}>#{tag}</Tag>
+            ))}
+          </Tags>
+        </ProfileWrap>
+      </ProfilesContainer>
       {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
-    </div>
+    </Wrap>
   );
 };
 

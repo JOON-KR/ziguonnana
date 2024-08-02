@@ -4,11 +4,11 @@ import BASE_URL from "../APIconfig";
 const accessToken = localStorage.getItem("accessToken");
 
 // 1. 프로필 등록
-export const createProfile = async ({ name, feature, profileImg }) => {
+export const createProfile = async ({ name, feature, profileImage }) => {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("feature", feature);
-  formData.append("profileImg", profileImg);
+  formData.append("profileImage", profileImage);
 
   try {
     const response = await axios.post(`${BASE_URL}/api/v1/profile`, formData, {
