@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,9 @@ const BlackBg = styled.div`
 `;
 
 const ModalWrap = styled.div`
+  background-image: url(${GoogleModal});
+  background-size: cover;
+  background-position: center;
   width: 721px;
   height: 610px;
   display: flex;
