@@ -9,6 +9,7 @@ import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import OpenViduComponent from "../../components/OpenViduComponent";
 import axiosInstance from "../../api/axiosInstance";
 
+
 const Wrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -76,82 +77,55 @@ const HeaderText = styled.h4`
 
 const ProfilePick = () => {
   const location = useLocation();
-  const { teamName, people, roomId, inviteCode, isJoin } = location.state || {};
+  const { teamName, people, roomId, isJoin } = location.state || {};
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [setRoomId] = useState(null);
+  const [token, setToken] = useState(null);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] = useState(false);
 
-  // 로컬 스토리지에서 토큰 가져오기
-  const localToken = localStorage.getItem('token');
-
-  // 로그인된 상태에서 프로필 데이터를 가져오는 useEffect
+  // 디버그용 로그
   useEffect(() => {
-    if (localToken) {
-      const fetchProfiles = async () => {
-        try {
-          const headers = {
-            "Content-type": "application/json",
-            "Authorization": `Bearer ${localToken}`
-          };
-          const res = await axiosInstance.get(`/api/v1/profile`, { headers });
-          setProfiles(res.data);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchProfiles();
-    } else {
-      setLoading(false);
-    }
-  }, [localToken]);
+    console.log('Location State:', location.state);
+    console.log('Team Name:', teamName);
+    console.log('People:', people);
+    console.log('Room ID:', roomId);
+    console.log('Is Join:', isJoin);
+  }, [location.state, teamName, people, roomId, isJoin]);
 
-  // WebSocket 연결을 통해 roomId 및 memberId 가져오기
+  // 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
-    const connectWebSocket = () => {
-      const ws = new WebSocket('https://i11b303.p.ssafy.io/ws');
-
-      ws.onopen = () => {
-        console.log('WebSocket Connected');
-        const message = {
-          type: isJoin ? 'JOIN' : 'CREATE',
-          roomId: roomId,
-          profile: { teamName, people }
-        };
-        const destination = isJoin ? `/app/game/${roomId}/join` : `/app/game/${roomId}/create`;
-        ws.send(JSON.stringify({ destination, message }));
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'ROOM_ID') {
-          setRoomId(data.roomId);
-        }
-        if (data.type === 'MEMBER_ID') {
-          console.log('Member ID:', data.memberId);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket Disconnected');
-      };
-
-      return () => {
-        ws.close();
-      };
+    const fetchProfiles = async () => {
+      try {
+        setProfiles([
+          { imgSrc: profileImage1, tags: ["활발한", "아저씨", "하트"] },
+          { imgSrc: profileImage2, tags: ["행복한", "소녀", "하트"] }
+        ]);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchProfiles();
+  }, []);
 
-    if (roomId) { 
-      connectWebSocket();
+  // 토큰을 가져오는 useEffect
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await axiosInstance.post(`/api/v1/room/${roomId}`, { groupCode: roomId }, { headers });
+        setToken(response.data.data.token);
+      } catch (error) {
+        console.error('토큰 가져오기 오류', error);
+      }
+    };
+    if (roomId) {
+      fetchToken();
     }
-  }, [roomId, inviteCode, isJoin]);
+  }, [roomId]);
 
   const pickProfile = () => {
     // 프로필 클릭 시, 프로필 선택되게 하는 로직
@@ -160,17 +134,6 @@ const ProfilePick = () => {
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
-
-  const myProfiles = [
-    {
-      imgSrc: profileImage1,
-      tags: ["활발한", "아저씨", "하트"],
-    },
-    {
-      imgSrc: profileImage2,
-      tags: ["행복한", "소녀", "하트"],
-    },
-  ];
 
   return (
     <div>
@@ -186,29 +149,16 @@ const ProfilePick = () => {
           사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
         </SubTitle>
         <ProfilesContainer>
-          {localToken && profiles.length > 0 ? (
-            profiles.map((profile, index) => (
-              <ProfileWrap key={index}>
-                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-                <Tags>
-                  {profile.tags.map((tag, idx) => (
-                    <Tag key={idx}>#{tag}</Tag>
-                  ))}
-                </Tags>
-              </ProfileWrap>
-            ))
-          ) : (
-            myProfiles.map((profile, index) => (
-              <ProfileWrap key={index}>
-                <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
-                <Tags>
-                  {profile.tags.map((tag, idx) => (
-                    <Tag key={idx}>#{tag}</Tag>
-                  ))}
-                </Tags>
-              </ProfileWrap>
-            ))
-          )}
+          {profiles.map((profile, index) => (
+            <ProfileWrap key={index}>
+              <Image src={profile.imgSrc} alt="Profile Image" onClick={pickProfile} />
+              <Tags>
+                {profile.tags.map((tag, idx) => (
+                  <Tag key={idx}>#{tag}</Tag>
+                ))}
+              </Tags>
+            </ProfileWrap>
+          ))}
           <ProfileWrap>
             <Image src={newProfileImage} alt="Profile Image" onClick={() => setIsProfileRegisterModalOpen(true)} />
             <Tags>
@@ -219,7 +169,7 @@ const ProfilePick = () => {
           </ProfileWrap>
         </ProfilesContainer>
       </Wrap>
-      {roomId && <OpenViduComponent roomId={roomId} />}
+      {token && roomId && <OpenViduComponent token={token} roomId={roomId} />}
     </div>
   );
 };

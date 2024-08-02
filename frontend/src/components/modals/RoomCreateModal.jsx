@@ -116,7 +116,8 @@ const RoomCreateModal = ({ onClose }) => {
       });
       console.log(response.data);
       const roomId = response.data.data.roomId;
-      navigate("/ProfilePick", { state: { teamName, people: selectedCapacity, roomId: roomId, isJoin: false } });
+      console.log('Room ID:', roomId);
+      navigate("/user/profilePick", { state: { teamName, people: selectedCapacity, roomId: roomId, isJoin: false } });
     } catch (error) {
       console.error('방 생성 오류', error);
     }

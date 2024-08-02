@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
-const OpenViduComponent = ({ roomId }) => {
+const OpenViduComponent = ({ token, roomId }) => {
   const [session, setSession] = useState(null);
   const [myUserName] = useState('Participant' + Math.floor(Math.random() * 100));
 
   useEffect(() => {
-    if (!roomId) {
-      console.error("Room ID가 제공되지 않았습니다.");
+    if (!token || !roomId) {
+      console.error("Token 또는 Room ID가 제공되지 않았습니다.");
       return;
     }
 
@@ -15,6 +15,7 @@ const OpenViduComponent = ({ roomId }) => {
     const session = OV.initSession();
     setSession(session);
 
+    console.log('Token:', token);
     console.log('Room ID:', roomId);
     console.log('UserName:', myUserName);
 
@@ -23,8 +24,7 @@ const OpenViduComponent = ({ roomId }) => {
       document.getElementById('video-container').appendChild(subscriber.video);
     });
 
-    // Room ID를 사용하여 OpenVidu 서버에 연결
-    session.connect(roomId, { clientData: myUserName })
+    session.connect(token, { clientData: myUserName })
       .then(() => {
         const publisher = OV.initPublisher(undefined);
         session.publish(publisher);
@@ -32,10 +32,11 @@ const OpenViduComponent = ({ roomId }) => {
       })
       .catch(error => {
         console.error('Connection error:', error);
+        console.error('Token:', token);
         console.error('Room ID:', roomId);
         console.error('UserName:', myUserName);
       });
-  }, [roomId, myUserName]);
+  }, [token, roomId, myUserName]);
 
   return <div id="video-container"></div>;
 };

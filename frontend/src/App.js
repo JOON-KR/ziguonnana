@@ -10,7 +10,6 @@ import Loading from "./pages/iceBreaking/Loading";
 import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
-import OpenViduComponent from "./components/OpenViduComponent";
 
 function App() {
   const navigate = useNavigate();
@@ -52,7 +51,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/gameRecord" element={<GameRecord />} />4
+        <Route path="/gameRecord" element={<GameRecord />} />
         {/* 유저 관련 페이지들 묶음 */}
         <Route path="/user/*" element={<UserPages />} />
         {/* 아이스브레이킹 입장 - 사람 6개 박아놓음. 하위 페이지는 /icebreaking/games/???와 같이 접근*/}
@@ -63,7 +62,6 @@ function App() {
           <Route path="intro" element={<Intro />} />
         </Route>
         <Route path="/create-room" element={<RoomCreateModal />} />
-        <Route path="/profilepick" element={<OpenViduComponent />} />
       </Routes>
       {/* <h1>웹소켓 테스트</h1>
       <div>
