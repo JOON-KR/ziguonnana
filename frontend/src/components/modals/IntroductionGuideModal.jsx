@@ -3,6 +3,7 @@ import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 
+// 배경 스타일 컴포넌트
 const BlackBg = styled.div`
   position: fixed;
   top: 0;
@@ -16,6 +17,7 @@ const BlackBg = styled.div`
   background: rgba(0, 0, 0, 0.6);
 `;
 
+// 모달 스타일 컴포넌트
 const ModalWrap = styled.div`
   background-image: url(${GoogleModal});
   background-size: cover;
@@ -31,6 +33,7 @@ const ModalWrap = styled.div`
   justify-content: center;
 `;
 
+// 제목 스타일 컴포넌트
 const Title = styled.h2`
   font-size: 36px;
   font-weight: bold;
@@ -38,6 +41,7 @@ const Title = styled.h2`
   color: #54595e;
 `;
 
+// 설명 텍스트 스타일 컴포넌트
 const Description = styled.p`
   font-size: 25px;
   color: #54595e;
@@ -45,6 +49,7 @@ const Description = styled.p`
   line-height: 1.5;
 `;
 
+// 버튼 랩퍼 스타일 컴포넌트
 const BtnWrap = styled.div`
   margin-top: 20px;
   display: flex;
@@ -53,10 +58,12 @@ const BtnWrap = styled.div`
   gap: 20px; /* 버튼 사이 간격 설정 */
 `;
 
+// 굵은 텍스트 스타일 컴포넌트
 const Bold = styled.span`
   font-weight: bold;
 `;
 
+// IntroductionGuideModal 컴포넌트 정의
 const IntroductionGuideModal = ({ onClose, onConfirm }) => {
   return (
     <BlackBg onClick={onClose}>
@@ -69,7 +76,7 @@ const IntroductionGuideModal = ({ onClose, onConfirm }) => {
         <Description>
           n 개의 질문이 <Bold>랜덤</Bold>으로 주어집니다<div></div> 주어진
           질문에 대해 <Bold>채팅</Bold>으로 답변해주세요. <div></div>
-          <Bold>20초</Bold>의 제한 시간이 주어집니다.
+          질문당<Bold>5초</Bold>의 제한 시간이 주어집니다.
         </Description>
         <BtnWrap>
           <AquaBtn text="YES!" BtnFn={onConfirm} />

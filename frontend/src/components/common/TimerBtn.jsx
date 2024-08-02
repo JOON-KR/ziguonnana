@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
+// 타이머 버튼 스타일 컴포넌트
 const TimerBtnWrapper = styled.button`
   width: 301px;
   height: 117px;
@@ -16,9 +17,11 @@ const TimerBtnWrapper = styled.button`
   cursor: pointer;
 `;
 
-const TimerBtn = ({ initialTime = 20, onTimerEnd }) => {
+// TimerBtn 컴포넌트 정의
+const TimerBtn = ({ initialTime = 5, onTimerEnd }) => {
   const [time, setTime] = useState(initialTime);
 
+  // 타이머 로직
   useEffect(() => {
     if (time <= 0) {
       if (onTimerEnd) onTimerEnd();
@@ -31,6 +34,7 @@ const TimerBtn = ({ initialTime = 20, onTimerEnd }) => {
     return () => clearInterval(timerId);
   }, [time, onTimerEnd]);
 
+  // 시간을 "MM:SS" 형식으로 포맷팅하는 함수
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -40,6 +44,7 @@ const TimerBtn = ({ initialTime = 20, onTimerEnd }) => {
     )}`;
   };
 
+  // 타이머 버튼 출력
   return <TimerBtnWrapper>{formatTime(time)}</TimerBtnWrapper>;
 };
 

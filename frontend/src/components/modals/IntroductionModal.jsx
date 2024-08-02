@@ -4,7 +4,7 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import TimerBtn from "../common/TimerBtn"; // 타이머 버튼 컴포넌트
 import AquaBtn from "../common/AquaBtn"; // 완료 버튼 컴포넌트
 
-// 배경 스타일
+// 배경 스타일 컴포넌트
 const BlackBg = styled.div`
   position: fixed;
   top: 0;
@@ -18,7 +18,7 @@ const BlackBg = styled.div`
   background: rgba(0, 0, 0, 0.6);
 `;
 
-// 모달 스타일
+// 모달 스타일 컴포넌트
 const ModalWrap = styled.div`
   background-image: url(${GoogleModal});
   background-size: cover;
@@ -34,7 +34,7 @@ const ModalWrap = styled.div`
   justify-content: center;
 `;
 
-// 제목 스타일
+// 제목 스타일 컴포넌트
 const Title = styled.h2`
   font-size: 30px;
   font-weight: bold;
@@ -42,7 +42,7 @@ const Title = styled.h2`
   color: #54595e;
 `;
 
-// 입력 필드 스타일
+// 입력 필드 스타일 컴포넌트
 const InputField = styled.input`
   width: 374px;
   height: 48px;
@@ -60,7 +60,7 @@ const InputField = styled.input`
   }
 `;
 
-// 버튼 랩퍼 스타일
+// 버튼 랩퍼 스타일 컴포넌트
 const BtnWrap = styled.div`
   display: flex;
   justify-content: center;
@@ -69,18 +69,22 @@ const BtnWrap = styled.div`
   margin-top: 20px;
 `;
 
+// 질문 리스트와 기본 답변 리스트
 const questionsList = [
   "당신과 가장 닮은 연예인의 이름은?",
   "자신만의 얼굴 특징은?",
   "자신이 닮은 동물은?",
   "지금 표정에 드러나는 내 기분은?",
+  "쿨톤인가요 웜톤인가요?",
 ];
 
-const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함"];
+const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함", "플랑크톤"];
 
+// IntroductionModal 컴포넌트 정의
 const IntroductionModal = ({ onClose, onConfirm }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // 현재 질문 인덱스 상태
-  const [answers, setAnswers] = useState(["", "", "", ""]); // 답변 상태
+  const [answers, setAnswers] = useState(Array(questionsList.length).fill("")); // 답변 상태
+  const [timerKey, setTimerKey] = useState(0); // 타이머를 재시작하기 위한 키 상태
 
   // currentQuestionIndex가 모든 질문을 초과하면 onConfirm을 호출하여 답변을 제출
   useEffect(() => {
@@ -105,6 +109,7 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
       setAnswers(newAnswers);
     }
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1); // 다음 질문으로 이동
+    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
   // 타이머 종료 시 호출되는 함수
@@ -113,6 +118,7 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
     newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex]; // 현재 질문에 대한 기본 답변을 설정
     setAnswers(newAnswers);
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1); // 다음 질문으로 이동
+    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
   // 엔터 키 누를 때 입력 처리
@@ -131,7 +137,11 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
       >
         <Title>{questionsList[currentQuestionIndex]}</Title>{" "}
         {/* 현재 질문 표시 */}
-        <TimerBtn initialTime={20} onTimerEnd={handleTimerEnd} />{" "}
+        <TimerBtn
+          key={timerKey}
+          initialTime={5}
+          onTimerEnd={handleTimerEnd}
+        />{" "}
         {/* 타이머 버튼 */}
         <InputField
           type="text"
