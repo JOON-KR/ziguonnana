@@ -91,9 +91,9 @@ const ProfilePick = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [gameProfile, setGameProfile] = useState(null);
 
-  //웹소켓 연결
+  //웹소켓 연결  
   useEffect(() => {
-    const socket = new SockJS(`wss://i11b303.p.ssafy.io/ws`);
+    const socket = new SockJS(`https://i11b303.p.ssafy.io/ws`);
     const client = Stomp.over(socket);
 
     client.connect({}, (frame) => {
