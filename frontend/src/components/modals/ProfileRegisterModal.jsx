@@ -142,28 +142,13 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     }
     const profileData = { profileImage, name, feature: hashTags.join(", ") };
 
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      try {
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("feature", hashTags.join(", "));
-        formData.append("profileImg", profileImage);
-        const response = await axios.post(`${BASE_URL}/api/v1/profile`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log("프로필 등록 성공:", response);
-        onRegisterProfile(response.data);
-      } catch (error) {
-        console.error("프로필 등록 실패:", error);
-      }
-    } else {
-      onRegisterProfile(profileData);
-    }
-  };
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("feature", hashTags.join(", "));
+    formData.append("profileImg", profileImage);
+    onRegisterProfile(profileData);
+  }
+
 
   return (
     <BlackBg onClick={onClose}>
