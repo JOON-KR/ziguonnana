@@ -170,7 +170,6 @@ const ProfilePick = () => {
     try {
       //const profile = await createProfile(profileData);
       const request = profileData;
-    try {
       const request = await createProfile(profileData);
       setGameProfile(request);
       setIsProfileRegisterModalOpen(false);
