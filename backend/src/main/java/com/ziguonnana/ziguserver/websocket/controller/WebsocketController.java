@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.ziguonnana.ziguserver.websocket.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
+import com.ziguonnana.ziguserver.websocket.dto.SessionInfo;
 import com.ziguonnana.ziguserver.websocket.service.WebsocketService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,16 +19,16 @@ public class WebsocketController {
 
     @MessageMapping("/game/{roomId}/create")
     @SendTo("topic/game/{roomId}")
-    public GameMessage<String> createRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
-        String memberId = websocketService.createRoom(profile,roomId);
-        return GameMessage.join(profile.getName(),memberId);
+    public GameMessage<SessionInfo> createRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
+        SessionInfo response = websocketService.createRoom(profile,roomId);
+        return GameMessage.info("방 생성 완료",response);
     }
     
     @MessageMapping("/game/{roomId}/join")
     @SendTo("/topic/game/{roomId}")
-    public GameMessage<String> joinRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
-        String memberId = websocketService.join(roomId,profile);
-        return GameMessage.join(profile.getName(),memberId);
+    public GameMessage<SessionInfo> joinRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
+        SessionInfo response = websocketService.join(roomId,profile);
+        return GameMessage.info("방 참가 완료",response);
     }
 
     @MessageMapping("/game/{roomId}/send")
