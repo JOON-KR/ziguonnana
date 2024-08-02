@@ -89,7 +89,7 @@ public class MemberService {
 	}
     public void logout( String accessToken) {
     	String email = getMember(TokenInfo.getMemberId()).get().getEmail();
-        long remainingTime = jwtUtil.getRemainingTime(accessToken);
+        long remainingTime = 86400000;
         redisService.addTokenToBlacklist(accessToken, remainingTime);
         redisService.deleteRefreshToken(email);
     }
