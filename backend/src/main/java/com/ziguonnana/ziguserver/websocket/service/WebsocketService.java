@@ -16,6 +16,7 @@ import com.ziguonnana.ziguserver.websocket.dto.Player;
 import com.ziguonnana.ziguserver.websocket.dto.Room;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
@@ -24,7 +25,7 @@ public class WebsocketService {
     private final ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, String> membersRoom = new ConcurrentHashMap<>();
 
-    public String createRoom(ProfileRequest request, String roomId) {
+    public String createRoom(GameProfile profile, String roomId) {
         List<Player> list = new ArrayList<>();
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
@@ -47,9 +48,8 @@ public class WebsocketService {
                 .orElseThrow(() -> new RoomNotFoundException("방을 찾을 수 없습니다.: " + roomId));
     }
 
-    public String join(String roomId, ProfileRequest request) {
+    public String join(String roomId, GameProfile profile) {
         String memberId = UUID.randomUUID().toString();
-        Profile profile = Profile.from(request);
         Player player = Player.builder()
                 .memberId(memberId)
                 .profile(profile)
