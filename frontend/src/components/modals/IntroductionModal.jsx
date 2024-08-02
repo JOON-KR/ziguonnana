@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import TimerBtn from "../common/TimerBtn"; // 타이머 버튼 컴포넌트
-import BlueBtn from "../common/BlueBtn"; // 완료 버튼 컴포넌트
+import AquaBtn from "../common/AquaBtn"; // 완료 버튼 컴포넌트
 
 // 배경 스타일
 const BlackBg = styled.div`
@@ -142,7 +142,7 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
         />{" "}
         {/* 입력 필드 */}
         <BtnWrap>
-          <BlueBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
+          <AquaBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
         </BtnWrap>
       </ModalWrap>
     </BlackBg>
