@@ -7,23 +7,24 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.ziguonnana.ziguserver.exception.ErrorCode;
+import com.ziguonnana.ziguserver.exception.PlayerException;
+import com.ziguonnana.ziguserver.websocket.dto.*;
 import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
-import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
-import com.ziguonnana.ziguserver.websocket.dto.GameProfileRequest;
-import com.ziguonnana.ziguserver.websocket.dto.Player;
-import com.ziguonnana.ziguserver.websocket.dto.Room;
-import com.ziguonnana.ziguserver.websocket.dto.SessionInfo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class WebsocketService {
+    // key : roomId, value : Room
     private final ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
+    // key : memberId, value : roomId
     private final ConcurrentMap<String, String> membersRoom = new ConcurrentHashMap<>();
 
     public SessionInfo createRoom( String roomId) {
@@ -46,12 +47,17 @@ public class WebsocketService {
                 .build();
         return info;
     }
-    
+
+    @Transactional
     public void createProfile(String roomId, GameProfileRequest request) {
         Room room = getRoom(roomId);
         Player player = getPlayer(roomId, request.getMemberId());
         GameProfile profile = GameProfile.from(request);
         player.createProfile(profile);
+        // 해당 룸의 player 정보 업데이트
+        room.getPlayers().put(request.getMemberId(), player);
+        // 룸 정보 업데이트
+        rooms.put(roomId, room);
     }
     
     public Room getRoom(String roomId) {
@@ -60,7 +66,7 @@ public class WebsocketService {
     }
     
     public Player getPlayer(String roomId, String memberId) {
-        return rooms.get(roomId).getPlayers().get(memberId);
+        return getRoom(roomId).getPlayers().get(memberId);
     }
     
     public SessionInfo join(String roomId, GameProfile profile) {
@@ -106,5 +112,19 @@ public class WebsocketService {
 
     public List<Room> getAllRooms() {
         return new ArrayList<>(rooms.values());
+    }
+    
+    @Transactional
+    public void getSelfIntroductionAnswer(String roomId, SelfIntroductionRequest request) {
+        Player player = getPlayer(roomId, request.getMemberId());
+        if(player == null) throw new PlayerException(ErrorCode.PLAYER_NOT_FOUND);
+        player.createAnswer(request.getAnswer());
+        Room room = getRoom(roomId);
+        // 해당 룸의 player 정보 업데이트
+        room.getPlayers().put(player.getMemberId(), player);
+        // 룸 정보 업데이트
+        rooms.put(roomId, room);
+        log.info("player 정보 업데이트 player : " + player.toString());
+        log.info("자기소개 답변 업데이트 room : " + rooms.toString());
     }
 }
