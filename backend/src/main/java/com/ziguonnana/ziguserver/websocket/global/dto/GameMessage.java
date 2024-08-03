@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.global.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

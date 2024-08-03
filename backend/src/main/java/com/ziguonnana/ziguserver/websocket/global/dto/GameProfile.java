@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.global.dto;
 
 import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
 

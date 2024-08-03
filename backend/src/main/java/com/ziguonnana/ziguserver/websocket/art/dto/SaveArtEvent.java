@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.art.dto;
 
 public class SaveArtEvent {
     private final String roomId;

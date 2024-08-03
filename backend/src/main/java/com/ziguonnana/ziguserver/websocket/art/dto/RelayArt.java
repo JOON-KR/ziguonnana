@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.art.dto;
 
 import lombok.Builder;
 import lombok.Data;

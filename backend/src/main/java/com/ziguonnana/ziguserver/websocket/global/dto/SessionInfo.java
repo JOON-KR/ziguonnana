@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.global.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,4 @@ public class SessionInfo {
 	private String memberId;
 	private String roomId;
 	private int num;
-	private boolean isFull;
-	
-	public void full() {
-		this.isFull = true;
-	}
 }

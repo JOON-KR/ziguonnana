@@ -1,8 +1,10 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.global.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
+
+import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +25,7 @@ public class Room {
 	private int cycle;
 	private int count;
 	private boolean isRelay;
+	private String roomId;
 	
 	
 	public void initArt() {
