@@ -3,6 +3,7 @@ import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import TimerBtn from "../common/TimerBtn"; // 타이머 버튼 컴포넌트
 import AquaBtn from "../common/AquaBtn"; // 완료 버튼 컴포넌트
+import { submitAnswers } from "../../api/game/submitAnswers";
 
 // 배경 스타일 컴포넌트
 const BlackBg = styled.div`
@@ -69,7 +70,7 @@ const BtnWrap = styled.div`
   margin-top: 20px;
 `;
 
-// 질문 리스트와 기본 답변 리스트
+// 질문 목록
 const questionsList = [
   "당신과 가장 닮은 연예인의 이름은?",
   "자신만의 얼굴 특징은?",
@@ -78,53 +79,63 @@ const questionsList = [
   "쿨톤인가요 웜톤인가요?",
 ];
 
+// 기본 답변 목록
 const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함", "플랑크톤"];
 
-// IntroductionModal 컴포넌트 정의
-const IntroductionModal = ({ onClose, onConfirm }) => {
+// IntroductionModal 컴포넌트
+const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // 현재 질문 인덱스 상태
-  const [answers, setAnswers] = useState(Array(questionsList.length).fill("")); // 답변 상태
-  const [timerKey, setTimerKey] = useState(0); // 타이머를 재시작하기 위한 키 상태
+  const [answers, setAnswers] = useState(Array(questionsList.length).fill("")); // 각 질문에 대한 답변 상태
+  const [timerKey, setTimerKey] = useState(0); // 타이머 재시작을 위한 키 상태
 
-  // currentQuestionIndex가 모든 질문을 초과하면 onConfirm을 호출하여 답변을 제출
+  // currentQuestionIndex가 모든 질문을 초과하면 서버에 답변 제출
   useEffect(() => {
     if (currentQuestionIndex >= questionsList.length) {
-      onConfirm(answers);
+      submitAnswersToServer();
     }
-  }, [currentQuestionIndex, answers, onConfirm]);
+  }, [currentQuestionIndex]);
 
-  // 입력 필드 값 변경 시 호출되는 함수
+  // 입력 필드 값이 변경될 때 호출되는 함수
   const handleQuestionChange = (e) => {
     const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = e.target.value; // 현재 질문의 답변을 업데이트
+    newAnswers[currentQuestionIndex] = e.target.value;
     setAnswers(newAnswers);
   };
 
-  // 입력 버튼 클릭 시 호출되는 함수
+  // "입력" 버튼 클릭 시 호출되는 함수
   const handleConfirm = () => {
     if (answers[currentQuestionIndex].trim() === "") {
-      // 현재 질문에 대한 답변이 비어있으면 기본 답변을 설정
       const newAnswers = [...answers];
       newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
       setAnswers(newAnswers);
     }
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1); // 다음 질문으로 이동
+    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
-  // 타이머 종료 시 호출되는 함수
+  // 타이머가 종료될 때 호출되는 함수
   const handleTimerEnd = () => {
     const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex]; // 현재 질문에 대한 기본 답변을 설정
+    newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
     setAnswers(newAnswers);
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1); // 다음 질문으로 이동
+    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
-  // 엔터 키 누를 때 입력 처리
+  // 엔터 키를 누를 때 호출되는 함수
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleConfirm();
+    }
+  };
+
+  // 답변을 서버에 제출하는 함수
+  const submitAnswersToServer = async () => {
+    try {
+      await submitAnswers({ roomId, memberId, answers });
+      onConfirm(answers); // 성공적으로 답변을 전송한 후 onConfirm 호출
+    } catch (error) {
+      console.error("Error submitting answers:", error);
     }
   };
 
@@ -135,22 +146,15 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
           e.stopPropagation(); // 클릭 이벤트가 부모로 전파되지 않도록 방지
         }}
       >
-        <Title>{questionsList[currentQuestionIndex]}</Title>{" "}
-        {/* 현재 질문 표시 */}
-        <TimerBtn
-          key={timerKey}
-          initialTime={5}
-          onTimerEnd={handleTimerEnd}
-        />{" "}
-        {/* 타이머 버튼 */}
+        <Title>{questionsList[currentQuestionIndex]}</Title> {/* 현재 질문 표시 */}
+        <TimerBtn key={timerKey} initialTime={5} onTimerEnd={handleTimerEnd} /> {/* 타이머 버튼 */}
         <InputField
           type="text"
           placeholder="답변을 입력해주세요."
           value={answers[currentQuestionIndex]}
           onChange={handleQuestionChange}
           onKeyPress={handleKeyPress} // 엔터 키 누를 때 처리
-        />{" "}
-        {/* 입력 필드 */}
+        />
         <BtnWrap>
           <AquaBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
         </BtnWrap>
