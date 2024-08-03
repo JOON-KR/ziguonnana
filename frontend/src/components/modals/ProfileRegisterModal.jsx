@@ -127,25 +127,20 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setProfileImageFile(file);
-      setProfileImage(URL.createObjectURL(file));
+      setProfileImageFile(e.target.files[0]);
+      setProfileImage(URL.createObjectURL(e.target.files[0]));
     }
   };
+
   const handleRegister = async () => {
     const hashTags = [hashTag1, hashTag2, hashTag3].filter((tag) => tag.trim() !== "");
     if (hashTags.length > 3) {
       alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
       return;
     }
-    const profileData = {
-      profileImageFile: profileImageFile || null, // 이미지 파일이 없을 경우 null
-      name,
-      feature: hashTags.join(", "),
-    };
+    const profileData = { profileImageFile, name, feature: hashTags.join(", ") };
     onRegisterProfile(profileData);
   };
-  
 
   return (
     <BlackBg onClick={onClose}>
