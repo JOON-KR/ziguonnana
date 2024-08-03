@@ -96,6 +96,7 @@ const BtnWrap = styled.div`
   gap: 20px; /* 버튼 사이 간격 설정 */
 `;
 
+//방 생성 모달
 const RoomCreateModal = ({ onClose }) => {
   const [teamName, setTeamName] = useState('');
   const [selectedCapacity, setSelectedCapacity] = useState(1);
@@ -105,6 +106,7 @@ const RoomCreateModal = ({ onClose }) => {
     setSelectedCapacity(capacity);
   };
 
+  //방 이름, 인원 수 정보 저장
   const handleCreateRoom = async () => {
     try {
       const response = await axiosInstance.post('/api/v1/room', {

@@ -78,6 +78,7 @@ const RoomJoinModal = ({ onClose }) => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
 
+  //초대코드 정보 저장
   const handleJoinRoom = async () => {
     try {
       const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {

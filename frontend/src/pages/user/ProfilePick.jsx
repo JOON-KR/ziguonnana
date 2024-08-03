@@ -153,6 +153,7 @@ const ProfilePick = () => {
     }
   }, []);
 
+  //프로필 고르기
   const pickProfile = (profile) => {
     setGameProfile(profile);
     if (stompClient && stompClient.connected) {
@@ -160,10 +161,12 @@ const ProfilePick = () => {
     }
   };
 
+  //모달 닫기
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
+  //프로필 등록하기 - 토큰 있는지 확인
   const handleRegisterProfile = async (profileData) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
