@@ -1,8 +1,9 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.answer.dto;
 
-import lombok.Getter;
 
 import java.util.List;
+
+import lombok.Getter;
 
 @Getter
 public class SelfIntroductionRequest {

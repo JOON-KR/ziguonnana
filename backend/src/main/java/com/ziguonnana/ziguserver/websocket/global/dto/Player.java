@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.dto;
+package com.ziguonnana.ziguserver.websocket.global.dto;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class Player {
 	private String nickName;
 	private String emotionImage;
 	private double[] vector;
-	
+	private int num;
 	public void createProfile(GameProfile profile) {
 		this.profile = profile;
 	}
