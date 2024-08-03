@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
-import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
-import ProfileNana from "../../assets/icons/ProfileNana.png"; // 기본 프로필 이미지
-import axios from "axios";
-import BASE_URL from "../../api/APIconfig";
+import GrayBtn from "../common/GrayBtn";
+import ProfileNana from "../../assets/icons/ProfileNana.png";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -121,92 +119,60 @@ const BtnWrap = styled.div`
 
 const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [profileImage, setProfileImage] = useState(ProfileNana);
-  const [name, setName] = useState(""); // 이름 입력 필드 추가
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [name, setName] = useState("");
   const [hashTag1, setHashTag1] = useState("");
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setProfileImage(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      setProfileImageFile(file);
+      setProfileImage(URL.createObjectURL(file));
     }
   };
-
   const handleRegister = async () => {
-    const hashTags = [hashTag1, hashTag2, hashTag3].filter(
-      (tag) => tag.trim() !== ""
-    );
+    const hashTags = [hashTag1, hashTag2, hashTag3].filter((tag) => tag.trim() !== "");
     if (hashTags.length > 3) {
       alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
       return;
     }
-    const profileData = { profileImage, name, feature: hashTags.join(", ") };
-
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("feature", hashTags.join(", "));
-    formData.append("profileImg", profileImage);
+    const profileData = {
+      profileImageFile: profileImageFile || null, // 이미지 파일이 없을 경우 null
+      name,
+      feature: hashTags.join(", "),
+    };
     onRegisterProfile(profileData);
-  }
-
+  };
+  
 
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>프로필에 등록할 정보를 입력하세요.</Title>
         <ProfileWrapper>
-          <ProfileImageWrapper
-            onClick={() => document.getElementById("imageInput").click()}
-          >
+          <ProfileImageWrapper onClick={() => document.getElementById("imageInput").click()}>
             <ProfileImage src={profileImage} alt="Profile" />
-            <ImageInput
-              id="imageInput"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <ImageInput id="imageInput" type="file" accept="image/*" onChange={handleImageChange} />
           </ProfileImageWrapper>
           <NameWrapper>
             <Label>이름</Label>
-            <InputField
-              type="text"
-              placeholder="이름을 입력해주세요."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <InputField type="text" placeholder="이름을 입력해주세요." value={name} onChange={(e) => setName(e.target.value)} />
           </NameWrapper>
         </ProfileWrapper>
         <HashTagWrapper>
           <LabelInputWrapper>
             <Label>해시태그1</Label>
-            <InputField
-              type="text"
-              placeholder="첫번째 해시태그를 입력해주세요."
-              value={hashTag1}
-              onChange={(e) => setHashTag1(e.target.value)}
-            />
+            <InputField type="text" placeholder="첫번째 해시태그를 입력해주세요." value={hashTag1} onChange={(e) => setHashTag1(e.target.value)} />
           </LabelInputWrapper>
           <LabelInputWrapper>
             <Label>해시태그2</Label>
-            <InputField
-              type="text"
-              placeholder="두번째 해시태그를 입력해주세요."
-              value={hashTag2}
-              onChange={(e) => setHashTag2(e.target.value)}
-            />
+            <InputField type="text" placeholder="두번째 해시태그를 입력해주세요." value={hashTag2} onChange={(e) => setHashTag2(e.target.value)} />
           </LabelInputWrapper>
           <LabelInputWrapper>
             <Label>해시태그3</Label>
-            <InputField
-              type="text"
-              placeholder="세번째 해시태그를 입력해주세요."
-              value={hashTag3}
-              onChange={(e) => setHashTag3(e.target.value)}
-            />
+            <InputField type="text" placeholder="세번째 해시태그를 입력해주세요." value={hashTag3} onChange={(e) => setHashTag3(e.target.value)} />
           </LabelInputWrapper>
         </HashTagWrapper>
         <BtnWrap>

@@ -175,7 +175,7 @@ const ProfilePick = () => {
           stompClient.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profile));
         }
       } catch (error) {
-        console.error("프로필 등록 실패:", error);
+        console.error("프로필 등록 실패:", error.response ? error.response.data : error.message);
       }
     } else {
       setGameProfile(profileData);
@@ -185,6 +185,7 @@ const ProfilePick = () => {
       }
     }
   };
+  
 
   return (
     <Wrap>
