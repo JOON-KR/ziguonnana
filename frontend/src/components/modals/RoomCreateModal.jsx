@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
-import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
+import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
-import OpenViduComponent from "../OpenViduComponent";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -63,7 +62,7 @@ const InputField = styled.input`
   box-sizing: border-box;
   margin-bottom: 20px;
   ::placeholder {
-    color: #acacac; /* placeholder 글씨 색상 설정 */
+    color: #acacac;
   }
 `;
 
@@ -93,12 +92,11 @@ const BtnWrap = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  gap: 20px; /* 버튼 사이 간격 설정 */
+  gap: 20px;
 `;
 
-//방 생성 모달
 const RoomCreateModal = ({ onClose }) => {
-  const [teamName, setTeamName] = useState('');
+  const [teamName, setTeamName] = useState("");
   const [selectedCapacity, setSelectedCapacity] = useState(1);
   const navigate = useNavigate();
 
@@ -106,18 +104,27 @@ const RoomCreateModal = ({ onClose }) => {
     setSelectedCapacity(capacity);
   };
 
-  //방 이름, 인원 수 정보 저장
   const handleCreateRoom = async () => {
     try {
-      const response = await axiosInstance.post('/api/v1/room', {
+      const response = await axiosInstance.post("/api/v1/room", {
         teamName: teamName,
-        people: selectedCapacity
+        people: selectedCapacity,
       });
       const roomId = response.data.data.roomId;
-      console.log('Room ID:', roomId);
-      navigate("/user/profilePick", { state: { teamName, people: selectedCapacity, roomId: roomId, isJoin: false } });
+      const token = localStorage.getItem("accessToken");
+
+      // 로그인 여부를 state에 포함시켜 navigate
+      navigate("/user/profilePick", {
+        state: {
+          teamName,
+          people: selectedCapacity,
+          roomId: roomId,
+          isJoin: false,
+          loggedIn: !!token,
+        },
+      });
     } catch (error) {
-      console.error('방 생성 오류', error);
+      console.error("방 생성 오류", error);
     }
   };
 
@@ -126,9 +133,9 @@ const RoomCreateModal = ({ onClose }) => {
       <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>이글루를 만들어주세요!</Title>
         <InputWrapper>
-          <InputField 
-            type="text" 
-            placeholder="이글루 이름을 입력해주세요." 
+          <InputField
+            type="text"
+            placeholder="이글루 이름을 입력해주세요."
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
           />
