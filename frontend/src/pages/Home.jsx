@@ -7,8 +7,11 @@ import SignUpModal from "../components/modals/SignUpModal";
 import RoomCreateModal from "../components/modals/RoomCreateModal";
 import RoomJoinModal from "../components/modals/RoomJoinModal";
 import { useNavigate } from "react-router-dom";
-import { login, logout } from "../api/login/loginAPI";
+import { login, logout, verifyToken } from "../api/login/loginAPI";
 import { signup } from "../api/signup/signupAPI"; // 회원가입 API 함수 import
+import { useDispatch, useSelector } from "react-redux";
+import { setLoggedIn, setLoggedOut } from "../store/authSlice";
+import { isAccessTokenExpired } from "../utils/auth";
 
 // Home 페이지 전체를 감싸는 스타일 컴포넌트
 const HomeWrap = styled.div`
@@ -108,9 +111,14 @@ const EarthIcon = styled.img`
 `;
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("accessToken")
-  );
+  // const [isLoggedIn, setIsLoggedIn] = useState(
+  //   !!localStorage.getItem("accessToken")
+  // );
+
+  //리덕스로 정의한 상태 가져옴
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const dispatch = useDispatch();
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isRoomCreateModalOpen, setIsRoomCreateModalOpen] = useState(false);
@@ -120,28 +128,42 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (email, password) => {
+    // try {
+    //   await login(email, password);
+    //   setIsLoggedIn(true);
+    //   setIsLoginModalOpen(false);
+    // } catch (e) {
+    //   setError("로그인 실패: " + e.message);
+    // }
     try {
-      await login(email, password);
-      setIsLoggedIn(true);
+      const { accessToken } = await login(email, password);
+      dispatch(setLoggedIn(accessToken));
       setIsLoginModalOpen(false);
     } catch (e) {
-      setError("로그인 실패: " + e.message);
+      setError("로그인 실패 : ", e.message);
     }
   };
 
   const handleLogout = async () => {
+    // try {
+    //   await logout();
+    //   setIsLoggedIn(false);
+    // } catch (e) {
+    //   setError("로그아웃 실패: " + e.message);
+    // }
     try {
       await logout();
-      setIsLoggedIn(false);
+      dispatch(setLoggedOut());
     } catch (e) {
-      setError("로그아웃 실패: " + e.message);
+      setError("로그아웃 실패 : ", e.message);
     }
   };
 
   const handleSignUp = async ({ email, name, password }) => {
     try {
       await signup({ email, name, password });
-      setIsLoggedIn(true);
+      const { accessToken } = await login(email, password);
+      dispatch(setLoggedIn(accessToken));
       setIsSignUpModalOpen(false);
     } catch (e) {
       setError("회원가입 실패: " + e.message);
@@ -164,13 +186,29 @@ const Home = () => {
     setIsRoomJoinModalOpen(false);
   };
 
+  // useEffect(() => {
+  //   const accessToken = localStorage.getItem("accessToken");
+  //   if (accessToken) {
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, []);
+
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+    const checkToken = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken && !isAccessTokenExpired(accessToken)) {
+        const isValid = await verifyToken(accessToken);
+        if (isValid) {
+          dispatch(setLoggedIn(accessToken));
+        } else {
+          localStorage.removeItem("accessToken");
+          dispatch(setLoggedOut());
+        }
+      }
+    };
+    checkToken();
   }, []);
 
   return (
