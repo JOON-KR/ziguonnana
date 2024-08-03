@@ -26,4 +26,8 @@ public class Player {
 	public void createProfile(GameProfile profile) {
 		this.profile = profile;
 	}
+
+	public void createAnswer(List<String> answer) {
+		this.answer = answer;
+	}
 }

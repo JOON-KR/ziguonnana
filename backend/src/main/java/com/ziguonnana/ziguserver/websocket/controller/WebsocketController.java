@@ -1,5 +1,7 @@
 package com.ziguonnana.ziguserver.websocket.controller;
 
+import com.ziguonnana.ziguserver.websocket.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Controller
+@Slf4j
 public class WebsocketController {
     private final WebsocketService websocketService;
     private final SaveArtPublisher saveArtPublisher;
@@ -52,5 +55,13 @@ public class WebsocketController {
     @SendTo("/topic/game/{roomId}")
     public GameMessage sendMessage(@DestinationVariable("roomId") String roomId, @Payload GameMessage message) {
         return message;
+    }
+
+    //   자기소개 문답 답변
+    @MessageMapping("/game/{roomId}/self-introduction")
+    public GameMessage<String> getAnswer(@DestinationVariable("roomId") String roomId, @Payload SelfIntroductionRequest request) {
+        log.info("=======자기소개 문답 답변 전송 시작=======");
+        websocketService.getSelfIntroductionAnswer(roomId, request);
+        return GameMessage.info("자기소개 문답 전송 완료", "");
     }
 }
