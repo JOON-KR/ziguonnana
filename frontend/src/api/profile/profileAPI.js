@@ -15,10 +15,7 @@ const getBase64 = (file) => {
 
 // 1. 프로필 등록
 export const createProfile = async ({ name, feature, profileImageFile }) => {
-  let base64Image = null;
-  if (profileImageFile) {
-    base64Image = await getBase64(profileImageFile);
-  }
+  const base64Image = profileImageFile ? await getBase64(profileImageFile) : null;
 
   const profileData = {
     name,
@@ -40,7 +37,6 @@ export const createProfile = async ({ name, feature, profileImageFile }) => {
     throw error;
   }
 };
-
 
 // 2. 프로필 불러오기
 export const getProfile = async (profileId) => {

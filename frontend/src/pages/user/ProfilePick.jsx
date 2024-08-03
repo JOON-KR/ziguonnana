@@ -185,7 +185,6 @@ const ProfilePick = () => {
       }
     }
   };
-  
 
   return (
     <Wrap>
@@ -204,7 +203,7 @@ const ProfilePick = () => {
           <ProfileWrap key={index}>
             <Image src={profile.profileImage || profileImage1} alt="Profile Image" onClick={() => pickProfile(profile)} />
             <Tags>
-              {profile.feature.split(', ').map((tag, idx) => (
+              {profile.feature.map((tag, idx) => (
                 <Tag key={idx}>#{tag}</Tag>
               ))}
             </Tags>
