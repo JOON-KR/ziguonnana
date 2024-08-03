@@ -80,24 +80,21 @@ const RoomJoinModal = ({ onClose }) => {
 
   const handleJoinRoom = async () => {
     try {
-        const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
-            groupCode: inviteCode,
-        });
-        navigate("/user/profilePick", {
-            state: { inviteCode, roomId: inviteCode, isJoin: true },
-        });
+      const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
+        groupCode: inviteCode,
+      });
+      const roomId = response.data.data.roomId;
+      navigate("/user/profilePick", {
+        state: { inviteCode, roomId: roomId, isJoin: true },
+      });
     } catch (e) {
-        console.error("방참여 오류", e);
+      console.error("방참여 오류", e);
     }
   };
 
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>이글루에 초대받으셨나요?</Title>
         <InputWrapper>
           <InputField

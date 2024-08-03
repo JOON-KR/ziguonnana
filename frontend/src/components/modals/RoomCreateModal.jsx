@@ -97,24 +97,20 @@ const BtnWrap = styled.div`
 `;
 
 const RoomCreateModal = ({ onClose }) => {
-  //팀이름, 인원수 상태 관리
   const [teamName, setTeamName] = useState('');
   const [selectedCapacity, setSelectedCapacity] = useState(1);
   const navigate = useNavigate();
 
-  //인원수 선택 처리
   const handleToggleClick = (capacity) => {
-    setSelectedCapacity(capacity); 
+    setSelectedCapacity(capacity);
   };
 
-  // 방 생성 API 호출
   const handleCreateRoom = async () => {
     try {
       const response = await axiosInstance.post('/api/v1/room', {
         teamName: teamName,
         people: selectedCapacity
       });
-      console.log(response.data);
       const roomId = response.data.data.roomId;
       console.log('Room ID:', roomId);
       navigate("/user/profilePick", { state: { teamName, people: selectedCapacity, roomId: roomId, isJoin: false } });
@@ -122,14 +118,10 @@ const RoomCreateModal = ({ onClose }) => {
       console.error('방 생성 오류', error);
     }
   };
-  
+
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>이글루를 만들어주세요!</Title>
         <InputWrapper>
           <InputField 
