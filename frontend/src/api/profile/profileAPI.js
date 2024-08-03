@@ -4,12 +4,12 @@ import BASE_URL from "../APIconfig";
 const accessToken = localStorage.getItem("accessToken");
 
 // 1. 프로필 등록
-export const createProfile = async ({ name, feature, profileImage }) => {
+export const createProfile = async ({ name, feature, profileImg }) => {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("feature", feature);
-  formData.append("profileImage", profileImage);
-  
+  formData.append("profileImg", profileImg);
+
   try {
     const response = await axios.post(`${BASE_URL}/api/v1/profile`, formData, {
       headers: {
@@ -18,7 +18,7 @@ export const createProfile = async ({ name, feature, profileImage }) => {
       },
     });
     console.log("프로필 등록 성공:", response);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("프로필 등록 실패:", error);
     throw error;
@@ -38,7 +38,7 @@ export const getProfile = async (profileId) => {
       }
     );
     console.log("프로필 불러오기 성공:", response);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("프로필 불러오기 실패:", error);
     throw error;
@@ -55,7 +55,7 @@ export const getProfileList = async () => {
       },
     });
     console.log("프로필 리스트 불러오기 성공:", response);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("프로필 리스트 불러오기 실패:", error);
     throw error;
@@ -75,7 +75,7 @@ export const deleteProfile = async (profileId) => {
       }
     );
     console.log("프로필 삭제 성공:", response);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("프로필 삭제 실패:", error);
     throw error;
