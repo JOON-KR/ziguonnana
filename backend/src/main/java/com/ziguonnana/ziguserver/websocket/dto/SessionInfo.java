@@ -10,4 +10,10 @@ import lombok.NoArgsConstructor;
 public class SessionInfo {
 	private String memberId;
 	private String roomId;
+	private int num;
+	private boolean isFull;
+	
+	public void full() {
+		this.isFull = true;
+	}
 }

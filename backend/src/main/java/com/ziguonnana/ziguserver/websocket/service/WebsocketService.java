@@ -1,7 +1,9 @@
 package com.ziguonnana.ziguserver.websocket.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +15,7 @@ import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.dto.GameProfile;
 import com.ziguonnana.ziguserver.websocket.dto.GameProfileRequest;
 import com.ziguonnana.ziguserver.websocket.dto.Player;
+import com.ziguonnana.ziguserver.websocket.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.dto.Room;
 import com.ziguonnana.ziguserver.websocket.dto.SessionInfo;
 
@@ -33,6 +36,7 @@ public class WebsocketService {
                 .memberId(memberId)
                 .role("admin")
                 .roomId(roomId)
+                .num(1)
                 .build();
         players.put(memberId, player);
         Room room = Room.builder()
@@ -43,6 +47,7 @@ public class WebsocketService {
         SessionInfo info = SessionInfo.builder()
                 .memberId(memberId)
                 .roomId(roomId)
+                .num(player.getNum())
                 .build();
         return info;
     }
@@ -65,18 +70,26 @@ public class WebsocketService {
     
     public SessionInfo join(String roomId, GameProfile profile) {
         String memberId = UUID.randomUUID().toString();
+        Room room = rooms.get(memberId);
+        
         Player player = Player.builder()
                 .memberId(memberId)
                 .profile(profile)
                 .role("user")
                 .roomId(roomId)
+                .num(room.getPlayers().size()+1)
                 .build();
         addPlayerToRoom(roomId, player);
         membersRoom.put(memberId, roomId);
         SessionInfo info = SessionInfo.builder()
                 .memberId(memberId)
                 .roomId(roomId)
+                .num(player.getNum())
                 .build();
+        if(room.getPlayers().size() == room.getPeople()) {
+        	info.full();
+        	room.initArt();
+        }
         return info;
     }
 
@@ -90,7 +103,43 @@ public class WebsocketService {
             throw new RoomNotFoundException("방이 가득 찼습니다.: " + roomId);
         }
     }
-
+    
+    // 그린 그림 저장
+    //로컬에 저장된 num 과 그림을 RelayArt로 싸서 보내주기만 하면 됨
+    public void relay(String roomId,RelayArt art){
+    	Room room = rooms.get(roomId);
+    	int cycle = room.getCycle();
+    	int people = room.getPeople();
+    	// key : 그릴 대상의 번호, value : 그림들
+    	ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+    	// 그린 대상의 번호
+    	int num = art.getNum()+cycle+1;
+    	if(cycle == 0) {
+    		List<RelayArt> list = new ArrayList<>();
+    		list.add(art);
+    		map.put((num)%(people+1), list);
+    	}else {
+    		map.get((num)%(people+1)).add(art);
+    	}
+    }
+    
+    // 그림 전파
+    // response map key : 플레이어 번호, value :  이어서 그려야 할 그림
+    public Map<Integer,RelayArt> artResponse(String roomId){
+    	Room room = rooms.get(roomId);
+    	int cycle = room.getCycle();
+    	int people = room.getPeople();
+    	ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+    	Map<Integer,RelayArt>tmp= new HashMap<>();
+    	for(int i=1;i<=people;i++) {
+    		// i 대상의 그림
+    		List<RelayArt> art = map.get((i+cycle+1)%(people+1));
+    		tmp.put(i, art.get(art.size()-1));
+    	}
+    	return tmp;
+    }
+    
+    
     public void handleDisconnect(String memberId) {
         String roomId = Optional.ofNullable(membersRoom.remove(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("Member not found in any room: " + memberId));
