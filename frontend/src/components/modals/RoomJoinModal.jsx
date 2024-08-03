@@ -78,15 +78,17 @@ const RoomJoinModal = ({ onClose }) => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
 
-  //초대코드 정보 저장
   const handleJoinRoom = async () => {
     try {
       const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
         groupCode: inviteCode,
       });
       const roomId = response.data.data.roomId;
+      const token = localStorage.getItem("accessToken");
+
+      // 로그인 여부를 state에 포함시켜 navigate
       navigate("/user/profilePick", {
-        state: { inviteCode, roomId: roomId, isJoin: true },
+        state: { inviteCode, roomId: roomId, isJoin: true, loggedIn: !!token },
       });
     } catch (e) {
       console.error("방참여 오류", e);
