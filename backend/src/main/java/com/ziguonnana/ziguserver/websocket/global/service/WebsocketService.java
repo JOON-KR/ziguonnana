@@ -37,7 +37,7 @@ public class WebsocketService {
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
                 .memberId(memberId)
-                .role("admi.")
+                .role("admin")
                 .roomId(roomId)
                 .num(1)
                 .build();
@@ -59,6 +59,7 @@ public class WebsocketService {
                 .roomId(roomId)
                 .num(player.getNum())
                 .build();
+        log.info("방 생성 :: roomId : {}, room : {}, player : {}" , roomId, room.toString(), player.toString() );
         return info;
     }
 
@@ -75,6 +76,7 @@ public class WebsocketService {
         if (room.getCount() == room.getPeople()) {
             startGame(room);
         }
+        log.info("프로필 생성 :: roomId : {}, player : {}, profile : {}" , roomId, room.toString(), profile.toString());
     }
 
     public Room getRoom(String roomId) {
@@ -99,6 +101,7 @@ public class WebsocketService {
                 .build();
         addPlayerToRoom(roomId, player);
         roomRepository.addMemberToRoom(memberId, roomId);
+        log.info("방 참가 :: roomId : {}, player : {}, profile : {}" , roomId, room.toString(), profile.toString());
     }
 
     public void startGame(Room room) {

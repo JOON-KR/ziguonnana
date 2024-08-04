@@ -50,6 +50,7 @@ public class ArtService {
                 endRelay(roomId);
             }
         }
+        log.info("그림 저장 :: roomId : {}, art : {} " , roomId, art.toString());
     }
     //그림 및 키워드 전파
     public Map<Integer, RelayArt> artResponse(String roomId) {
@@ -76,6 +77,7 @@ public class ArtService {
                 tmp.put(i, relayArt);
             }
         }
+        log.info("그림 전파 :: roomId : {}, art : {} " , roomId, tmp.toString());
         return tmp;
     }
     private String selectRandomKeyword(Room room) {
@@ -109,6 +111,7 @@ public class ArtService {
         String nextStepMessage = "이어그리기 결과 확인";
         boolean endArt = true;
         messagingTemplate.convertAndSend("/topic/game/" + roomId, endArt);
+        log.info("그림 그리기 결과 :: roomId : {}, art : {} " , roomId, artResult);
     }
 
 
