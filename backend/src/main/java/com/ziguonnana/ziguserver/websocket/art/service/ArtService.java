@@ -4,18 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
-import com.ziguonnana.ziguserver.websocket.global.service.WebsocketService;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -53,21 +51,51 @@ public class ArtService {
             }
         }
     }
-
-    // 그림 전파
+    //그림 및 키워드 전파
     public Map<Integer, RelayArt> artResponse(String roomId) {
         Room room = roomRepository.getRoom(roomId);
         int cycle = room.getCycle();
         int people = room.getPeople();
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
         Map<Integer, RelayArt> tmp = new HashMap<>();
+        Random random = new Random();
+
         for (int i = 1; i <= people; i++) {
-            List<RelayArt> art = map.get((i + cycle) % people);
-            tmp.put(i, art.get(art.size() - 1));
+            List<RelayArt> artList = map.get((i + cycle) % people);
+
+            if (artList != null && !artList.isEmpty()) {
+                RelayArt originalArt = artList.get(artList.size() - 1);
+
+                // 원본 객체 깊은 복사 및 키워드 설정
+                RelayArt relayArt = RelayArt.builder()
+                        .num(originalArt.getNum())
+                        .keyword(selectRandomKeyword(room))
+                        .art(originalArt.getArt())
+                        .build();
+
+                tmp.put(i, relayArt);
+            }
         }
         return tmp;
     }
+    private String selectRandomKeyword(Room room) {
+        List<String> combinedList = new ArrayList<>();
+        ConcurrentMap<Integer, Player> players = room.getPlayers();
 
+        for (Player player : players.values()) {
+            String[] feature = player.getProfile().getFeature();
+            List<String> answer = player.getAnswer();
+            for (String f : feature) combinedList.add(f);
+            combinedList.addAll(answer);
+        }
+
+        if (!combinedList.isEmpty()) {
+            Random random = new Random();
+            return combinedList.get(random.nextInt(combinedList.size()));
+        }
+
+        return "차은우"; // 비어있을 경우 
+    }
     private void endRelay(String roomId) {
         Room room = roomRepository.getRoom(roomId);
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();

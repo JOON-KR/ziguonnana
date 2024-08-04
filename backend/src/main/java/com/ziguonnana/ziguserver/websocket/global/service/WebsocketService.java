@@ -1,10 +1,9 @@
 package com.ziguonnana.ziguserver.websocket.global.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
-import com.ziguonnana.ziguserver.websocket.global.dto.ChatMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
@@ -35,7 +33,7 @@ public class WebsocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public SessionInfo createRoom(String roomId, CreateRequest request) {
-        ConcurrentHashMap<String, Player> players = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
                 .memberId(memberId)
@@ -43,7 +41,7 @@ public class WebsocketService {
                 .roomId(roomId)
                 .num(1)
                 .build();
-        players.put(memberId, player);
+        players.put(1, player);
         Room room = Room.builder()
                 .players(players)
                 .people(request.getPeople())
@@ -103,20 +101,52 @@ public class WebsocketService {
         roomRepository.addMemberToRoom(memberId, roomId);
     }
 
-    private void startGame(Room room) {
+    public void startGame(Room room) {
         room.initArt();
         // 게임 시작 알림을 클라이언트에 보냅니다.
+        List<RelayArt>keywordList = getKeyword(room);
         
+        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keywordList);
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
+    }
+    
+    public List<RelayArt> getKeyword(Room room) {
+        int people = room.getPeople();
+        ConcurrentMap<Integer, Player> players = room.getPlayers();
+        List<RelayArt> relayArts = new ArrayList<>();
+        Random random = new Random();
+
+        for (int i = 1; i <= people; i++) {
+            Player player = players.get(i);
+            List<String> combinedList = new ArrayList<>();
+            
+            // feature와 answer 리스트를 결합
+            String[] feature = player.getProfile().getFeature();
+            List<String> answer = player.getAnswer();
+            for (String f : feature) combinedList.add(f);
+            combinedList.addAll(answer);
+
+            // 랜덤하게 값을 선택
+            if (!combinedList.isEmpty()) {
+                String randomKeyword = combinedList.get(random.nextInt(combinedList.size()));
+                RelayArt relayArt = RelayArt.builder()
+                		.num(i)
+                		.keyword(randomKeyword)
+                		.build();
+                relayArts.add(relayArt);
+            }
+        }
+
+        return relayArts;
     }
 
     public void addPlayerToRoom(String roomId, Player player) {
         Room room = getRoom(roomId);
 
         if (room.getPlayers().size() < room.getPeople()) {
-            room.getPlayers().put(player.getMemberId(), player);
+            room.getPlayers().put(player.getNum(), player);
         } else {
             throw new RoomNotFoundException("방이 가득 찼습니다.: " + roomId);
         }

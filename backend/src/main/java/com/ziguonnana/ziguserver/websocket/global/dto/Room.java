@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-	private ConcurrentMap<String,Player> players;
+	private ConcurrentMap<Integer,Player> players;
 	private int people;
 	private int status;
 	private int pose;

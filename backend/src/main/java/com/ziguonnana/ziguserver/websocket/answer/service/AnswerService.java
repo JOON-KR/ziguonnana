@@ -33,7 +33,7 @@ public class AnswerService {
 	        if(player == null) throw new PlayerException(ErrorCode.PLAYER_NOT_FOUND);
 	        player.createAnswer(request.getAnswer());
 	        // 해당 룸의 player 정보 업데이트
-	        room.getPlayers().put(player.getMemberId(), player);
+	        room.getPlayers().put(player.getNum(), player);
 	        // 룸 정보 업데이트
 	        ConcurrentMap<String, Room> rooms= roomRepository.getAllRooms();
 	        rooms.put(roomId, room);
