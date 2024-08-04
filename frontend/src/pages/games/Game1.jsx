@@ -18,6 +18,7 @@ const Wrap = styled.div`
 `;
 
 // 자기소개 문답 페이지
+// & 이어그리기 <- 만들어야함
 const Game1 = ({ roomId }) => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionGuideModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
@@ -66,7 +67,7 @@ const Game1 = ({ roomId }) => {
     };
   }, [roomId]);
 
-  // IntroductionGuideModal 열기
+  // IntroductionGuideModal 닫고 IntroductionModal 열기
   const openIntroModal = () => {
     setIsIntroGuideModalOpen(false);
     setIsIntroModalOpen(true);
@@ -77,8 +78,8 @@ const Game1 = ({ roomId }) => {
     setIsIntroGuideModalOpen(false);
   };
 
-  // IntroductionModal 닫기
-  const closeIntroModal = () => {
+  // IntroductionModal 닫고 DrawingModal 열기
+  const openDrawingModal = () => {
     setIsIntroModalOpen(false);
     setIsDrawingModalOpen(true); // IntroductionModal 닫을 때 DrawingModal 열기
   };
@@ -93,7 +94,7 @@ const Game1 = ({ roomId }) => {
       )}
       {isIntroModalOpen && memberId && ( // memberId가 설정된 후 모달 열기
         <IntroductionModal
-          onClose={closeIntroModal}
+          onClose={openDrawingModal}
           onConfirm={() => setIsDrawingModalOpen(true)} // IntroductionModal에서 DrawingModal 열기
           roomId={roomId}
           memberId={memberId}

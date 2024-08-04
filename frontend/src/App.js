@@ -1,4 +1,5 @@
-// App.js
+import React from "react";
+
 import { Route, Routes } from "react-router-dom";
 import "./styles/App.css";
 import Home from "./pages/Home";
@@ -10,80 +11,31 @@ import Loading from "./pages/iceBreaking/Loading";
 import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
-import PrivateRoute from "./components/PrivateRoute";
+import { WebSocketProvider } from "./context/WebSocketContext";
+import { AppProvider } from "./context/AppContext"; // 추가된 부분
 
 function App() {
   return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/mypage"
-          element={
-            <PrivateRoute>
-              <MyPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/gameRecord"
-          element={
-            <PrivateRoute>
-              <GameRecord />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/user/*"
-          element={
-            <PrivateRoute>
-              <UserPages />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/icebreaking"
-          element={
-            <PrivateRoute>
-              <IceBreaking />
-            </PrivateRoute>
-          }
-        >
-          <Route
-            path="/icebreaking/games/*"
-            element={
-              <PrivateRoute>
-                <GamePages />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path=""
-            element={
-              <PrivateRoute>
-                <Loading />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="intro"
-            element={
-              <PrivateRoute>
-                <Intro />
-              </PrivateRoute>
-            }
-          />
-        </Route>
-        <Route
-          path="/create-room"
-          element={
-            <PrivateRoute>
-              <RoomCreateModal />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </div>
+    <AppProvider>
+      {/* AppProvider로 전체를 감싸줍니다. */}
+      <WebSocketProvider>
+        {/* WebSocketProvider도 함께 사용합니다. */}
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/gameRecord" element={<GameRecord />} />
+            <Route path="/user/*" element={<UserPages />} />
+            <Route path="/icebreaking" element={<IceBreaking />}>
+              <Route path="/icebreaking/games/*" element={<GamePages />} />
+              <Route path="" element={<Loading />} />
+              <Route path="intro" element={<Intro />} />
+            </Route>
+            <Route path="/create-room" element={<RoomCreateModal />} />
+          </Routes>
+        </div>
+      </WebSocketProvider>
+    </AppProvider>
   );
 }
 

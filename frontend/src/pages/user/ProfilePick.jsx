@@ -129,6 +129,7 @@ const ProfilePick = () => {
   // 프로필을 선택하여 소켓으로 전송하는 함수
   const pickProfile = (profile) => {
     setGameProfile(profile);
+    console.log(profile, roomId);
     if (stompClient && stompClient.connected) {
       stompClient.send(
         `/app/game/${roomId}/profile`,

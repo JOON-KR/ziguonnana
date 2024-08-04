@@ -11,7 +11,7 @@ export const signup = async ({ email, name, password }) => {
       { email, name, password },
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          // Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       }

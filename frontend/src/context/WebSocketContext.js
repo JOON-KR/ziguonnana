@@ -35,7 +35,7 @@ export const WebSocketProvider = ({ children }) => {
         });
 
         // 세션 정보를 받아오기 위한 구독 설정
-        client.subscribe(`/user/queue/session`, (message) => {
+        client.subscribe(`topic/game/${roomId}`, (message) => {
           const sessionInfo = JSON.parse(message.body);
           localStorage.setItem("memberId", sessionInfo.memberId);
           console.log("세션 정보 수신:", sessionInfo);

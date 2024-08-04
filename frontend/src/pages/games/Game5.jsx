@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
 import earth from "../../assets/icons/earth.png";
@@ -13,23 +14,55 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
+// 숏폼 챌린지 페이지 (ShortForm)
 const Game5 = () => {
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isShortFormWelcomeModalOpen, setIsShortFormWelcomeModalOpen] = useState(true);
+  const [isShortFormGuideModalOpen, setIsShortFormGuideModalOpen] = useState(false);
+
+  // isShortFormWelcomeModalOpen 닫고 isShortFormGuideModalOpen 열기
+  const openisShortFormGuideModalOpen = () => {
+    setIsShortFormWelcomeModalOpen(false);
+    setIsShortFormGuideModalOpen(true);
+  }
+
+  // 가이드 2개 만들기 : 댄스 / 팀소개
+  const closeShortFormGuideModal = () => {
+    setIsShortFormGuideModalOpen(false);
+  }
 
   return (
     <Wrap>
-      {isModalOpen && (
+      {isShortFormWelcomeModalOpen && (
         <GameInfoModal
           planetImg={earth}
-          RedBtnText={"게임 시작"}
-          RedBtnFn={""}
-          BlueBtnText={"게임 설명"}
-          BlueBtnFn={""}
-          modalText={"게임3임~~~"}
-          onClose={() => setIsModalOpen(false)}
+          planetWidth='180px'
+          RedBtnText={"댄스 챌린지"}
+          RedBtnFn={openisShortFormGuideModalOpen}
+          BlueBtnText={"팀 소개 챌린지"}
+          BlueBtnFn={openisShortFormGuideModalOpen}
+          modalText={(
+            <>
+              숏폼 챌린지에 오신걸 환영합니다 !
+            </>
+          )}
+          onClose={() => setIsShortFormWelcomeModalOpen(false)}
         />
       )}
-      Game5
+      {isShortFormGuideModalOpen && (
+        <GameModal
+          exImg={''}
+          RedBtnText={"챌린지 시작"}
+          RedBtnFn={closeShortFormGuideModal}
+          modalText={(
+            <>
+              숏폼 챌린지 설명 <br />
+            </>
+          )}          
+          onClose={() => setIsShortFormGuideModalOpen(false)}
+        />
+      )}
+
+      숏폼 챌린지 화면
       {/* <Link to={"/icebreaking/games/gameRecord"}>게임 기록</Link> */}
     </Wrap>
   );

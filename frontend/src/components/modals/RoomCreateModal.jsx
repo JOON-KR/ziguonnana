@@ -110,7 +110,9 @@ const RoomCreateModal = ({ onClose }) => {
         teamName: teamName,
         people: selectedCapacity,
       });
-      const roomId = response.data.data.roomId;
+      console.log("roomId:", response.data);
+      localStorage.setItem("roomId", response.data.roomId);
+      const roomId = response.data.roomId;
       const token = localStorage.getItem("accessToken");
 
       // 로그인 여부를 state에 포함시켜 navigate
