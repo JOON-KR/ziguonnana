@@ -15,6 +15,7 @@ import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
+import com.ziguonnana.ziguserver.websocket.global.service.WebsocketService;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ArtService {
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
     // 그림 저장
     public void save(String roomId, RelayArt art) {
-        Room room = getRoom(roomId);
+        Room room = roomRepository.getRoom(roomId);
         int cycle = room.getCycle();
         int people = room.getPeople();
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
@@ -56,7 +56,7 @@ public class ArtService {
 
     // 그림 전파
     public Map<Integer, RelayArt> artResponse(String roomId) {
-        Room room = getRoom(roomId);
+        Room room = roomRepository.getRoom(roomId);
         int cycle = room.getCycle();
         int people = room.getPeople();
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
@@ -69,7 +69,7 @@ public class ArtService {
     }
 
     private void endRelay(String roomId) {
-        Room room = getRoom(roomId);
+        Room room = roomRepository.getRoom(roomId);
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
         
         // 결과 전송
@@ -83,16 +83,5 @@ public class ArtService {
         messagingTemplate.convertAndSend("/topic/game/" + roomId, endArt);
     }
 
-    public Room getRoom(String roomId) {
-        return Optional.ofNullable(roomRepository.getRoom(roomId))
-                .orElseThrow(() -> new RoomNotFoundException("방을 찾을 수 없습니다.: " + roomId));
-    }
 
-    public Player getPlayer(String roomId, String memberId) {
-        return getRoom(roomId).getPlayers().get(memberId);
-    }
-
-    public List<Room> getAllRooms() {
-        return new ArrayList<>(roomRepository.getAllRooms().values());
-    }
 }

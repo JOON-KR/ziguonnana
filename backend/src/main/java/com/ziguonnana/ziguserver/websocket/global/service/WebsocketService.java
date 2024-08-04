@@ -39,7 +39,7 @@ public class WebsocketService {
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
                 .memberId(memberId)
-                .role("admin")
+                .role("admi.")
                 .roomId(roomId)
                 .num(1)
                 .build();
