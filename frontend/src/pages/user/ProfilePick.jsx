@@ -4,9 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
-import OpenViduComponent from "../../components/OpenViduComponent";
 import { getProfileList, createProfile } from "../../api/profile/profileAPI";
-import { useWebSocket } from "../../context/WebSocketContext";
 import BASE_URL from "../../api/APIconfig";
 
 // 전체 래퍼 스타일 설정
@@ -91,24 +89,7 @@ const ProfilePick = () => {
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
     useState(false);
   const [gameProfile, setGameProfile] = useState(null);
-  const { connectWebSocket, stompClient } = useWebSocket();
   const hasMountedRef = useRef(false); // 마운트 상태를 추적하는 Ref
-
-  // 웹소켓 연결 설정
-  useEffect(() => {
-    if (hasMountedRef.current) return; // 이미 마운트되었으면 재실행 방지
-    hasMountedRef.current = true; // 첫 마운트 시 설정
-
-    connectWebSocket(roomId);
-
-    return () => {
-      if (stompClient) {
-        stompClient.disconnect(() => {
-          console.log("웹소켓 연결 종료"); // 웹소켓 연결 종료 메시지
-        });
-      }
-    };
-  }, [connectWebSocket, roomId, stompClient]);
 
   // 로그인 유저의 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
@@ -127,19 +108,6 @@ const ProfilePick = () => {
   }, [loggedIn]);
 
   // 프로필을 선택하여 소켓으로 전송하는 함수
-  const pickProfile = (profile) => {
-    setGameProfile(profile);
-    console.log(profile, roomId);
-    if (stompClient && stompClient.connected) {
-      stompClient.send(
-        `/app/game/${roomId}/profile`,
-        {},
-        JSON.stringify({ ...profile, roomId })
-      );
-      console.log("프로필 정보 전송:", profile); // 프로필 정보 전송 메시지
-    }
-    navigate("/icebreaking", { state: { roomId } });
-  };
 
   // 모달 닫기 함수
   const closeProfileRegisterModal = () => {
@@ -147,39 +115,6 @@ const ProfilePick = () => {
   };
 
   // 프로필 등록 핸들러
-  const handleRegisterProfile = async (profileData) => {
-    if (loggedIn) {
-      try {
-        const profile = await createProfile(profileData);
-        setProfiles((prevProfiles) => [...prevProfiles, profile]); // 프로필 리스트 업데이트
-        setGameProfile(profile);
-        setIsProfileRegisterModalOpen(false);
-        if (stompClient && stompClient.connected) {
-          stompClient.send(
-            `/app/game/${roomId}/profile`,
-            {},
-            JSON.stringify({ ...profile, roomId })
-          );
-          console.log("프로필 정보 전송:", profile); // 프로필 정보 전송 메시지
-        }
-      } catch (error) {
-        console.error("프로필 등록 실패:", error); // 프로필 등록 실패 메시지
-      }
-    } else {
-      setGameProfile(profileData);
-      setProfiles((prevProfiles) => [...prevProfiles, profileData]); // 프로필 리스트 업데이트
-      setIsProfileRegisterModalOpen(false);
-      if (stompClient && stompClient.connected) {
-        stompClient.send(
-          `/app/game/${roomId}/profile`,
-          {},
-          JSON.stringify({ ...profileData, roomId })
-        );
-        console.log("프로필 정보 전송:", profileData); // 프로필 정보 전송 메시지
-      }
-      navigate("/icebreaking", { state: { roomId } });
-    }
-  };
 
   return (
     <Wrap>
@@ -187,7 +122,7 @@ const ProfilePick = () => {
       {isProfileRegisterModalOpen && (
         <ProfileRegisterModal
           onClose={closeProfileRegisterModal} // 모달 닫기 함수
-          onRegisterProfile={handleRegisterProfile} // 프로필 등록 핸들러
+          onRegisterProfile={""} // 프로필 등록 핸들러
         />
       )}
 
@@ -211,7 +146,7 @@ const ProfilePick = () => {
               <Image
                 src={profile.profileImage || profileImage1} // 프로필 이미지
                 alt="Profile Image"
-                onClick={() => pickProfile(profile)} // 프로필 선택 핸들러
+                onClick={() => {}} // 프로필 선택 핸들러
               />
               <Tags>
                 {/* 프로필에 포함된 해시태그를 렌더링합니다. */}
@@ -239,12 +174,12 @@ const ProfilePick = () => {
       </ProfilesContainer>
 
       {/* OpenViduComponent 컴포넌트는 로그인된 유저와 roomId가 있을 때만 렌더링합니다. */}
-      {loggedIn && roomId && (
+      {/* {loggedIn && roomId && (
         <OpenViduComponent
           token={localStorage.getItem("accessToken")} // 액세스 토큰을 전달
           roomId={roomId} // 방 ID를 전달
         />
-      )}
+      )} */}
     </Wrap>
   );
 };
