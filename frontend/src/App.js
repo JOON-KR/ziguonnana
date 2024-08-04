@@ -17,15 +17,71 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<Home />} />
-        <PrivateRoute path="/mypage" element={<MyPage />} />
-        <PrivateRoute path="/gameRecord" element={<GameRecord />} />
-        <PrivateRoute path="/user/*" element={<UserPages />} />
-        <PrivateRoute path="/icebreaking" element={<IceBreaking />}>
-          <PrivateRoute path="/icebreaking/games/*" element={<GamePages />} />
-          <PrivateRoute path="" element={<Loading />} />
-          <PrivateRoute path="intro" element={<Intro />} />
-        </PrivateRoute>
-        <PrivateRoute path="/create-room" element={<RoomCreateModal />} />
+        <Route
+          path="/mypage"
+          element={
+            <PrivateRoute>
+              <MyPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/gameRecord"
+          element={
+            <PrivateRoute>
+              <GameRecord />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/user/*"
+          element={
+            <PrivateRoute>
+              <UserPages />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/icebreaking"
+          element={
+            <PrivateRoute>
+              <IceBreaking />
+            </PrivateRoute>
+          }
+        >
+          <Route
+            path="/icebreaking/games/*"
+            element={
+              <PrivateRoute>
+                <GamePages />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path=""
+            element={
+              <PrivateRoute>
+                <Loading />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="intro"
+            element={
+              <PrivateRoute>
+                <Intro />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+        <Route
+          path="/create-room"
+          element={
+            <PrivateRoute>
+              <RoomCreateModal />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </div>
   );
