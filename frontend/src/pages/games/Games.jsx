@@ -53,7 +53,7 @@ const Games = () => {
         src={blue}
         style={{ left: "50px", bottom: "90px" }}
       />
-      <PlanetName style={{ left: "77px", bottom: "75px" }}>아바타</PlanetName>
+      <PlanetName style={{ left: "83px", bottom: "75px" }}>아바타</PlanetName>
       {/* 몸으로 말해요 행성 */}
       <Planet
         onClick={() => {
@@ -62,7 +62,7 @@ const Games = () => {
         src={orange}
         style={{ left: "200px", top: "20px" }}
       />
-      <PlanetName style={{ left: "195px", top: "0px" }}>몸으로 말해요</PlanetName>
+      <PlanetName style={{ left: "200px", top: "0px" }}>몸으로 말해요</PlanetName>
       {/* 이구동성 행성 */}
       <Planet
         onClick={() => {
