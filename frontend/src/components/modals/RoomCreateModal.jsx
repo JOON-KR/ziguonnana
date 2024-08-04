@@ -111,6 +111,7 @@ const RoomCreateModal = ({ onClose }) => {
         people: selectedCapacity,
       });
       console.log("roomId:", response.data);
+      localStorage.setItem("roomId", response.data.roomId);
       const roomId = response.data.roomId;
       const token = localStorage.getItem("accessToken");
 
