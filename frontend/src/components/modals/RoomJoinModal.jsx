@@ -83,9 +83,12 @@ const RoomJoinModal = ({ onClose }) => {
       const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
         groupCode: inviteCode,
       });
-      const token = response.data.data.token;
-      navigate("/user/ProfilePick", {
-        state: { inviteCode, token, sessionId: inviteCode, isJoin: true },
+      const roomId = response.data.data.roomId;
+      const token = localStorage.getItem("accessToken");
+
+      // 로그인 여부를 state에 포함시켜 navigate
+      navigate("/user/profilePick", {
+        state: { inviteCode, roomId: roomId, isJoin: true, loggedIn: !!token },
       });
     } catch (e) {
       console.error("방참여 오류", e);
@@ -94,11 +97,7 @@ const RoomJoinModal = ({ onClose }) => {
 
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>이글루에 초대받으셨나요?</Title>
         <InputWrapper>
           <InputField

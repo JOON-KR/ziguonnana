@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
-import GrayBtn from "../common/GrayBtn"; // 이미 존재하는 GrayBtn 컴포넌트를 불러옴
-import ProfileNana from "../../assets/icons/ProfileNana.png"; // 기본 프로필 이미지
-import axios from "axios";
-import BASE_URL from "../../api/APIconfig";
+import GrayBtn from "../common/GrayBtn";
+import ProfileNana from "../../assets/icons/ProfileNana.png";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -121,17 +119,21 @@ const BtnWrap = styled.div`
 
 const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [profileImage, setProfileImage] = useState(ProfileNana);
-  const [name, setName] = useState(""); // 이름 입력 필드 추가
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [name, setName] = useState("");
   const [hashTag1, setHashTag1] = useState("");
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
 
+  // 이미지 변경 핸들러
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
+      setProfileImageFile(e.target.files[0]);
       setProfileImage(URL.createObjectURL(e.target.files[0]));
     }
   };
 
+  // 프로필 등록 핸들러
   const handleRegister = async () => {
     const hashTags = [hashTag1, hashTag2, hashTag3].filter(
       (tag) => tag.trim() !== ""
@@ -140,23 +142,17 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
       alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
       return;
     }
-    const profileData = { profileImage, name, feature: hashTags.join(", ") };
-
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("feature", hashTags.join(", "));
-    formData.append("profileImg", profileImage);
+    const profileData = {
+      profileImageFile,
+      name,
+      feature: hashTags.join(", "),
+    };
     onRegisterProfile(profileData);
-  }
-
+  };
 
   return (
     <BlackBg onClick={onClose}>
-      <ModalWrap
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>프로필에 등록할 정보를 입력하세요.</Title>
         <ProfileWrapper>
           <ProfileImageWrapper

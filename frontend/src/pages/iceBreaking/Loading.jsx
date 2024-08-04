@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import VideoBox from "../../components/layout/VideoBox";
+import { useNavigate, useLocation } from "react-router-dom";
 import Loader from "../../components/common/Loader";
 
 const PageWrap = styled.div`
@@ -32,21 +32,23 @@ const Content = styled.div`
 `;
 
 const Loading = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { roomId } = location.state || {};
+
+  //이 부분 수정 필요
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate("/icebreaking/games", { state: { roomId } });
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [navigate, roomId]);
+
   return (
     <PageWrap>
-      {/* <Frame>
-          <VideoBox />
-          <VideoBox />
-          <VideoBox />
-        </Frame> */}
       <Content>
         <Loader currentNum={4} MaxNum={6} />
       </Content>
-      {/* <Frame>
-          <VideoBox />
-          <VideoBox />
-          <VideoBox />
-        </Frame> */}
     </PageWrap>
   );
 };

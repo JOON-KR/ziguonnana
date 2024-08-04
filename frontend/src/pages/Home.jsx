@@ -108,7 +108,9 @@ const EarthIcon = styled.img`
 `;
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("accessToken")
+  );
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isRoomCreateModalOpen, setIsRoomCreateModalOpen] = useState(false);
@@ -163,8 +165,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
