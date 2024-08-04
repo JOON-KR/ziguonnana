@@ -34,35 +34,30 @@ const ModalWrap = styled.div`
   padding-top: 40px;
 `;
 
-const Planet = styled.img`
+const ExImage = styled.img`
   width: 170px;
   height: 148px;
-  /* margin-bottom: 20px; */
   display: block;
 `;
 
 const GameInfo = styled.h2`
-  font-size: 28px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  font-size: 27px;
   line-height: 150%;
+  margin: 20px 30px;
 `;
 
 const BtnWrap = styled.div`
-  margin-top: 70px;
+  margin-top: 20px;
   display: flex;
   gap: 51px;
 `;
 
-const GameInfoModal = ({
+const GameModal = ({
   onClose,
   modalText,
-  planetImg,
   RedBtnText,
-  BlueBtnText,
   RedBtnFn,
-  BlueBtnFn,
-  planetWidth,
+  exImg,
 }) => {
   return (
     <BlackBg onClick={onClose}>
@@ -71,15 +66,14 @@ const GameInfoModal = ({
           e.stopPropagation();
         }}
       >
-        <Planet src={planetImg} style={{width: planetWidth}} />
+        {exImg && <ExImage src={exImg} />}
         <GameInfo>{modalText}</GameInfo>
         <BtnWrap>
           <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />
-          <BlueBtn text={BlueBtnText} BtnFn={BlueBtnFn} />
         </BtnWrap>
       </ModalWrap>
     </BlackBg>
   );
 };
 
-export default GameInfoModal;
+export default GameModal;

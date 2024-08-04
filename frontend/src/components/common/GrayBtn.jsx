@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const BtnGrey = styled.button`
   background-color: #d4d7d9;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
   color: #54595e;
   width: 163px;
