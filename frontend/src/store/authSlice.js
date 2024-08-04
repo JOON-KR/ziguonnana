@@ -5,7 +5,10 @@ export const authSlice = createSlice({
   name: "auth",
   initialState: {
     isLoggedIn: false,
-    accessToken: null,
+    userNo: 0,
+    memberId: 0,
+
+    // accessToken: null,
   },
 
   //state 수정 함수들, 리턴값으로 상태 변수 설정
@@ -17,6 +20,12 @@ export const authSlice = createSlice({
     setLoggedOut: (state, action) => {
       state.isLoggedIn = false;
       state.accessToken = null;
+    },
+    setUserNo: (state, action) => {
+      state.userNo = action.payload;
+    },
+    setMemberId: (state, action) => {
+      state.memberId = action.payload;
     },
   },
 });

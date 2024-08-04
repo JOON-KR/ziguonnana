@@ -8,28 +8,40 @@ const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]); // Base64 데이터만 추출
+    reader.onload = () => resolve(reader.result.split(",")[1]); // Base64 데이터만 추출
     reader.onerror = (error) => reject(error);
   });
 };
 
 // 1. 프로필 등록
 export const createProfile = async ({ name, feature, profileImageFile }) => {
-  const base64Image = profileImageFile ? await getBase64(profileImageFile) : null;
+  const base64Image = profileImageFile
+    ? await getBase64(profileImageFile)
+    : null;
 
   const profileData = {
     name,
-    feature: feature.split(', ').map(tag => tag.trim()), // 해시태그를 배열로 변환
+    feature: feature.split(", ").map((tag) => tag.trim()), // 해시태그를 배열로 변환
     profileImage: base64Image,
   };
 
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  //토큰 있을 때만 넣기
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
   try {
-    const response = await axios.post(`${BASE_URL}/api/v1/profile`, profileData, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.post(
+      `${BASE_URL}/api/v1/profile`,
+      profileData,
+      {
+        headers,
+      }
+    );
     console.log("프로필 등록 성공:", response);
     return response.data.data;
   } catch (error) {

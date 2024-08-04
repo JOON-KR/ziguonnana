@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { setRoomId, setTeamCode } from "../../store/roomSlice";
+import authSlice from "../../store/authSlice";
+import BASE_URL from "../../api/APIconfig";
+import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { setStompClient } from "../../store/clientSlice";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -98,31 +106,74 @@ const BtnWrap = styled.div`
 const RoomCreateModal = ({ onClose }) => {
   const [teamName, setTeamName] = useState("");
   const [selectedCapacity, setSelectedCapacity] = useState(1);
+
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = localStorage.getItem("accessToken");
 
   const handleToggleClick = (capacity) => {
     setSelectedCapacity(capacity);
   };
 
+  useEffect(() => {
+    console.log("로그인 상태 : ", isLoggedIn);
+    console.log("토큰 : ", token);
+  }, [isLoggedIn, token]);
+
   const handleCreateRoom = async () => {
     try {
+      //오픈비두 엔드포인트 보내서 연결
       const response = await axiosInstance.post("/api/v1/room", {
         teamName: teamName,
         people: selectedCapacity,
       });
-      console.log("roomId:", response.data);
-      localStorage.setItem("roomId", response.data.roomId);
-      const roomId = response.data.roomId;
-      const token = localStorage.getItem("accessToken");
 
-      // 로그인 여부를 state에 포함시켜 navigate
+      const roomId = response.data.data.roomId;
+      const teamCode = response.data.data.teamCode;
+
+      console.log("roomID : ", roomId);
+      console.log("teamCode : ", teamCode);
+
+      dispatch(setRoomId(roomId));
+      dispatch(setTeamCode(teamCode));
+
+      const socket = new SockJS(`${BASE_URL}/ws`);
+      const stompClient = new Client({
+        webSocketFactory: () => socket,
+        reconnectDelay: 5000,
+        debug: (str) => {
+          console.log(str);
+        },
+      });
+
+      //서버 연결
+      stompClient.onConnect = () => {
+        const serverUrl = socket._transport.url;
+        console.log("서버 연결됨 : ", serverUrl);
+
+        //roomId를 소켓 엔드포인트로 연결하면서 보냄
+        stompClient.subscribe(`/game/${roomId}/create`, (message) => {
+          console.log(`/game/${roomId}/create 에서 온 메세지 : `, message.body);
+        });
+
+        // 방 입장
+        // stompClient.publish({
+        //   destination: `/app/game/${roomId}/join`,
+        //   body: JSON.stringify({ message: "Join Request" }),
+        // });
+      };
+
+      stompClient.activate();
+
+      dispatch(setStompClient(stompClient));
+
       navigate("/user/profilePick", {
         state: {
           teamName,
           people: selectedCapacity,
-          roomId: roomId,
           isJoin: false,
-          loggedIn: !!token,
+          from: "createModal",
         },
       });
     } catch (error) {
