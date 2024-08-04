@@ -1,3 +1,4 @@
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import "./styles/App.css";
 import Home from "./pages/Home";
@@ -9,23 +10,26 @@ import Loading from "./pages/iceBreaking/Loading";
 import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
+import { WebSocketProvider } from "./context/WebSocketContext";
 
 function App() {
   return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/gameRecord" element={<GameRecord />} />
-        <Route path="/user/*" element={<UserPages />} />
-        <Route path="/icebreaking" element={<IceBreaking />}>
-          <Route path="/icebreaking/games/*" element={<GamePages />} />
-          <Route path="" element={<Loading />} />
-          <Route path="intro" element={<Intro />} />
-        </Route>
-        <Route path="/create-room" element={<RoomCreateModal />} />
-      </Routes>
-    </div>
+    <WebSocketProvider>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/gameRecord" element={<GameRecord />} />
+          <Route path="/user/*" element={<UserPages />} />
+          <Route path="/icebreaking" element={<IceBreaking />}>
+            <Route path="/icebreaking/games/*" element={<GamePages />} />
+            <Route path="" element={<Loading />} />
+            <Route path="intro" element={<Intro />} />
+          </Route>
+          <Route path="/create-room" element={<RoomCreateModal />} />
+        </Routes>
+      </div>
+    </WebSocketProvider>
   );
 }
 
