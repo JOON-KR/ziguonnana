@@ -20,7 +20,7 @@ text-align: center;
 `;
 
 const Header = styled.div`
-  width: 100%;
+  width: 90%;
   padding: 10px;
   background-color: #f0f0f0;
   display: flex;
@@ -38,8 +38,8 @@ const HeaderText = styled.h1`
 
 const CanvasWrapper = styled.div`
   position: relative;
-  width: 100%;
-  height: 700px;
+  width: 90%;
+  height: 600px;
   border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
@@ -309,7 +309,7 @@ const Game1 = ({ roomId }) => {
           </Header>
           <CanvasWrapper>
             <CanvasDraw
-              canvasWidth={1000}
+              canvasWidth={900}
               canvasHeight={600}
               brushColor={isEraser ? "#FFFFFF" : brushColor}
               brushRadius={brushRadius}
@@ -348,3 +348,4 @@ const Game1 = ({ roomId }) => {
 };
 
 export default Game1;
+// 살려
