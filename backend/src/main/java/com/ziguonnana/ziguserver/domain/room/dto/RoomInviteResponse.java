@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoomInviteResponse {
-    private String teamCode;
-    private String roomId;
+    private String roomId; //openvidu session ID
 }

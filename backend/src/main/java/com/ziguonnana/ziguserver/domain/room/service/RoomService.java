@@ -1,5 +1,6 @@
 package com.ziguonnana.ziguserver.domain.room.service;
 
+import com.google.gson.JsonObject;
 import com.ziguonnana.ziguserver.domain.room.dto.RoomRequest;
 import com.ziguonnana.ziguserver.domain.room.dto.RoomInviteResponse;
 import com.ziguonnana.ziguserver.domain.room.dto.RoomResponse;
@@ -32,25 +33,31 @@ public class RoomService {
 
 
     public RoomInviteResponse createRoom(RoomRequest roomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
-        // 10자 내외 회의 초대 코드 생성 - UUID
-        String teamCode = "uuid";
-        // 세션 속성 지정
-        Map<String, String> params = new HashMap<>();
-        params.put("uuid", teamCode);
+        Map<String, Object> params = new HashMap<>();
+        params.put("people", roomRequest.getPeople());
+        params.put("teamName", roomRequest.getTeamName());
         SessionProperties properties = SessionProperties.fromJson(params).build();
 
         // 세션 생성
         Session session = openvidu.createSession(properties);
         log.info("session id(roomId)" + session.getSessionId());
-        return new RoomInviteResponse(teamCode, session.getSessionId());
+        log.info("session properties(roomId)" + session.getProperties());
+        return new RoomInviteResponse(session.getSessionId());
     }
 
     public RoomResponse connectRoom(String roomId) throws OpenViduJavaClientException, OpenViduHttpException {
         Session session = openvidu.getActiveSession(roomId);
         if(session == null) throw new OpenviduException(ErrorCode.SESSION_NOT_FOUND);
         // 방장이 설정한 인원수가 connection이 많으면 예외처리
+        SessionProperties sessionProperties = session.getProperties();
+        JsonObject properties = sessionProperties.toJson();
+        int people = properties.get("people").getAsInt();
+        if(session.getActiveConnections().size() == people){
+            throw new OpenviduException(ErrorCode.ROOM_PEOPLE_LIMIT);
+        }
         Connection connection = session.createConnection();
-        log.info("roomId : " + connection.getToken());
+        log.info("connection count : " + session.getActiveConnections().size());
+        log.info("openviduToken : " + connection.getToken());
         return new RoomResponse(connection.getToken());
     }
 }
