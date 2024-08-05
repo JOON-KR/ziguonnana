@@ -7,7 +7,10 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
-import authSlice from "../../store/authSlice";
+import authSlice, {
+  setMemberId,
+  setOpenViduToken,
+} from "../../store/authSlice";
 import SockJS from "sockjs-client";
 import BASE_URL from "../../api/APIconfig";
 import { setStompClient } from "../../store/clientSlice";
@@ -86,45 +89,7 @@ const RoomJoinModal = ({ onClose }) => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const [stClient, setStClient] = useState(null);
   const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    //소켓 생성
-    const socket = new SockJS(`${BASE_URL}/ws`);
-    console.log("Socket created");
-
-    const client = Stomp.over(socket);
-
-    client.connect(
-      {},
-      (frame) => {
-        console.log("웹소켓 서버와 연결됨!", frame);
-
-        setStClient(client);
-        dispatch(setStompClient(client));
-
-        // 각 memberId에 대한 구독
-        // client.subscribe(
-        //   `/topic/game/${inviteCode}/${sessionInfo.memberId}`,
-        //   (message) => {
-        //     const parsedMessage = JSON.parse(message.body);
-        //     console.log("개별 구독 받은 메시지:", parsedMessage);
-        //     // 응답 메시지에서 num 저장
-        //     if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-        //       setSessionInfo((prevSessionInfo) => ({
-        //         ...prevSessionInfo,
-        //         num: parsedMessage.data.num,
-        //       }));
-        //     }
-        //   }
-        // );
-      },
-      (error) => {
-        console.error("STOMP error:", error);
-      }
-    );
-  }, []);
 
   const handleJoinRoom = async () => {
     try {
@@ -132,10 +97,69 @@ const RoomJoinModal = ({ onClose }) => {
         groupCode: inviteCode,
       });
 
-      console.log("오픈비두 엔드포인트 연결 : ", response);
+      console.log("오픈비두 방 참가 응답 : ", response.data.data);
 
+      dispatch(setMemberId(response.data.data.memberId));
+      dispatch(setOpenViduToken(response.data.data.openviduToken));
       dispatch(setRoomId(inviteCode));
+      console.log("memberID : ", response.data.data.memberId);
+      console.log("viduToken : ", response.data.data.openviduToken);
       console.log("Invite Code:", inviteCode);
+
+      //소켓 방생성
+      const socket = new SockJS(`${BASE_URL}/ws`);
+      const client = Stomp.over(socket);
+      client.connect(
+        {},
+        (frame) => {
+          console.log("웹소켓 서버와 연결됨!", frame);
+
+          // 각 memberId에 대한 구독
+          client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("개별 구독 받은 메시지:", parsedMessage);
+
+            dispatch(setUserNo(parsedMessage.data.num));
+            console.log(parsedMessage.data.num);
+            // 응답 메시지에서 num 저장
+            if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+              setSessionInfo((prevSessionInfo) => ({
+                ...prevSessionInfo,
+                num: parsedMessage.data.num,
+              }));
+            }
+          });
+
+          // 방에 대한 구독
+          client.subscribe(`/topic/game/${roomId}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("방에서 받은 메시지:", parsedMessage);
+            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+          });
+
+          //방소켓  생성 요청
+          if (client && client.connected) {
+            console.log("소켓 방 입장 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            client.send(
+              `/app/game/${roomId}/join`,
+              {},
+              JSON.stringify({
+                teamName,
+                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
+                memberId, // memberId 포함
+              })
+            );
+          }
+
+          setStClient(client);
+        },
+        (error) => {
+          console.error("STOMP error:", error);
+        }
+      );
 
       //roomId를 소켓 엔드포인트로 연결하면서 보냄
       // stClient.subscribe(`/game/${inviteCode}/join`, (message) => {

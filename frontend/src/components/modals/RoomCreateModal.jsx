@@ -10,6 +10,7 @@ import { setMaxNo, setRoomId, setTeamCode } from "../../store/roomSlice";
 import authSlice, {
   setMemberId,
   setOpenViduToken,
+  setUserNo,
 } from "../../store/authSlice";
 import BASE_URL from "../../api/APIconfig";
 import axios from "axios";
@@ -111,6 +112,7 @@ const RoomCreateModal = ({ onClose }) => {
   const [selectedCapacity, setSelectedCapacity] = useState(1);
   const [stClient, setStClient] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [sessionInfo, setSessionInfo] = useState({});
 
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
@@ -136,11 +138,8 @@ const RoomCreateModal = ({ onClose }) => {
       console.log("오픈비두 엔드포인트 응답 :", response.data.data);
 
       const roomId = response.data.data.roomId;
-      // const teamCode = response.data.data.teamCode;
       console.log("roomID : ", roomId);
-      // console.log("teamCode : ", teamCode);/
       dispatch(setRoomId(roomId));
-      // dispatch(setTeamCode(teamCode));
 
       //오픈비두 방입장
       const enterResponse = await axiosInstance.post(`/api/v1/room/${roomId}`);
@@ -149,6 +148,7 @@ const RoomCreateModal = ({ onClose }) => {
       const viduToken = enterResponse.data.data.openviduToken;
       const memberId = enterResponse.data.data.memberId;
 
+      //전역상태 저장
       dispatch(setOpenViduToken(viduToken));
       dispatch(setMemberId(memberId));
 
@@ -161,20 +161,20 @@ const RoomCreateModal = ({ onClose }) => {
           console.log("웹소켓 서버와 연결됨!", frame);
 
           // 각 memberId에 대한 구독
-          // client.subscribe(
-          //   `/topic/game/${roomId}/${sessionInfo.memberId}`,
-          //   (message) => {
-          //     const parsedMessage = JSON.parse(message.body);
-          //     console.log("개별 구독 받은 메시지:", parsedMessage);
-          //     // 응답 메시지에서 num 저장
-          //     if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-          //       setSessionInfo((prevSessionInfo) => ({
-          //         ...prevSessionInfo,
-          //         num: parsedMessage.data.num,
-          //       }));
-          //     }
-          //   }
-          // );
+          client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("개별 구독 받은 메시지:", parsedMessage);
+
+            dispatch(setUserNo(parsedMessage.data.num));
+            console.log(parsedMessage.data.num);
+            // 응답 메시지에서 num 저장
+            if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+              setSessionInfo((prevSessionInfo) => ({
+                ...prevSessionInfo,
+                num: parsedMessage.data.num,
+              }));
+            }
+          });
 
           // 방에 대한 구독
           client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -183,16 +183,19 @@ const RoomCreateModal = ({ onClose }) => {
             setMessages((prevMessages) => [...prevMessages, parsedMessage]);
           });
 
-          //방 생성 요청
+          //방소켓  생성 요청
           if (client && client.connected) {
-            console.log("방 생성 요청:", { teamName: profile.name, people: 2 });
+            console.log("소켓 방 생성 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
             client.send(
               `/app/game/${roomId}/create`,
               {},
               JSON.stringify({
-                teamName: profile.name,
-                people: 2, // 임의로 설정, 필요에 따라 변경
-                memberId: sessionInfo.memberId, // memberId 포함
+                teamName,
+                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
+                memberId, // memberId 포함
               })
             );
           }
