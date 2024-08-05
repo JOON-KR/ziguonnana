@@ -125,39 +125,68 @@ const RoomJoinModal = ({ onClose }) => {
         (frame) => {
           console.log("웹소켓 서버와 연결됨!", frame);
 
-          // 방에 대한 구독
-          if (client && client.connected) {
-            client.subscribe(`/topic/game/${inviteCode}`, (message) => {
-              const parsedMessage = JSON.parse(message.body);
-              console.log("방에서 받은 메시지:", parsedMessage);
-              setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-            });
+          async function executeSequence() {
+            if (client.connected) {
+              await new Promise((resolve, reject) => {
+                client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+                  const parsedMessage = JSON.parse(message.body);
+                  console.log("방에서 받은 메시지:", parsedMessage);
+                  setMessages((prevMessages) => [
+                    ...prevMessages,
+                    parsedMessage,
+                  ]);
+                  resolve();
+                });
+              });
+
+              // 각 memberId에 대한 구독
+              console.log(response.data.data.memberId);
+
+              await new Promise((resolve, reject) => {
+                client.subscribe(
+                  `/topic/game/${inviteCode}/${response.data.data.memberId}`,
+                  (message) => {
+                    const parsedMessage = JSON.parse(message.body);
+                    console.log("개별 구독 받은 메시지:", parsedMessage);
+                    // 응답 메시지에서 num 저장
+                    if (
+                      parsedMessage.data &&
+                      parsedMessage.data.num !== undefined
+                    ) {
+                      dispatch(setUserNo(parsedMessage.data.num));
+                      setSessionInfo((prevSessionInfo) => ({
+                        ...prevSessionInfo,
+                        num: parsedMessage.data.num,
+                      }));
+                    }
+                    resolve();
+                  }
+                );
+              });
+
+              // 방 참가 요청 - 방 생성이 완료된 이후에나 시도해야 응답받음
+              console.log("방 참가 요청:");
+              await new Promise((resolve, reject) => {
+                client.send(
+                  `/app/game/${inviteCode}/${response.data.data.memberId}/join`,
+                  {},
+                  (response) => {
+                    resolve();
+                  }
+                );
+              });
+            }
           }
 
-          // 각 memberId에 대한 구독
-          console.log(response.data.data.memberId); //
-          client.subscribe(
-            `/topic/game/${inviteCode}/${response.data.data.memberId}`,
-            (message) => {
-              const parsedMessage = JSON.parse(message.body);
-              console.log("개별 구독 받은 메시지:", parsedMessage);
-              // 응답 메시지에서 num 저장
-              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-                dispatch(setUserNo(parsedMessage.data.num));
-                setSessionInfo((prevSessionInfo) => ({
-                  ...prevSessionInfo,
-                  num: parsedMessage.data.num,
-                }));
-              }
-            }
-          );
-
-          //방 참가 요청 - 방 생성이 완료된 이후에나 시도해야 응답받음
-          console.log("방 참가 요청:");
-          client.send(
-            `/app/game/${inviteCode}/${response.data.data.memberId}/join`
-          );
-
+          // 실행
+          executeSequence()
+            .then(() => {
+              console.log("모든 작업이 순차적으로 완료되었습니다.");
+            })
+            .catch((error) => {
+              console.error("작업 중 오류 발생:", error);
+            });
+          //==========================================================================
           // //roomId를 소켓 엔드포인트로 연결하면서 보냄
           // stClient.subscribe(`/game/${inviteCode}/join`, (message) => {
           //   console.log(
