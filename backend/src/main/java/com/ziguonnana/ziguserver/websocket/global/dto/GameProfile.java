@@ -1,6 +1,6 @@
 package com.ziguonnana.ziguserver.websocket.global.dto;
 
-import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GameProfile {
     private String name;
-    private String[] feature;
+    private List<String> feature;
     private String profileImage;
     
     public static GameProfile from(GameProfileRequest req) {
