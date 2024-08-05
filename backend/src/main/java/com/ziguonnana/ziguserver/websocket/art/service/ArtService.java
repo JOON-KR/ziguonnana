@@ -85,7 +85,7 @@ public class ArtService {
         ConcurrentMap<Integer, Player> players = room.getPlayers();
 
         for (Player player : players.values()) {
-            String[] feature = player.getProfile().getFeature();
+            List<String> feature = player.getProfile().getFeature();
             List<String> answer = player.getAnswer();
             for (String f : feature) combinedList.add(f);
             combinedList.addAll(answer);

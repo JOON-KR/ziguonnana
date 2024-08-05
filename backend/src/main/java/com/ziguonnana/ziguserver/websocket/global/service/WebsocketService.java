@@ -33,6 +33,7 @@ public class WebsocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public SessionInfo createRoom(String roomId, CreateRequest request) {
+    	log.info("----------방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
         String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
@@ -65,7 +66,7 @@ public class WebsocketService {
 
     public void createProfile(String roomId, GameProfileRequest request) {
         Room room = getRoom(roomId);
-        Player player = getPlayer(roomId, request.getMemberId());
+        Player player = getPlayer(roomId, request.getNum());
         GameProfile profile = GameProfile.from(request);
         player.createProfile(profile);
         
@@ -84,11 +85,11 @@ public class WebsocketService {
                 .orElseThrow(() -> new RoomNotFoundException("방을 찾을 수 없습니다.: " + roomId));
     }
 
-    public Player getPlayer(String roomId, String memberId) {
-        return getRoom(roomId).getPlayers().get(memberId);
+    public Player getPlayer(String roomId, int num) {
+        return getRoom(roomId).getPlayers().get(num);
     }
 
-    public void join(String roomId, GameProfile profile) {
+    public SessionInfo join(String roomId, GameProfile profile) {
         String memberId = UUID.randomUUID().toString();
         Room room = getRoom(roomId);
 
@@ -101,7 +102,13 @@ public class WebsocketService {
                 .build();
         addPlayerToRoom(roomId, player);
         roomRepository.addMemberToRoom(memberId, roomId);
+        SessionInfo info = SessionInfo.builder()
+                .memberId(memberId)
+                .roomId(roomId)
+                .num(player.getNum())
+                .build();
         log.info("방 참가 :: roomId : {}, player : {}, profile : {}" , roomId, room.toString(), profile.toString());
+        return info;
     }
 
     public void startGame(Room room) {
@@ -127,7 +134,7 @@ public class WebsocketService {
             List<String> combinedList = new ArrayList<>();
             
             // feature와 answer 리스트를 결합
-            String[] feature = player.getProfile().getFeature();
+            List<String> feature = player.getProfile().getFeature();
             List<String> answer = player.getAnswer();
             for (String f : feature) combinedList.add(f);
             combinedList.addAll(answer);
