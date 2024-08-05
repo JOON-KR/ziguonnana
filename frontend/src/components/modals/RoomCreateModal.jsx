@@ -123,7 +123,6 @@ const RoomCreateModal = ({ onClose }) => {
 
   const handleCreateRoom = async () => {
     try {
-      //오픈비두 엔드포인트 보내서 연결
       const response = await axiosInstance.post("/api/v1/room", {
         teamName: teamName,
         people: selectedCapacity,
@@ -147,21 +146,35 @@ const RoomCreateModal = ({ onClose }) => {
         },
       });
 
-      //서버 연결
       stompClient.onConnect = () => {
         const serverUrl = socket._transport.url;
         console.log("서버 연결됨 : ", serverUrl);
 
-        //roomId를 소켓 엔드포인트로 연결하면서 보냄
-        stompClient.subscribe(`/game/${roomId}/create`, (message) => {
-          console.log(`/game/${roomId}/create 에서 온 메세지 : `, message.body);
+        // 응답을 받을 주제 구독
+        stompClient.subscribe(`/topic/game/${roomId}`, (message) => {
+          console.log(
+            `/app/game/${roomId}/response 에서 온 메세지 : `,
+            message.body
+          );
+          const response = JSON.parse(message.body);
+          // 응답 처리 로직 추가
+          console.log(response);
         });
 
-        // 방 입장
-        // stompClient.publish({
-        //   destination: `/app/game/${roomId}/join`,
-        //   body: JSON.stringify({ message: "Join Request" }),
-        // });
+        // 메시지 발행
+        stompClient.publish(
+          `/app/game/${roomId}/create`,
+          {}, // 헤더가 필요 없는 경우 빈 객체
+          JSON.stringify({
+            people: selectedCapacity,
+            teamName: teamName,
+            message: "create Request",
+          })
+        );
+      };
+
+      stompClient.onStompError = (frame) => {
+        console.error("Stomp 에러", frame.headers["message"], frame.body);
       };
 
       stompClient.activate();

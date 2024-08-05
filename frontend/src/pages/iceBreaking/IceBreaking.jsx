@@ -9,7 +9,6 @@ const PageWrap = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
   box-sizing: border-box;
 `;
 
@@ -18,9 +17,9 @@ const Frame = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
   height: 100%;
   gap: 16px;
-  box-sizing: border-box;
 `;
 
 const Content = styled.div`

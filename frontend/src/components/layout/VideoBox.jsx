@@ -2,8 +2,8 @@ import React from "react";
 import styled from "styled-components";
 
 const Box = styled.div`
-  width: 220px;
-  height: 220px;
+  width: 200px;
+  height: 200px;
   background-color: #ebeef1;
   /* background-color: red; */
   padding: 10px;
@@ -15,8 +15,8 @@ const Box = styled.div`
 
 const Video = styled.div`
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
   background-color: white;
   border-radius: 10px;
   padding: 10px;
