@@ -5,7 +5,7 @@ import Loader from "../../components/common/Loader";
 
 const PageWrap = styled.div`
   width: 100%;
-  height: 100vh; /* Viewport height to fill the screen */
+  /* height: 100vh; Viewport height to fill the screen */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -28,7 +28,7 @@ const Content = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  /* height: 100%; */
 `;
 
 const Loading = () => {
@@ -37,12 +37,12 @@ const Loading = () => {
   const { roomId } = location.state || {};
 
   //이 부분 수정 필요
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate("/icebreaking/games", { state: { roomId } });
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [navigate, roomId]);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     navigate("/icebreaking/games", { state: { roomId } });
+  //   }, 3000);
+  //   return () => clearTimeout(timer);
+  // }, [navigate, roomId]);
 
   return (
     <PageWrap>

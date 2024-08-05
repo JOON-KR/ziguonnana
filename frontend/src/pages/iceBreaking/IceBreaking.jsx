@@ -6,6 +6,7 @@ import { Outlet } from "react-router-dom";
 
 const PageWrap = styled.div`
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,16 +21,16 @@ const Frame = styled.div`
   box-sizing: border-box;
   height: 100%;
   gap: 16px;
+  width: 200px; /* Fixed width for Frame */
 `;
 
 const Content = styled.div`
-  width: 100%;
+  flex-grow: 1;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* background-color: aliceblue; */
+  box-sizing: border-box;
 `;
 
 const PageTemplate = () => {
@@ -41,7 +42,6 @@ const PageTemplate = () => {
         <VideoBox />
       </Frame>
       <Content>
-        {/* 하위 페이지는 Outlet위치에 박힘(사람 6개는 고정) */}
         <Outlet />
       </Content>
       <Frame>

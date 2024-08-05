@@ -62,7 +62,9 @@ const Games = () => {
         src={orange}
         style={{ left: "200px", top: "20px" }}
       />
-      <PlanetName style={{ left: "200px", top: "0px" }}>몸으로 말해요</PlanetName>
+      <PlanetName style={{ left: "200px", top: "0px" }}>
+        몸으로 말해요
+      </PlanetName>
       {/* 이구동성 행성 */}
       <Planet
         onClick={() => {
@@ -76,7 +78,9 @@ const Games = () => {
           height: "120px",
         }}
       />
-      <PlanetName style={{ left: "397px", bottom: "65px" }}>이구동성</PlanetName>
+      <PlanetName style={{ left: "397px", bottom: "65px" }}>
+        이구동성
+      </PlanetName>
       {/* 포즈 따라하기 행성 */}
       <Planet
         onClick={() => {
@@ -85,7 +89,9 @@ const Games = () => {
         src={gray}
         style={{ right: "190px", top: "15px", height: "120px" }}
       />
-      <PlanetName style={{ right: "205px", top: "4px" }}>포즈 따라하기</PlanetName>
+      <PlanetName style={{ right: "205px", top: "4px" }}>
+        포즈 따라하기
+      </PlanetName>
       {/* 숏폼 챌린지 행성 */}
       <Planet
         onClick={() => {
@@ -99,7 +105,9 @@ const Games = () => {
           height: "110px",
         }}
       />
-      <PlanetName style={{ right: "10px", bottom: "95px" }}>숏폼 챌린지</PlanetName>
+      <PlanetName style={{ right: "10px", bottom: "95px" }}>
+        숏폼 챌린지
+      </PlanetName>
     </Wrap>
   );
 };

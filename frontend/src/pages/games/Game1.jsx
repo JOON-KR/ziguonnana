@@ -4,7 +4,7 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import DrawingModal from "../../components/modals/DrawingModal"; // DrawingModal import 추가
-import BigAquaBtn from "../../components/common/BigAquaBtn";
+import BigAquaBtn from "../../components/common/AquaBtn";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/images/bigNana.png";
 
@@ -13,9 +13,10 @@ const Wrap = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  /* height: 100%; */
   flex-direction: column;
   text-align: center;
+  box-sizing: border-box;
 `;
 
 const BoxWrap = styled.div`
@@ -78,7 +79,7 @@ const Game1 = ({ roomId }) => {
         <DrawingModal onClose={() => setIsDrawingModalOpen(false)} /> // DrawingModal 컴포넌트 추가
       )}
 
-      {/* <div>
+      <div>
         <SpeechBubble text={"별명 스타일 정해."} />
         <img src={bigNana} style={{ marginLeft: "200px" }} />
         <BoxWrap>
@@ -87,7 +88,7 @@ const Game1 = ({ roomId }) => {
           <BigAquaBtn text={"동물"} />
           <BigAquaBtn text={"미래"} />
         </BoxWrap>
-      </div> */}
+      </div>
     </Wrap>
   );
 };

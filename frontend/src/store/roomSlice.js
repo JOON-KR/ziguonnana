@@ -6,6 +6,7 @@ export const roomSlice = createSlice({
   initialState: {
     roomId: "",
     teamCode: "",
+    maxNo: 0,
   },
 
   //state 수정 함수들, 리턴값으로 상태 변수 설정
@@ -16,9 +17,12 @@ export const roomSlice = createSlice({
     setTeamCode: (state, action) => {
       state.teamCode = action.payload;
     },
+    setMaxNo: (state, action) => {
+      state.maxNo = action.payload;
+    },
   },
 });
 
-export const { setRoomId, setTeamCode } = roomSlice.actions;
+export const { setRoomId, setTeamCode, setMaxNo } = roomSlice.actions;
 
 export default roomSlice;

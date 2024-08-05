@@ -10,8 +10,8 @@ import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
 import authSlice from "../../store/authSlice";
 import SockJS from "sockjs-client";
 import BASE_URL from "../../api/APIconfig";
-import { Client } from "@stomp/stompjs";
 import { setStompClient } from "../../store/clientSlice";
+import { Stomp } from "@stomp/stompjs";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -86,6 +86,45 @@ const RoomJoinModal = ({ onClose }) => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const [stClient, setStClient] = useState(null);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    //소켓 생성
+    const socket = new SockJS(`${BASE_URL}/ws`);
+    console.log("Socket created");
+
+    const client = Stomp.over(socket);
+
+    client.connect(
+      {},
+      (frame) => {
+        console.log("웹소켓 서버와 연결됨!", frame);
+
+        setStClient(client);
+        dispatch(setStompClient(client));
+
+        // 각 memberId에 대한 구독
+        // client.subscribe(
+        //   `/topic/game/${inviteCode}/${sessionInfo.memberId}`,
+        //   (message) => {
+        //     const parsedMessage = JSON.parse(message.body);
+        //     console.log("개별 구독 받은 메시지:", parsedMessage);
+        //     // 응답 메시지에서 num 저장
+        //     if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+        //       setSessionInfo((prevSessionInfo) => ({
+        //         ...prevSessionInfo,
+        //         num: parsedMessage.data.num,
+        //       }));
+        //     }
+        //   }
+        // );
+      },
+      (error) => {
+        console.error("STOMP error:", error);
+      }
+    );
+  }, []);
 
   const handleJoinRoom = async () => {
     try {
@@ -98,55 +137,42 @@ const RoomJoinModal = ({ onClose }) => {
       dispatch(setRoomId(inviteCode));
       console.log("Invite Code:", inviteCode);
 
-      //소켓 생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
-      console.log("Socket created");
+      //roomId를 소켓 엔드포인트로 연결하면서 보냄
+      // stClient.subscribe(`/game/${inviteCode}/join`, (message) => {
+      //   console.log(`/game/${inviteCode}/join 에서 온 메세지 : `, message.body);
+      // });
 
-      const stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-        debug: (str) => {
-          console.log("STOMP Debug:", str);
-        },
+      // 방에 대한 구독
+      stClient.subscribe(`/topic/game/${inviteCode}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        console.log("방에서 받은 메시지:", parsedMessage);
+        setMessages((prevMessages) => [...prevMessages, parsedMessage]);
       });
 
-      stompClient.onConnect = () => {
-        const serverUrl = socket._transport.url;
-        console.log("서버 연결됨 : ", serverUrl);
+      console.log("Subscribing to destination");
+      var destination = `/app/game/${inviteCode}/join`;
 
-        //roomId를 소켓 엔드포인트로 연결하면서 보냄
-        stompClient.subscribe(`/game/${inviteCode}/join`, (message) => {
-          console.log(
-            `/game/${inviteCode}/join 에서 온 메세지 : `,
-            message.body
-          );
-        });
+      stClient.activate();
+      console.log("STOMP Client activated");
 
-        console.log("Subscribing to destination");
-        var destination = `/app/game/${inviteCode}/join`;
+      dispatch(setStompClient(stClient));
 
-        stompClient.activate();
-        console.log("STOMP Client activated");
+      // 로그인 여부를 state에 포함시켜 navigate
+      // navigate("/user/profilePick", {
+      //   state: {
+      //     inviteCode,
+      //     isJoin: true,
+      //     isLoggedIn: isLoggedIn,
+      //     from: "joinModal",
+      //   },
+      // });
 
-        dispatch(setStompClient(stompClient));
-
-        // 로그인 여부를 state에 포함시켜 navigate
-        navigate("/user/profilePick", {
-          state: {
-            inviteCode,
-            isJoin: true,
-            isLoggedIn: isLoggedIn,
-            from: "joinModal",
-          },
-        });
-      };
-
-      stompClient.onStompError = (frame) => {
+      stClient.onStompError = (frame) => {
         console.error("Broker reported error: " + frame.headers["message"]);
         console.error("Additional details: " + frame.body);
       };
 
-      stompClient.activate();
+      stClient.activate();
     } catch (e) {
       console.error("방참여 오류", e);
     }
