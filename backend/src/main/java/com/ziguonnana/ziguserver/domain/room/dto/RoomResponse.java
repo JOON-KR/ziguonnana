@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoomResponse {
-    private String roomId;
+    private String openviduToken;
 }
