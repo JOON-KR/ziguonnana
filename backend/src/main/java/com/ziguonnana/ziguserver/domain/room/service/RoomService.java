@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 
 
 @Slf4j
@@ -48,6 +49,8 @@ public class RoomService {
         Connection connection = session.createConnection();
         log.info("connection count : " + session.getActiveConnections().size());
         log.info("openviduToken : " + connection.getToken());
-        return new RoomResponse(connection.getToken());
+        // memberId UUID로 생성
+        String memberId = UUID.randomUUID().toString();
+        return new RoomResponse(connection.getToken(), memberId);
     }
 }
