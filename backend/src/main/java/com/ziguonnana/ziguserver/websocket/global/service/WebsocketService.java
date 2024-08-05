@@ -76,6 +76,7 @@ public class WebsocketService {
         log.info("room count:" + room.getCount());
         // count가 people과 같아지면 게임 시작
         if (room.getCount() == room.getPeople()) {
+        	room.countInit();
             startGame(room);
         }
         log.info("프로필 생성 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
@@ -150,7 +151,7 @@ public class WebsocketService {
             if (!combinedList.isEmpty()) {
                 String randomKeyword = combinedList.get(random.nextInt(combinedList.size()));
                 RelayArt relayArt = RelayArt.builder()
-                        .num(i)
+                        .num((i+1)%(people) == 0? i+1:(i+1)%(people) )
                         .keyword(randomKeyword)
                         .build();
                 relayArts.add(relayArt);

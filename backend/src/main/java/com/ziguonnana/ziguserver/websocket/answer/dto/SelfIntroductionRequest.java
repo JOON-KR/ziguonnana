@@ -7,6 +7,6 @@ import lombok.Getter;
 
 @Getter
 public class SelfIntroductionRequest {
-    private String memberId;
+    private int num;
     private List<String> answer;
 }

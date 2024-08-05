@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
+	//key: 클라이언트의 "num" value : Player
 	private ConcurrentMap<Integer,Player> players;
 	private int people;
 	private int status;
