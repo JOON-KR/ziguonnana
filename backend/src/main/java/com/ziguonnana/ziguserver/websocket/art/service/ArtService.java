@@ -80,7 +80,7 @@ public class ArtService {
         log.info("그림 전파 :: roomId : {}, art : {} " , roomId, tmp.toString());
         return tmp;
     }
-    private String selectRandomKeyword(Room room) {
+    public String selectRandomKeyword(Room room) {
         List<String> combinedList = new ArrayList<>();
         ConcurrentMap<Integer, Player> players = room.getPlayers();
 

@@ -109,7 +109,8 @@ public class WebsocketService {
         // 게임 시작 알림을 클라이언트에 보냅니다.
         List<RelayArt>keywordList = getKeyword(room);
         
-        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keywordList);
+        GameMessage<List<RelayArt>> keyword = GameMessage.info("키워드", keywordList);
+        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
