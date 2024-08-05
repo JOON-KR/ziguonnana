@@ -4,10 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import profileImage1 from "../../assets/icons/p1.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
-import OpenViduComponent from "../../components/OpenViduComponent";
 import { getProfileList, createProfile } from "../../api/profile/profileAPI";
-import { useWebSocket } from "../../context/WebSocketContext";
 import BASE_URL from "../../api/APIconfig";
+import { useSelector } from "react-redux";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import axiosInstance from "../../api/axiosInstance";
 
 // 전체 래퍼 스타일 설정
 const Wrap = styled.div`
@@ -86,135 +88,162 @@ const HeaderText = styled.h4`
 const ProfilePick = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { teamName, people, roomId, isJoin, loggedIn } = location.state || {};
+  const { teamName, people, isJoin, from } = location.state || {};
+
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const roomId = useSelector((state) => state.room.roomId);
+  const token = localStorage.getItem("accessToken");
+
   const [profiles, setProfiles] = useState([]);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
     useState(false);
   const [gameProfile, setGameProfile] = useState(null);
-  const { connectWebSocket, stompClient } = useWebSocket();
-  const hasMountedRef = useRef(false); // 마운트 상태를 추적하는 Ref
 
-  // 웹소켓 연결 설정
-  useEffect(() => {
-    if (hasMountedRef.current) return; // 이미 마운트되었으면 재실행 방지
-    hasMountedRef.current = true; // 첫 마운트 시 설정
+  const hasMountedRef = useRef(false);
+  const stompClientRef = useRef(null);
 
-    connectWebSocket(roomId);
-
-    return () => {
-      if (stompClient) {
-        stompClient.disconnect(() => {
-          console.log("웹소켓 연결 종료"); // 웹소켓 연결 종료 메시지
-        });
-      }
-    };
-  }, [connectWebSocket, roomId, stompClient]);
-
-  // 로그인 유저의 프로필 데이터를 가져오는 useEffect
   useEffect(() => {
     const fetchProfiles = async () => {
-      if (loggedIn) {
+      if (isLoggedIn) {
         try {
           const profileList = await getProfileList();
           setProfiles(profileList);
-          console.log("프로필 리스트 불러오기 성공:", profileList); // 프로필 리스트 성공 메시지
+          console.log("프로필 리스트 불러오기 성공:", profileList);
         } catch (error) {
-          console.error("프로필 불러오기 실패:", error); // 프로필 리스트 실패 메시지
+          console.error("프로필 불러오기 실패:", error);
         }
       }
     };
     fetchProfiles();
-  }, [loggedIn]);
 
-  // 프로필을 선택하여 소켓으로 전송하는 함수
-  const pickProfile = (profile) => {
-    setGameProfile(profile);
-    console.log(profile, roomId);
-    if (stompClient && stompClient.connected) {
-      stompClient.send(
-        `/app/game/${roomId}/profile`,
-        {},
-        JSON.stringify({ ...profile, roomId })
-      );
-      console.log("프로필 정보 전송:", profile); // 프로필 정보 전송 메시지
-    }
-    navigate("/icebreaking", { state: { roomId } });
+    const socket = new SockJS(`${BASE_URL}/ws`);
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+      debug: (str) => {
+        console.log(str);
+      },
+    });
+
+    // stompClientRef.current = stompClient;
+
+    // stompClient.onConnect = (frame) => {
+    //   const serverUrl = socket._transport.url;
+    //   console.log("Connected to server: " + serverUrl);
+    //   console.log("Connected: " + JSON.stringify(frame));
+
+    //   if (from === "createModal") {
+    //     socketEndpointConnect();
+    //   } else if (from === "joinModal") {
+    //     joinSocketEndpointConnect();
+    //   }
+    // };
+
+    // stompClient.activate();
+  }, [isLoggedIn, from, roomId]);
+
+  const socketEndpointConnect = async () => {
+    console.log("from createModal: ");
+    const response = await axiosInstance.post("/api/v1/room", {});
+    console.log("create Modal response:", response.data);
   };
 
-  // 모달 닫기 함수
+  const joinSocketEndpointConnect = async () => {
+    console.log("from joinmodal");
+
+    const attemptToJoin = () => {
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        const joinMessage = JSON.stringify({ message: "Join Request" });
+
+        stompClientRef.current.subscribe(
+          `/game/${roomId}/create`,
+          (message) => {
+            console.log(
+              `Received message from /game/${roomId}/create:`,
+              message.body
+            );
+          }
+        );
+
+        stompClientRef.current.publish({
+          destination: `app/game/${roomId}/join`,
+          body: joinMessage,
+        });
+      } else {
+        console.log("Waiting for connection...");
+        setTimeout(attemptToJoin, 1000); // 1초 후에 다시 시도
+      }
+    };
+
+    attemptToJoin();
+  };
+
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
-  // 프로필 등록 핸들러
   const handleRegisterProfile = async (profileData) => {
-    if (loggedIn) {
+    if (isLoggedIn) {
       try {
         const profile = await createProfile(profileData);
-        setProfiles((prevProfiles) => [...prevProfiles, profile]); // 프로필 리스트 업데이트
+        setProfiles((prevProfiles) => [...prevProfiles, profile]);
         setGameProfile(profile);
         setIsProfileRegisterModalOpen(false);
-        if (stompClient && stompClient.connected) {
-          stompClient.send(
+
+        if (stompClientRef.current && stompClientRef.current.connected) {
+          stompClientRef.current.subscribe(
             `/app/game/${roomId}/profile`,
             {},
             JSON.stringify({ ...profile, roomId })
           );
-          console.log("프로필 정보 전송:", profile); // 프로필 정보 전송 메시지
+          console.log("프로필 정보 전송:", profile);
         }
       } catch (error) {
-        console.error("프로필 등록 실패:", error); // 프로필 등록 실패 메시지
+        console.error("프로필 등록 실패:", error);
       }
     } else {
       setGameProfile(profileData);
-      setProfiles((prevProfiles) => [...prevProfiles, profileData]); // 프로필 리스트 업데이트
+      setProfiles((prevProfiles) => [...prevProfiles, profileData]);
       setIsProfileRegisterModalOpen(false);
-      if (stompClient && stompClient.connected) {
-        stompClient.send(
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        stompClientRef.current.subscribe(
           `/app/game/${roomId}/profile`,
           {},
           JSON.stringify({ ...profileData, roomId })
         );
-        console.log("프로필 정보 전송:", profileData); // 프로필 정보 전송 메시지
+        console.log("프로필 정보 전송:", profileData);
       }
-      navigate("/icebreaking", { state: { roomId } });
     }
   };
 
   return (
     <Wrap>
-      {/* 프로필 등록 모달이 열려 있는 경우에만 모달을 렌더링합니다. */}
       {isProfileRegisterModalOpen && (
         <ProfileRegisterModal
-          onClose={closeProfileRegisterModal} // 모달 닫기 함수
-          onRegisterProfile={handleRegisterProfile} // 프로필 등록 핸들러
+          onClose={closeProfileRegisterModal}
+          onRegisterProfile={handleRegisterProfile}
         />
       )}
 
-      {/* 상단 헤더 부분 */}
       <Header>
         <HeaderText>마이페이지</HeaderText>
         <HeaderText>커뮤니티</HeaderText>
       </Header>
 
-      {/* 서브 타이틀 */}
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
 
-      {/* 프로필 리스트 컨테이너 */}
       <ProfilesContainer>
-        {/* 로그인된 유저만 프로필 목록을 볼 수 있습니다. */}
-        {loggedIn &&
+        {isLoggedIn &&
           profiles.map((profile, index) => (
             <ProfileWrap key={index}>
               <Image
-                src={profile.profileImage || profileImage1} // 프로필 이미지
+                src={profile.profileImage || profileImage1}
                 alt="Profile Image"
-                onClick={() => pickProfile(profile)} // 프로필 선택 핸들러
+                onClick={() => {}}
               />
               <Tags>
-                {/* 프로필에 포함된 해시태그를 렌더링합니다. */}
                 {profile.feature.map((tag, idx) => (
                   <Tag key={idx}>#{tag}</Tag>
                 ))}
@@ -222,29 +251,19 @@ const ProfilePick = () => {
             </ProfileWrap>
           ))}
 
-        {/* 새로운 프로필을 만들기 위한 래퍼 */}
         <ProfileWrap>
           <Image
-            src={newProfileImage} // 새로운 프로필 이미지
+            src={newProfileImage}
             alt="Profile Image"
-            onClick={() => setIsProfileRegisterModalOpen(true)} // 모달 열기 함수
+            onClick={() => setIsProfileRegisterModalOpen(true)}
           />
           <Tags>
-            {/* 새로운 프로필 만들기 해시태그 */}
             {["새로운", "프로필", "만들기"].map((tag, idx) => (
               <Tag key={idx}>#{tag}</Tag>
             ))}
           </Tags>
         </ProfileWrap>
       </ProfilesContainer>
-
-      {/* OpenViduComponent 컴포넌트는 로그인된 유저와 roomId가 있을 때만 렌더링합니다. */}
-      {loggedIn && roomId && (
-        <OpenViduComponent
-          token={localStorage.getItem("accessToken")} // 액세스 토큰을 전달
-          roomId={roomId} // 방 ID를 전달
-        />
-      )}
     </Wrap>
   );
 };

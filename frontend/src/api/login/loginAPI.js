@@ -32,3 +32,15 @@ export const logout = async () => {
     localStorage.removeItem("accessToken");
   }
 };
+
+export const verifyToken = async (accessToken) => {
+  try {
+    const response = await axiosInstance.post("???", {
+      token: accessToken,
+    });
+    return response.data.valid;
+  } catch (error) {
+    console.log("토큰 검증 오류", error);
+    return false;
+  }
+};
