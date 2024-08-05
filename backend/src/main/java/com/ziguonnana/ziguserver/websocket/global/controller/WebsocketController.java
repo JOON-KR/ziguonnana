@@ -1,23 +1,20 @@
 package com.ziguonnana.ziguserver.websocket.global.controller;
 
+import com.ziguonnana.ziguserver.websocket.global.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import com.ziguonnana.ziguserver.websocket.global.dto.ChatMessage;
-import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
-import com.ziguonnana.ziguserver.websocket.global.dto.SessionInfo;
 import com.ziguonnana.ziguserver.websocket.global.service.WebsocketService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Controller
+@Slf4j
 public class WebsocketController {
     private final WebsocketService websocketService;
 
@@ -40,5 +37,15 @@ public class WebsocketController {
     @SendTo("/topic/game/{roomId}")
     public GameMessage<ChatMessage> sendMessage(@DestinationVariable("roomId") String roomId, @Payload ChatMessage chatMessage) {
         return GameMessage.info(chatMessage.getSender() + ": " + chatMessage.getContent(), chatMessage);
+    }
+
+
+    //  방장이 각종 게임 시작 버튼 누르면  게임 시작
+    // 방에 있는 모두에게 시작 알림
+    @MessageMapping("/game/{roomId}/game-start/{gameType}")
+    @SendTo("/topic/game/{roomId}/game-start")
+    public GameMessage<GameType> gameStart(@DestinationVariable("roomId") String roomId, @DestinationVariable("gameType") GameType gameType) {
+        log.info("=========" + gameType + " 게임 처음 시작=========");
+        return GameMessage.info(gameType.getGameName() + "게임 시작", gameType);
     }
 }
