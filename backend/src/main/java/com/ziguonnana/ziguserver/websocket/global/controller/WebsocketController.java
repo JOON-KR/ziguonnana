@@ -41,7 +41,7 @@ public class WebsocketController {
 
 
     //  방장이 각종 게임 시작 버튼 누르면  게임 시작
-    // 방에 있는 모두에게 시작 알림
+    // 방에 있는 모두에게 시작 알림 => 모든 클라이언트 해당 게임 페이지로 이동
     @MessageMapping("/game/{roomId}/game-start/{gameType}")
     @SendTo("/topic/game/{roomId}/game-start")
     public GameMessage<GameType> gameStart(@DestinationVariable("roomId") String roomId, @DestinationVariable("gameType") GameType gameType) {
