@@ -11,5 +11,5 @@ public enum GameType {
     FOLLOW_POSE("포즈따라하기"),
     SHORTS("숏폼 챌린지");
 
-    private String gameName;
+    private final String gameName;
 }
