@@ -53,19 +53,7 @@ public class AnswerService {
 	}
 
 	private void nextGame(String roomId) {
-		Room room = roomRepository.getRoom(roomId);
 		// 결과 전송
-		String resultMessage = "문답 종료";
-		Random random = new Random();
-		Map<Integer, RelayArt> tmp = new HashMap<>();
-		int people = room.getPeople();
-		for (int i = 1; i <= people; i++) {
-			RelayArt relayArt = RelayArt.builder().num(i).keyword(artService.selectRandomKeyword(room)).build();
-
-			tmp.put(i, relayArt);
-		}
-		GameMessage<Map<Integer, RelayArt>> keywordList = GameMessage.info(resultMessage, tmp);
-		messagingTemplate.convertAndSend("/topic/game/" + roomId, keywordList);
 		boolean relayStart = true;
 		GameMessage<Boolean> nextMessage = GameMessage.info("이어그리기 시작", relayStart);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
