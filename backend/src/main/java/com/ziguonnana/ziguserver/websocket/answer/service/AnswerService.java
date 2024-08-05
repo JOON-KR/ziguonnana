@@ -38,6 +38,7 @@ public class AnswerService {
 		rooms.put(roomId, room);
 		room.countUp();
 		if (room.getCount() == room.getPeople()) {
+			room.countInit();
 			room.cycleInit();
 			nextGame(roomId);
 		}
