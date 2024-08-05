@@ -8,12 +8,14 @@ import com.ziguonnana.ziguserver.global.ResponseDto;
 import io.openvidu.java.client.OpenViduHttpException;
 import io.openvidu.java.client.OpenViduJavaClientException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController()
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/room")
+@Slf4j
 public class RoomController {
     private final RoomService roomService;
 
