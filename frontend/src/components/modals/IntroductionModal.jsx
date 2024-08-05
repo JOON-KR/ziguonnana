@@ -109,8 +109,14 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
       newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
       setAnswers(newAnswers);
     }
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
+    // 마지막 handleConfirm 호출 시
+    if (currentQuestionIndex === questionsList.length - 1) {
+      submitAnswersToServer();
+      onClose();
+    } else {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
+    }
   };
 
   // 타이머가 종료될 때 호출되는 함수
@@ -118,8 +124,13 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
     setAnswers(newAnswers);
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
+    if (currentQuestionIndex === questionsList.length - 1) {
+      submitAnswersToServer();
+      onClose();
+    } else {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
+    }
   };
 
   // 엔터 키를 누를 때 호출되는 함수
@@ -140,7 +151,7 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
   };
 
   return (
-    <BlackBg onClick={onClose}>
+    <BlackBg>
       <ModalWrap
         onClick={(e) => {
           e.stopPropagation(); // 클릭 이벤트가 부모로 전파되지 않도록 방지
@@ -156,7 +167,7 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
           onKeyPress={handleKeyPress} // 엔터 키 누를 때 처리
         />
         <BtnWrap>
-          <AquaBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
+          <AquaBtn text="입력" BtnFn={() => handleConfirm(onClose)} /> {/* 입력 버튼 */}
         </BtnWrap>
       </ModalWrap>
     </BlackBg>

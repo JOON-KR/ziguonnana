@@ -1,9 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-
 import GameModalImage from "../../assets/images/gameModal.png";
 import RedBtn from "../common/RedBtn";
-import BlueBtn from "../common/BlueBtn";
 
 const BlackBg = styled.div`
   position: fixed;
