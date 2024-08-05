@@ -5,17 +5,134 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png"
+import CanvasDraw from "react-canvas-draw";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import BASE_URL from '../../api/APIconfig';
 
 const Wrap = styled.div`
+width: 100%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+`;
+
+const Header = styled.div`
   width: 100%;
+  padding: 10px;
+  background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+`;
+
+const HeaderText = styled.h1`
+  margin: 7px;
+  color: black;
+  font-size: 27px;
+`
+
+const CanvasWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 700px;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ToolsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  text-align: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+`;
+
+const ToolButton = styled.button`
+  background-color: ${(props) => (props.active ? "#58fff5" : "#ccc")};
+  font-size: 19px;
+  font-weight: bold;
+  color: black;
+  width: 100px;
+  height: 50px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+`;
+
+const SliderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 10px;
+`;
+
+const SliderLabel = styled.label`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: black;
+`;
+
+const Slider = styled.input`
+  width: 100px;
+`;
+
+const Timer = styled.div`
+  width: 180px;
+  height: 50px;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  background: gray;
+  padding: 5px;
+  border-radius: 5px;
+  margin: 0 20px 0 190px;
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  flex-direction: row;
+`;
+
+const ProfileImage = styled.img`
+  width: 60px;
+  height: 60px;
+  margin-right: 10px;
+`;
+
+const ProfileDetails = styled.div`
+  text-align: left;
+`;
+
+const CustomSwatchesPicker = styled.div`
+  display: grid;
+  grid-template-columns: repeat(11, 24px);
+  grid-gap: 4px;
+  margin: 10px 20px;
+`;
+
+const ColorSquare = styled.div`
+  width: 24px;
+  height: 24px;
+  background-color: ${(props) => props.color};
+  cursor: pointer;
+  border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
 // 자기소개 문답 모달 & 이어그리기 페이지 (Drawing)
@@ -24,6 +141,10 @@ const Game1 = ({ roomId }) => {
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
   const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
+  const [brushColor, setBrushColor] = useState("#000000"); // 브러시 색상 상태
+  const [brushRadius, setBrushRadius] = useState(5); // 브러시 크기 상태
+  const [isEraser, setIsEraser] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20);
   const [memberId, setMemberId] = useState(''); // 현재 사용자 ID 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   // const [statusMessage, setStatusMessage] = useState(''); // 상태 메시지 상태
@@ -106,6 +227,26 @@ const Game1 = ({ roomId }) => {
     setIsDrawingGuideModalOpen(true);
   };
 
+  const handleColorChange = (color) => {
+    setBrushColor(color);
+    setIsEraser(false);
+  };
+
+  useEffect(() => {
+    if (!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [timeLeft, isIntroGuideModalOpen, isIntroModalOpen, isDrawingWelcomeModalOpen, isDrawingGuideModalOpen]);
+
+  const colors = [
+    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#000000", "#FFFFFF",
+    "#A52A2A", "#D2691E", "#DAA520", "#808000", "#008000", "#008080", "#00FFFF", "#4682B4", "#00008B",
+    "#8A2BE2", "#FF1493", "#D3D3D3", "#A9A9A9"
+  ];
+
   return (
     <Wrap>
       {error && <div style={{ color: "red" }}>{error}</div>} {/* 에러 메시지 표시 */}
@@ -153,7 +294,55 @@ const Game1 = ({ roomId }) => {
           onClose={closeDrawingGuideModal}
         />
       )}
-      이어그리기 화면 (캔버스)
+      {/* 이어그리기 화면 (캔버스) */}
+      {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
+        <>
+          <Header>
+            <ProfileInfo>
+              <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
+              <ProfileDetails>
+                <HeaderText>이름: 홍길동</HeaderText>
+                <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
+              </ProfileDetails>
+            </ProfileInfo>
+            <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+          </Header>
+          <CanvasWrapper>
+            <CanvasDraw
+              canvasWidth={1000}
+              canvasHeight={600}
+              brushColor={isEraser ? "#FFFFFF" : brushColor}
+              brushRadius={brushRadius}
+            />
+            <ToolsWrapper>
+                <CustomSwatchesPicker>
+                  {colors.map((color) => (
+                    <ColorSquare
+                      key={color}
+                      color={color}
+                      selected={brushColor === color}
+                      onClick={() => handleColorChange(color)}
+                    />
+                  ))}
+                </CustomSwatchesPicker>
+                <SliderWrapper>
+                  <SliderLabel>펜 굵기</SliderLabel>
+                  <Slider
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={brushRadius}
+                    onChange={(e) => setBrushRadius(e.target.value)}
+                  />
+                </SliderWrapper>
+                <ToolButton onClick={() => setIsEraser(!isEraser)}>
+                  {isEraser ? "펜" : "지우개"}
+                </ToolButton>
+              <Timer>{timeLeft}</Timer>
+            </ToolsWrapper>
+          </CanvasWrapper>
+        </>
+      )}
     </Wrap>
   );
 };
