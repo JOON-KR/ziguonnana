@@ -121,11 +121,12 @@ const RoomCreateModal = ({ onClose }) => {
 
   const handleToggleClick = (capacity) => {
     setSelectedCapacity(capacity);
+    dispatch(setMaxNo(capacity));
   };
 
   useEffect(() => {
-    console.log("로그인 상태 : ", isLoggedIn);
-    console.log("토큰 : ", token);
+    // console.log("로그인 상태 : ", isLoggedIn);
+    // console.log("토큰 : ", token);
   }, [isLoggedIn, token]);
 
   const handleCreateRoom = async () => {
@@ -135,7 +136,7 @@ const RoomCreateModal = ({ onClose }) => {
         teamName: teamName,
         people: selectedCapacity,
       });
-      console.log("오픈비두 엔드포인트 응답 :", response.data.data);
+      // console.log("오픈비두 엔드포인트 응답 :", response.data.data);
 
       const roomId = response.data.data.roomId;
       console.log("roomID : ", roomId);
@@ -143,7 +144,7 @@ const RoomCreateModal = ({ onClose }) => {
 
       //오픈비두 방입장
       const enterResponse = await axiosInstance.post(`/api/v1/room/${roomId}`);
-      console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
+      // console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
 
       const viduToken = enterResponse.data.data.openviduToken;
       const memberId = enterResponse.data.data.memberId;
@@ -155,36 +156,15 @@ const RoomCreateModal = ({ onClose }) => {
       //소켓 방생성
       const socket = new SockJS(`${BASE_URL}/ws`);
       const client = Stomp.over(socket);
+      dispatch(setStompClient(client));
+
       client.connect(
         {},
         (frame) => {
-          console.log("웹소켓 서버와 연결됨!", frame);
+          // console.log("웹소켓 서버와 연결됨!", frame);
 
-          // 각 memberId에 대한 구독
-          client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
-            const parsedMessage = JSON.parse(message.body);
-            console.log("개별 구독 받은 메시지:", parsedMessage);
-
-            dispatch(setUserNo(parsedMessage.data.num));
-            console.log(parsedMessage.data.num);
-            // 응답 메시지에서 num 저장
-            if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-              setSessionInfo((prevSessionInfo) => ({
-                ...prevSessionInfo,
-                num: parsedMessage.data.num,
-              }));
-            }
-          });
-
-          // 방에 대한 구독
-          client.subscribe(`/topic/game/${roomId}`, (message) => {
-            const parsedMessage = JSON.parse(message.body);
-            console.log("방에서 받은 메시지:", parsedMessage);
-            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-          });
-
-          //방소켓  생성 요청
           if (client && client.connected) {
+            //방 생성 요청
             console.log("소켓 방 생성 요청:", {
               teamName,
               people: selectedCapacity,
@@ -200,7 +180,55 @@ const RoomCreateModal = ({ onClose }) => {
             );
           }
 
-          setStClient(client);
+          if (client && client.connected) {
+            // 방에 대한 구독
+            client.subscribe(`/topic/game/${roomId}`, (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("방에서 받은 메시지:", parsedMessage);
+              setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+            });
+          }
+
+          if (client && client.connected) {
+            // 각 memberId에 대한 구독
+            client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("개별 구독 받은 메시지:", parsedMessage);
+
+              dispatch(setUserNo(parsedMessage.data.num));
+              console.log("유저 번호 :", parsedMessage.data.num);
+              // 응답 메시지에서 num 저장
+              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+                setSessionInfo((prevSessionInfo) => ({
+                  ...prevSessionInfo,
+                  num: parsedMessage.data.num,
+                }));
+              }
+            });
+          }
+
+          //소켓 방 구독
+          if (client && client.connected) {
+            console.log("소켓 방 구독 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            client.subscribe(
+              `/app/game/${roomId}/join`,
+              {},
+              JSON.stringify({})
+            );
+          }
+
+          // setStClient(client);
+          // client.publish(
+          //   `/app/game/${roomId}/create`,
+          //   {}, // 헤더가 필요 없는 경우 빈 객체
+          //   JSON.stringify({
+          //     people: selectedCapacity,
+          //     teamName: teamName,
+          //   })
+          // );
         },
         (error) => {
           console.error("STOMP error:", error);
@@ -208,14 +236,6 @@ const RoomCreateModal = ({ onClose }) => {
       );
 
       // 메시지 발행
-      client.publish(
-        `/app/game/${roomId}/create`,
-        {}, // 헤더가 필요 없는 경우 빈 객체
-        JSON.stringify({
-          people: selectedCapacity,
-          teamName: teamName,
-        })
-      );
 
       client.onStompError = (frame) => {
         console.error("Stomp 에러", frame.headers["message"], frame.body);

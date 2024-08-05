@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-const [messages, setMessages] = useState([]);
 import SockJS from "sockjs-client";
 import { v4 as uuidv4 } from "uuid"; // UUID를 생성하기 위해 추가
 import profileImg from "../assets/icons/p1.PNG";
+import { Stomp } from "@stomp/stompjs";
+import BASE_URL from "../api/APIconfig";
 
-const SocketTest = () => {
+const Test = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [stompClient, setStompClient] = useState(null);
@@ -21,7 +22,7 @@ const SocketTest = () => {
   });
 
   useEffect(() => {
-    const socket = new SockJS("http://localhost:8081/ws");
+    const socket = new SockJS(`${BASE_URL}/ws`);
     const client = Stomp.over(socket);
 
     client.connect(
@@ -69,7 +70,6 @@ const SocketTest = () => {
         });
       }
     };
-    c;
   }, [roomId]); // roomId가 변경될 때만 재구독하도록 설정
 
   const sendMessage = () => {
@@ -207,4 +207,4 @@ const SocketTest = () => {
   );
 };
 
-export default SocketTest;
+export default Test;

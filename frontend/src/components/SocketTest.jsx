@@ -6,7 +6,11 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
+import roomSlice, {
+  setMaxNo,
+  setRoomId,
+  setTeamCode,
+} from "../../store/roomSlice";
 import authSlice, {
   setMemberId,
   setOpenViduToken,
@@ -91,33 +95,63 @@ const RoomJoinModal = ({ onClose }) => {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [messages, setMessages] = useState([]);
+  const [stClient, setStClient] = useState(null);
   const [sessionInfo, setSessionInfo] = useState({});
+
+  const memberId = useSelector((state) => state.auth.memberId);
+  const [memId, setMemId] = useState("");
 
   const handleJoinRoom = async () => {
     try {
+      //소켓 방생성
+      const socket = new SockJS(`${BASE_URL}/ws`);
+      const client = Stomp.over(socket);
+      dispatch(setStompClient(client));
+
       const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
         groupCode: inviteCode,
       });
 
       console.log("오픈비두 방 참가 응답 : ", response.data.data);
 
-      dispatch(setMemberId(response.data.data.memberId));
-      dispatch(setOpenViduToken(response.data.data.openviduToken));
-      dispatch(setRoomId(inviteCode));
       console.log("memberID : ", response.data.data.memberId);
       console.log("viduToken : ", response.data.data.openviduToken);
       console.log("Invite Code:", inviteCode);
 
-      //소켓 방생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
-      const client = Stomp.over(socket);
-      dispatch(setStompClient(client));
+      dispatch(setMemberId(response.data.data.memberId));
+      dispatch(setOpenViduToken(response.data.data.openviduToken));
+      dispatch(setRoomId(inviteCode));
 
       client.connect(
         {},
         (frame) => {
           console.log("웹소켓 서버와 연결됨!", frame);
-          console.log("연결 상태:", client.connected);
+
+          // 각 memberId에 대한 구독
+          client.subscribe(
+            `/topic/game/${inviteCode}/${memberId}`,
+            (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("개별 구독 :", parsedMessage);
+
+              dispatch(setUserNo(parsedMessage.data.num));
+              console.log("유저 번호 : ", parsedMessage.data.num);
+              // 응답 메시지에서 num 저장
+              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+                setSessionInfo((prevSessionInfo) => ({
+                  ...prevSessionInfo,
+                  num: parsedMessage.data.num,
+                }));
+              }
+            }
+          );
+
+          // 방에 대한 구독
+          client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("방 구독 :", parsedMessage);
+            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+          });
 
           //roomId를 소켓 엔드포인트로 연결하면서 보냄
           client.subscribe(`/game/${inviteCode}/join`, (message) => {
@@ -127,55 +161,36 @@ const RoomJoinModal = ({ onClose }) => {
             );
           });
 
-          // 각 memberId에 대한 구독
-          client.subscribe(
-            `/topic/game/${inviteCode}/${response.data.data.memberId}`,
-            (message) => {
+          //방소켓 입장 요청
+          if (client && client.connected) {
+            console.log("방 참가 요청:");
+            client.send(`/app/game/${inviteCode}/join`, {}, JSON.stringify({}));
+          }
+
+          if (client && client.connected) {
+            // 방에 대한 구독
+            client.subscribe(`/topic/game/${inviteCode}`, (message) => {
               const parsedMessage = JSON.parse(message.body);
-              console.log("개별 구독 받은 메시지:", parsedMessage);
+              console.log("방에서 받은 메시지:", parsedMessage);
+              setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+            });
+          }
 
-              dispatch(setUserNo(parsedMessage.data.num));
-              console.log(parsedMessage.data.num);
-              // 응답 메시지에서 num 저장
-              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-                dispatch(setUserNo(parsedMessage.data.num));
-              }
-            }
-          );
-          //방 참여 요청
-          client.send(`/app/game/${inviteCode}/join`, (message) => {
+          client.subscribe(`/app/game/${inviteCode}/join`, (message) => {
             const parsedMessage = JSON.parse(message.body);
             console.log("방에서 받은 메시지:", parsedMessage);
             setMessages((prevMessages) => [...prevMessages, parsedMessage]);
           });
 
-          // 방에 대한 구독
-          client.subscribe(`/topic/game/${inviteCode}`, (message) => {
-            const parsedMessage = JSON.parse(message.body);
-            console.log("방에서 받은 메시지:", parsedMessage);
-            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-          });
-
-          // roomId를 소켓 엔드포인트로 연결하면서 보냄
-          client.subscribe(`/game/${inviteCode}/join`, (message) => {
-            console.log(
-              `/game/${inviteCode}/join 에서 온 메세지 : `,
-              message.body
-            );
-          });
-
-          client.onStompError = (frame) => {
-            console.error("Broker reported error: " + frame.headers["message"]);
-            console.error("Additional details: " + frame.body);
-          };
+          setStClient(client);
         },
         (error) => {
           console.error("STOMP error:", error);
         }
       );
 
-      client.activate();
-      console.log("STOMP Client activated");
+      stClient.activate();
+      // console.log("STOMP Client activated");
 
       // 로그인 여부를 state에 포함시켜 navigate
       // navigate("/user/profilePick", {
@@ -187,7 +202,12 @@ const RoomJoinModal = ({ onClose }) => {
       //   },
       // });
 
-      client.activate();
+      stClient.onStompError = (frame) => {
+        console.error("Broker reported error: " + frame.headers["message"]);
+        console.error("Additional details: " + frame.body);
+      };
+
+      stClient.activate();
     } catch (e) {
       console.error("방참여 오류", e);
     }
