@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.ziguonnana.ziguserver.exception.RoomException;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
@@ -32,12 +32,11 @@ public class WebsocketService {
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public SessionInfo createRoom(String roomId, CreateRequest request) {
-    	log.info("----------방 생성 시작 -----------");
+    public void createRoom(String roomId, CreateRequest request) {
+        log.info("----------방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
-        String memberId = UUID.randomUUID().toString();
         Player player = Player.builder()
-                .memberId(memberId)
+                .memberId(request.getMemberId())
                 .role("admin")
                 .roomId(roomId)
                 .num(1)
@@ -52,32 +51,34 @@ public class WebsocketService {
                 .art(new ConcurrentHashMap<>())
                 .cycle(0)
                 .count(0)
+                .roomId(roomId)
                 .build();
         roomRepository.addRoom(roomId, room);
-        roomRepository.addMemberToRoom(memberId, roomId);
+        roomRepository.addMemberToRoom(request.getMemberId(), roomId);
         SessionInfo info = SessionInfo.builder()
-                .memberId(memberId)
+                .memberId(request.getMemberId())
                 .roomId(roomId)
                 .num(player.getNum())
                 .build();
-        log.info("방 생성 :: roomId : {}, room : {}, player : {}" , roomId, room.toString(), player.toString() );
-        return info;
+        log.info("방 생성 :: roomId : {}, room : {}, player : {}", roomId, room.toString(), player.toString());
+        messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + request.getMemberId(), GameMessage.info("방 생성 완료", info));
     }
 
     public void createProfile(String roomId, GameProfileRequest request) {
         Room room = getRoom(roomId);
-        Player player = getPlayer(roomId, request.getNum());
+        Player player = room.getPlayers().get(request.getNum());
         GameProfile profile = GameProfile.from(request);
         player.createProfile(profile);
-        
+
         // 프로필 생성 시 count를 증가시킵니다.
         room.countUp();
-
+        log.info("room people:" + room.getPeople());
+        log.info("room count:" + room.getCount());
         // count가 people과 같아지면 게임 시작
         if (room.getCount() == room.getPeople()) {
             startGame(room);
         }
-        log.info("프로필 생성 :: roomId : {}, player : {}, profile : {}" , roomId, room.toString(), profile.toString());
+        log.info("프로필 생성 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
     }
 
     public Room getRoom(String roomId) {
@@ -89,8 +90,7 @@ public class WebsocketService {
         return getRoom(roomId).getPlayers().get(num);
     }
 
-    public SessionInfo join(String roomId, GameProfile profile) {
-        String memberId = UUID.randomUUID().toString();
+    public void join(String roomId, GameProfile profile, String memberId) {
         Room room = getRoom(roomId);
 
         Player player = Player.builder()
@@ -107,22 +107,23 @@ public class WebsocketService {
                 .roomId(roomId)
                 .num(player.getNum())
                 .build();
-        log.info("방 참가 :: roomId : {}, player : {}, profile : {}" , roomId, room.toString(), profile.toString());
-        return info;
+        log.info("방 참가 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
+        messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, GameMessage.info("방 참가 완료", info));
     }
 
     public void startGame(Room room) {
         room.initArt();
         // 게임 시작 알림을 클라이언트에 보냅니다.
-        List<RelayArt>keywordList = getKeyword(room);
-        
+        List<RelayArt> keywordList = getKeyword(room);
+        log.info("------------------게임 시작 ------------------");
         GameMessage<List<RelayArt>> keyword = GameMessage.info("키워드", keywordList);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
+        log.info("game 키워드 발송");
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
     }
-    
+
     public List<RelayArt> getKeyword(Room room) {
         int people = room.getPeople();
         ConcurrentMap<Integer, Player> players = room.getPlayers();
@@ -132,20 +133,26 @@ public class WebsocketService {
         for (int i = 1; i <= people; i++) {
             Player player = players.get(i);
             List<String> combinedList = new ArrayList<>();
-            
+
             // feature와 answer 리스트를 결합
-            List<String> feature = player.getProfile().getFeature();
+            List<String> feature = player.getProfile() != null ? player.getProfile().getFeature() : null;
             List<String> answer = player.getAnswer();
-            for (String f : feature) combinedList.add(f);
-            combinedList.addAll(answer);
+
+            if (feature != null) {
+                combinedList.addAll(feature);
+            }
+
+            if (answer != null) {
+                combinedList.addAll(answer);
+            }
 
             // 랜덤하게 값을 선택
             if (!combinedList.isEmpty()) {
                 String randomKeyword = combinedList.get(random.nextInt(combinedList.size()));
                 RelayArt relayArt = RelayArt.builder()
-                		.num(i)
-                		.keyword(randomKeyword)
-                		.build();
+                        .num(i)
+                        .keyword(randomKeyword)
+                        .build();
                 relayArts.add(relayArt);
             }
         }
@@ -162,13 +169,13 @@ public class WebsocketService {
             throw new RoomNotFoundException("방이 가득 찼습니다.: " + roomId);
         }
     }
-    
+
     public void handleDisconnect(String memberId) {
         String roomId = Optional.ofNullable(roomRepository.getRoomIdByMemberId(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("Member not found in any room: " + memberId));
+                .orElseThrow(() -> new RoomException("Member not found in any room: " + memberId));
 
         Room room = Optional.ofNullable(roomRepository.getRoom(roomId))
-                .orElseThrow(() -> new IllegalArgumentException("Room not found: " + roomId));
+                .orElseThrow(() -> new RoomException("Room not found: " + roomId));
 
         room.getPlayers().remove(memberId);
         if (room.getPlayers().isEmpty()) {
