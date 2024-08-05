@@ -50,7 +50,7 @@ public class RoomService {
         if(session == null) throw new OpenviduException(ErrorCode.SESSION_NOT_FOUND);
         // 방장이 설정한 인원수가 connection이 많으면 예외처리
         Connection connection = session.createConnection();
-        log.info("token : " + connection.getToken());
+        log.info("roomId : " + connection.getToken());
         return new RoomResponse(connection.getToken());
     }
 }

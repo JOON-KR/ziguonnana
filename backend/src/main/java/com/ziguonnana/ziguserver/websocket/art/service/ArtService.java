@@ -110,7 +110,8 @@ public class ArtService {
         // 다음 단계로 전환 메시지 전송
         String nextStepMessage = "이어그리기 결과 확인";
         boolean endArt = true;
-        messagingTemplate.convertAndSend("/topic/game/" + roomId, endArt);
+        GameMessage<Boolean>nextMessage = GameMessage.info(nextStepMessage, endArt);
+        messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
         log.info("그림 그리기 결과 :: roomId : {}, art : {} " , roomId, artResult);
     }
 
