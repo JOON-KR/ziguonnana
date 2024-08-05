@@ -1,14 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-//리덕스 툴킷(RTK)에서는 상태 하나를 slice라고 부름
+// Redux Toolkit (RTK)에서 상태 관리를 위한 slice 생성
 export const roomSlice = createSlice({
   name: "room",
   initialState: {
     roomId: "",
     teamCode: "",
+    session: null, // OpenVidu 세션
+    publisher: null, // OpenVidu 퍼블리셔
+    subscribers: [], // 구독자 리스트
   },
 
-  //state 수정 함수들, 리턴값으로 상태 변수 설정
+  // 상태 수정 함수들
   reducers: {
     setRoomId: (state, action) => {
       state.roomId = action.payload;
@@ -16,9 +19,30 @@ export const roomSlice = createSlice({
     setTeamCode: (state, action) => {
       state.teamCode = action.payload;
     },
+    setSession: (state, action) => {
+      state.session = action.payload;
+    },
+    setPublisher: (state, action) => {
+      state.publisher = action.payload;
+    },
+    addSubscriber: (state, action) => {
+      state.subscribers.push(action.payload);
+    },
+    clearSession: (state) => {
+      state.session = null;
+      state.publisher = null;
+      state.subscribers = [];
+    },
   },
 });
 
-export const { setRoomId, setTeamCode } = roomSlice.actions;
+export const {
+  setRoomId,
+  setTeamCode,
+  setSession,
+  setPublisher,
+  addSubscriber,
+  clearSession,
+} = roomSlice.actions;
 
-export default roomSlice;
+export default roomSlice.reducer;

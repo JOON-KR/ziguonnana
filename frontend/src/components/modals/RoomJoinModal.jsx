@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -6,8 +6,7 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
-import authSlice from "../../store/authSlice";
+import { setRoomId } from "../../store/roomSlice";
 import SockJS from "sockjs-client";
 import BASE_URL from "../../api/APIconfig";
 import { Client } from "@stomp/stompjs";
@@ -94,11 +93,12 @@ const RoomJoinModal = ({ onClose }) => {
       });
 
       console.log("오픈비두 엔드포인트 연결 : ", response);
+      const openviduToken = response.data.data.openviduToken; // 수정된 부분: 응답에서 openviduToken 추출
+      console.log("OpenVidu Token:", openviduToken);
 
       dispatch(setRoomId(inviteCode));
-      console.log("Invite Code:", inviteCode);
 
-      //소켓 생성
+      // 소켓 생성
       const socket = new SockJS(`${BASE_URL}/ws`);
       console.log("Socket created");
 
@@ -114,7 +114,7 @@ const RoomJoinModal = ({ onClose }) => {
         const serverUrl = socket._transport.url;
         console.log("서버 연결됨 : ", serverUrl);
 
-        //roomId를 소켓 엔드포인트로 연결하면서 보냄
+        // roomId를 소켓 엔드포인트로 연결하면서 보냄
         stompClient.subscribe(`/game/${inviteCode}/join`, (message) => {
           console.log(
             `/game/${inviteCode}/join 에서 온 메세지 : `,
@@ -133,7 +133,8 @@ const RoomJoinModal = ({ onClose }) => {
         // 로그인 여부를 state에 포함시켜 navigate
         navigate("/user/profilePick", {
           state: {
-            inviteCode,
+            roomId: inviteCode,
+            openviduToken,
             isJoin: true,
             isLoggedIn: isLoggedIn,
             from: "joinModal",
@@ -151,6 +152,7 @@ const RoomJoinModal = ({ onClose }) => {
       console.error("방참여 오류", e);
     }
   };
+
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap onClick={(e) => e.stopPropagation()}>
