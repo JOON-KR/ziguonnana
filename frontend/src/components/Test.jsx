@@ -71,7 +71,7 @@ const Test = () => {
       }
     };
   }, [roomId]); // roomId가 변경될 때만 재구독하도록 설정
-
+  //=====================================================================
   const sendMessage = () => {
     if (stompClient && stompClient.connected) {
       console.log("보내는 메시지:", {
