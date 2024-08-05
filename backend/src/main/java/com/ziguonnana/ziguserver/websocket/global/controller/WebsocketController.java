@@ -22,10 +22,8 @@ public class WebsocketController {
     private final WebsocketService websocketService;
 
     @MessageMapping("/game/{roomId}/create")
-    @SendTo("topic/game/{roomId}")
-    public GameMessage<SessionInfo> createRoom(@DestinationVariable("roomId") String roomId, @Payload CreateRequest request) {
-        SessionInfo response = websocketService.createRoom(roomId, request);
-        return GameMessage.info("방 생성 완료", response);
+    public void createRoom(@DestinationVariable("roomId") String roomId, @Payload CreateRequest request) {
+         websocketService.createRoom(roomId, request);
     }
 
     @MessageMapping("/game/{roomId}/profile")
@@ -33,11 +31,9 @@ public class WebsocketController {
         websocketService.createProfile(roomId, request);
     }
 
-    @MessageMapping("/game/{roomId}/join")
-    @SendTo("/topic/game/{roomId}")
-    public GameMessage<SessionInfo> joinRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
-    	SessionInfo response =  websocketService.join(roomId, profile);
-        return GameMessage.info("방 참가 완료", response);
+    @MessageMapping("/game/{roomId}/{memberId}/join")
+    public void joinRoom(@DestinationVariable("roomId") String roomId,@DestinationVariable("memberId") String memberId, @Payload GameProfile profile) {
+    	websocketService.join(roomId, profile,memberId);
     }
 
     @MessageMapping("/game/{roomId}/chat")
