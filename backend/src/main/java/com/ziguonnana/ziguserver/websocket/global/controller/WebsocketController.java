@@ -6,7 +6,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.ChatMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
@@ -36,9 +35,9 @@ public class WebsocketController {
 
     @MessageMapping("/game/{roomId}/join")
     @SendTo("/topic/game/{roomId}")
-    public GameMessage<String> joinRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
-        websocketService.join(roomId, profile);
-        return GameMessage.info("방 참가 완료", "");
+    public GameMessage<SessionInfo> joinRoom(@DestinationVariable("roomId") String roomId, @Payload GameProfile profile) {
+    	SessionInfo response =  websocketService.join(roomId, profile);
+        return GameMessage.info("방 참가 완료", response);
     }
 
     @MessageMapping("/game/{roomId}/chat")
