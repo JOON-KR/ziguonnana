@@ -4,19 +4,19 @@ import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
 import IntroductionModal from "../../components/modals/IntroductionModal";
-import blue from "../../assets/icons/blue.png"
+import blue from "../../assets/icons/blue.png";
 import CanvasDraw from "react-canvas-draw";
-import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
-import BASE_URL from '../../api/APIconfig';
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
+import BASE_URL from "../../api/APIconfig";
 
 const Wrap = styled.div`
-width: 100%;
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 `;
 
 const Header = styled.div`
@@ -34,7 +34,7 @@ const HeaderText = styled.h1`
   margin: 7px;
   color: black;
   font-size: 27px;
-`
+`;
 
 const CanvasWrapper = styled.div`
   position: relative;
@@ -139,13 +139,14 @@ const ColorSquare = styled.div`
 const Game1 = ({ roomId }) => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
+  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
+    useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
   const [brushColor, setBrushColor] = useState("#000000"); // 브러시 색상 상태
   const [brushRadius, setBrushRadius] = useState(5); // 브러시 크기 상태
   const [isEraser, setIsEraser] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
-  const [memberId, setMemberId] = useState(''); // 현재 사용자 ID 상태
+  const [memberId, setMemberId] = useState(""); // 현재 사용자 ID 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   // const [statusMessage, setStatusMessage] = useState(''); // 상태 메시지 상태
   // const [messages, setMessages] = useState([]); // 메시지 배열 상태
@@ -159,13 +160,13 @@ const Game1 = ({ roomId }) => {
   //   // 웹소켓 서버에 연결
   //   client.connect({}, (frame) => {
   //     setStatusMessage('웹소켓 서버와 연결됨!');
-      
+
   //     // 특정 경로 구독하여 메시지 수신
   //     client.subscribe(`/topic/game/${roomId}`, (message) => {
   //       console.log('받은 메시지:', message.body);
   //       setMessages((prevMessages) => [...prevMessages, message.body]); // 받은 메시지를 상태에 추가
   //     });
-      
+
   //     // 세션 정보 구독하여 memberId 저장
   //     client.subscribe(`/user/queue/session`, (message) => {
   //       const sessionInfo = JSON.parse(message.body);
@@ -233,30 +234,63 @@ const Game1 = ({ roomId }) => {
   };
 
   useEffect(() => {
-    if (!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen) {
+    if (
+      !isIntroGuideModalOpen &&
+      !isIntroModalOpen &&
+      !isDrawingWelcomeModalOpen &&
+      !isDrawingGuideModalOpen
+    ) {
       if (timeLeft > 0) {
         const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
         return () => clearTimeout(timer);
       }
     }
-  }, [timeLeft, isIntroGuideModalOpen, isIntroModalOpen, isDrawingWelcomeModalOpen, isDrawingGuideModalOpen]);
+  }, [
+    timeLeft,
+    isIntroGuideModalOpen,
+    isIntroModalOpen,
+    isDrawingWelcomeModalOpen,
+    isDrawingGuideModalOpen,
+  ]);
 
   const colors = [
-    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#000000", "#FFFFFF",
-    "#A52A2A", "#D2691E", "#DAA520", "#808000", "#008000", "#008080", "#00FFFF", "#4682B4", "#00008B",
-    "#8A2BE2", "#FF1493", "#D3D3D3", "#A9A9A9"
+    "#FF0000",
+    "#FF7F00",
+    "#FFFF00",
+    "#00FF00",
+    "#0000FF",
+    "#4B0082",
+    "#8B00FF",
+    "#000000",
+    "#FFFFFF",
+    "#A52A2A",
+    "#D2691E",
+    "#DAA520",
+    "#808000",
+    "#008000",
+    "#008080",
+    "#00FFFF",
+    "#4682B4",
+    "#00008B",
+    "#8A2BE2",
+    "#FF1493",
+    "#D3D3D3",
+    "#A9A9A9",
   ];
 
   return (
     <Wrap>
-      {error && <div style={{ color: "red" }}>{error}</div>} {/* 에러 메시지 표시 */}
+      {error && <div style={{ color: "red" }}>{error}</div>}{" "}
+      {/* 에러 메시지 표시 */}
       {/* {statusMessage && <div>{statusMessage}</div>} 상태 메시지 표시 */}
-
       {isIntroGuideModalOpen && (
-        <IntroductionGuideModal onClose={closeIntroGuideModal} onConfirm={openIntroModal} />
+        <IntroductionGuideModal
+          onClose={closeIntroGuideModal}
+          onConfirm={openIntroModal}
+        />
       )}
       {isIntroModalOpen && (
-        <IntroductionModal onClose={openDrawingWelcomeModal}  />
+        <IntroductionModal onClose={openDrawingWelcomeModal} />
       )}
       {/* {isIntroModalOpen && memberId && ( // memberId가 설정된 후 모달 열기
         <IntroductionModal
@@ -266,13 +300,12 @@ const Game1 = ({ roomId }) => {
         memberId={memberId}
         />
         )} */}
-
       {/* 이어그리기 행성 입장 */}
       {isDrawingWelcomeModalOpen && (
-        <GameInfoModal 
+        <GameInfoModal
           planetImg={blue}
           RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}      
+          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
           RedBtnFn={closeDrawingWelcomeModal}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={openDrawingGuideModal}
@@ -283,38 +316,47 @@ const Game1 = ({ roomId }) => {
       {isDrawingGuideModalOpen && (
         <GameModal
           RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}      
+          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
           RedBtnFn={closeDrawingGuideModal}
-          modalText={(
+          modalText={
             <>
-              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요. <br />
+              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
+              <br />
               제한시간은 20초입니다.
             </>
-          )}
+          }
           onClose={closeDrawingGuideModal}
         />
       )}
       {/* 이어그리기 화면 (캔버스) */}
-      {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
-        <>
-          <Header>
-            <ProfileInfo>
-              <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-              <ProfileDetails>
-                <HeaderText>이름: 홍길동</HeaderText>
-                <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
-              </ProfileDetails>
-            </ProfileInfo>
-            <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-          </Header>
-          <CanvasWrapper>
-            <CanvasDraw
-              canvasWidth={900}
-              canvasHeight={600}
-              brushColor={isEraser ? "#FFFFFF" : brushColor}
-              brushRadius={brushRadius}
-            />
-            <ToolsWrapper>
+      {!isIntroGuideModalOpen &&
+        !isIntroModalOpen &&
+        !isDrawingWelcomeModalOpen &&
+        !isDrawingGuideModalOpen && (
+          <>
+            <Header>
+              <ProfileInfo>
+                <ProfileImage
+                  src="path/to/profile-image.png"
+                  alt="프로필 이미지"
+                />
+                <ProfileDetails>
+                  <HeaderText>이름: 홍길동</HeaderText>
+                  <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
+                </ProfileDetails>
+              </ProfileInfo>
+              <HeaderText>
+                주어진 정보를 활용하여 아바타를 그려주세요!
+              </HeaderText>
+            </Header>
+            <CanvasWrapper>
+              <CanvasDraw
+                canvasWidth={900}
+                canvasHeight={600}
+                brushColor={isEraser ? "#FFFFFF" : brushColor}
+                brushRadius={brushRadius}
+              />
+              <ToolsWrapper>
                 <CustomSwatchesPicker>
                   {colors.map((color) => (
                     <ColorSquare
@@ -338,11 +380,11 @@ const Game1 = ({ roomId }) => {
                 <ToolButton onClick={() => setIsEraser(!isEraser)}>
                   {isEraser ? "펜" : "지우개"}
                 </ToolButton>
-              <Timer>{timeLeft}</Timer>
-            </ToolsWrapper>
-          </CanvasWrapper>
-        </>
-      )}
+                <Timer>{timeLeft}</Timer>
+              </ToolsWrapper>
+            </CanvasWrapper>
+          </>
+        )}
     </Wrap>
   );
 };
