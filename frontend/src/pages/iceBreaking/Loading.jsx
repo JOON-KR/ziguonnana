@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import Loader from "../../components/common/Loader";
+import { useSelector } from "react-redux";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -34,7 +35,9 @@ const Content = styled.div`
 const Loading = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { roomId } = location.state || {};
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const [messages, setMessages] = useState([]);
 
   //이 부분 수정 필요
   // useEffect(() => {
@@ -43,6 +46,16 @@ const Loading = () => {
   //   }, 3000);
   //   return () => clearTimeout(timer);
   // }, [navigate, roomId]);
+  console.log("--------------------------------");
+  console.log("연결 상태 : ", client.connected);
+  console.log("--------------------------------");
+
+  client.subscribe(`/topic/game/${roomId}`, (message) => {
+    const parsedMessage = JSON.parse(message.body);
+    console.log("방에서 받은 메시지:", parsedMessage);
+    if (parsedMessage.data == true)
+      setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+  });
 
   return (
     <PageWrap>

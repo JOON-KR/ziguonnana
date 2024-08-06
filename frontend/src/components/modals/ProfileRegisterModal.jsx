@@ -5,6 +5,7 @@ import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import ProfileNana from "../../assets/icons/ProfileNana.png";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -132,6 +133,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const client = useSelector((state) => state.client.stompClient);
   const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
 
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
@@ -143,14 +145,6 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
   // 프로필 등록 핸들러
   const handleRegister = async () => {
-    // const hashTags = [hashTag1, hashTag2, hashTag3].filter(
-    //   (tag) => tag.trim() !== ""
-    // );
-    // if (hashTags.length > 3) {
-    //   alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
-    //   return;
-    // }
-
     const profileData = {
       memberId: memberId,
       num: userNo,
@@ -161,11 +155,12 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
     console.log("연결 상태 : ", client.connected);
 
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log("방에서 받은 메시지:", parsedMessage);
-      setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-    });
+    // client.subscribe(`/topic/game/${roomId}`, (message) => {
+    //   const parsedMessage = JSON.parse(message.body);
+    //   console.log("방에서 받은 메시지:", parsedMessage);
+    //   if(parsedMessage.data == true)
+    //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+    // });
 
     if (client && client.connected) {
       console.log("소켓에 전송할 데이터 : ", profileData);
@@ -177,6 +172,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     }
 
     onRegisterProfile(profileData);
+    navigate("/icebreaking");
   };
 
   return (
