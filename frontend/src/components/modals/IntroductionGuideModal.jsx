@@ -76,7 +76,7 @@ const IntroductionGuideModal = ({ onClose, onConfirm }) => {
         <Description>
           n 개의 질문이 <Bold>랜덤</Bold>으로 주어집니다<div></div> 주어진
           질문에 대해 <Bold>채팅</Bold>으로 답변해주세요. <div></div>
-          질문당<Bold>5초</Bold>의 제한 시간이 주어집니다.
+          질문당 <Bold>5초</Bold>의 제한 시간이 주어집니다.
         </Description>
         <BtnWrap>
           <AquaBtn text="YES!" BtnFn={onConfirm} />

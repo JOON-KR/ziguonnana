@@ -49,7 +49,7 @@ const GameInfo = styled.h2`
 `;
 
 const BtnWrap = styled.div`
-  margin-top: 70px;
+  margin-top: 50px;
   display: flex;
   gap: 51px;
 `;
@@ -71,10 +71,10 @@ const GameInfoModal = ({
           e.stopPropagation();
         }}
       >
-        <Planet src={planetImg} style={{width: planetWidth}} />
+        {planetImg && <Planet src={planetImg} style={{width: planetWidth}} />}
         <GameInfo>{modalText}</GameInfo>
         <BtnWrap>
-          <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />
+          {RedBtnText && <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />}
           <BlueBtn text={BlueBtnText} BtnFn={BlueBtnFn} />
         </BtnWrap>
       </ModalWrap>
