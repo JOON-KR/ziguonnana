@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import OpenViduSession from "../../components/OpenViduSession"; // 경로를 맞춰주세요
 import VideoBox from "../../components/layout/VideoBox";
 
@@ -52,6 +52,7 @@ const IceBreaking = () => {
         ) : (
           <p>Loading...</p>
         )}
+        <Outlet />
       </Content>
       <Frame>
         <VideoBox />
