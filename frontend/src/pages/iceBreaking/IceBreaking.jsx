@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import { Outlet, useLocation } from "react-router-dom";
-import OpenViduSession from "../../components/OpenViduSession"; // 경로를 맞춰주세요
+import { Outlet } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import OpenViduSession from "../../components/OpenViduSession";
 import VideoBox from "../../components/layout/VideoBox";
+import { clearSession } from "../../store/roomSlice";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -33,28 +35,30 @@ const Content = styled.div`
 `;
 
 const IceBreaking = () => {
-  const location = useLocation();
-  const { roomId, openviduToken, profileData } = location.state || {};
+  const dispatch = useDispatch();
+  const openviduToken = useSelector((state) => state.auth.openViduToken);
 
-  console.log("IceBreaking: Room ID:", roomId);
-  console.log("IceBreaking: OpenVidu Token:", openviduToken);
-  console.log("IceBreaking: Profile Data:", profileData);
+  useEffect(() => {
+    return () => {
+      dispatch(clearSession());
+    };
+  }, [dispatch]);
 
   return (
     <PageWrap>
+      {openviduToken && <OpenViduSession token={openviduToken} />}
       <Frame>
-        <VideoBox />
-        <VideoBox />
-        <VideoBox />
+        <VideoBox index={0} />
+        <VideoBox index={1} />
+        <VideoBox index={2} />
       </Frame>
       <Content>
-        {/* 하위 페이지는 Outlet위치에 박힘(사람 6개는 고정) */}
         <Outlet />
       </Content>
       <Frame>
-        <VideoBox />
-        <VideoBox />
-        <VideoBox />
+        <VideoBox index={3} />
+        <VideoBox index={4} />
+        <VideoBox index={5} />
       </Frame>
     </PageWrap>
   );

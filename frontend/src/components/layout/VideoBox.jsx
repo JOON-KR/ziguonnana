@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 const Box = styled.div`
   width: 200px;
   height: 200px;
   background-color: #ebeef1;
-  /* background-color: red; */
   padding: 10px;
   border-radius: 10px;
   display: flex;
@@ -13,7 +13,7 @@ const Box = styled.div`
   align-items: center;
 `;
 
-const Video = styled.div`
+const Video = styled.video`
   position: relative;
   width: 180px;
   height: 180px;
@@ -29,18 +29,26 @@ const NameTag = styled.div`
   display: inline-block;
   color: #f6f8fa;
   background-color: rgba(0, 0, 0, 0.5);
-  /* width: 116px; */
-  padding: 4px 8px 4px 8px;
+  padding: 4px 8px;
   font-size: 12px;
   align-self: flex-start;
 `;
 
-const VideoBox = () => {
+const VideoBox = ({ index }) => {
+  const videoRef = useRef(null);
+  const subscribers = useSelector((state) => state.room.subscribers);
+
+  useEffect(() => {
+    if (subscribers.length > index && videoRef.current) {
+      subscribers[index].addVideoElement(videoRef.current);
+      console.log(`Added video element for subscriber ${index}`);
+    }
+  }, [subscribers, index]);
+
   return (
     <Box>
-      <Video>
-        <NameTag>사용자이름</NameTag>
-      </Video>
+      <Video ref={videoRef} autoPlay />
+      <NameTag>사용자 이름</NameTag>
     </Box>
   );
 };
