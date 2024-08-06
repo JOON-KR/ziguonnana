@@ -34,7 +34,8 @@ public class BodyTalkService {
         if(room.getCycle()+1 > ROUND){
             // 게임종료
             BodyTalkResult result = gameEnd(room.getBodyTalkGame());
-            simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/bodyTalk/result", result);
+            BodyResponse response = BodyResponse.ok(CommandType.RESULT, result);
+            simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
             room.cycleInit(); //사이클(라운드) 초기화
             return "게임종료";
         }
@@ -46,7 +47,8 @@ public class BodyTalkService {
         // 키워드 저장
         Keyword keyword = randomKeyword();
         room.getBodyTalkGame().changeKeyword(keyword);
-        simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/bodyTalk/" + explanierNum, keyword);
+        BodyResponse response  = BodyResponse.ok(CommandType.EXPLANIER, keyword);
+        simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
         return keyword.getType();
     }
 
