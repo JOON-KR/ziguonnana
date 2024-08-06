@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,12 @@ public class Room {
 	private boolean isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
+
+	//게임 결과 계산용 벡터 저장
+	private ConcurrentMap<Integer, List<Double>>vectors;
+	//이구동성 게임결과 저장용
+	private List<IgudongseongResult> Igudongseong;
+
 
 	public void initArt() {
 		for(int i=1;i<=people;i++) {

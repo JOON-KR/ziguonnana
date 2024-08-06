@@ -29,8 +29,8 @@ public class WebsocketController {
     }
 
     @MessageMapping("/game/{roomId}/{memberId}/join")
-    public void joinRoom(@DestinationVariable("roomId") String roomId,@DestinationVariable("memberId") String memberId, @Payload GameProfile profile) {
-    	websocketService.join(roomId, profile,memberId);
+    public void joinRoom(@DestinationVariable("roomId") String roomId,@DestinationVariable("memberId") String memberId) {
+    	websocketService.join(roomId, memberId);
     }
 
     @MessageMapping("/game/{roomId}/chat")

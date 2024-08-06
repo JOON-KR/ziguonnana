@@ -21,6 +21,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.global.dto.SessionInfo;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,8 @@ public class WebsocketService {
     public void createRoom(String roomId, CreateRequest request) {
         log.info("----------웹소켓 방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, List<Double>> vector= new ConcurrentHashMap<>();
+        List<IgudongseongResult> Igudongseong = new ArrayList<>();
         Player player = Player.builder()
                 .memberId(request.getMemberId())
                 .role("admin")
@@ -54,6 +57,8 @@ public class WebsocketService {
                 .count(0)
                 .roomId(roomId)
                 .bodyTalkGame(new BodyTalkGame())
+                .vectors(vector)
+                .Igudongseong(Igudongseong)
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
@@ -93,12 +98,11 @@ public class WebsocketService {
         return getRoom(roomId).getPlayers().get(num);
     }
 
-    public void join(String roomId, GameProfile profile, String memberId) {
+    public void join(String roomId,  String memberId) {
         Room room = getRoom(roomId);
 
         Player player = Player.builder()
                 .memberId(memberId)
-                .profile(profile)
                 .role("user")
                 .roomId(roomId)
                 .num(room.getPlayers().size() + 1)
@@ -110,7 +114,7 @@ public class WebsocketService {
                 .roomId(roomId)
                 .num(player.getNum())
                 .build();
-        log.info("방 참가 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
+        log.info("방 참가 :: roomId : {}, player : {}", roomId, room.toString());
         messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, GameMessage.info("방 참가 완료", info));
     }
 
