@@ -23,99 +23,142 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class ArtService {
-    private final RoomRepository roomRepository;
-    private final SimpMessagingTemplate messagingTemplate;
-    // 그림 저장
-    public void save(String roomId, RelayArt art) {
-        Room room = roomRepository.getRoom(roomId);
-        int cycle = room.getCycle();
-        int people = room.getPeople();
-        ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-        int num = (art.getNum() + cycle) % people;
-        map.computeIfAbsent(num, k -> new ArrayList<>()).add(art);
+	private final RoomRepository roomRepository;
+	private final SimpMessagingTemplate messagingTemplate;
 
-        room.countUp();
-        log.info("roomCount: {}",room.getCount());
-        if (room.getCount() == people) {
-            // 그림 전파 함수 호출
-            Map<Integer, RelayArt> artMap = artResponse(roomId);
-            messagingTemplate.convertAndSend("/topic/game/" + roomId, GameMessage.info("그림 전파",artMap));
+	// 그림 저장
+	public void save(String roomId, RelayArt art) {
+		Room room = roomRepository.getRoom(roomId);
+		int cycle = room.getCycle();
+		int people = room.getPeople();
+		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+		int num = (art.getNum() + cycle) % people;
+		map.computeIfAbsent(num, k -> new ArrayList<>()).add(art);
 
-            // 카운트 초기화 및 사이클 증가
-            room.countInit();
-            room.cycleUp();
-            log.info("roomCycle: {}",room.getCycle());
-            // 사이클이 people - 1에 도달하면 다음 단계로 전환
-            if (room.getCycle() == people - 1) {
-            	log.info("이어그리기 종료=================다음단계로================");
-                room.cycleInit();
-                endRelay(roomId);
-            }
-        }
-        log.info("그림 저장 :: roomId : {}, art : {} " , roomId, art.toString());
-    }
-    //그림 및 키워드 전파
-    public Map<Integer, RelayArt> artResponse(String roomId) {
-        Room room = roomRepository.getRoom(roomId);
-        int cycle = room.getCycle();
-        int people = room.getPeople();
-        ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-        Map<Integer, RelayArt> tmp = new HashMap<>();
-        Random random = new Random();
+		room.countUp();
+		log.info("roomCount: {}", room.getCount());
+		if (room.getCount() == people) {
+			// 그림 전파 함수 호출
+			Map<Integer, RelayArt> artMap = artResponse(roomId);
+			messagingTemplate.convertAndSend("/topic/game/" + roomId, GameMessage.info("그림 전파", artMap));
 
-        for (int i = 1; i <= people; i++) {
-            List<RelayArt> artList = map.get((i + cycle) % people);
+			// 카운트 초기화 및 사이클 증가
+			room.countInit();
+			room.cycleUp();
+			log.info("roomCycle: {}", room.getCycle());
+			// 사이클이 people - 1에 도달하면 다음 단계로 전환
+			if (room.getCycle() == people - 1) {
+				log.info("이어그리기 종료=================다음단계로================");
+				room.cycleInit();
+				endRelay(roomId);
+			}
+		}
+		log.info("그림 저장 :: roomId : {}, art : {} ", roomId, art.toString());
+	}
 
-            if (artList != null && !artList.isEmpty()) {
-                RelayArt originalArt = artList.get(artList.size() - 1);
+	// 그림 및 키워드 전파
+	public Map<Integer, RelayArt> artResponse(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		int cycle = room.getCycle();
+		int people = room.getPeople();
+		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+		Map<Integer, RelayArt> tmp = new HashMap<>();
+		Random random = new Random();
 
-                // 원본 객체 깊은 복사 및 키워드 설정
-                RelayArt relayArt = RelayArt.builder()
-                        .num(originalArt.getNum())
-                        .keyword(selectRandomKeyword(room))
-                        .art(originalArt.getArt())
-                        .build();
+		for (int i = 1; i <= people; i++) {
+			List<RelayArt> artList = map.get((i + cycle) % people);
 
-                tmp.put(i, relayArt);
-            }
-        }
-        log.info("그림 전파 :: roomId : {}, art : {} " , roomId, tmp.toString());
-        return tmp;
-    }
-    public String selectRandomKeyword(Room room) {
-        List<String> combinedList = new ArrayList<>();
-        ConcurrentMap<Integer, Player> players = room.getPlayers();
+			if (artList != null && !artList.isEmpty()) {
+				RelayArt originalArt = artList.get(artList.size() - 1);
 
-        for (Player player : players.values()) {
-            List<String> feature = player.getProfile().getFeature();
-            List<String> answer = player.getAnswer();
-            for (String f : feature) combinedList.add(f);
-            combinedList.addAll(answer);
-        }
+				// 원본 객체 깊은 복사 및 키워드 설정
+				RelayArt relayArt = RelayArt.builder().num(originalArt.getNum()).keyword(selectRandomKeyword(room))
+						.art(originalArt.getArt()).build();
 
-        if (!combinedList.isEmpty()) {
-            Random random = new Random();
-            return combinedList.get(random.nextInt(combinedList.size()));
-        }
+				tmp.put(i, relayArt);
+			}
+		}
+		log.info("그림 전파 :: roomId : {}, art : {} ", roomId, tmp.toString());
+		return tmp;
+	}
 
-        return "차은우"; // 비어있을 경우 
-    }
-    private void endRelay(String roomId) {
-        Room room = roomRepository.getRoom(roomId);
-        ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-        
-        // 결과 전송
-        String resultMessage = "이어그리기 종료";
-        GameMessage<ConcurrentMap<Integer, List<RelayArt>>> artResult = GameMessage.info(resultMessage, map);
-        messagingTemplate.convertAndSend("/topic/game/" + roomId, artResult);
-        
-        // 다음 단계로 전환 메시지 전송
-        String nextStepMessage = "이어그리기 결과 확인";
-        boolean endArt = true;
-        GameMessage<Boolean>nextMessage = GameMessage.info(nextStepMessage, endArt);
-        messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
-        log.info("그림 그리기 결과 :: roomId : {}, art : {} " , roomId, artResult);
-    }
+	public String selectRandomKeyword(Room room) {
+		List<String> combinedList = new ArrayList<>();
+		ConcurrentMap<Integer, Player> players = room.getPlayers();
 
+		for (Player player : players.values()) {
+			List<String> feature = player.getProfile().getFeature();
+			List<String> answer = player.getAnswer();
+			for (String f : feature)
+				combinedList.add(f);
+			combinedList.addAll(answer);
+		}
+
+		if (!combinedList.isEmpty()) {
+			Random random = new Random();
+			return combinedList.get(random.nextInt(combinedList.size()));
+		}
+
+		return "차은우"; // 비어있을 경우
+	}
+
+	private void endRelay(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+
+		// 결과 전송
+		String resultMessage = "이어그리기 종료";
+		GameMessage<ConcurrentMap<Integer, List<RelayArt>>> artResult = GameMessage.info(resultMessage, map);
+		messagingTemplate.convertAndSend("/topic/game/" + roomId, artResult);
+
+		// 다음 단계로 전환 메시지 전송
+		String nextStepMessage = "이어그리기 결과 확인";
+		boolean endArt = true;
+		GameMessage<Boolean> nextMessage = GameMessage.info(nextStepMessage, endArt);
+		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
+		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, artResult);
+	}
+
+	public void spreadKeyword(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		List<RelayArt> keywordList = getKeyword(room);
+		GameMessage<List<RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", keywordList);
+		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
+		log.info("이어그리기 키워드 발송");
+	}
+
+	public List<RelayArt> getKeyword(Room room) {
+		int people = room.getPeople();
+		ConcurrentMap<Integer, Player> players = room.getPlayers();
+		List<RelayArt> relayArts = new ArrayList<>();
+		Random random = new Random();
+
+		for (int i = 1; i <= people; i++) {
+			Player player = players.get(i);
+			List<String> combinedList = new ArrayList<>();
+
+			// feature와 answer 리스트를 결합
+			List<String> feature = player.getProfile() != null ? player.getProfile().getFeature() : null;
+			List<String> answer = player.getAnswer();
+
+			if (feature != null) {
+				combinedList.addAll(feature);
+			}
+
+			if (answer != null) {
+				combinedList.addAll(answer);
+			}
+
+			// 랜덤하게 값을 선택
+			if (!combinedList.isEmpty()) {
+				String randomKeyword = combinedList.get(random.nextInt(combinedList.size()));
+				RelayArt relayArt = RelayArt.builder().num((i + 1) % (people) == 0 ? i + 1 : (i + 1) % (people))
+						.keyword(randomKeyword).build();
+				relayArts.add(relayArt);
+			}
+		}
+
+		return relayArts;
+	}
 
 }

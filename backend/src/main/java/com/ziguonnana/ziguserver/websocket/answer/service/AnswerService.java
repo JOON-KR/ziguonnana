@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.exception.PlayerException;
 import com.ziguonnana.ziguserver.websocket.answer.dto.SelfIntroductionRequest;
+import com.ziguonnana.ziguserver.websocket.art.service.ArtService;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
@@ -24,6 +25,7 @@ public class AnswerService {
 
 	private final RoomRepository roomRepository;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final ArtService artService;
 	@Transactional
 	public void getSelfIntroductionAnswer(String roomId, SelfIntroductionRequest request) {
 		Room room = roomRepository.getRoom(roomId);
@@ -51,5 +53,6 @@ public class AnswerService {
 		boolean relayStart = true;
 		GameMessage<Boolean> nextMessage = GameMessage.info("이어그리기 시작", relayStart);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
+		artService.spreadKeyword(roomId);
 	}
 }
