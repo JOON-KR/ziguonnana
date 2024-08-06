@@ -125,13 +125,13 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [hashTag1, setHashTag1] = useState("");
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
-
   const userNo = useSelector((state) => state.auth.userNo);
-  const memberId = useSelector((state) => state.memberId);
+  const memberId = useSelector((state) => state.auth.memberId);
   const openviduToken = useSelector((state) => state.auth.openViduToken);
   const roomId = useSelector((state) => state.room.roomId);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const stompClient = useSelector((state) => state.client.stompClient);
+  const client = useSelector((state) => state.client.stompClient);
+  const [messages, setMessages] = useState([]);
 
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
@@ -143,35 +143,40 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
   // 프로필 등록 핸들러
   const handleRegister = async () => {
-    const hashTags = [hashTag1, hashTag2, hashTag3].filter(
-      (tag) => tag.trim() !== ""
-    );
-    if (hashTags.length > 3) {
-      alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
-      return;
-    }
-    const profileData = {
-      profileImageFile,
-      name,
-      feature: hashTags.join(", "),
-    };
-    // onRegisterProfile(profileData);
-    if (stompClient && stompClient.connected) {
-      const profileRequest = {
-        memberId: memberId, // 저장된 memberId 사용
-        num: userNo, // 저장된 num 사용
-        profileImage: "no_Img",
-        feature: hashTags.join(", "),
-        name: name,
-      };
+    // const hashTags = [hashTag1, hashTag2, hashTag3].filter(
+    //   (tag) => tag.trim() !== ""
+    // );
+    // if (hashTags.length > 3) {
+    //   alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
+    //   return;
+    // }
 
-      console.log("프로필 생성 요청:", profileRequest);
-      stompClient.send(
+    const profileData = {
+      memberId: memberId,
+      num: userNo,
+      profileImageFile: "",
+      feature: [hashTag1, hashTag2, hashTag3],
+      name: name,
+    };
+
+    console.log("연결 상태 : ", client.connected);
+
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+      console.log("방에서 받은 메시지:", parsedMessage);
+      setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+    });
+
+    if (client && client.connected) {
+      console.log("소켓에 전송할 데이터 : ", profileData);
+      client.send(
         `/app/game/${roomId}/profile`,
         {},
-        JSON.stringify(profileRequest)
+        JSON.stringify(profileData)
       );
     }
+
+    onRegisterProfile(profileData);
   };
 
   return (

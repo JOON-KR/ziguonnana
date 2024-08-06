@@ -6,10 +6,7 @@ import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import { getProfileList, createProfile } from "../../api/profile/profileAPI";
 import BASE_URL from "../../api/APIconfig";
-import {
-  useSelector,
-  useSelectoses_DYGcdUoJUHses_DYGcdUoJUHr,
-} from "react-redux";
+import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import axiosInstance from "../../api/axiosInstance";
@@ -89,18 +86,20 @@ const HeaderText = styled.h4`
 `;
 
 const ProfilePick = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-
+  // const { roomId, openviduToken } = location.state || {};
   const userNo = useSelector((state) => state.auth.userNo);
   const memberId = useSelector((state) => state.memberId);
   const openviduToken = useSelector((state) => state.auth.openViduToken);
   const roomId = useSelector((state) => state.room.roomId);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const client = useSelector((state) => state.client.stompClient);
 
-  console.log("ProfilePick: Room ID:", roomId);
-  console.log("ProfilePick: OpenVidu Token:", openviduToken);
+  // console.log("ProfilePick: Room ID:", roomId);
+  // console.log("ProfilePick: OpenVidu Token:", openviduToken);
 
-  // const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken");
 
   const [profiles, setProfiles] = useState([]);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
@@ -124,33 +123,28 @@ const ProfilePick = () => {
     };
     fetchProfiles();
 
-    // const socket = new SockJS(`${BASE_URL}/ws`);
-    // const stompClient = new Client({
-    //   webSocketFactory: () => socket,
-    //   reconnectDelay: 5000,
-    //   debug: (str) => {
-    //     console.log(str);
-    //   },
-    // });
+    const socket = new SockJS(`${BASE_URL}/ws`);
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+    });
 
-    // stompClientRef.current = stompClient;
+    stompClientRef.current = stompClient;
 
-    // stompClient.onConnect = (frame) => {
-    //   const serverUrl = socket._transport.url;
-    //   console.log("Connected to server: " + serverUrl);
-    //   console.log("Connected: " + JSON.stringify(frame));
-    // };
+    stompClient.onConnect = (frame) => {
+      const serverUrl = socket._transport.url;
+      console.log("Connected to server: " + serverUrl);
+      console.log("Connected: " + JSON.stringify(frame));
+    };
 
-    // stompClient.activate();
+    stompClient.activate();
   }, [isLoggedIn]);
 
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
   };
 
-  //--------------------------------------------------------------------------
   const handleRegisterProfile = async (profileData) => {
-    //로그인 하든 안하든 프로필 만들었으면 이동
     if (isLoggedIn) {
       try {
         const profile = await createProfile(profileData);
@@ -158,14 +152,14 @@ const ProfilePick = () => {
         setGameProfile(profile);
         setIsProfileRegisterModalOpen(false);
 
-        // if (stompClientRef.current && stompClientRef.current.connected) {
-        //   stompClientRef.current.subscribe(
-        //     `/app/game/${roomId}/profile`,
-        //     {},
-        //     JSON.stringify({ ...profile, roomId })
-        //   );
-        //   console.log("프로필 정보 전송:", profile);
-        // }
+        if (stompClientRef.current && stompClientRef.current.connected) {
+          stompClientRef.current.subscribe(
+            `/app/game/${roomId}/profile`,
+            {},
+            JSON.stringify({ ...profile, roomId })
+          );
+          console.log("프로필 정보 전송:", profile);
+        }
       } catch (error) {
         console.error("프로필 등록 실패:", error);
       }
@@ -173,24 +167,24 @@ const ProfilePick = () => {
       setGameProfile(profileData);
       setProfiles((prevProfiles) => [...prevProfiles, profileData]);
       setIsProfileRegisterModalOpen(false);
-      // if (stompClientRef.current && stompClientRef.current.connected) {
-      //   stompClientRef.current.subscribe(
-      //     `/app/game/${roomId}/profile`,
-      //     {},
-      //     JSON.stringify({ ...profileData, roomId })
-      //   );
-      //   console.log("프로필 정보 전송:", profileData);
-      // }
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        stompClientRef.current.subscribe(
+          `/app/game/${roomId}/profile`,
+          {},
+          JSON.stringify({ ...profileData, roomId })
+        );
+        console.log("프로필 정보 전송:", profileData);
+      }
     }
-    //-------------------------------------------------------------------------
+
     // 프로필 등록 후 IceBreaking 페이지로 이동
-    navigate("/icebreaking", {
-      state: {
-        roomId,
-        openviduToken,
-        profileData,
-      },
-    });
+    // navigate("/icebreaking", {
+    //   state: {
+    //     roomId,
+    //     openviduToken,
+    //     profileData,
+    //   },
+    // });
   };
 
   return (
