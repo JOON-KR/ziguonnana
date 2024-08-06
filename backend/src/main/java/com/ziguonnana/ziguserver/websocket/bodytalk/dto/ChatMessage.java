@@ -8,5 +8,6 @@ import lombok.Getter;
 public class ChatMessage {
     private int senderNum;
     private String content;
+    private boolean isCorrect;
 
 }

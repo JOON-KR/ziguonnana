@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,8 +28,8 @@ public class Room {
 	private int count;
 	private boolean isRelay;
 	private String roomId;
-	
-	
+	private BodyTalkGame bodyTalkGame;
+
 	public void initArt() {
 		for(int i=1;i<=people;i++) {
 			art.put(i, new ArrayList<>());

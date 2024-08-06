@@ -33,10 +33,9 @@ public class BodyTalkController {
     @MessageMapping("/game/{roomId}/bodyTalk/chat")
     @SendTo("/topic/game/{roomId}/bodyTalk/chat")
     public GameMessage<ChatMessage> sendMessage(@DestinationVariable("roomId") String roomId, @Payload ChatRequest chatRequest) {
-        ChatMessage chatMessage = bodyTalkService.chat(chatRequest);
+        log.info("========몸으로 말해요 채팅=========");
+        ChatMessage chatMessage = bodyTalkService.chat(chatRequest, roomId);
         return GameMessage.info(chatMessage.getSenderNum() + ": " + chatMessage.getContent(), chatMessage);
     }
-    
-    //TODO : 점수 집계
 
 }

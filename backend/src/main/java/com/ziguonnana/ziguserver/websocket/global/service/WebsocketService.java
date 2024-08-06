@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +34,7 @@ public class WebsocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void createRoom(String roomId, CreateRequest request) {
-        log.info("----------방 생성 시작 -----------");
+        log.info("----------웹소켓 방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
         Player player = Player.builder()
                 .memberId(request.getMemberId())
@@ -52,6 +53,7 @@ public class WebsocketService {
                 .cycle(0)
                 .count(0)
                 .roomId(roomId)
+                .bodyTalkGame(new BodyTalkGame())
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
