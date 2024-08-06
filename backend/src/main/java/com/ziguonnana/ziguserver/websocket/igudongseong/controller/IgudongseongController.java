@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.SimilarRequest;
 import com.ziguonnana.ziguserver.websocket.igudongseong.service.IgudongseongService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,15 +27,13 @@ public class IgudongseongController {
     public GameMessage<List<String>> getAnswer(@DestinationVariable("roomId") String roomId) {
         log.info("=======이구동성 시작=======");
         List<String> keyword =  igudongseongService.getKeyword(roomId);
+        igudongseongService.saveKeyword(keyword,roomId);
         return GameMessage.info("이구동성 시작!", keyword);
     }
     
     @MessageMapping("/game/{roomId}/similar")
-    public GameMessage<Integer> getResult(@DestinationVariable("roomId") String roomId) {
+    public void getResult(@DestinationVariable("roomId") String roomId, @Payload SimilarRequest request) {
     	log.info("=======이구동성 유사도 검증=======");
-    	GameMessage<Integer> response =  igudongseongService.getSimilar(roomId);
-    	return response;
+    	igudongseongService.getSimilar(roomId,request);
     }
-    
-
 }

@@ -20,6 +20,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.global.dto.SessionInfo;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class WebsocketService {
     public void createRoom(String roomId, CreateRequest request) {
         log.info("----------방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, List<Double>> vector= new ConcurrentHashMap<>();
+        List<IgudongseongResult> Igudongseong = new ArrayList<>();
         Player player = Player.builder()
                 .memberId(request.getMemberId())
                 .role("admin")
@@ -52,6 +55,8 @@ public class WebsocketService {
                 .cycle(0)
                 .count(0)
                 .roomId(roomId)
+                .vectors(vector)
+                .Igudongseong(Igudongseong)
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
