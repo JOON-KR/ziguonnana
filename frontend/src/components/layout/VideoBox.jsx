@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { OpenVidu } from "openvidu-browser"; // OpenVidu 임포트
+import { OpenVidu } from "openvidu-browser";
 import {
   setPublisher,
   addSubscriber,
   clearSession,
-} from "../../store/roomSlice"; // 필요한 액션들 임포트
+} from "../../store/roomSlice";
 
 const Box = styled.div`
   width: 200px;
@@ -50,6 +50,10 @@ const VideoBox = ({ index }) => {
     const initializePublisher = async () => {
       try {
         console.log("세션 상태:", session);
+
+        // 권한 요청
+        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
         const OV = new OpenVidu();
         const publisher = OV.initPublisher(videoRef.current, {
           videoSource: undefined,
