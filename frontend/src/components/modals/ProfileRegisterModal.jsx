@@ -4,6 +4,7 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import ProfileNana from "../../assets/icons/ProfileNana.png";
+import { useSelector } from "react-redux";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -125,6 +126,13 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
 
+  const userNo = useSelector((state) => state.auth.userNo);
+  const memberId = useSelector((state) => state.memberId);
+  const openviduToken = useSelector((state) => state.auth.openViduToken);
+  const roomId = useSelector((state) => state.room.roomId);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const stompClient = useSelector((state) => state.client.stompClient);
+
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -147,7 +155,23 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
       name,
       feature: hashTags.join(", "),
     };
-    onRegisterProfile(profileData);
+    // onRegisterProfile(profileData);
+    if (stompClient && stompClient.connected) {
+      const profileRequest = {
+        memberId: memberId, // 저장된 memberId 사용
+        num: userNo, // 저장된 num 사용
+        profileImage: "no_Img",
+        feature: hashTags.join(", "),
+        name: name,
+      };
+
+      console.log("프로필 생성 요청:", profileRequest);
+      stompClient.send(
+        `/app/game/${roomId}/profile`,
+        {},
+        JSON.stringify(profileRequest)
+      );
+    }
   };
 
   return (
