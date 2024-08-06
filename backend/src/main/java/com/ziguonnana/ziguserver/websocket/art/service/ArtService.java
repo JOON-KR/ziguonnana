@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.ziguonnana.ziguserver.websocket.art.dto.AvatarCard;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
@@ -117,7 +120,39 @@ public class ArtService {
 		GameMessage<Boolean> nextMessage = GameMessage.info(nextStepMessage, endArt);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
 		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, artResult);
+		
+		//아바타 결과 반환
 	}
+	//아직 어디서 호출할지 회의해봐야함
+	public void spreadAvatarCard(String roomId) {
+	    Room room = roomRepository.getRoom(roomId);
+	    ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+	    int people = room.getPeople();
+	    ConcurrentMap<Integer, AvatarCard> cards = new ConcurrentHashMap<>();
+
+	    for (int i = 1; i <= people; i++) {
+	        List<RelayArt> tmp = map.get(i);
+
+	        if (tmp != null && !tmp.isEmpty()) {
+	            RelayArt art = tmp.get(tmp.size() - 1);
+	            List<String> features = tmp.stream()
+	                                       .limit(3)
+	                                       .map(RelayArt::getKeyword)
+	                                       .collect(Collectors.toList());
+
+	            AvatarCard card = AvatarCard.builder()
+	                                        .avatarImage("") // art.getArt()) 나중에 s3로 연결 해야하는데 로직을 고민해봐야함
+	                                        .feature(features)
+	                                        .build();
+	            cards.put(i, card);
+	        }
+	    }
+	    GameMessage<ConcurrentMap<Integer, AvatarCard>> cardMessage = GameMessage.info("아바타 명함 전파", cards);
+		messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
+		log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
+	}
+
+	
 
 	public void spreadKeyword(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
