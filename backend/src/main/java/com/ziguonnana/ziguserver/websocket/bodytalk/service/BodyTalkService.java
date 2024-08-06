@@ -35,6 +35,7 @@ public class BodyTalkService {
             // 게임종료
             BodyTalkResult result = gameEnd(room.getBodyTalkGame());
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/bodyTalk/result", result);
+            room.cycleInit(); //사이클(라운드) 초기화
             return "게임종료";
         }
         int people = room.getPeople();
