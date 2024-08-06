@@ -12,7 +12,14 @@ const Wrap = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  padding-top: 300px; /* 상단 패딩 추가 */
+  padding-top: 20px; /* 상단 패딩 추가 */
+`;
+
+const BubbleWrap = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 `;
 
 const ButtonWrap = styled.div`
@@ -28,7 +35,7 @@ const StyleButton = styled.button`
   font-size: 18px;
   font-weight: bold;
   color: white;
-  background-color: #ff7f50;
+  background-color: #58FFF5;
   border: none;
   border-radius: 50px;
   cursor: pointer;
@@ -36,7 +43,7 @@ const StyleButton = styled.button`
   transition: background-color 0.3s, transform 0.3s;
 
   &:hover {
-    background-color: #ff6347;
+    background-color: #1DADA4;
     transform: translateY(-2px);
   }
 
@@ -49,7 +56,8 @@ const StyleButton = styled.button`
 const NanaImg = styled.img`
   width: 300px;
   height: auto;
-  margin-top: -50px; /* 상단 마진 조정 */
+  margin-top: 20px; /* 상단 마진 조정 */
+  margin-bottom: 20px;
 `;
 
 const Game1Nickname = ({ onSelectStyle, onClose }) => {
@@ -58,7 +66,9 @@ const Game1Nickname = ({ onSelectStyle, onClose }) => {
 
   return (
     <Wrap>
-      <SpeechBubble text={text} />
+      <BubbleWrap>
+        <SpeechBubble text={text} />
+      </BubbleWrap>
       <NanaImg src={Nana} />
       <ButtonWrap>
         {styles.map((style) => (

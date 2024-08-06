@@ -5,8 +5,8 @@ export const authSlice = createSlice({
   name: "auth",
   initialState: {
     isLoggedIn: false,
-    userNo: 0,
-    memberId: 0,
+    userNo: 0, //총 인원 중 몇번째로 들어왔는지 입장 번호
+    memberId: 0, //멤버 한명한명에게 부여된 고유의 id
     openViduToken: "",
 
     // accessToken: null,
