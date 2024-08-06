@@ -9,6 +9,7 @@ export const roomSlice = createSlice({
     session: null, // OpenVidu 세션
     publisher: null, // OpenVidu 퍼블리셔
     subscribers: [], // 구독자 리스트
+    maxNo: 0,
   },
 
   // 상태 수정 함수들
@@ -33,6 +34,9 @@ export const roomSlice = createSlice({
       state.publisher = null;
       state.subscribers = [];
     },
+    setMaxNo: (state, action) => {
+      state.maxNo = action.payload;
+    },
   },
 });
 
@@ -43,6 +47,7 @@ export const {
   setPublisher,
   addSubscriber,
   clearSession,
+  setMaxNo,
 } = roomSlice.actions;
 
 export default roomSlice.reducer;
