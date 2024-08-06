@@ -36,29 +36,29 @@ public class IgudongseongService {
                 .collect(Collectors.toList());
 	}
 	
-	public GameMessage<String> getSimilar(String roomId, List<List<Double>> userVectors){
-		Room room = roomRepository.getRoom(roomId);
-		int people = room.getPeople();
+	public GameMessage<Integer> getSimilar(String roomId){//, List<List<Double>> userVectors){
+//		Room room = roomRepository.getRoom(roomId);
+//		int people = room.getPeople();
+//		
+//		room.countUp();
+//		
+//		double[] similarityScores = calculateSimilarity(userVectors);
+//		int mostSimilarUserCount = findMostSimilarUserCount(similarityScores);  // 가장 많은 유사도를 가진 사용자의 유사도 수
+//
+//		String resultMessage = (mostSimilarUserCount == people) ? "성공!" : "실패!";
+//		GameMessage<Integer> result = GameMessage.info(resultMessage, mostSimilarUserCount);
+//
+//		if(room.getCount() == people) {
+//			room.cycleUp();
+//			room.countInit();
+//			
+//			if(room.getCycle() == people) {
+//				room.cycleInit();
+//				endGame(roomId);
+//			}
+//		}
 		
-		room.countUp();
-		
-		double[] similarityScores = calculateSimilarity(userVectors);
-		int mostSimilarUserCount = findMostSimilarUserCount(similarityScores);  // 가장 많은 유사도를 가진 사용자의 유사도 수
-
-		String resultMessage = (mostSimilarUserCount == people) ? "성공!" : "실패!";
-		GameMessage<Integer> result = GameMessage.info(resultMessage, mostSimilarUserCount);
-
-		if(room.getCount() == people) {
-			room.cycleUp();
-			room.countInit();
-			
-			if(room.getCycle() == people) {
-				room.cycleInit();
-				endGame(roomId);
-			}
-		}
-		
-		return result;
+		return null;
 	}
 	
 	public GameMessage<Boolean> endGame(String roomId){
