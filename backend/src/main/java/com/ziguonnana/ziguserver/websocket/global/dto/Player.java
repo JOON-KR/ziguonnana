@@ -19,7 +19,7 @@ public class Player {
 	private List<String>answer;
 	private GameProfile profile;
 	private Avatar avatar;
-	private String nickName;
+	private String nickname;
 	private String emotionImage;
 	private double[] vector;
 	private int num;
@@ -29,5 +29,9 @@ public class Player {
 
 	public void createAnswer(List<String> answer) {
 		this.answer = answer;
+	}
+	
+	public void createNickname(String nickname) {
+		this.nickname = nickname;
 	}
 }
