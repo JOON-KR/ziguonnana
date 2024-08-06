@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Games from "../pages/games/Games";
 import Game1 from "../pages/games/Game1";
+import Game1Nickname from "../pages/games/Game1Nickname";
 import Game2 from "../pages/games/Game2";
 import Game3 from "../pages/games/Game3";
 import Game4 from "../pages/games/Game4";
@@ -15,6 +16,7 @@ const GamePages = () => {
       <Routes>
         <Route path="/" element={<Games />} />
         <Route path="game1" element={<Game1 />} />
+        <Route path="game1NickName" element={<Game1Nickname />} />
         <Route path="game2" element={<Game2 />} />
         <Route path="game3" element={<Game3 />} />
         <Route path="game4" element={<Game4 />} />
