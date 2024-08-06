@@ -88,12 +88,17 @@ const HeaderText = styled.h4`
 const ProfilePick = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { roomId, openviduToken } = location.state || {};
-
-  console.log("ProfilePick: Room ID:", roomId);
-  console.log("ProfilePick: OpenVidu Token:", openviduToken);
-
+  // const { roomId, openviduToken } = location.state || {};
+  const userNo = useSelector((state) => state.auth.userNo);
+  const memberId = useSelector((state) => state.memberId);
+  const openviduToken = useSelector((state) => state.auth.openViduToken);
+  const roomId = useSelector((state) => state.room.roomId);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const client = useSelector((state) => state.client.stompClient);
+
+  // console.log("ProfilePick: Room ID:", roomId);
+  // console.log("ProfilePick: OpenVidu Token:", openviduToken);
+
   const token = localStorage.getItem("accessToken");
 
   const [profiles, setProfiles] = useState([]);
@@ -122,9 +127,6 @@ const ProfilePick = () => {
     const stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      debug: (str) => {
-        console.log(str);
-      },
     });
 
     stompClientRef.current = stompClient;
@@ -176,13 +178,13 @@ const ProfilePick = () => {
     }
 
     // 프로필 등록 후 IceBreaking 페이지로 이동
-    navigate("/icebreaking", {
-      state: {
-        roomId,
-        openviduToken,
-        profileData,
-      },
-    });
+    // navigate("/icebreaking", {
+    //   state: {
+    //     roomId,
+    //     openviduToken,
+    //     profileData,
+    //   },
+    // });
   };
 
   return (

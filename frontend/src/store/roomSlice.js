@@ -4,12 +4,12 @@ import { createSlice } from "@reduxjs/toolkit";
 export const roomSlice = createSlice({
   name: "room",
   initialState: {
-    roomId: "",
-    teamCode: "",
+    roomId: "", //이거 입력해서 방에 참가
+    teamCode: "", // 이제 안씀
     session: null, // OpenVidu 세션
     publisher: null, // OpenVidu 퍼블리셔
     subscribers: [], // 구독자 리스트
-    maxNo: 0,
+    maxNo: 0, //방장이 설정한 최대 인원수
   },
 
   // 상태 수정 함수들
