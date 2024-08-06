@@ -121,50 +121,10 @@ public class WebsocketService {
     public void startGame(Room room) {
         room.initArt();
         // 게임 시작 알림을 클라이언트에 보냅니다.
-        List<RelayArt> keywordList = getKeyword(room);
         log.info("------------------게임 시작 ------------------");
-        GameMessage<List<RelayArt>> keyword = GameMessage.info("키워드", keywordList);
-        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
-        log.info("game 키워드 발송");
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
-    }
-
-    public List<RelayArt> getKeyword(Room room) {
-        int people = room.getPeople();
-        ConcurrentMap<Integer, Player> players = room.getPlayers();
-        List<RelayArt> relayArts = new ArrayList<>();
-        Random random = new Random();
-
-        for (int i = 1; i <= people; i++) {
-            Player player = players.get(i);
-            List<String> combinedList = new ArrayList<>();
-
-            // feature와 answer 리스트를 결합
-            List<String> feature = player.getProfile() != null ? player.getProfile().getFeature() : null;
-            List<String> answer = player.getAnswer();
-
-            if (feature != null) {
-                combinedList.addAll(feature);
-            }
-
-            if (answer != null) {
-                combinedList.addAll(answer);
-            }
-
-            // 랜덤하게 값을 선택
-            if (!combinedList.isEmpty()) {
-                String randomKeyword = combinedList.get(random.nextInt(combinedList.size()));
-                RelayArt relayArt = RelayArt.builder()
-                        .num((i+1)%(people) == 0? i+1:(i+1)%(people) )
-                        .keyword(randomKeyword)
-                        .build();
-                relayArts.add(relayArt);
-            }
-        }
-
-        return relayArts;
     }
 
     public void addPlayerToRoom(String roomId, Player player) {
