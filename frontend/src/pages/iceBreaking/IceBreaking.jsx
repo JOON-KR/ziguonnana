@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
+import { Outlet, useLocation } from "react-router-dom";
+import OpenViduSession from "../../components/OpenViduSession"; // 경로를 맞춰주세요
 import VideoBox from "../../components/layout/VideoBox";
-import Loader from "../../components/common/Loader";
-import { Outlet } from "react-router-dom";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -29,11 +29,16 @@ const Content = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* background-color: aliceblue; */
 `;
 
-const PageTemplate = () => {
+const IceBreaking = () => {
+  const location = useLocation();
+  const { roomId, openviduToken, profileData } = location.state || {};
+
+  console.log("IceBreaking: Room ID:", roomId);
+  console.log("IceBreaking: OpenVidu Token:", openviduToken);
+  console.log("IceBreaking: Profile Data:", profileData);
+
   return (
     <PageWrap>
       <Frame>
@@ -42,6 +47,11 @@ const PageTemplate = () => {
         <VideoBox />
       </Frame>
       <Content>
+        {openviduToken ? (
+          <OpenViduSession token={openviduToken} /> // 받아온 토큰을 OpenViduSession에 전달
+        ) : (
+          <p>Loading...</p>
+        )}
         <Outlet />
       </Content>
       <Frame>
@@ -53,4 +63,4 @@ const PageTemplate = () => {
   );
 };
 
-export default PageTemplate;
+export default IceBreaking;

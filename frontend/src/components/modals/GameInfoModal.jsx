@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import GameModal from "../../assets/images/gameModal.png";
+import GameModalImage from "../../assets/images/gameModal.png";
 import RedBtn from "../common/RedBtn";
 import BlueBtn from "../common/BlueBtn";
 
@@ -19,7 +19,7 @@ const BlackBg = styled.div`
 `;
 
 const ModalWrap = styled.div`
-  background-image: url(${GameModal});
+  background-image: url(${GameModalImage});
   background-size: cover;
   background-position: center;
   width: 735px;
@@ -35,21 +35,21 @@ const ModalWrap = styled.div`
 `;
 
 const Planet = styled.img`
-  width: 138px;
-  height: 138px;
+  width: 170px;
+  height: 148px;
   /* margin-bottom: 20px; */
   display: block;
 `;
 
 const GameInfo = styled.h2`
-  font-size: 30px;
+  font-size: 28px;
   margin-top: 20px;
   margin-bottom: 20px;
   line-height: 150%;
 `;
 
 const BtnWrap = styled.div`
-  margin-top: 70px;
+  margin-top: 50px;
   display: flex;
   gap: 51px;
 `;
@@ -62,6 +62,7 @@ const GameInfoModal = ({
   BlueBtnText,
   RedBtnFn,
   BlueBtnFn,
+  planetWidth,
 }) => {
   return (
     <BlackBg onClick={onClose}>
@@ -70,10 +71,10 @@ const GameInfoModal = ({
           e.stopPropagation();
         }}
       >
-        <Planet src={planetImg} />
+        {planetImg && <Planet src={planetImg} style={{width: planetWidth}} />}
         <GameInfo>{modalText}</GameInfo>
         <BtnWrap>
-          <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />
+          {RedBtnText && <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />}
           <BlueBtn text={BlueBtnText} BtnFn={BlueBtnFn} />
         </BtnWrap>
       </ModalWrap>

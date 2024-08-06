@@ -20,7 +20,7 @@ const PageWrap = styled.div`
 
 const Header = styled.header`
   font-size: 50px;
-  color: #58FFF5;
+  color: #58fff5;
   font-weight: bold;
   margin-top: 30px;
   margin-bottom: 30px;
@@ -126,17 +126,21 @@ const Icon = styled.img`
 `;
 
 const MyPage = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); //로그인 상태
+  const [setIsLoggedIn] = useState(true); //로그인 상태
   const navigate = useNavigate();
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     navigate("/");
-  }
+  };
 
   const handleRecord = () => {
     navigate("/games/gameRecord");
-  }
+  };
+
+  const handleProfileUpdate = () => {
+    navigate("/user/profileupdate");
+  };
 
   return (
     <PageWrap>
@@ -149,7 +153,9 @@ const MyPage = () => {
           <ProfileKeywords>#개발자, #음악 애호가, #여행자</ProfileKeywords>
           <ButtonContainer>
             <ProfileButton onClick={handleLogout}>로그아웃</ProfileButton>
-            <ProfileButton>내정보수정</ProfileButton>
+            <ProfileButton onClick={handleProfileUpdate}>
+              내정보수정
+            </ProfileButton>
           </ButtonContainer>
         </LeftBox>
         <RightBox>
@@ -160,7 +166,7 @@ const MyPage = () => {
           <BottomBox>
             <Title>나의 기록</Title>
             <IconContainer>
-              <Icon src={grayPic} alt="기록1" onClick={handleRecord}/>
+              <Icon src={grayPic} alt="기록1" onClick={handleRecord} />
               <Icon src={orangePic} alt="기록2" />
               <Icon src={bluePic} alt="기록3" />
             </IconContainer>
