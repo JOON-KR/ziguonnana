@@ -6,10 +6,10 @@ import VideoBox from "../../components/layout/VideoBox";
 
 const PageWrap = styled.div`
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
   box-sizing: border-box;
 `;
 
@@ -18,13 +18,14 @@ const Frame = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
   height: 100%;
   gap: 16px;
-  box-sizing: border-box;
+  width: 200px; /* Fixed width for Frame */
 `;
 
 const Content = styled.div`
-  width: 100%;
+  flex-grow: 1;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -47,11 +48,7 @@ const IceBreaking = () => {
         <VideoBox />
       </Frame>
       <Content>
-        {openviduToken ? (
-          <OpenViduSession token={openviduToken} /> // 받아온 토큰을 OpenViduSession에 전달
-        ) : (
-          <p>Loading...</p>
-        )}
+        {/* 하위 페이지는 Outlet위치에 박힘(사람 6개는 고정) */}
         <Outlet />
       </Content>
       <Frame>

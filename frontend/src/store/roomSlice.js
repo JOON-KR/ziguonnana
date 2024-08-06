@@ -19,30 +19,9 @@ export const roomSlice = createSlice({
     setTeamCode: (state, action) => {
       state.teamCode = action.payload;
     },
-    setSession: (state, action) => {
-      state.session = action.payload;
-    },
-    setPublisher: (state, action) => {
-      state.publisher = action.payload;
-    },
-    addSubscriber: (state, action) => {
-      state.subscribers.push(action.payload);
-    },
-    clearSession: (state) => {
-      state.session = null;
-      state.publisher = null;
-      state.subscribers = [];
-    },
   },
 });
 
-export const {
-  setRoomId,
-  setTeamCode,
-  setSession,
-  setPublisher,
-  addSubscriber,
-  clearSession,
-} = roomSlice.actions;
+export const { setRoomId, setTeamCode } = roomSlice.actions;
 
 export default roomSlice.reducer;

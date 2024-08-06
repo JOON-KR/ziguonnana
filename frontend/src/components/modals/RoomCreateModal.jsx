@@ -6,13 +6,17 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { setRoomId, setTeamCode } from "../../store/roomSlice";
-import authSlice from "../../store/authSlice";
+import { setMaxNo, setRoomId, setTeamCode } from "../../store/roomSlice";
+import authSlice, {
+  setMemberId,
+  setOpenViduToken,
+  setUserNo,
+} from "../../store/authSlice";
 import BASE_URL from "../../api/APIconfig";
 import axios from "axios";
-import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";
+import { Stomp } from "@stomp/stompjs";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -106,6 +110,9 @@ const BtnWrap = styled.div`
 const RoomCreateModal = ({ onClose }) => {
   const [teamName, setTeamName] = useState("");
   const [selectedCapacity, setSelectedCapacity] = useState(1);
+  const [stClient, setStClient] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [sessionInfo, setSessionInfo] = useState({});
 
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
@@ -114,68 +121,138 @@ const RoomCreateModal = ({ onClose }) => {
 
   const handleToggleClick = (capacity) => {
     setSelectedCapacity(capacity);
+    dispatch(setMaxNo(capacity));
   };
 
   useEffect(() => {
-    console.log("로그인 상태 : ", isLoggedIn);
-    console.log("토큰 : ", token);
+    // console.log("로그인 상태 : ", isLoggedIn);
+    // console.log("토큰 : ", token);
   }, [isLoggedIn, token]);
 
   const handleCreateRoom = async () => {
     try {
-      //오픈비두 엔드포인트 보내서 연결
+      //오픈비두 방생성
       const response = await axiosInstance.post("/api/v1/room", {
         teamName: teamName,
         people: selectedCapacity,
       });
+      // console.log("오픈비두 엔드포인트 응답 :"x, response.data.data);
 
       const roomId = response.data.data.roomId;
-      const teamCode = response.data.data.teamCode;
-
       console.log("roomID : ", roomId);
-      console.log("teamCode : ", teamCode);
-
       dispatch(setRoomId(roomId));
-      dispatch(setTeamCode(teamCode));
 
+      //오픈비두 방입장
+      const enterResponse = await axiosInstance.post(`/api/v1/room/${roomId}`);
+      console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
+
+      const viduToken = enterResponse.data.data.openviduToken;
+      const memberId = enterResponse.data.data.memberId;
+
+      //전역상태 저장
+      dispatch(setOpenViduToken(viduToken));
+      dispatch(setMemberId(memberId));
+
+      //소켓 방생성
       const socket = new SockJS(`${BASE_URL}/ws`);
-      const stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-        debug: (str) => {
-          console.log(str);
+      const client = Stomp.over(socket);
+      dispatch(setStompClient(client));
+
+      client.connect(
+        {},
+        (frame) => {
+          // console.log("웹소켓 서버와 연결됨!", frame);
+
+          if (client && client.connected) {
+            //방 생성 요청
+            console.log("소켓 방 생성 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            client.send(
+              `/app/game/${roomId}/create`,
+              {},
+              JSON.stringify({
+                teamName,
+                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
+                memberId, // memberId 포함
+              })
+            );
+          }
+
+          if (client && client.connected) {
+            // 방에 대한 구독
+            client.subscribe(`/topic/game/${roomId}`, (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("방에서 받은 메시지:", parsedMessage);
+              setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+            });
+          }
+
+          if (client && client.connected) {
+            // 각 memberId에 대한 구독
+            client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("개별 구독 받은 메시지:", parsedMessage);
+
+              dispatch(setUserNo(parsedMessage.data.num));
+              console.log("유저 번호 :", parsedMessage.data.num);
+              // 응답 메시지에서 num 저장
+              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+                setSessionInfo((prevSessionInfo) => ({
+                  ...prevSessionInfo,
+                  num: parsedMessage.data.num,
+                }));
+              }
+            });
+          }
+
+          //소켓 방 구독
+          if (client && client.connected) {
+            console.log("소켓 방 구독 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            client.subscribe(
+              `/app/game/${roomId}/join`,
+              {},
+              JSON.stringify({})
+            );
+          }
+
+          // setStClient(client);
+          // client.publish(
+          //   `/app/game/${roomId}/create`,
+          //   {}, // 헤더가 필요 없는 경우 빈 객체
+          //   JSON.stringify({
+          //     people: selectedCapacity,
+          //     teamName: teamName,
+          //   })
+          // );
         },
-      });
+        (error) => {
+          console.error("STOMP error:", error);
+        }
+      );
 
-      //서버 연결
-      stompClient.onConnect = () => {
-        const serverUrl = socket._transport.url;
-        console.log("서버 연결됨 : ", serverUrl);
+      // 메시지 발행
 
-        //roomId를 소켓 엔드포인트로 연결하면서 보냄
-        stompClient.subscribe(`/game/${roomId}/create`, (message) => {
-          console.log(`/game/${roomId}/create 에서 온 메세지 : `, message.body);
-        });
-
-        // 방 입장
-        // stompClient.publish({
-        //   destination: `/app/game/${roomId}/join`,
-        //   body: JSON.stringify({ message: "Join Request" }),
-        // });
+      client.onStompError = (frame) => {
+        console.error("Stomp 에러", frame.headers["message"], frame.body);
       };
 
-      stompClient.activate();
+      client.activate();
 
-      dispatch(setStompClient(stompClient));
+      dispatch(setStompClient(client));
 
-      navigate("/user/profilePick", {
-        state: {
-          teamName,
-          people: selectedCapacity,
-          isJoin: false,
-          from: "createModal",
-        },
-      });
+      // navigate("/user/profilePick", {
+      //   state: {
+      //     teamName,
+      //     people: selectedCapacity,
+      //     isJoin: false,
+      //     from: "createModal",
+      //   },
+      // });
     } catch (error) {
       console.error("방 생성 오류", error);
     }

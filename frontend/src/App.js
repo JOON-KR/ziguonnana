@@ -11,6 +11,7 @@ import Loading from "./pages/iceBreaking/Loading";
 import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
+import TestPage from "./pages/TestPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/gameRecord" element={<GameRecord />} />
         <Route path="/user/*" element={<UserPages />} />
+        <Route path="/test" element={<TestPage />} />
         <Route path="/icebreaking" element={<IceBreaking />}>
           <Route path="/icebreaking/games/*" element={<GamePages />} />
           <Route path="" element={<Loading />} />

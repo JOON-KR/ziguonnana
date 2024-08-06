@@ -7,6 +7,7 @@ export const authSlice = createSlice({
     isLoggedIn: false,
     userNo: 0,
     memberId: 0,
+    openViduToken: "",
 
     // accessToken: null,
   },
@@ -27,9 +28,18 @@ export const authSlice = createSlice({
     setMemberId: (state, action) => {
       state.memberId = action.payload;
     },
+    setOpenViduToken: (state, action) => {
+      state.openViduToken = action.payload;
+    },
   },
 });
 
-export const { setLoggedIn, setLoggedOut } = authSlice.actions;
+export const {
+  setLoggedIn,
+  setLoggedOut,
+  setUserNo,
+  setMemberId,
+  setOpenViduToken,
+} = authSlice.actions;
 
 export default authSlice;
