@@ -162,17 +162,23 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
     //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
     // });
 
-    if (client && client.connected) {
-      console.log("소켓에 전송할 데이터 : ", profileData);
-      client.send(
-        `/app/game/${roomId}/profile`,
-        {},
-        JSON.stringify(profileData)
-      );
-    }
+    // if (client && client.connected) {
+    //   console.log("소켓에 전송할 데이터 : ", profileData);
+    //   client.send(
+    //     `/app/game/${roomId}/profile`,
+    //     {},
+    //     JSON.stringify(profileData)
+    //   );
+    // }
 
     onRegisterProfile(profileData);
-    navigate("/icebreaking");
+
+    //이거는 의도적으로 navigate state로 넘겼음. 건들지말것!
+    navigate("/icebreaking", {
+      state: {
+        profileData,
+      },
+    });
   };
 
   return (

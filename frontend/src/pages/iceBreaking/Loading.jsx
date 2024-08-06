@@ -39,6 +39,8 @@ const Loading = () => {
   const client = useSelector((state) => state.client.stompClient);
   const [messages, setMessages] = useState([]);
 
+  const { profileData } = location.state || {};
+
   //이 부분 수정 필요
   // useEffect(() => {
   //   const timer = setTimeout(() => {
@@ -53,9 +55,14 @@ const Loading = () => {
   client.subscribe(`/topic/game/${roomId}`, (message) => {
     const parsedMessage = JSON.parse(message.body);
     console.log("방에서 받은 메시지:", parsedMessage);
-    if (parsedMessage.data == true)
-      setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+    if (parsedMessage.data == true) navigate("/icebreaking/intro");
+    // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
   });
+
+  if (client && client.connected) {
+    console.log("소켓에 전송할 데이터 : ", profileData);
+    client.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profileData));
+  }
 
   return (
     <PageWrap>
