@@ -3,17 +3,15 @@ package com.ziguonnana.ziguserver.websocket.global.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.exception.RoomException;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
-import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
+import com.ziguonnana.ziguserver.websocket.answer.service.AnswerService;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
@@ -33,7 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 public class WebsocketService {
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
+    private final AnswerService answerService;
+    
     public void createRoom(String roomId, CreateRequest request) {
         log.info("----------웹소켓 방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
@@ -124,7 +123,9 @@ public class WebsocketService {
         log.info("------------------게임 시작 ------------------");
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
+        answerService.getQuestion(room.getRoomId());
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
+        
     }
 
     public void addPlayerToRoom(String roomId, Player player) {
