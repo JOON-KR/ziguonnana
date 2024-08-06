@@ -136,7 +136,7 @@ const RoomCreateModal = ({ onClose }) => {
         teamName: teamName,
         people: selectedCapacity,
       });
-      // console.log("오픈비두 엔드포인트 응답 :", response.data.data);
+      // console.log("오픈비두 엔드포인트 응답 :"x, response.data.data);
 
       const roomId = response.data.data.roomId;
       console.log("roomID : ", roomId);
@@ -144,7 +144,7 @@ const RoomCreateModal = ({ onClose }) => {
 
       //오픈비두 방입장
       const enterResponse = await axiosInstance.post(`/api/v1/room/${roomId}`);
-      // console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
+      console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
 
       const viduToken = enterResponse.data.data.openviduToken;
       const memberId = enterResponse.data.data.memberId;
