@@ -1,6 +1,8 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.service;
 
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.*;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class BodyTalkService {
         if(room.getCycle()+1 > ROUND){
             // 게임종료
             BodyTalkResult result = gameEnd(room.getBodyTalkGame());
-            BodyResponse response = BodyResponse.ok(CommandType.RESULT, result);
+            Response response = Response.ok(CommandType.BODYGAME_RESULT, result);
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
             room.cycleInit(); //사이클(라운드) 초기화
             return "게임종료";
@@ -47,7 +49,7 @@ public class BodyTalkService {
         // 키워드 저장
         Keyword keyword = randomKeyword();
         room.getBodyTalkGame().changeKeyword(keyword);
-        BodyResponse response  = BodyResponse.ok(CommandType.EXPLANIER, keyword);
+        Response response  = Response.ok(CommandType.BODYGAME_EXPLANIER, keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
         return keyword.getType();
     }
