@@ -1,15 +1,21 @@
 package com.ziguonnana.ziguserver.websocket.igudongseong.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongKeyword;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
+import com.ziguonnana.ziguserver.websocket.igudongseong.dto.SimilarRequest;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class IgudongseongService {
 	
 	private final RoomRepository roomRepository;
+	private final SimpMessagingTemplate messagingTemplate;
 	
 	public List<String> getKeyword(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
@@ -35,35 +42,72 @@ public class IgudongseongService {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 	}
+	//만들어진 키워드를 결과와 함께 매핑할 수 있도록 저장
+	public void saveKeyword(List<String> keyword, String roomId) {
+	    Room room = roomRepository.getRoom(roomId);
+	    if (room == null) {
+	        throw new RoomNotFoundException("방을 찾을 수 없습니다");
+	    }
+	    
+	    int people = room.getPeople();
+	    List<IgudongseongResult> igudongseong = room.getIgudongseong();
+	    
+	    if (igudongseong == null) {
+	        igudongseong = new ArrayList<>();
+	        room.setIgudongseong(igudongseong); // room에 igudongseong 리스트 설정
+	    }
+
+	    for (int i = 0; i < people; i++) {
+	        if (i < keyword.size()) {
+	            igudongseong.add(IgudongseongResult.builder()
+	                .keyword(keyword.get(i))
+	                .build());
+	        } else {
+	            igudongseong.add(IgudongseongResult.builder()
+	                .keyword("호날두") // 기본 키워드 설정
+	                .build());
+	        }
+	    }
+	}
+
 	
-	public GameMessage<Integer> getSimilar(String roomId){//, List<List<Double>> userVectors){
-//		Room room = roomRepository.getRoom(roomId);
-//		int people = room.getPeople();
-//		
-//		room.countUp();
-//		
-//		double[] similarityScores = calculateSimilarity(userVectors);
-//		int mostSimilarUserCount = findMostSimilarUserCount(similarityScores);  // 가장 많은 유사도를 가진 사용자의 유사도 수
-//
-//		String resultMessage = (mostSimilarUserCount == people) ? "성공!" : "실패!";
-//		GameMessage<Integer> result = GameMessage.info(resultMessage, mostSimilarUserCount);
-//
-//		if(room.getCount() == people) {
-//			room.cycleUp();
-//			room.countInit();
-//			
-//			if(room.getCycle() == people) {
-//				room.cycleInit();
-//				endGame(roomId);
-//			}
-//		}
+	public void getSimilar(String roomId,SimilarRequest request){
+		Room room = roomRepository.getRoom(roomId);
+		int people = room.getPeople();
+		ConcurrentMap<Integer, List<Double>> vectors = room.getVectors();
+		vectors.put(request.getNum(),request.getVector());
+		room.countUp();
 		
-		return null;
+		if(room.getCount() == people) {
+			room.countInit();
+			List<List<Double>> list = new ArrayList<>();
+			for(int i=1 ; i<=people; i++) {
+				if(vectors.containsKey(i))
+					list.add(vectors.get(i));
+			}
+			double[] similarityScores = calculateSimilarity(list);
+			int mostSimilarUserCount = findMostSimilarUserCount(similarityScores);  // 가장 많은 유사도를 가진 사용자의 유사도 수
+			String resultMessage = (mostSimilarUserCount == people) ? "성공!" : "실패!";
+			GameMessage<Integer> result = GameMessage.info(resultMessage, mostSimilarUserCount);
+			
+			List<IgudongseongResult> Igudongseong = room.getIgudongseong();
+			if(room.getCycle()<Igudongseong.size()) {
+				Igudongseong.get(room.getCycle()).updateSuccess(mostSimilarUserCount);
+			}
+			room.cycleUp();
+			messagingTemplate.convertAndSend("/topic/game/" + roomId, result);
+			
+			if(room.getCycle() == people -1 ) {
+				room.cycleInit();
+				endGame(roomId);
+			}
+		}
 	}
 	
-	public GameMessage<Boolean> endGame(String roomId){
-		// 게임 종료 로직을 여기에 추가
-		return null;
+	public void endGame(String roomId){
+		boolean end = true;
+		GameMessage<Boolean> result = GameMessage.info("이구동성 게임 종료", end);
+		messagingTemplate.convertAndSend("/topic/game/" + roomId, result);
 	}
 
 	private double[] calculateSimilarity(List<List<Double>> userVectors) {
