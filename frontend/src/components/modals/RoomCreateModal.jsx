@@ -245,14 +245,14 @@ const RoomCreateModal = ({ onClose }) => {
 
       dispatch(setStompClient(client));
 
-      // navigate("/user/profilePick", {
-      //   state: {
-      //     teamName,
-      //     people: selectedCapacity,
-      //     isJoin: false,
-      //     from: "createModal",
-      //   },
-      // });
+      navigate("/user/profilePick", {
+        state: {
+          teamName,
+          people: selectedCapacity,
+          isJoin: false,
+          from: "createModal",
+        },
+      });
     } catch (error) {
       console.error("방 생성 오류", error);
     }
