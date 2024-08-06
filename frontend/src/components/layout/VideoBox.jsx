@@ -1,12 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
-import { useDispatch, useSelector } from "react-redux";
-import { OpenVidu } from "openvidu-browser";
-import {
-  setPublisher,
-  addSubscriber,
-  clearSession,
-} from "../../store/roomSlice";
+import { useSelector } from "react-redux";
 
 const Box = styled.div`
   width: 200px;
@@ -42,50 +36,14 @@ const NameTag = styled.div`
 
 const VideoBox = ({ index }) => {
   const videoRef = useRef(null);
-  const dispatch = useDispatch();
-  const session = useSelector((state) => state.room.session);
   const subscribers = useSelector((state) => state.room.subscribers);
 
   useEffect(() => {
-    const initializePublisher = async () => {
-      try {
-        console.log("세션 상태:", session);
-
-        // 권한 요청
-        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-
-        const OV = new OpenVidu();
-        const publisher = OV.initPublisher(videoRef.current, {
-          videoSource: undefined,
-          publishAudio: true,
-          publishVideo: true,
-          resolution: "640x480",
-          frameRate: 30,
-          insertMode: "APPEND",
-          mirror: false,
-        });
-
-        session.publish(publisher);
-        dispatch(setPublisher(publisher));
-        console.log("퍼블리셔 설정됨:", publisher);
-      } catch (error) {
-        console.error("퍼블리셔 초기화 오류:", error);
-      }
-    };
-
-    if (session && !subscribers.length) {
-      initializePublisher();
-    } else if (subscribers.length > index && videoRef.current) {
+    if (subscribers.length > index && videoRef.current) {
       subscribers[index].addVideoElement(videoRef.current);
+      console.log(`Added video element for subscriber ${index}`);
     }
-
-    return () => {
-      if (session) {
-        session.disconnect();
-        dispatch(clearSession());
-      }
-    };
-  }, [session, subscribers, index, dispatch]);
+  }, [subscribers, index]);
 
   return (
     <Box>
