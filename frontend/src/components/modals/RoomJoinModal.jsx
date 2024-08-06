@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -6,7 +6,12 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { setRoomId } from "../../store/roomSlice";
+import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
+import authSlice, {
+  setMemberId,
+  setOpenViduToken,
+  setUserNo,
+} from "../../store/authSlice";
 import SockJS from "sockjs-client";
 import BASE_URL from "../../api/APIconfig";
 import { setStompClient } from "../../store/clientSlice";
@@ -162,71 +167,28 @@ const RoomJoinModal = ({ onClose }) => {
 
   const handleJoinRoom = async () => {
     try {
-      const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
-        groupCode: inviteCode,
-      });
+      //----------------------------------------------------------------------------------
 
-      console.log("오픈비두 엔드포인트 연결 : ", response);
+      // client.activate();
+      console.log("STOMP Client activated");
 
-      dispatch(setRoomId(inviteCode));
-      console.log("Invite Code:", inviteCode);
+      if (stClient && stClient.connected) {
+        stClient.send(`/app/game/${inviteCode}/${memId}/join`);
+      }
 
-      //소켓 생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
-      console.log("Socket created");
-
-      const stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-        debug: (str) => {
-          console.log("STOMP Debug:", str);
-        },
-      });
-
-      stompClient.onConnect = () => {
-        const serverUrl = socket._transport.url;
-        console.log("서버 연결됨 : ", serverUrl);
-
-        //roomId를 소켓 엔드포인트로 연결하면서 보냄
-        stompClient.subscribe(`/game/${inviteCode}/join`, (message) => {
-          console.log(
-            `/game/${inviteCode}/join 에서 온 메세지 : `,
-            message.body
-          );
-        });
-
-        console.log("Subscribing to destination");
-        var destination = `/app/game/${inviteCode}/join`;
-
-        stompClient.activate();
-        console.log("STOMP Client activated");
-
-        if (stClient && stClient.connected) {
-          stClient.send(`/app/game/${inviteCode}/${memId}/join`);
-        }
-
-        // 로그인 여부를 state에 포함시켜 navigate
-        navigate("/user/profilePick", {
-          state: {
-            inviteCode,
-            isJoin: true,
-            isLoggedIn: isLoggedIn,
-            from: "joinModal",
-          },
-        });
-      };
-
-      stompClient.onStompError = (frame) => {
-        console.error("Broker reported error: " + frame.headers["message"]);
-        console.error("Additional details: " + frame.body);
-      };
-
-      stompClient.activate();
+      // 로그인 여부를 state에 포함시켜 navigate
+      // navigate("/user/profilePick", {
+      //   state: {
+      //     inviteCode,
+      //     isJoin: true,
+      //     isLoggedIn: isLoggedIn,
+      //     from: "joinModal",
+      //   },
+      // });
     } catch (e) {
       console.error("방참여 오류", e);
     }
   };
-
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap onClick={(e) => e.stopPropagation()}>
