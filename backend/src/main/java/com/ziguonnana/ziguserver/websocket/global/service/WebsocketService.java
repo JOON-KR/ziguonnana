@@ -91,12 +91,11 @@ public class WebsocketService {
         return getRoom(roomId).getPlayers().get(num);
     }
 
-    public void join(String roomId, GameProfile profile, String memberId) {
+    public void join(String roomId,  String memberId) {
         Room room = getRoom(roomId);
 
         Player player = Player.builder()
                 .memberId(memberId)
-                .profile(profile)
                 .role("user")
                 .roomId(roomId)
                 .num(room.getPlayers().size() + 1)
@@ -108,7 +107,7 @@ public class WebsocketService {
                 .roomId(roomId)
                 .num(player.getNum())
                 .build();
-        log.info("방 참가 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
+        log.info("방 참가 :: roomId : {}, player : {}", roomId, room.toString());
         messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, GameMessage.info("방 참가 완료", info));
     }
 
