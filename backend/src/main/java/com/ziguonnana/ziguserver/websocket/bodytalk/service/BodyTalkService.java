@@ -33,11 +33,7 @@ public class BodyTalkService {
         }
         if(room.getCycle()+1 > ROUND){
             // 게임종료
-            // 경과 시간 계산
-            BodyTalkGame bodyTalkGame = room.getBodyTalkGame();
-            bodyTalkGame.calculateDurationTime();
-            BodyTalkResult result = new BodyTalkResult(bodyTalkGame.getDurationTime(), bodyTalkGame.getCorrectCnt());
-            log.info("몸으로 말해요 결과:" + result);
+            BodyTalkResult result = gameEnd(room.getBodyTalkGame());
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/bodyTalk/result", result);
             return "게임종료";
         }
@@ -51,6 +47,15 @@ public class BodyTalkService {
         room.getBodyTalkGame().changeKeyword(keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/bodyTalk/" + explanierNum, keyword);
         return keyword.getType();
+    }
+
+    private BodyTalkResult gameEnd(BodyTalkGame bodyTalkGame){
+        // 게임종료
+        // 경과 시간 계산
+        bodyTalkGame.calculateDurationTime();
+        BodyTalkResult result = new BodyTalkResult(bodyTalkGame.getDurationTime(), bodyTalkGame.getCorrectCnt());
+        log.info("몸으로 말해요 결과:" + result);
+        return result;
     }
 
     private Keyword randomKeyword(){
