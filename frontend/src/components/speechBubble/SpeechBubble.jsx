@@ -3,28 +3,27 @@ import styled from "styled-components";
 import sb from "../../assets/images/speechBubble.png";
 
 const Wrap = styled.div`
-  width: 600px; /* 크기를 줄였습니다 */
-  height: 215px; /* 크기를 줄였습니다 */
+  width: 412px; /* 크기를 줄임 */
+  height: 150px; /* 크기를 줄임 */
   position: relative;
   background-image: url(${sb});
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin-top: -200px; /* 위치를 위로 올립니다 */
+  margin-bottom: 20px; /* 말풍선과 Nana 이미지 사이의 간격 추가 */
 `;
 
 const TextBox = styled.div`
   z-index: 2;
   width: 100%;
   height: 80%;
-  padding-right: 40px; /* 패딩 조정 */
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 0px;
+  top: 0;
   text-align: center;
-  font-size: 24px; /* 글꼴 크기를 줄였습니다 */
+  font-size: 16px; /* 글꼴 크기를 줄임 */
   font-weight: 600;
   color: black;
 `;

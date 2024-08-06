@@ -2,13 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./authSlice";
 import { roomSlice } from "./roomSlice";
 import clientSlice from "./clientSlice";
+import nicknameSlice from "./nicknameSlice";
 
 const store = configureStore({
-  //사용할 상태들 등록
   reducer: {
     auth: authSlice.reducer,
     room: roomSlice.reducer,
     client: clientSlice.reducer,
+    nickname: nicknameSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
