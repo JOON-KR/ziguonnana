@@ -11,10 +11,10 @@ const Box = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
 
 const Video = styled.video`
-  position: relative;
   width: 180px;
   height: 180px;
   background-color: white;
@@ -37,6 +37,9 @@ const NameTag = styled.div`
 const VideoBox = ({ index }) => {
   const videoRef = useRef(null);
   const subscribers = useSelector((state) => state.room.subscribers);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
+
+  const userNickname = nicknameList.find((item) => item.num === index + 1)?.nickname;
 
   useEffect(() => {
     if (subscribers.length > index && videoRef.current) {
@@ -48,7 +51,7 @@ const VideoBox = ({ index }) => {
   return (
     <Box>
       <Video ref={videoRef} autoPlay />
-      <NameTag>사용자 이름</NameTag>
+      <NameTag>{userNickname || "사용자 이름"}</NameTag>
     </Box>
   );
 };

@@ -6,6 +6,7 @@ import IntroductionGuideModal from "../../components/modals/IntroductionGuideMod
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png";
 import { ReactSketchCanvas } from "react-sketch-canvas";
+import { useNavigate } from "react-router-dom";
 
 const Wrap = styled.div`
   width: 100%;
@@ -151,6 +152,7 @@ const Game1 = ({ roomId }) => {
   const [replayIndex, setReplayIndex] = useState(0);
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const navigate = useNavigate();
 
   const openIntroModal = () => {
     setIsIntroGuideModalOpen(false);
@@ -232,6 +234,8 @@ const Game1 = ({ roomId }) => {
       animationFrameRef.current = setTimeout(replayDrawing, 500);
     }
   };
+  
+  const next = navigate('/icebreaking/games/game1NickName');
 
   useEffect(() => {
     if (isReplaying) {
@@ -330,6 +334,7 @@ const Game1 = ({ roomId }) => {
               <Timer>{formatTime(timeLeft)}</Timer>
             </ToolsWrapper>
           </CanvasWrapper>
+          <button onClick={next}>별명짓기페이지</button>
         </>
       )}
     </Wrap>
