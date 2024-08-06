@@ -88,10 +88,12 @@ const HeaderText = styled.h4`
 const ProfilePick = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { teamName, people, isJoin, from } = location.state || {};
+  const { roomId, openviduToken } = location.state || {};
+
+  console.log("ProfilePick: Room ID:", roomId);
+  console.log("ProfilePick: OpenVidu Token:", openviduToken);
 
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const roomId = useSelector((state) => state.room.roomId);
   const token = localStorage.getItem("accessToken");
 
   const [profiles, setProfiles] = useState([]);
@@ -125,58 +127,16 @@ const ProfilePick = () => {
       },
     });
 
-    // stompClientRef.current = stompClient;
+    stompClientRef.current = stompClient;
 
-    // stompClient.onConnect = (frame) => {
-    //   const serverUrl = socket._transport.url;
-    //   console.log("Connected to server: " + serverUrl);
-    //   console.log("Connected: " + JSON.stringify(frame));
-
-    //   if (from === "createModal") {
-    //     socketEndpointConnect();
-    //   } else if (from === "joinModal") {
-    //     joinSocketEndpointConnect();
-    //   }
-    // };
-
-    // stompClient.activate();
-  }, [isLoggedIn, from, roomId]);
-
-  const socketEndpointConnect = async () => {
-    console.log("from createModal: ");
-    const response = await axiosInstance.post("/api/v1/room", {});
-    console.log("create Modal response:", response.data);
-  };
-
-  const joinSocketEndpointConnect = async () => {
-    console.log("from joinmodal");
-
-    const attemptToJoin = () => {
-      if (stompClientRef.current && stompClientRef.current.connected) {
-        const joinMessage = JSON.stringify({ message: "Join Request" });
-
-        stompClientRef.current.subscribe(
-          `/game/${roomId}/create`,
-          (message) => {
-            console.log(
-              `Received message from /game/${roomId}/create:`,
-              message.body
-            );
-          }
-        );
-
-        stompClientRef.current.publish({
-          destination: `app/game/${roomId}/join`,
-          body: joinMessage,
-        });
-      } else {
-        console.log("Waiting for connection...");
-        setTimeout(attemptToJoin, 1000); // 1초 후에 다시 시도
-      }
+    stompClient.onConnect = (frame) => {
+      const serverUrl = socket._transport.url;
+      console.log("Connected to server: " + serverUrl);
+      console.log("Connected: " + JSON.stringify(frame));
     };
 
-    attemptToJoin();
-  };
+    stompClient.activate();
+  }, [isLoggedIn]);
 
   const closeProfileRegisterModal = () => {
     setIsProfileRegisterModalOpen(false);
@@ -214,6 +174,15 @@ const ProfilePick = () => {
         console.log("프로필 정보 전송:", profileData);
       }
     }
+
+    // 프로필 등록 후 IceBreaking 페이지로 이동
+    navigate("/icebreaking", {
+      state: {
+        roomId,
+        openviduToken,
+        profileData,
+      },
+    });
   };
 
   return (
