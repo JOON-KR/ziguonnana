@@ -3,9 +3,11 @@ package com.ziguonnana.ziguserver.websocket.bodytalk.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
-public class ChatRequest {
+@AllArgsConstructor
+public class BodyChatMessage {
     private int senderNum;
     private String content;
+    private boolean isCorrect;
+
 }

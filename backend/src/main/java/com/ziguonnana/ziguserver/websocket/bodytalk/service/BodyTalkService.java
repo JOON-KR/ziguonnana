@@ -69,16 +69,16 @@ public class BodyTalkService {
     }
 
     @Transactional
-    public ChatMessage chat(ChatRequest chatRequest, String roomId) {
+    public BodyChatMessage chat(BodyChatRequest bodyChatRequest, String roomId) {
         BodyTalkGame bodyTalkGame = roomRepository.getRoom(roomId).getBodyTalkGame();
         String answer = bodyTalkGame.getKeyword().getWord();
 
         //정답이면 점수 카운트 up
-        boolean isCorrect = isCorrect(answer, chatRequest.getContent());
+        boolean isCorrect = isCorrect(answer, bodyChatRequest.getContent());
         if(isCorrect){
             bodyTalkGame.plusCorrectCnt();
         }
-        return new ChatMessage(chatRequest.getSenderNum(), chatRequest.getContent(), isCorrect);
+        return new BodyChatMessage(bodyChatRequest.getSenderNum(), bodyChatRequest.getContent(), isCorrect);
     }
 
     private boolean isCorrect(String answer, String input){

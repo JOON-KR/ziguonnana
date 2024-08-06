@@ -1,6 +1,6 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.controller;
-import com.ziguonnana.ziguserver.websocket.bodytalk.dto.ChatMessage;
-import com.ziguonnana.ziguserver.websocket.bodytalk.dto.ChatRequest;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatMessage;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.bodytalk.service.BodyTalkService;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
@@ -33,10 +33,10 @@ public class BodyTalkController {
     //정답 맞추는 채팅
     @MessageMapping("/game/{roomId}/bodyTalk/chat")
     @SendTo("/topic/game/{roomId}")
-    public Response<ChatMessage> sendMessage(@DestinationVariable("roomId") String roomId, @Payload ChatRequest chatRequest) {
+    public Response<BodyChatMessage> sendMessage(@DestinationVariable("roomId") String roomId, @Payload BodyChatRequest bodyChatRequest) {
         log.info("========몸으로 말해요 채팅=========");
-        ChatMessage chatMessage = bodyTalkService.chat(chatRequest, roomId);
-        return Response.ok(CommandType.CHAT, chatMessage);
+        BodyChatMessage bodyChatMessage = bodyTalkService.chat(bodyChatRequest, roomId);
+        return Response.ok(CommandType.CHAT, bodyChatMessage);
     }
 
 }
