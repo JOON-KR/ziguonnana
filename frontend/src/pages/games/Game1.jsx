@@ -5,8 +5,7 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png";
-// import CanvasDraw from "react-canvas-draw"; // 기존 코드
-import { ReactSketchCanvas } from "react-sketch-canvas";
+import CanvasDraw from "react-canvas-draw";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
@@ -351,12 +350,11 @@ const Game1 = ({ roomId }) => {
               </HeaderText>
             </Header>
             <CanvasWrapper>
-              <ReactSketchCanvas
-                style={{ border: "1px solid #000" }}
-                width="900"
-                height="600"
-                strokeWidth={brushRadius}
-                strokeColor={isEraser ? "#FFFFFF" : brushColor}
+              <CanvasDraw
+                canvasWidth={900}
+                canvasHeight={600}
+                brushColor={isEraser ? "#FFFFFF" : brushColor}
+                brushRadius={brushRadius}
               />
               <ToolsWrapper>
                 <CustomSwatchesPicker>
