@@ -30,6 +30,16 @@ public class Room {
 	private boolean isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
+	// 몸으로 말해요 키워드 요청 count
+	private int bodyTalkKeywordCnt;
+	// 이어그리기
+	private int artRelayRequestCnt;
+	// 자기소개 질문 request count
+	private int questionRequestCnt;
+	// 이구동성
+	private int igudongseongRequestCnt;
+	// 포즈맞추기
+	private int poseRequestCnt;
 
 	//게임 결과 계산용 벡터 저장
 	private ConcurrentMap<Integer, List<Double>>vectors;
@@ -57,5 +67,18 @@ public class Room {
 	}
 	public void relayEnd() {
 		isRelay=true;
+	}
+
+	// 몸으로 말해요 키워드 요청 관련 함수
+	public void countBodyTalkKeywordCnt(){
+		bodyTalkKeywordCnt++;
+	}
+	public void initBodyTalkKeywordCnt(){
+		bodyTalkKeywordCnt=0;
+	}
+
+	// 자기소개 문답
+	public void countQuestionRequestCnt(){
+		questionRequestCnt++;
 	}
 }

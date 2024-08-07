@@ -20,6 +20,8 @@ public class BodyTalkController {
 
     private final BodyTalkService bodyTalkService;
 
+
+
     // 게임 한 라운드 끝나면, 출제자에게 키워드 전달
     // 다른 방 참가자들에게 키워드 타입만 전달
     @MessageMapping("/game/{roomId}/bodyTalk/keyword")

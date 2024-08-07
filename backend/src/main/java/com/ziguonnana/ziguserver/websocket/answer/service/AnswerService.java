@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.exception.PlayerException;
@@ -33,7 +32,7 @@ public class AnswerService {
 	private final RoomRepository roomRepository;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ArtService artService;
-	@Transactional
+
 	public void getSelfIntroductionAnswer(String roomId, SelfIntroductionRequest request) {
 		Room room = roomRepository.getRoom(roomId);
 		Player player = room.getPlayers().get(request.getNum());
@@ -51,11 +50,16 @@ public class AnswerService {
 			room.cycleInit();
 			nextGame(roomId);
 		}
-		log.info("player 정보 업데이트 player : " + player.toString());
-		log.info("자기소개 답변 업데이트 room : " + rooms.toString());
+		log.info("player 정보 업데이트 player : " + player);
+		log.info("자기소개 답변 업데이트 room : " + rooms);
 	}
 	
 	public void getQuestion(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		int questionRequestCnt = room.getQuestionRequestCnt();
+		if(questionRequestCnt > 0) return;
+		room.countQuestionRequestCnt();
+
         List<String> questionList = new ArrayList<>();
         SelfIntroductionQuestion[] questions = SelfIntroductionQuestion.values();
         
