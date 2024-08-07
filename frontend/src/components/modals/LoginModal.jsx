@@ -8,6 +8,7 @@ import AquaBtn from "../common/AquaBtn";
 // 소셜 로그인 아이콘
 import GoogleIcon from "../../assets/icons/google.png";
 import KakaoIcon from "../../assets/icons/kakao.png";
+import GreyBtn from "../common/GrayBtn";
 
 // 공통 스타일
 const FlexCenter = styled.div`
@@ -96,6 +97,8 @@ const FindPassword = styled.div`
 const BtnWrap = styled(FlexCenter)`
   margin-top: 20px;
   width: 100%;
+  display: flex;
+  gap: 10px;
 `;
 
 // 소셜 로그인 섹션 스타일
@@ -170,6 +173,7 @@ const LoginModal = ({
         <FindPassword onClick={onFindPasswordClick}>비밀번호 찾기</FindPassword>
         <BtnWrap>
           <AquaBtn text="로그인" BtnFn={handleSubmit} />
+          <GreyBtn text="닫기" BtnFn={onClose} />
         </BtnWrap>
         <SocialLoginSection>
           <SocialLoginText>소셜 로그인</SocialLoginText>

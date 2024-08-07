@@ -41,6 +41,7 @@ const ProfileWrap = styled.div`
 const SubTitle = styled.h3`
   font-size: 36px;
   color: white;
+  margin-bottom: 20px;
 `;
 
 // 프로필 이미지 스타일 설정
@@ -204,6 +205,7 @@ const ProfilePick = () => {
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
+      <SubTitle>방 참여 코드 : {roomId}</SubTitle>
 
       <ProfilesContainer>
         {isLoggedIn &&

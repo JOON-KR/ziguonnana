@@ -3,6 +3,7 @@ import authSlice from "./authSlice";
 import { roomSlice } from "./roomSlice";
 import clientSlice from "./clientSlice";
 import nicknameSlice from "./nicknameSlice";
+import messageSlice from "./messageSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     room: roomSlice.reducer,
     client: clientSlice.reducer,
     nickname: nicknameSlice.reducer,
+    message: messageSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

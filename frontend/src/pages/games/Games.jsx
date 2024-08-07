@@ -12,7 +12,8 @@ import frozen_red from "../../assets/icons/frozen_red.png";
 import gray from "../../assets/icons/gray.png";
 import frozen_gray from "../../assets/icons/frozen_gray.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setMessage } from "../../store/messageSlice";
 
 const Wrap = styled.div`
   width: 819px;
@@ -43,31 +44,36 @@ const Games = () => {
   const client = useSelector((state) => state.client.stompClient);
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
+  const [subscribed, setSubscribed] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    if (client && client.connected) {
+    if (client && client.connected && !subscribed) {
       client.subscribe(`/topic/game/${roomId}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
         // console.log("게임 종류 선택 메시지:", parsedMessage);
         console.log("게임 종류 응답 메시지 :", parsedMessage.data);
+        dispatch(setMessage(parsedMessage.data));
 
         const gameType = parsedMessage.data;
-        if (gameType == "BODY_TALK") {
+        if (gameType === "BODY_TALK") {
           navigate("/icebreaking/games/game2");
-        } else if (gameType == "SAME_POSE") {
+        } else if (gameType === "SAME_POSE") {
           navigate("/icebreaking/games/game3");
-        } else if (gameType == "FOLLOW_POSE") {
+        } else if (gameType === "FOLLOW_POSE") {
           navigate("/icebreaking/games/game4");
-        } else if (gameType == "SHORTS") {
+        } else if (gameType === "SHORTS") {
           navigate("/icebreaking/games/game5");
         }
       });
+      setSubscribed(true);
     }
-  }, [client, roomId]);
+  }, [client, roomId, subscribed]);
 
+  //한번만 보내야됨
   useEffect(() => {
     if (gameName !== "") {
       client.send(`/app/game/${roomId}/game-start/${gameName}`);

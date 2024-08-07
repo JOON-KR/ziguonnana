@@ -13,9 +13,37 @@ const Wrap = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+`;
+
+const FormWrap = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ChatForm = styled.form`
+  width: 1090%;
+  /* position: absolute; */
+  /* bottom: 0; */
+  display: flex;
+`;
+
+const ChatInput = styled.input`
+  /* width: 500px; */
+  height: 40px;
+
+  font-size: 30px;
+  color: black;
+`;
+
+const ChatBtn = styled.button`
+  width: 100px;
+  height: 46px;
 `;
 
 // 몸으로 말해요 페이지 (BodyTalk)
+
 const Game2 = () => {
   const [isBodyTalkWelcomeModalOpen, setIsBodyTalkWelcomeModalOpen] =
     useState(true);
@@ -32,6 +60,7 @@ const Game2 = () => {
   const [receivedKeyword, setReceivedKeyword] = useState("");
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [durationTime, setDurationTime] = useState(0);
+  const [subscribed, setSubscribed] = useState(false);
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -40,23 +69,14 @@ const Game2 = () => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    if (client && client.connected) {
+    console.log("유저 번호 :", userNo);
+    if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
       client.subscribe(`/topic/game/${roomId}/${userNo}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
         console.log("출제자 키워드 :", parsedMessage.data);
         setReceivedKeyword(parsedMessage.data.word);
 
-        // {
-        //   "message" : "SUCCESS",
-        //   "data" : {
-        //         "type" : "동물",
-        //         "word" : "악어"
-        //     },
-        //   "commandType" : "EXPLANIER"
-        // }
-
-        // 결과
         if (
           parsedMessage.commandType == "RESULT" &&
           parsedMessage.data.durationTime
@@ -64,14 +84,6 @@ const Game2 = () => {
           setDurationTime(parsedMessage.data.durationTime);
           console.log("진행 시간 : ", parsedMessage.data.durationTime);
         }
-        // {
-        //   "message" : "SUCCESS",
-        //   "commandType" : "RESULT",
-        //   "data" : {
-        //     "correctCnt" : 5,  // 맞은 갯수
-        //     "durationTime" : 80  // 게임 종료까지 걸린 시간(초)
-        //   }
-        // }
       });
 
       //방 구독
@@ -79,20 +91,16 @@ const Game2 = () => {
         const parsedMessage = JSON.parse(message.body);
         console.log("키워드 타입 :", parsedMessage.data);
         setKeywordType(parsedMessage.data);
-        // {
-
-        //   "message" : "SUCCESS",
-        //   "CommandType" : "KEYWORD_TYPE",
-        //   "data" : "동물"
-        // }
 
         //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
-        if (parsedMessage.data.isCorrect == true) {
+        if (parsedMessage.data.isCorrect === true) {
           setRound((prevRound) => prevRound + 1);
         }
       });
+
+      setSubscribed(true);
     }
-  }, []);
+  }, [client, roomId, userNo, subscribed]);
 
   //라운드 변경시 실행
   useEffect(() => {
@@ -100,7 +108,7 @@ const Game2 = () => {
     if (client && client.connected) {
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
-  }, [round]);
+  }, [round, client, roomId]);
 
   const openBodyTalkGuideModal = () => {
     setIsBodyTalkWelcomeModalOpen(false);
@@ -135,6 +143,7 @@ const Game2 = () => {
           BlueBtnFn={openBodyTalkGuideModal}
           modalText={"몸으로말해요 게임에 오신걸 환영합니다 !"}
           onClose={() => setIsBodyTalkWelcomeModalOpen(false)}
+          a
         />
       )}
       {isBodyTalkGuideModalOpen && (
@@ -161,6 +170,9 @@ const Game2 = () => {
         />
       )}
       몸으로 말해요 게임 화면
+      <h1>제시어 종류 : {keywordType}</h1>
+      <h1>제시어 : {receivedKeyword}</h1>
+      <div></div>
     </Wrap>
   );
 };

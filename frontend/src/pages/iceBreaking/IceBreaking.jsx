@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -32,17 +32,45 @@ const Content = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  position: relative;
+`;
+
+const ChatWrap = styled.div`
+  /* width: 60%; */
+  position: fixed;
+  bottom: 30px;
 `;
 
 const IceBreaking = () => {
   const dispatch = useDispatch();
   const openviduToken = useSelector((state) => state.auth.openViduToken);
-
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const [typedText, setTypedText] = useState("");
   useEffect(() => {
     return () => {
       dispatch(clearSession());
     };
   }, [dispatch]);
+
+  const sendMessage = () => {
+    if (client && client.connected) {
+      console.log("보내는 메시지:", {
+        // sender: profile.name,
+        content: typedText,
+      });
+      client.send(
+        `/app/game/${roomId}/chat`,
+        {},
+        JSON.stringify({
+          // sender: profile.name,
+          content: typedText,
+        })
+      );
+      setTypedText("");
+    }
+  };
 
   return (
     <PageWrap>
@@ -54,6 +82,19 @@ const IceBreaking = () => {
       </Frame>
       <Content>
         <Outlet />
+        <ChatWrap>
+          <input
+            type="text"
+            value={typedText}
+            onChange={(e) => setTypedText(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
+          />
+          <button onClick={sendMessage}>보냄</button>
+        </ChatWrap>
       </Content>
       <Frame>
         <VideoBox index={3} />
