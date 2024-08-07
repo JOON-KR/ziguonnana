@@ -92,6 +92,12 @@ const Game2 = () => {
         console.log("키워드 타입 :", parsedMessage.data);
         setKeywordType(parsedMessage.data);
 
+        if (parsedMessage.commandType == "GAME_MODAL_START") {
+          console.log("게임 시작 - 모달 닫기");
+          setIsBodyTalkGuideModalOpen(false);
+          setIsBodyTalkWelcomeModalOpen(false);
+          client.send(`/app/game/${roomId}/bodyTalk/keyword`);
+        }
         //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
         if (parsedMessage.data.isCorrect === true) {
           setRound((prevRound) => prevRound + 1);
@@ -143,7 +149,6 @@ const Game2 = () => {
           BlueBtnFn={openBodyTalkGuideModal}
           modalText={"몸으로말해요 게임에 오신걸 환영합니다 !"}
           onClose={() => setIsBodyTalkWelcomeModalOpen(false)}
-          a
         />
       )}
       {isBodyTalkGuideModalOpen && (
@@ -153,7 +158,7 @@ const Game2 = () => {
           RedBtnFn={() => {
             closeBodyTalkGuideModal();
             if (client && client.connected) {
-              client.send(`/app/game/${roomId}/bodyTalk/keyword`);
+              client.send(`/app/game/${roomId}/start-modal/BODY_TALK`);
               setIsGameStarted(true);
             }
           }}

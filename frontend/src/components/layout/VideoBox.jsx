@@ -88,14 +88,14 @@ const VideoBox = ({ index }) => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.addEventListener("loadeddata", () => {
-        console.log(`Video element for userNo ${userNo} is playing`);
+        // console.log(`Video element for userNo ${userNo} is playing`);
       });
     }
   }, [videoRef]);
 
-  console.log(
-    `Rendering VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
-  );
+  // console.log(
+  //   `Rendering VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
+  // );
 
   return (
     <Box>
