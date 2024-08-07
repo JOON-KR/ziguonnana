@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RelayArt {
-	private Byte[] art;
+	private String art;
 	private int num; //그리는 플레이어 넘버
 	private String keyword;
 }
