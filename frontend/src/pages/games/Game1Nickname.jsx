@@ -123,7 +123,6 @@ const Game1Nickname = () => {
         if (response.message.trim() === "별명 전파") {
           // 별명 리스트를 받아와서 Redux 상태 업데이트
           dispatch(setNicknameList(response.data));
-          console.log("Nickname list set in redux:", response.data); // 별명 리스트 로그
           // 별명 리스트를 받고 나면 아바타 명함 제작 대기화면으로 이동
           setTimeout(() => {
             navigate('/icebreaking/games/game1Result');
