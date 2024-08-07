@@ -30,8 +30,9 @@ public class BodyTalkGame {
     }
 
 
-    public void calculateDurationTime() {
+    public long calculateDurationTime() {
         this.endTime = Instant.now();
         this.durationTime = Duration.between(startTime, endTime).getSeconds();
+        return this.durationTime;
     }
 }
