@@ -12,6 +12,7 @@ const Box = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
 
 const Video = styled.video`
@@ -47,6 +48,8 @@ const VideoBox = ({ index }) => {
   // 사용자 번호에 맞는 별명 찾기
   const userNickname = nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름";
 
+  console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
+
   useEffect(() => {
     if (index === 0 && localStream && videoRef.current) {
       videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림 설정
@@ -60,6 +63,10 @@ const VideoBox = ({ index }) => {
       console.log(`Added video element for subscriber ${index - 1}`);
     }
   }, [subscribers, index, localStream]);
+
+  useEffect(() => {
+    console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
+  }, [nicknameList]);
 
   return (
     <Box>
