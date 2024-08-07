@@ -20,10 +20,16 @@ public class AnswerController {
 	
 	//   자기소개 문답 답변
     @MessageMapping("/game/{roomId}/self-introduction")
-    public GameMessage<String> getAnswer(@DestinationVariable("roomId") String roomId, @Payload SelfIntroductionRequest request) {
+    public void getAnswer(@DestinationVariable("roomId") String roomId, @Payload SelfIntroductionRequest request) {
         log.info("=======자기소개 문답 답변 전송 시작=======");
         answerService.getSelfIntroductionAnswer(roomId, request);
-        return GameMessage.info("자기소개 문답 전송 완료", "");
+    }
+    
+    //자기소개 질문 리스트
+    @MessageMapping("/game/{roomId}/self-introduction/question")
+    public void getQuestion(@DestinationVariable("roomId") String roomId) {
+    	log.info("=======자기소개 문답 답변 전송 시작=======");
+    	answerService.getQuestion(roomId);
     }
 
 }

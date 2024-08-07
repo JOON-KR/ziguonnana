@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.exception.PlayerException;
+import com.ziguonnana.ziguserver.websocket.answer.dto.QuestionResponse;
 import com.ziguonnana.ziguserver.websocket.answer.dto.SelfIntroductionQuestion;
 import com.ziguonnana.ziguserver.websocket.answer.dto.SelfIntroductionRequest;
 import com.ziguonnana.ziguserver.websocket.art.service.ArtService;
@@ -62,8 +63,12 @@ public class AnswerService {
         for (int i = 0; i < 5; i++) {
             questionList.add(shuffledQuestions.get(i).getQuestion());
         }
-
-        GameMessage<List<String>> questionMessage = GameMessage.info("질문리스트 전파", questionList);
+        QuestionResponse response =	QuestionResponse.builder()
+        								.question(questionList)
+        								.start(true)
+        								.build();
+        
+        GameMessage<QuestionResponse> questionMessage = GameMessage.info("질문리스트 전파", response);
         messagingTemplate.convertAndSend("/topic/game/" + roomId, questionMessage);
     }
 	
