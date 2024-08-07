@@ -3,7 +3,7 @@ import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import TimerBtn from "../common/TimerBtn"; // 타이머 버튼 컴포넌트
 import AquaBtn from "../common/AquaBtn"; // 완료 버튼 컴포넌트
-import { submitAnswers } from "../../api/game/submitAnswers";
+import { useSelector } from "react-redux";
 
 // 배경 스타일 컴포넌트
 const BlackBg = styled.div`
@@ -70,7 +70,7 @@ const BtnWrap = styled.div`
   margin-top: 20px;
 `;
 
-// 질문 목록
+// 질문 목록 -> 서버에서 받아와야함
 const questionsList = [
   "당신과 가장 닮은 연예인의 이름은?",
   "자신만의 얼굴 특징은?",
@@ -83,15 +83,39 @@ const questionsList = [
 const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함", "플랑크톤"];
 
 // IntroductionModal 컴포넌트
-const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
+const IntroductionModal = ({ onClose, onConfirm }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // 현재 질문 인덱스 상태
   const [answers, setAnswers] = useState(Array(questionsList.length).fill("")); // 각 질문에 대한 답변 상태
   const [timerKey, setTimerKey] = useState(0); // 타이머 재시작을 위한 키 상태
+  // Redux 상태에서 필요한 값들 가져오기
+  const userNo = useSelector((state) => state.auth.userNo);
+  const roomId = useSelector((state) => state.room.roomId); 
+  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+
+  // 답변을 서버에 제출하는 함수
+  const submitAnswers = () => {
+    try {
+      const message = {
+        num: userNo, // 요청 바디에 userNo 포함
+        answer: answers, // 요청 바디에 답변 배열 포함
+      };
+
+      stompClient.send(
+        `/app/game/${roomId}/self-introduction`, // 엔드포인트 URL
+        {},
+        JSON.stringify(message) // 메시지를 JSON 문자열로 변환하여 전송
+      );
+
+      console.log("답변 전송 성공:", message); // 성공 시 메시지 로그
+    } catch (error) {
+      console.error("답변 전송 실패:", error); // 오류 발생 시 오류 로그
+    }
+  };
 
   // currentQuestionIndex가 모든 질문을 초과하면 서버에 답변 제출
   useEffect(() => {
     if (currentQuestionIndex >= questionsList.length) {
-      submitAnswersToServer();
+      submitAnswers();
     }
   }, [currentQuestionIndex]);
 
@@ -111,7 +135,7 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
     }
     // 마지막 handleConfirm 호출 시
     if (currentQuestionIndex === questionsList.length - 1) {
-      submitAnswersToServer();
+      submitAnswers();
       onClose();
     } else {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
@@ -125,7 +149,7 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
     newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
     setAnswers(newAnswers);
     if (currentQuestionIndex === questionsList.length - 1) {
-      submitAnswersToServer();
+      submitAnswers();
       onClose();
     } else {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
@@ -137,16 +161,6 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleConfirm();
-    }
-  };
-
-  // 답변을 서버에 제출하는 함수
-  const submitAnswersToServer = async () => {
-    try {
-      await submitAnswers({ roomId, memberId, answers });
-      onConfirm(answers); // 성공적으로 답변을 전송한 후 onConfirm 호출
-    } catch (error) {
-      console.error("Error submitting answers:", error);
     }
   };
 
@@ -167,7 +181,7 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
           onKeyPress={handleKeyPress} // 엔터 키 누를 때 처리
         />
         <BtnWrap>
-          <AquaBtn text="입력" BtnFn={() => handleConfirm(onClose)} /> {/* 입력 버튼 */}
+          <AquaBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
         </BtnWrap>
       </ModalWrap>
     </BlackBg>

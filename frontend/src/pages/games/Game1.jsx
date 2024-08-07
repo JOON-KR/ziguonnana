@@ -139,7 +139,6 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
-// 자기소개 문답 모달 & 이어그리기 페이지 (Drawing)
 const Game1 = ({ roomId }) => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
@@ -159,87 +158,47 @@ const Game1 = ({ roomId }) => {
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
   const navigate = useNavigate();
-  // const [statusMessage, setStatusMessage] = useState(''); // 상태 메시지 상태
-  // const [messages, setMessages] = useState([]); // 메시지 배열 상태
-  // const [stompClient, setStompClient] = useState(null); // STOMP 클라이언트 상태
 
-  // 웹소켓 연결 설정
-  // useEffect(() => {
-  //   const socket = new SockJS(`${BASE_URL}/ws`); // SockJS 객체 생성
-  //   const client = Stomp.over(socket); // STOMP 클라이언트 객체 생성
-
-  //   // 웹소켓 서버에 연결
-  //   client.connect({}, (frame) => {
-  //     setStatusMessage('웹소켓 서버와 연결됨!');
-
-  //     // 특정 경로 구독하여 메시지 수신
-  //     client.subscribe(`/topic/game/${roomId}`, (message) => {
-  //       console.log('받은 메시지:', message.body);
-  //       setMessages((prevMessages) => [...prevMessages, message.body]); // 받은 메시지를 상태에 추가
-  //     });
-
-  //     // 세션 정보 구독하여 memberId 저장
-  //     client.subscribe(`/user/queue/session`, (message) => {
-  //       const sessionInfo = JSON.parse(message.body);
-  //       setMemberId(sessionInfo.memberId);
-  //       localStorage.setItem('memberId', sessionInfo.memberId); // memberId를 로컬 스토리지에 저장
-  //     });
-
-  //     setStompClient(client); // STOMP 클라이언트 객체를 상태로 저장
-  //   }, (error) => {
-  //     setStatusMessage('웹소켓 서버와 연결 끊김!');
-  //     console.error('STOMP error:', error);
-  //   });
-
-  //   // 컴포넌트 언마운트 시 또는 roomId 변경 시 실행되는 정리 작업
-  //   return () => {
-  //     if (client) {
-  //       client.disconnect(() => {
-  //         setStatusMessage('웹소켓 서버와 연결 끊김!');
-  //       });
-  //     }
-  //   };
-  // }, [roomId]);
-
-  // IntroductionGuideModal 닫고 IntroductionModal 열기
   const openIntroModal = () => {
+    console.log("Opening Introduction Modal");
     setIsIntroGuideModalOpen(false);
     setIsIntroModalOpen(true);
   };
 
-  // IntroductionGuideModal 닫기
   const closeIntroGuideModal = () => {
+    console.log("Closing Introduction Guide Modal");
     setIsIntroGuideModalOpen(false);
   };
 
-  // IntroductionModal 닫기
   const closeIntroModal = () => {
+    console.log("Closing Introduction Modal");
     setIsIntroModalOpen(false);
   };
 
-  // IntroductionModal 닫고 DrawingWelcomeModal 열기
   const openDrawingWelcomeModal = () => {
+    console.log("Opening Drawing Welcome Modal");
     setIsIntroModalOpen(false);
     setIsDrawingWelcomeModalOpen(true);
   };
 
-  // DrawingWelcomeModal 닫기
   const closeDrawingWelcomeModal = () => {
+    console.log("Closing Drawing Welcome Modal");
     setIsDrawingWelcomeModalOpen(false);
   };
 
-  // DrawingGuideModal 닫기
   const closeDrawingGuideModal = () => {
+    console.log("Closing Drawing Guide Modal");
     setIsDrawingGuideModalOpen(false);
   };
 
-  // DrawingWelcomeModal 닫고 DrawingGuideModal 열기
   const openDrawingGuideModal = () => {
+    console.log("Opening Drawing Guide Modal");
     setIsDrawingWelcomeModalOpen(false);
     setIsDrawingGuideModalOpen(true);
   };
 
   const handleColorChange = (color) => {
+    console.log("Changing color to:", color);
     setBrushColor(color);
     setIsEraser(false);
   };
@@ -248,14 +207,17 @@ const Game1 = ({ roomId }) => {
     canvasRef.current
       .exportPaths()
       .then((paths) => {
+        console.log("Saving drawing paths:", paths);
         setDrawingHistory((prev) => [...prev, { paths }]);
       })
       .catch((error) => {
+        console.error("Error saving drawing:", error);
         setError("그린 과정 저장 중 오류가 발생했습니다.");
       });
   };
 
   const startReplay = () => {
+    console.log("Starting replay");
     setIsReplaying(true);
     setReplayIndex(0);
   };
@@ -266,8 +228,8 @@ const Game1 = ({ roomId }) => {
     return `${minutes}:${seconds}`;
   };
 
-  // member1 ~ member5 가 member6 을 그리는 화면
   const switchToNextMember = () => {
+    console.log("Switching to next member");
     setCurrentMemberIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
       if (nextIndex === 5) { // 5명이 그리기를 완료한 후
@@ -282,6 +244,7 @@ const Game1 = ({ roomId }) => {
     if (!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen) {
       if (timeLeft > 0 && !isReplaying) {
         const timer = setTimeout(() => {
+          console.log("Timer countdown:", timeLeft);
           setTimeLeft(timeLeft - 1);
         }, 1000);
         return () => clearTimeout(timer);
@@ -294,6 +257,7 @@ const Game1 = ({ roomId }) => {
 
   const replayDrawing = () => {
     if (replayIndex < drawingHistory.length) {
+      console.log("Replaying drawing at index:", replayIndex);
       canvasRef.current.clearCanvas();
       canvasRef.current.loadPaths(drawingHistory[replayIndex].paths);
       setReplayIndex(replayIndex + 1);
@@ -317,24 +281,7 @@ const Game1 = ({ roomId }) => {
   return (
     <Wrap>
       {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
-      {/* {statusMessage && <div>{statusMessage}</div>} 상태 메시지 표시 */}
-      {isIntroGuideModalOpen && (
-        <IntroductionGuideModal
-          onClose={closeIntroGuideModal}
-          onConfirm={openIntroModal}
-        />
-      )}
-      {isIntroModalOpen && (
-        <IntroductionModal onClose={openDrawingWelcomeModal} />
-      )}
-      {/* {isIntroModalOpen && memberId && ( // memberId가 설정된 후 모달 열기
-        <IntroductionModal
-        onClose={openDrawingWelcomeModal}
-        onConfirm={() => setIsDrawingWelcomeModalOpen(true)} // IntroductionModal에서 DrawingWelcomeModal 열기
-        roomId={roomId}
-        memberId={memberId}
-        />
-        )} */}
+      
       {/* 이어그리기 행성 입장 */}
       {isDrawingWelcomeModalOpen && (
         <GameInfoModal
@@ -433,10 +380,9 @@ const Game1 = ({ roomId }) => {
           )} */}
         </>
       )}
-      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
+      
     </Wrap>
   );
 };
 
 export default Game1;
-// 살려
