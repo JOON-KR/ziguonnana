@@ -157,7 +157,11 @@ public class ArtService {
 	public void spreadKeyword(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
 		List<RelayArt> keywordList = getKeyword(room);
-		GameMessage<List<RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", keywordList);
+		ConcurrentMap<Integer, RelayArt> map = new ConcurrentHashMap<>();
+		for(int i=0; i<keywordList.size();i++) {
+			map.put(i+1, keywordList.get(i));
+		}
+		GameMessage<ConcurrentMap<Integer, RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", map);
 		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
 		log.info("이어그리기 키워드 발송");
 	}
