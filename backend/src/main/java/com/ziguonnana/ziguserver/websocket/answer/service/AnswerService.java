@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.exception.PlayerException;
@@ -49,8 +48,8 @@ public class AnswerService {
 			room.cycleInit();
 			nextGame(roomId);
 		}
-		log.info("player 정보 업데이트 player : " + player.toString());
-		log.info("자기소개 답변 업데이트 room : " + rooms.toString());
+		log.info("player 정보 업데이트 player : " + player);
+		log.info("자기소개 답변 업데이트 room : " + rooms);
 	}
 	
 	public void getQuestion(String roomId) {
