@@ -26,8 +26,31 @@ const FormWrap = styled.div`
 
 const ChatWrap = styled.div`
   /* width: 60%; */
+`;
+
+const ExplainerWrap = styled.div`
+  width: 600px;
+  border-radius: 10px;
+  height: 155px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const QuestionerWrap = styled.div`
+  width: 600px;
+  border-radius: 10px;
   position: fixed;
   bottom: 30px;
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #ebeef1;
 `;
 
 // 몸으로 말해요 페이지 (BodyTalk)
@@ -51,6 +74,7 @@ const Game2 = () => {
   const [subscribed, setSubscribed] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
+  const [isExplainer, setIsExplainer] = useState(false);
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -84,6 +108,7 @@ const Game2 = () => {
         console.log("출제자 키워드 :", parsedMessage);
 
         if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
+          setIsExplainer(true);
           setKeywordType(parsedMessage.data.type);
           console.log(parsedMessage.data.type);
           console.log(keywordType);
@@ -202,27 +227,56 @@ const Game2 = () => {
           }}
         />
       )}
-      <SpeechBubble text={keywordType} />
-      <img src={bigNana} />
 
+      {isExplainer ? (
+        <ExplainerWrap>
+          <SpeechBubble text={receivedKeyword} />
+          <img src={bigNana} />
+          <div>
+            <h1
+              style={{ fontSize: "34px", fontWeight: "600", color: "#626262" }}
+            >
+              주어진 제시어를 몸으로 표현하세요!
+            </h1>
+            <h4 style={{ fontSize: "26px", color: "#81939C" }}>
+              마이크는 꺼집니다
+            </h4>
+          </div>
+        </ExplainerWrap>
+      ) : (
+        <QuestionerWrap>
+          <h1
+            style={{
+              fontSize: "34px",
+              fontWeight: "600",
+              marginBottom: "16px",
+              color: "#626262",
+            }}
+          >
+            출제자를 보고 답을 맞춰주세요!
+          </h1>
+          <h4 style={{ fontSize: "26px", color: "#81939C" }}>
+            아래 채팅창에 입력해주세요 :)
+          </h4>
+          <ChatWrap>
+            <input
+              type="text"
+              value={typedText}
+              onChange={(e) => setTypedText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();
+                }
+              }}
+            />
+            <button onClick={sendMessage}>보냄</button>
+          </ChatWrap>
+        </QuestionerWrap>
+      )}
       <h1>제시어 종류 : {keywordType}</h1>
       {/* {cmdType == "BODYGAME_EXPLANIER" && <h1>제시어 : {receivedKeyword}</h1>} */}
       <h1>제시어 : {receivedKeyword}</h1>
       <div>라운드 {round}</div>
-
-      <ChatWrap>
-        <input
-          type="text"
-          value={typedText}
-          onChange={(e) => setTypedText(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              sendMessage();
-            }
-          }}
-        />
-        <button onClick={sendMessage}>보냄</button>
-      </ChatWrap>
     </Wrap>
   );
 };
