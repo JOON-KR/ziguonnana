@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-// Styled components
 const Box = styled.div`
   width: 200px;
   height: 200px;
@@ -43,18 +42,11 @@ const VideoBox = ({ index }) => {
   const userNickname = nicknameList.find((item) => item.num === index + 1)?.nickname;
 
   useEffect(() => {
-    if (index === 0 && localStream && videoRef.current) {
-      videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림 설정
-      console.log("Added local video element");
-    } else if (
-      subscribers.length > index - 1 &&
-      subscribers[index - 1] &&
-      videoRef.current
-    ) {
-      subscribers[index - 1].addVideoElement(videoRef.current); // 구독자 비디오 요소 추가
-      console.log(`Added video element for subscriber ${index - 1}`);
+    if (subscribers.length > index && videoRef.current) {
+      subscribers[index].addVideoElement(videoRef.current);
+      console.log(`Added video element for subscriber ${index}`);
     }
-  }, [subscribers, index, localStream]);
+  }, [subscribers, index]);
 
   return (
     <Box>
