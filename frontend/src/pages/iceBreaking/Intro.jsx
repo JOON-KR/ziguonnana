@@ -15,6 +15,7 @@ const Wrap = styled.div`
   background-color: black;
   padding: 20px 0; /* Add top and bottom padding for spacing */
   box-sizing: border-box;
+  position: relative; /* For positioning the skip button */
 `;
 
 const Image = styled.img`
@@ -23,9 +24,32 @@ const Image = styled.img`
   object-fit: contain; /* Keep aspect ratio while fitting within the container */
 `;
 
+const SkipButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
 const Introduce = () => {
   const [isStoryFinished, setIsStoryFinished] = useState(false);
   const navigate = useNavigate();
+
+  const skipIntro = () => {
+    setIsStoryFinished(true);
+  };
 
   useEffect(() => {
     const gifDuration = 16000; // GIF 재생 시간 (밀리초 단위)
@@ -39,7 +63,10 @@ const Introduce = () => {
   return (
     <Wrap>
       {!isStoryFinished ? (
-        <Image src={introGif} alt="Intro" />
+        <>
+          <Image src={introGif} alt="Intro" />
+          <SkipButton onClick={skipIntro}>Skip</SkipButton>
+        </>
       ) : (
         <Image
           src={firstGame}
