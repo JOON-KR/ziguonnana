@@ -25,15 +25,16 @@ public class BodyTalkService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final List<Keyword> keywordList = KeywordConstants.KEYWORD_LIST;
     private final Random random = new Random();
-    private int keywordReq = 0;
 
     // 출제자 선정
     // 키워드 타입 전달
     public synchronized String decideKeywordExplanier(String roomId){
-        if(keywordReq != 0) throw new BodyTalkException(ErrorCode.BODYTALK_KEYWORD_REQUEST);
-        // 처음 요청일 때만 수행
-        keywordReq++;
         Room room = roomRepository.getRoom(roomId);
+        int keywordReq = room.getBodyTalkKeywordCnt();
+        if(keywordReq != 0) throw new BodyTalkException(ErrorCode.BODYTALK_KEYWORD_REQUEST);
+
+        // 처음 요청일 때만 수행
+        room.countBodyTalkKeywordCnt();
         if(room.getCycle() == 0){
             room.getBodyTalkGame().startGame();
         }
@@ -43,7 +44,7 @@ public class BodyTalkService {
             Response response = Response.ok(CommandType.BODYGAME_RESULT, result);
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
             room.cycleInit(); //사이클(라운드) 초기화
-            keywordReq = 0; // 키워드 요청 초기화
+            room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
             return "게임종료";
         }
         int people = room.getPeople();
