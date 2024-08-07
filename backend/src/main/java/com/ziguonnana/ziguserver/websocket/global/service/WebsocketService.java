@@ -123,7 +123,6 @@ public class WebsocketService {
         log.info("------------------게임 시작 ------------------");
         boolean start = true;
         GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
-        answerService.getQuestion(room.getRoomId());
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
         
     }
