@@ -32,7 +32,7 @@ public class BodyTalkService {
     public synchronized String decideKeywordExplanier(String roomId){
         Room room = roomRepository.getRoom(roomId);
         int keywordReq = room.getBodyTalkKeywordCnt();
-        if(keywordReq != 0) throw new BodyTalkException(ErrorCode.BODYTALK_KEYWORD_REQUEST);
+        if(keywordReq != 0) return "요청 불가";
 
         // 처음 요청일 때만 수행
         room.countBodyTalkKeywordCnt();
@@ -60,6 +60,7 @@ public class BodyTalkService {
         room.getBodyTalkGame().changeKeyword(keyword);
         Response response  = Response.ok(CommandType.BODYGAME_EXPLANIER, keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
+        log.info(explanierNum + "에게 키워드 전달 : " + keyword);
         return keyword.getType();
     }
 

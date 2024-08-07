@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.AvatarCard;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
@@ -117,8 +119,8 @@ public class ArtService {
 		// 다음 단계로 전환 메시지 전송
 		String nextStepMessage = "이어그리기 결과 확인";
 		boolean endArt = true;
-		GameMessage<Boolean> nextMessage = GameMessage.info(nextStepMessage, endArt);
-		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
+		Response<Boolean> endResponse = Response.ok(CommandType.ART_END, endArt);
+		messagingTemplate.convertAndSend("/topic/game/" + roomId, endResponse);
 		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, artResult);
 		
 		//아바타 결과 반환
@@ -157,7 +159,11 @@ public class ArtService {
 	public void spreadKeyword(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
 		List<RelayArt> keywordList = getKeyword(room);
-		GameMessage<List<RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", keywordList);
+		ConcurrentMap<Integer, RelayArt> map = new ConcurrentHashMap<>();
+		for(int i=0; i<keywordList.size();i++) {
+			map.put(i+1, keywordList.get(i));
+		}
+		GameMessage<ConcurrentMap<Integer, RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", map);
 		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
 		log.info("이어그리기 키워드 발송");
 	}
