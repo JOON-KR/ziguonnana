@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
+// Styled components
 const Box = styled.div`
   width: 200px;
   height: 200px;
@@ -38,18 +39,39 @@ const NameTag = styled.div`
 const VideoBox = ({ index }) => {
   const videoRef = useRef(null);
   const subscribers = useSelector((state) => state.room.subscribers);
+  const localStream = useSelector((state) => state.room.localStream);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
+
+  // 해당 인덱스에 맞는 사용자 번호 찾기
+  const userNo = index + 1;
+
+  // 사용자 번호에 맞는 별명 찾기
+  const userNickname = nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름";
+
+  console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
 
   useEffect(() => {
-    if (subscribers.length > index && videoRef.current) {
-      subscribers[index].addVideoElement(videoRef.current);
-      console.log(`Added video element for subscriber ${index}`);
+    if (index === 0 && localStream && videoRef.current) {
+      videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림 설정
+      console.log("Added local video element");
+    } else if (
+      subscribers.length > index - 1 &&
+      subscribers[index - 1] &&
+      videoRef.current
+    ) {
+      subscribers[index - 1].addVideoElement(videoRef.current); // 구독자 비디오 요소 추가
+      console.log(`Added video element for subscriber ${index - 1}`);
     }
-  }, [subscribers, index]);
+  }, [subscribers, index, localStream]);
+
+  useEffect(() => {
+    console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
+  }, [nicknameList]);
 
   return (
     <Box>
       <Video ref={videoRef} autoPlay />
-      <NameTag>사용자 이름</NameTag>
+      <NameTag>{userNickname}</NameTag>
     </Box>
   );
 };
