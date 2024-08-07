@@ -12,11 +12,13 @@ import com.ziguonnana.ziguserver.exception.RoomException;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.answer.service.AnswerService;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.global.dto.SessionInfo;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
@@ -122,8 +124,8 @@ public class WebsocketService {
         // 게임 시작 알림을 클라이언트에 보냅니다.
         log.info("------------------게임 시작 ------------------");
         boolean start = true;
-        GameMessage<Boolean> startMessage = GameMessage.info("게임 시작!", start);
-        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startMessage);
+        Response<Boolean>startResponse = Response.ok(CommandType.GAME_START, start);
+        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), startResponse);
         
     }
 
