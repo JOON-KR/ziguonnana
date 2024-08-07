@@ -58,10 +58,10 @@ public class Profile {
         }
         onUpdate();
     }
-    public static Profile from(ProfileRequest profile) {
+    public static Profile from(ProfileRequest profile, String profileImageUrl) {
         return Profile.builder()
                 .feature(profile.getFeature())
-                .profileImage(profile.getProfileImage())
+                .profileImage(profileImageUrl)
                 .id(profile.getProfileId())
                 .name(profile.getName())
                 .build();

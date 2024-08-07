@@ -1,16 +1,10 @@
 package com.ziguonnana.ziguserver.domain.profile.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ziguonnana.ziguserver.domain.profile.dto.ProfileRequest;
 import com.ziguonnana.ziguserver.domain.profile.dto.ProfileResponse;
@@ -19,6 +13,7 @@ import com.ziguonnana.ziguserver.global.ResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -29,8 +24,8 @@ public class ProfileController {
 	private final ProfileService profileService;
 
 	@PostMapping
-	public ResponseEntity<ResponseDto<ProfileResponse>> createProfile(@RequestBody ProfileRequest profileRequest) {
-		ProfileResponse profileResponse = profileService.createProfile(profileRequest);
+	public ResponseEntity<ResponseDto<ProfileResponse>> createProfile(@RequestPart MultipartFile profileImage, @RequestPart ProfileRequest profileRequest) throws IOException {
+		ProfileResponse profileResponse = profileService.createProfile(profileRequest, profileImage);
 		return ResponseEntity.status(201).body(ResponseDto.success(profileResponse));
 	}
 	
@@ -53,8 +48,8 @@ public class ProfileController {
 	}
 	
 	@PutMapping
-	public ResponseEntity<ResponseDto<ProfileResponse>> updateProfile(@RequestBody ProfileRequest profile){
-		ProfileResponse profileResponse = profileService.updateProfile(profile);
+	public ResponseEntity<ResponseDto<ProfileResponse>> updateProfile(@RequestPart MultipartFile profileImage, @RequestPart ProfileRequest profileRequest) throws IOException {
+		ProfileResponse profileResponse = profileService.updateProfile(profileRequest, profileImage);
 		return ResponseEntity.ok().body(ResponseDto.success(profileResponse));
 	}
 }
