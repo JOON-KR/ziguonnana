@@ -29,6 +29,7 @@ public class BodyTalkController {
     public Response<String> sendKeyword(@DestinationVariable("roomId") String roomId) {
         log.info("========= 몸으로 말해요 게임 키워드 전달 =========");
         String type = bodyTalkService.decideKeywordExplanier(roomId);
+        if(type.equals("요청 불가")) log.info("=====요청 여러번 들어옴====");
         return Response.ok(CommandType.KEYWORD_TYPE, type);
     }
 
