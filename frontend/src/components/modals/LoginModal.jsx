@@ -140,6 +140,7 @@ const LoginModal = ({
     AquaBtnFn(email, password);
   };
 
+  //url 연결
   const handleKakaoLogin = () => {
     const kakaoLoginUrl = 'https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=http://localhost:8081/api/v1/member/login/kakao/callback&response_type=code';
     window.location.href = kakaoLoginUrl;
