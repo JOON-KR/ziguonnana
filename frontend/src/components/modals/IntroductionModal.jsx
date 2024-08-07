@@ -92,8 +92,10 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
 
   useEffect(() => {
     if (stompClient && stompClient.connected) {
+      console.log("WebSocket connected:", stompClient);
+  
       fetchQuestions();
-
+  
       const handleMessage = (message) => {
         const body = JSON.parse(message.body);
         console.log("Received message:", body);
@@ -101,16 +103,27 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
           console.log("Setting questions list:", body.data.question);
           setQuestionsList(body.data.question);
           setAnswers(Array(body.data.question.length).fill(""));
+          console.log("Updated questions list:", body.data.question); // 추가된 로그
+        } else {
+          console.log("Unexpected message:", body);
         }
       };
-
+  
       const subscription = stompClient.subscribe(`/topic/game/${roomId}`, handleMessage);
-
+      console.log("Subscribed to:", `/topic/game/${roomId}`);
+  
       return () => {
         subscription.unsubscribe();
+        console.log("Unsubscribed from:", `/topic/game/${roomId}`);
       };
+    } else {
+      console.log("WebSocket not connected:", stompClient);
     }
   }, [stompClient, roomId]);
+  
+  useEffect(() => {
+    console.log("Current questions list:", questionsList);
+  }, [questionsList]);
 
   // 답변을 서버에 제출하는 함수
   const submitAnswers = () => {
