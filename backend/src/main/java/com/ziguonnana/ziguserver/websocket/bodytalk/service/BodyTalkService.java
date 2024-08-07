@@ -1,5 +1,7 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.service;
 
+import com.ziguonnana.ziguserver.exception.BodyTalkException;
+import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.*;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
@@ -9,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Random;
@@ -27,9 +28,13 @@ public class BodyTalkService {
 
     // 출제자 선정
     // 키워드 타입 전달
-    @Transactional
-    public String decideKeywordExplanier(String roomId){
+    public synchronized String decideKeywordExplanier(String roomId){
         Room room = roomRepository.getRoom(roomId);
+        int keywordReq = room.getBodyTalkKeywordCnt();
+        if(keywordReq != 0) throw new BodyTalkException(ErrorCode.BODYTALK_KEYWORD_REQUEST);
+
+        // 처음 요청일 때만 수행
+        room.countBodyTalkKeywordCnt();
         if(room.getCycle() == 0){
             room.getBodyTalkGame().startGame();
         }
@@ -39,6 +44,7 @@ public class BodyTalkService {
             Response response = Response.ok(CommandType.BODYGAME_RESULT, result);
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
             room.cycleInit(); //사이클(라운드) 초기화
+            room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
             return "게임종료";
         }
         int people = room.getPeople();
@@ -60,6 +66,7 @@ public class BodyTalkService {
         bodyTalkGame.calculateDurationTime();
         BodyTalkResult result = new BodyTalkResult(bodyTalkGame.getDurationTime(), bodyTalkGame.getCorrectCnt());
         log.info("몸으로 말해요 결과:" + result);
+
         return result;
     }
 
@@ -68,7 +75,6 @@ public class BodyTalkService {
         return keywordList.get(index);
     }
 
-    @Transactional
     public BodyChatMessage chat(BodyChatRequest bodyChatRequest, String roomId) {
         BodyTalkGame bodyTalkGame = roomRepository.getRoom(roomId).getBodyTalkGame();
         String answer = bodyTalkGame.getKeyword().getWord();
