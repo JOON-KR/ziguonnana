@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProfileRequest {
     private String[] feature;
-    private String profileImage;
     private Long profileId;
     private String name;
 }
