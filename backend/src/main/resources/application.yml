@@ -24,6 +24,12 @@ spring:
     host: redis
     port: 6379
 
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 300MB
+      max-file-size: 30MB
+
 logging:
   level:
     org.hibernate.SQL: info
