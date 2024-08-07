@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -41,12 +41,20 @@ const NicknameItem = styled.li`
 const Game1Result = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
+  const [cmdType, setCmdType] = useState("");
+
   const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const userNo = useSelector((state) => state.auth.userNo);
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const maxNo = useSelector((state) => state.room.maxNo);
+
   const navigate = useNavigate();
 
   // 현재 사용자의 별명만 필터링
-  const userNickname = nicknameList.find((nicknameItem) => nicknameItem.num === userNo)?.nickname;
+  const userNickname = nicknameList.find(
+    (nicknameItem) => nicknameItem.num === userNo
+  )?.nickname;
 
   const handleIntroGuideConfirm = () => {
     setIsIntroGuideModalOpen(false);
@@ -55,8 +63,22 @@ const Game1Result = () => {
 
   const handleIntroModalConfirm = () => {
     setIsIntroModalOpen(false);
-    navigate('/icebreaking/games/game1');
+    navigate("/icebreaking/games/game1");
   };
+
+  useEffect(() => {
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+
+      const cmd = parsedMessage.commandType;
+
+      if (cmd == "GAME_MODAL_START") {
+        navigate("/icebreaking/games/game1");
+      }
+
+      console.log("키워드 타입 :", parsedMessage);
+    });
+  }, [client, roomId]);
 
   return (
     <Wrap>
@@ -78,7 +100,14 @@ const Game1Result = () => {
       </NicknameList>
       <h2>입니다.</h2>
       <ButtonWrap>
-        <button onClick={handleIntroModalConfirm}>다음</button>
+        {/* 다음 누르면 game1로감 */}
+        <button
+          onClick={() => {
+            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`); //몸으로 말해요는 아니지만 아무거나 써도됨
+          }}
+        >
+          다음
+        </button>
       </ButtonWrap>
     </Wrap>
   );
