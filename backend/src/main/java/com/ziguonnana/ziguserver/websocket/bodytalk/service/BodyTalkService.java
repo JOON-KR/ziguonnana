@@ -20,6 +20,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class BodyTalkService {
     private static final int ROUND = 6;
+    private static final int END_TIME = 4 * 60; //게임 시간 4분
 
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -38,8 +39,9 @@ public class BodyTalkService {
         if(room.getCycle() == 0){
             room.getBodyTalkGame().startGame();
         }
-        if(room.getCycle()+1 > ROUND){
-            // 게임종료
+
+        // 시간 종료 - 게임종료 & 라운드 종료 - 게임종료
+        if(room.getBodyTalkGame().calculateDurationTime() > END_TIME || room.getCycle()+1 > ROUND){
             BodyTalkResult result = gameEnd(room.getBodyTalkGame());
             Response response = Response.ok(CommandType.BODYGAME_RESULT, result);
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
@@ -52,6 +54,7 @@ public class BodyTalkService {
         log.info("출제자 번호: " + explanierNum);
         room.cycleUp();
         log.info("현재 라운드 : " + room.getCycle());
+
         // 키워드 저장
         Keyword keyword = randomKeyword();
         room.getBodyTalkGame().changeKeyword(keyword);
@@ -76,6 +79,7 @@ public class BodyTalkService {
     }
 
     public BodyChatMessage chat(BodyChatRequest bodyChatRequest, String roomId) {
+        Room room = roomRepository.getRoom(roomId);
         BodyTalkGame bodyTalkGame = roomRepository.getRoom(roomId).getBodyTalkGame();
         String answer = bodyTalkGame.getKeyword().getWord();
 
@@ -83,6 +87,7 @@ public class BodyTalkService {
         boolean isCorrect = isCorrect(answer, bodyChatRequest.getContent());
         if(isCorrect){
             bodyTalkGame.plusCorrectCnt();
+            room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
         }
         return new BodyChatMessage(bodyChatRequest.getSenderNum(), bodyChatRequest.getContent(), isCorrect);
     }
