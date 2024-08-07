@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
+import { useSelector } from "react-redux";
 
 const Wrap = styled.div`
   width: 100%;
@@ -139,11 +140,11 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
-
-const Game1 = ({ roomId }) => {
+const Game1 = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
+  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
+    useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
   const [brushColor, setBrushColor] = useState("#000000"); // 브러시 색상 상태
   const [brushRadius, setBrushRadius] = useState(5); // 브러시 크기 상태
@@ -153,12 +154,46 @@ const Game1 = ({ roomId }) => {
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayIndex, setReplayIndex] = useState(0);
   const [memberId, setMemberId] = useState(""); // 현재 사용자 ID 상태
-  const [members, setMembers] = useState(['member1', 'member2', 'member3', 'member4', 'member5', 'member6']); // 멤버 리스트
+  const [members, setMembers] = useState([
+    "member1",
+    "member2",
+    "member3",
+    "member4",
+    "member5",
+    "member6",
+  ]); // 멤버 리스트
   const [currentMemberIndex, setCurrentMemberIndex] = useState(0); // 현재 멤버 인덱스 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
   const navigate = useNavigate();
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+
+  useEffect(() => {
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+    if (client && client.connected) {
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        // console.log("게임 종류 선택 메시지:", parsedMessage);
+
+        const cmd = parsedMessage.commandType;
+        const data = parsedMessage.data;
+
+        console.log("닫기 요청 데이터 ", parsedMessage);
+        console.log("닫기 요청 데이터 ", data);
+
+        if (data == "SAME_POSE") {
+          setIsDrawingWelcomeModalOpen(false);
+          setIsDrawingGuideModalOpen(false);
+        } else if (cmd == "GAME_MODAL_START") {
+          setIsIntroGuideModalOpen(false);
+        }
+      });
+    }
+  }, [client, roomId]);
 
   const openIntroModal = () => {
     console.log("Opening Introduction Modal");
@@ -225,8 +260,10 @@ const Game1 = ({ roomId }) => {
   };
 
   const formatTime = (time) => {
-    const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-    const seconds = (time % 60).toString().padStart(2, '0');
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
 
@@ -234,7 +271,8 @@ const Game1 = ({ roomId }) => {
     console.log("Switching to next member");
     setCurrentMemberIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
-      if (nextIndex === 5) { // 5명이 그리기를 완료한 후
+      if (nextIndex === 5) {
+        // 5명이 그리기를 완료한 후
         startReplay();
       }
       return nextIndex;
@@ -243,7 +281,12 @@ const Game1 = ({ roomId }) => {
   };
 
   useEffect(() => {
-    if (!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen) {
+    if (
+      !isIntroGuideModalOpen &&
+      !isIntroModalOpen &&
+      !isDrawingWelcomeModalOpen &&
+      !isDrawingGuideModalOpen
+    ) {
       if (timeLeft > 0 && !isReplaying) {
         const timer = setTimeout(() => {
           console.log("Timer countdown:", timeLeft);
@@ -255,7 +298,14 @@ const Game1 = ({ roomId }) => {
         switchToNextMember();
       }
     }
-  }, [timeLeft, isIntroGuideModalOpen, isIntroModalOpen, isDrawingWelcomeModalOpen, isDrawingGuideModalOpen, isReplaying]);
+  }, [
+    timeLeft,
+    isIntroGuideModalOpen,
+    isIntroModalOpen,
+    isDrawingWelcomeModalOpen,
+    isDrawingGuideModalOpen,
+    isReplaying,
+  ]);
 
   const replayDrawing = () => {
     if (replayIndex < drawingHistory.length) {
@@ -275,22 +325,50 @@ const Game1 = ({ roomId }) => {
   }, [isReplaying, replayIndex, drawingHistory]);
 
   const colors = [
-    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#000000", "#FFFFFF",
-    "#A52A2A", "#D2691E", "#DAA520", "#808000", "#008000", "#008080", "#00FFFF", "#4682B4", "#00008B",
-    "#8A2BE2", "#FF1493", "#D3D3D3", "#A9A9A9"
+    "#FF0000",
+    "#FF7F00",
+    "#FFFF00",
+    "#00FF00",
+    "#0000FF",
+    "#4B0082",
+    "#8B00FF",
+    "#000000",
+    "#FFFFFF",
+    "#A52A2A",
+    "#D2691E",
+    "#DAA520",
+    "#808000",
+    "#008000",
+    "#008080",
+    "#00FFFF",
+    "#4682B4",
+    "#00008B",
+    "#8A2BE2",
+    "#FF1493",
+    "#D3D3D3",
+    "#A9A9A9",
   ];
 
   return (
     <Wrap>
-      {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
-      
+      {error && <div style={{ color: "red" }}>{error}</div>}{" "}
+      {/* 에러 메시지 표시 */}
       {/* 자기소개 가이드 모달 */}
       {isIntroGuideModalOpen && (
-        <IntroductionGuideModal onClose={closeIntroGuideModal} onConfirm={openIntroModal} />
+        <IntroductionGuideModal
+          onClick={() => {
+            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`); //몸으로 말해요는 아니지만 아무거나 써도됨
+          }}
+          // onClose={closeIntroGuideModal}
+          onConfirm={openIntroModal}
+        />
       )}
       {/* 자기소개 모달 */}
       {isIntroModalOpen && (
-        <IntroductionModal onClose={closeIntroModal} onConfirm={openDrawingWelcomeModal} />
+        <IntroductionModal
+          onClose={closeIntroModal}
+          onConfirm={openDrawingWelcomeModal}
+        />
       )}
       {/* 이어그리기 행성 입장 */}
       {isDrawingWelcomeModalOpen && (
@@ -298,18 +376,27 @@ const Game1 = ({ roomId }) => {
           planetImg={blue}
           RedBtnText={"게임 시작"}
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={closeDrawingWelcomeModal}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           BlueBtnText={"게임 설명"}
-          BlueBtnFn={openDrawingGuideModal}
+          BlueBtnFn={() =>
+            // client.send(`/app/game/${roomId}/start-modal/SAME_POSE`)
+            openDrawingGuideModal()
+          }
           modalText={"이어그리기 게임에 오신걸 환영합니다 !"}
-          onClose={closeDrawingWelcomeModal}
+          // onClose={closeDrawingWelcomeModal}
         />
       )}
       {isDrawingGuideModalOpen && (
         <GameModal
           RedBtnText={"게임 시작"}
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={closeDrawingGuideModal}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           modalText={
             <>
               주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
@@ -317,76 +404,93 @@ const Game1 = ({ roomId }) => {
               제한시간은 20초입니다.
             </>
           }
-          onClose={closeDrawingGuideModal}
+          // onClose={closeDrawingGuideModal}
         />
       )}
       {/* 이어그리기 화면 (캔버스) */}
-      {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
-        <>
-          {!isReplaying ? (
-            <>
-              <Header>
-                <ProfileInfo>
-                  <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-                  <ProfileDetails>
-                    <HeaderText>이름: {members[5]}</HeaderText> {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
-                    <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
-                  </ProfileDetails>
-                </ProfileInfo>
-                <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-              </Header>
+      {!isIntroGuideModalOpen &&
+        !isIntroModalOpen &&
+        !isDrawingWelcomeModalOpen &&
+        !isDrawingGuideModalOpen && (
+          <>
+            {!isReplaying ? (
+              <>
+                <Header>
+                  <ProfileInfo>
+                    <ProfileImage
+                      src="path/to/profile-image.png"
+                      alt="프로필 이미지"
+                    />
+                    <ProfileDetails>
+                      <HeaderText>이름: {members[5]}</HeaderText>{" "}
+                      {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
+                      <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
+                    </ProfileDetails>
+                  </ProfileInfo>
+                  <HeaderText>
+                    주어진 정보를 활용하여 아바타를 그려주세요!
+                  </HeaderText>
+                </Header>
+                <CanvasWrapper>
+                  <ReactSketchCanvas
+                    ref={canvasRef}
+                    width="970px"
+                    height="600px"
+                    strokeColor={isEraser ? "#FFFFFF" : brushColor}
+                    strokeWidth={brushRadius}
+                    eraserWidth={isEraser ? brushRadius : 0}
+                  />
+                  <ToolsWrapper>
+                    <CustomSwatchesPicker>
+                      {colors.map((color) => (
+                        <ColorSquare
+                          key={color}
+                          color={color}
+                          selected={brushColor === color}
+                          onClick={() => handleColorChange(color)}
+                        />
+                      ))}
+                    </CustomSwatchesPicker>
+                    <SliderWrapper>
+                      <SliderLabel>펜 굵기</SliderLabel>
+                      <Slider
+                        type="range"
+                        min="1"
+                        max="20"
+                        value={brushRadius}
+                        onChange={(e) => setBrushRadius(e.target.value)}
+                      />
+                    </SliderWrapper>
+                    <ToolButton
+                      onClick={() => setIsEraser(false)}
+                      active={!isEraser}
+                    >
+                      펜
+                    </ToolButton>
+                    <ToolButton
+                      onClick={() => setIsEraser(true)}
+                      active={isEraser}
+                    >
+                      지우개
+                    </ToolButton>
+                    <Timer>{formatTime(timeLeft)}</Timer>
+                  </ToolsWrapper>
+                </CanvasWrapper>
+              </>
+            ) : (
               <CanvasWrapper>
                 <ReactSketchCanvas
                   ref={canvasRef}
                   width="970px"
                   height="600px"
-                  strokeColor={isEraser ? "#FFFFFF" : brushColor}
-                  strokeWidth={brushRadius}
-                  eraserWidth={isEraser ? brushRadius : 0}
                 />
-                <ToolsWrapper>
-                  <CustomSwatchesPicker>
-                    {colors.map((color) => (
-                      <ColorSquare
-                        key={color}
-                        color={color}
-                        selected={brushColor === color}
-                        onClick={() => handleColorChange(color)}
-                      />
-                    ))}
-                  </CustomSwatchesPicker>
-                  <SliderWrapper>
-                    <SliderLabel>펜 굵기</SliderLabel>
-                    <Slider
-                      type="range"
-                      min="1"
-                      max="20"
-                      value={brushRadius}
-                      onChange={(e) => setBrushRadius(e.target.value)}
-                    />
-                  </SliderWrapper>
-                  <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
-                    펜
-                  </ToolButton>
-                  <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
-                    지우개
-                  </ToolButton>
-                  <Timer>{formatTime(timeLeft)}</Timer>
-                </ToolsWrapper>
               </CanvasWrapper>
-            </>
-          ) : (
-            <CanvasWrapper>
-              <ReactSketchCanvas
-                ref={canvasRef}
-                width="970px"
-                height="600px"
-                />
-            </CanvasWrapper>
-          )}
-        </>
-      )}
-      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
+            )}
+          </>
+        )}
+      <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
+        버튼
+      </button>
     </Wrap>
   );
 };

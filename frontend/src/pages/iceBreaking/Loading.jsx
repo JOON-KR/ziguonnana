@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import Loader from "../../components/common/Loader";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setQuestionList } from "../../store/questionSlice";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -39,6 +40,9 @@ const Loading = () => {
   const client = useSelector((state) => state.client.stompClient);
   const [messages, setMessages] = useState([]);
 
+  const questionList = useSelector((state) => state.question.questionList);
+  const dispatch = useDispatch();
+
   const { profileData } = location.state || {};
 
   //이 부분 수정 필요
@@ -55,9 +59,17 @@ const Loading = () => {
   client.subscribe(`/topic/game/${roomId}`, (message) => {
     const parsedMessage = JSON.parse(message.body);
     console.log("방에서 받은 메시지:", parsedMessage);
-    if (parsedMessage.data == true && parsedMessage.commandType == "GAME_START") navigate("/icebreaking/intro");
+    if (parsedMessage.data == true && parsedMessage.commandType == "GAME_START")
+      // navigate("/icebreaking/intro");
+      navigate("/icebreaking/games/game1");
     // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+    else if (parsedMessage.message == "질문리스트 전파\n") {
+      dispatch(setQuestionList(parsedMessage.data.question));
+      console.log(parsedMessage.data.question);
+    }
   });
+
+  client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
 
   if (client && client.connected) {
     console.log("소켓에 전송할 데이터 : ", profileData);
@@ -67,7 +79,7 @@ const Loading = () => {
   return (
     <PageWrap>
       <Content>
-        <Loader currentNum={4} MaxNum={6} />
+        <Loader />
       </Content>
     </PageWrap>
   );

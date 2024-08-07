@@ -76,54 +76,40 @@ const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함", "
 // IntroductionModal 컴포넌트
 const IntroductionModal = ({ onClose, onConfirm }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // 현재 질문 인덱스 상태
-  const [questionsList, setQuestionsList] = useState([]); // 서버에서 받아온 질문 목록 상태
   const [answers, setAnswers] = useState([]); // 각 질문에 대한 답변 상태
   const [timerKey, setTimerKey] = useState(0); // 타이머 재시작을 위한 키 상태
   // Redux 상태에서 필요한 값들 가져오기
   const userNo = useSelector((state) => state.auth.userNo);
-  const roomId = useSelector((state) => state.room.roomId); 
-  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+  const questionList = useSelector((state) => state.question.questionList);
 
   // 서버에서 질문 목록을 받아오는 함수
-  const fetchQuestions = () => {
-    console.log("Sending request to fetch questions");
-    stompClient.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
-  };
 
   useEffect(() => {
-    if (stompClient && stompClient.connected) {
-      console.log("WebSocket connected:", stompClient);
-  
-      fetchQuestions();
-  
-      const handleMessage = (message) => {
-        const body = JSON.parse(message.body);
-        console.log("Received message:", body);
-        if (body.message.trim() === '질문리스트 전파') {
-          console.log("Setting questions list:", body.data.question);
-          setQuestionsList(body.data.question);
-          setAnswers(Array(body.data.question.length).fill(""));
-          console.log("Updated questions list:", body.data.question); // 추가된 로그
-        } else {
-          console.log("Unexpected message:", body);
-        }
-      };
-  
-      const subscription = stompClient.subscribe(`/topic/game/${roomId}`, handleMessage);
-      console.log("Subscribed to:", `/topic/game/${roomId}`);
-  
-      return () => {
-        subscription.unsubscribe();
-        console.log("Unsubscribed from:", `/topic/game/${roomId}`);
-      };
-    } else {
-      console.log("WebSocket not connected:", stompClient);
-    }
-  }, [stompClient, roomId]);
-  
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+      console.log("방에서 받은 메시지:", parsedMessage);
+      // if (
+      //   parsedMessage.data == true &&
+      //   parsedMessage.commandType == "GAME_START"
+      // )
+      //   navigate("/icebreaking/intro");
+      // // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      // else if (parsedMessage.message == "질문리스트 전파\n") {
+      //   dispatch(setQuestionList(parsedMessage.data.question));
+      //   console.log(parsedMessage.data.question);
+      // }
+    });
+  }, [client, roomId]);
+
   useEffect(() => {
-    console.log("Current questions list:", questionsList);
-  }, [questionsList]);
+    console.log("Current questions list:", questionList);
+  }, [questionList]);
 
   // 답변을 서버에 제출하는 함수
   const submitAnswers = () => {
@@ -133,7 +119,7 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
         answer: answers, // 요청 바디에 답변 배열 포함
       };
 
-      stompClient.send(
+      client.send(
         `/app/game/${roomId}/self-introduction`, // 엔드포인트 URL
         {},
         JSON.stringify(message) // 메시지를 JSON 문자열로 변환하여 전송
@@ -147,11 +133,14 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
 
   // currentQuestionIndex가 모든 질문을 초과하면 서버에 답변 제출
   useEffect(() => {
-    if (currentQuestionIndex >= questionsList.length && questionsList.length > 0) {
+    if (
+      currentQuestionIndex >= questionList.length &&
+      questionList.length > 0
+    ) {
       submitAnswers();
       onClose();
     }
-  }, [currentQuestionIndex, questionsList, onClose]);
+  }, [currentQuestionIndex, questionList, onClose]);
 
   // 입력 필드 값이 변경될 때 호출되는 함수
   const handleQuestionChange = (e) => {
@@ -194,8 +183,16 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
           e.stopPropagation(); // 클릭 이벤트가 부모로 전파되지 않도록 방지
         }}
       >
-        {questionsList.length > 0 && <Title>{questionsList[currentQuestionIndex]}</Title>} {/* 현재 질문 표시 */}
-        <TimerBtn key={timerKey} initialTime={5} onTimerEnd={handleTimerEnd} /> {/* 타이머 버튼 */}
+        {questionList.length > 0 && (
+          <Title>{questionList[currentQuestionIndex]}</Title>
+        )}
+        {/* 현재 질문 표시 */}
+        <TimerBtn
+          key={timerKey}
+          initialTime={5}
+          onTimerEnd={handleTimerEnd}
+        />{" "}
+        {/* 타이머 버튼 */}
         <InputField
           type="text"
           placeholder="답변을 입력해주세요."
