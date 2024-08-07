@@ -433,6 +433,7 @@ const Game1 = ({ roomId }) => {
           )} */}
         </>
       )}
+      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
     </Wrap>
   );
 };
