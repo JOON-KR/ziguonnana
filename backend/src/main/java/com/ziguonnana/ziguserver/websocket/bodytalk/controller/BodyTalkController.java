@@ -20,13 +20,7 @@ public class BodyTalkController {
 
     private final BodyTalkService bodyTalkService;
 
-    //게임 시작 모달 삭제용
-    @MessageMapping("/game/{roomId}/bodyTalk/start")
-    @SendTo("/topic/game/{roomId}")
-    public Response<String> bodyTalkStart(@DestinationVariable String roomId){
-        log.info("=========몸으로 말해요 시작===========");
-        return Response.ok(CommandType.BODYGAME_START, "몸으로 말해요 시작");
-    }
+
 
     // 게임 한 라운드 끝나면, 출제자에게 키워드 전달
     // 다른 방 참가자들에게 키워드 타입만 전달

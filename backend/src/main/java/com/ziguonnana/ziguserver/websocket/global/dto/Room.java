@@ -68,4 +68,17 @@ public class Room {
 	public void relayEnd() {
 		isRelay=true;
 	}
+
+	// 몸으로 말해요 키워드 요청 관련 함수
+	public void countBodyTalkKeywordCnt(){
+		bodyTalkKeywordCnt++;
+	}
+	public void initBodyTalkKeywordCnt(){
+		bodyTalkKeywordCnt=0;
+	}
+
+	// 자기소개 문답
+	public void countQuestionRequestCnt(){
+		questionRequestCnt++;
+	}
 }

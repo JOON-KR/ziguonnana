@@ -41,4 +41,12 @@ public class WebsocketController {
         log.info("=========" + gameType + " 게임 처음 시작=========");
         return Response.ok(CommandType.CHOICE, gameType);
     }
+
+    //게임 시작 모달 삭제용
+    @MessageMapping("/game/{roomId}/start-modal/{gameType}")
+    @SendTo("/topic/game/{roomId}")
+    public Response<GameType> bodyTalkStart(@DestinationVariable String roomId, @DestinationVariable("gameType") GameType gameType){
+        log.info("=========" + gameType + "게임 모달 시작===========");
+        return Response.ok(CommandType.GAME_MODAL_START, gameType);
+    }
 }
