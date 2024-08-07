@@ -60,6 +60,7 @@ public class BodyTalkService {
         room.getBodyTalkGame().changeKeyword(keyword);
         Response response  = Response.ok(CommandType.BODYGAME_EXPLANIER, keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
+        log.info(explanierNum + "에게 키워드 전달 : " + keyword);
         return keyword.getType();
     }
 
