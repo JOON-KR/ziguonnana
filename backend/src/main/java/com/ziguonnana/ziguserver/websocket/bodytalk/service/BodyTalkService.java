@@ -32,7 +32,7 @@ public class BodyTalkService {
     public synchronized String decideKeywordExplanier(String roomId){
         Room room = roomRepository.getRoom(roomId);
         int keywordReq = room.getBodyTalkKeywordCnt();
-        if(keywordReq != 0) throw new BodyTalkException(ErrorCode.BODYTALK_KEYWORD_REQUEST);
+        if(keywordReq != 0) return "요청 불가";
 
         // 처음 요청일 때만 수행
         room.countBodyTalkKeywordCnt();
