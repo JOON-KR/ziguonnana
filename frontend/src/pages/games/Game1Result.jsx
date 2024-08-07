@@ -60,7 +60,7 @@ const Game1Result = () => {
 
   return (
     <Wrap>
-      {isIntroGuideModalOpen && (
+      {/* {isIntroGuideModalOpen && (
         <IntroductionGuideModal
           onClose={() => setIsIntroGuideModalOpen(false)}
           onConfirm={handleIntroGuideConfirm}
@@ -71,7 +71,7 @@ const Game1Result = () => {
           onClose={() => setIsIntroModalOpen(false)}
           onConfirm={handleIntroModalConfirm}
         />
-      )}
+      )} */}
       <h2>당신의 별명은</h2>
       <NicknameList>
         <NicknameItem>{userNickname}</NicknameItem>

@@ -139,6 +139,7 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
+
 const Game1 = ({ roomId }) => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
@@ -173,6 +174,7 @@ const Game1 = ({ roomId }) => {
   const closeIntroModal = () => {
     console.log("Closing Introduction Modal");
     setIsIntroModalOpen(false);
+    setIsDrawingWelcomeModalOpen(true); // 자기소개 종료 후 DrawingWelcomeModal 열기
   };
 
   const openDrawingWelcomeModal = () => {
@@ -282,6 +284,14 @@ const Game1 = ({ roomId }) => {
     <Wrap>
       {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
       
+      {/* 자기소개 가이드 모달 */}
+      {isIntroGuideModalOpen && (
+        <IntroductionGuideModal onClose={closeIntroGuideModal} onConfirm={openIntroModal} />
+      )}
+      {/* 자기소개 모달 */}
+      {isIntroModalOpen && (
+        <IntroductionModal onClose={closeIntroModal} onConfirm={openDrawingWelcomeModal} />
+      )}
       {/* 이어그리기 행성 입장 */}
       {isDrawingWelcomeModalOpen && (
         <GameInfoModal
@@ -374,13 +384,9 @@ const Game1 = ({ roomId }) => {
                 />
             </CanvasWrapper>
           )}
-          {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-          {/* {!isReplaying && replayIndex === drawingHistory.length && (
-            <button onClick={navigate('/icebreaking/games/game1NickName')}>별명짓기페이지</button>
-          )} */}
         </>
       )}
-      
+      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
     </Wrap>
   );
 };
