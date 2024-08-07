@@ -28,16 +28,16 @@ const NicknameItem = styled.li`
 
 const Game1Result = () => {
   const nicknameList = useSelector((state) => state.nickname.nicknameList);
+  const userNo = useSelector((state) => state.auth.userNo);
+
+  // 현재 사용자의 별명만 필터링
+  const userNickname = nicknameList.find((nicknameItem) => nicknameItem.num === userNo)?.nickname;
 
   return (
     <Wrap>
-      <h2>당신의 별명은 </h2>
+      <h2>당신의 별명은</h2>
       <NicknameList>
-        {nicknameList.map((nicknameItem, index) => (
-          <NicknameItem key={index}>
-            {nicknameItem.nickname}
-          </NicknameItem>
-        ))}
+        <NicknameItem>{userNickname}</NicknameItem>
       </NicknameList>
       <h2>입니다.</h2>
     </Wrap>
