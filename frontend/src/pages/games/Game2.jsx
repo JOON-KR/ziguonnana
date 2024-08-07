@@ -5,6 +5,8 @@ import styled from "styled-components";
 import orange from "../../assets/icons/orange.png";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import SpeechBubble from "../../components/speechBubble/SpeechBubble";
+import bigNana from "../../assets/images/bigNana.png";
 
 const Wrap = styled.div`
   width: 90%;
@@ -22,24 +24,10 @@ const FormWrap = styled.div`
   align-items: center;
 `;
 
-const ChatForm = styled.form`
-  width: 1090%;
-  /* position: absolute; */
-  /* bottom: 0; */
-  display: flex;
-`;
-
-const ChatInput = styled.input`
-  /* width: 500px; */
-  height: 40px;
-
-  font-size: 30px;
-  color: black;
-`;
-
-const ChatBtn = styled.button`
-  width: 100px;
-  height: 46px;
+const ChatWrap = styled.div`
+  /* width: 60%; */
+  position: fixed;
+  bottom: 30px;
 `;
 
 // 몸으로 말해요 페이지 (BodyTalk)
@@ -61,9 +49,28 @@ const Game2 = () => {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [durationTime, setDurationTime] = useState(0);
   const [subscribed, setSubscribed] = useState(false);
+  const [typedText, setTypedText] = useState("");
+  const [cmdType, setCmdType] = useState("");
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
+  const sendMessage = () => {
+    if (client && client.connected) {
+      console.log("보내는 메시지:", {
+        senderNum: userNo,
+        content: typedText,
+      });
+      client.send(
+        `/app/game/${roomId}/bodyTalk/chat`,
+        {},
+        JSON.stringify({
+          senderNum: userNo,
+          content: typedText,
+        })
+      );
+      setTypedText("");
+    }
+  };
   //최초 1회 실행
   useEffect(() => {
     console.log("--------------------------------");
@@ -74,10 +81,15 @@ const Game2 = () => {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
       client.subscribe(`/topic/game/${roomId}/${userNo}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
-        console.log("출제자 키워드 :", parsedMessage.data);
-        setReceivedKeyword(parsedMessage.data.word);
+        console.log("출제자 키워드 :", parsedMessage);
 
-        if (
+        if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
+          setKeywordType(parsedMessage.data.type);
+          console.log(parsedMessage.data.type);
+          console.log(keywordType);
+          setReceivedKeyword(parsedMessage.data.word);
+          console.log(receivedKeyword);
+        } else if (
           parsedMessage.commandType == "RESULT" &&
           parsedMessage.data.durationTime
         ) {
@@ -89,11 +101,26 @@ const Game2 = () => {
       //방 구독
       client.subscribe(`/topic/game/${roomId}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
-        console.log("키워드 타입 :", parsedMessage.data);
-        setKeywordType(parsedMessage.data);
+        setCmdType(parsedMessage.commandType);
+        console.log("키워드 타입 :", parsedMessage);
+
+        if (
+          parsedMessage.commandType == "KEYWORD_TYPE" &&
+          parsedMessage.data !== "요청 불가"
+        ) {
+          setKeywordType(parsedMessage.data);
+        }
+        if (
+          parsedMessage.commandType == "CHAT" &&
+          parsedMessage.data.correct == true
+        ) {
+          setKeywordType("");
+          setReceivedKeyword("");
+          setRound((prev) => prev + 1);
+        }
+        // setKeywordType
 
         if (parsedMessage.commandType == "GAME_MODAL_START") {
-          console.log("게임 시작 - 모달 닫기");
           setIsBodyTalkGuideModalOpen(false);
           setIsBodyTalkWelcomeModalOpen(false);
           client.send(`/app/game/${roomId}/bodyTalk/keyword`);
@@ -111,7 +138,7 @@ const Game2 = () => {
   //라운드 변경시 실행
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
-    if (client && client.connected) {
+    if (client && client.connected && isGameStarted == true) {
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
   }, [round, client, roomId]);
@@ -159,6 +186,7 @@ const Game2 = () => {
             closeBodyTalkGuideModal();
             if (client && client.connected) {
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`);
+              client.send(`/app/game/${roomId}/bodyTalk/keyword`);
               setIsGameStarted(true);
             }
           }}
@@ -174,12 +202,39 @@ const Game2 = () => {
           }}
         />
       )}
-      몸으로 말해요 게임 화면
+      <SpeechBubble text={keywordType} />
+      <img src={bigNana} />
+
       <h1>제시어 종류 : {keywordType}</h1>
+      {/* {cmdType == "BODYGAME_EXPLANIER" && <h1>제시어 : {receivedKeyword}</h1>} */}
       <h1>제시어 : {receivedKeyword}</h1>
-      <div></div>
+      <div>라운드 {round}</div>
+
+      <ChatWrap>
+        <input
+          type="text"
+          value={typedText}
+          onChange={(e) => setTypedText(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
+        />
+        <button onClick={sendMessage}>보냄</button>
+      </ChatWrap>
     </Wrap>
   );
 };
 
 export default Game2;
+
+// 종료 키워드 타입 :
+// {
+//   "message": "SUCCESS",
+//   "commandType": "BODYGAME_RESULT",
+//   "data": {
+//       "durationTime": 24,
+//       "correctCnt": 6
+//   }
+// }

@@ -56,23 +56,23 @@ const IceBreaking = () => {
     };
   }, [dispatch]);
 
-  const sendMessage = () => {
-    if (client && client.connected) {
-      console.log("보내는 메시지:", {
-        // sender: profile.name,
-        content: typedText,
-      });
-      client.send(
-        `/app/game/${roomId}/chat`,
-        {},
-        JSON.stringify({
-          // sender: profile.name,
-          content: typedText,
-        })
-      );
-      setTypedText("");
-    }
-  };
+  // const sendMessage = () => {
+  //   if (client && client.connected) {
+  //     console.log("보내는 메시지:", {
+  //       // sender: profile.name,
+  //       content: typedText,
+  //     });
+  //     client.send(
+  //       `/app/game/${roomId}/chat`,
+  //       {},
+  //       JSON.stringify({
+  //         // sender: profile.name,
+  //         content: typedText,
+  //       })
+  //     );
+  //     setTypedText("");
+  //   }
+  // };
 
   return (
     <PageWrap>
@@ -86,7 +86,7 @@ const IceBreaking = () => {
       </Frame>
       <Content>
         <Outlet />
-        <ChatWrap>
+        {/* <ChatWrap>
           <input
             type="text"
             value={typedText}
@@ -98,7 +98,7 @@ const IceBreaking = () => {
             }}
           />
           <button onClick={sendMessage}>보냄</button>
-        </ChatWrap>
+        </ChatWrap> */}
       </Content>
       <Frame>
         <VideoBox index={3} />
