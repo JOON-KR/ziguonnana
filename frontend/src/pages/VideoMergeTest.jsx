@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { createWorker } from 'ffmpeg.js';
+import React, { useRef, useState } from "react";
+import { createWorker } from "ffmpeg.js";
 
 const worker = createWorker();
 
@@ -30,30 +30,36 @@ const VideoMergeTest = () => {
       file 'input5.mp4'
       file 'input6.mp4'
     `;
-    await worker.write('concat.txt', new TextEncoder().encode(concatTxt));
+    await worker.write("concat.txt", new TextEncoder().encode(concatTxt));
 
     // ffmpeg 명령어를 사용하여 비디오 병합
     await worker.run(
-      '-f', 'concat',
-      '-safe', '0',
-      '-i', 'concat.txt',
-      '-c', 'copy',
-      'output.mp4'
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      "concat.txt",
+      "-c",
+      "copy",
+      "output.mp4"
     );
 
     // 병합된 비디오 파일 가져오기
-    const { data } = await worker.read('output.mp4');
+    const { data } = await worker.read("output.mp4");
 
     // Blob URL 생성
-    const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+    const videoURL = URL.createObjectURL(
+      new Blob([data.buffer], { type: "video/mp4" })
+    );
     setMergedVideo(videoURL);
     setLoading(false);
   };
 
   const handleSaveVideo = () => {
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = mergedVideo;
-    a.download = 'merged_video.mp4';
+    a.download = "merged_video.mp4";
     a.click();
   };
 
@@ -71,7 +77,7 @@ const VideoMergeTest = () => {
         ))}
       </div>
       <button onClick={handleMergeVideos} disabled={loading}>
-        {loading ? 'Merging...' : 'Merge Videos'}
+        {loading ? "Merging..." : "Merge Videos"}
       </button>
       {mergedVideo && (
         <div>

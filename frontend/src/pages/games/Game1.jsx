@@ -6,14 +6,10 @@ import IntroductionGuideModal from "../../components/modals/IntroductionGuideMod
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-<<<<<<< HEAD
-import { useSelector } from "react-redux";
-=======
 import { useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
->>>>>>> develop-front
 
 const Wrap = styled.div`
   width: 100%;
@@ -143,12 +139,8 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
-<<<<<<< HEAD
-const Game1 = () => {
-=======
 // 자기소개 문답 모달 & 이어그리기 페이지 (Drawing)
 const Game1 = ({ roomId }) => {
->>>>>>> develop-front
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
   const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
@@ -157,18 +149,19 @@ const Game1 = ({ roomId }) => {
   const [brushColor, setBrushColor] = useState("#000000"); // 브러시 색상 상태
   const [brushRadius, setBrushRadius] = useState(5); // 브러시 크기 상태
   const [isEraser, setIsEraser] = useState(false);
-<<<<<<< HEAD
-  const [timeLeft, setTimeLeft] = useState(20);
-  const [memberId, setMemberId] = useState(""); // 현재 사용자 ID 상태
-  const [error, setError] = useState(""); // 에러 메시지 상태
-=======
   const [timeLeft, setTimeLeft] = useState(5); // 타이머 시간
->>>>>>> develop-front
   const [drawingHistory, setDrawingHistory] = useState([]); // 그린 과정 저장
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayIndex, setReplayIndex] = useState(0);
   const [memberId, setMemberId] = useState(""); // 현재 사용자 ID 상태
-  const [members, setMembers] = useState(['member1', 'member2', 'member3', 'member4', 'member5', 'member6']); // 멤버 리스트
+  const [members, setMembers] = useState([
+    "member1",
+    "member2",
+    "member3",
+    "member4",
+    "member5",
+    "member6",
+  ]); // 멤버 리스트
   const [currentMemberIndex, setCurrentMemberIndex] = useState(0); // 현재 멤버 인덱스 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   const canvasRef = useRef(null);
@@ -178,11 +171,6 @@ const Game1 = ({ roomId }) => {
   // const [messages, setMessages] = useState([]); // 메시지 배열 상태
   // const [stompClient, setStompClient] = useState(null); // STOMP 클라이언트 상태
 
-<<<<<<< HEAD
-  const roomId = useSelector((state) => state.room.roomId);
-  const client = useSelector((state) => state.client.stompClient);
-
-=======
   // 웹소켓 연결 설정
   // useEffect(() => {
   //   const socket = new SockJS(`${BASE_URL}/ws`); // SockJS 객체 생성
@@ -222,7 +210,6 @@ const Game1 = ({ roomId }) => {
   // }, [roomId]);
 
   // IntroductionGuideModal 닫고 IntroductionModal 열기
->>>>>>> develop-front
   const openIntroModal = () => {
     setIsIntroGuideModalOpen(false);
     setIsIntroModalOpen(true);
@@ -289,28 +276,12 @@ const Game1 = ({ roomId }) => {
     return `${minutes}:${seconds}`;
   };
 
-<<<<<<< HEAD
-  useEffect(() => {
-    if (
-      !isIntroGuideModalOpen &&
-      !isIntroModalOpen &&
-      !isDrawingWelcomeModalOpen &&
-      !isDrawingGuideModalOpen
-    ) {
-      if (timeLeft > 0) {
-        const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
-          saveDrawing();
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else {
-=======
   // member1 ~ member5 가 member6 을 그리는 화면
   const switchToNextMember = () => {
     setCurrentMemberIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
-      if (nextIndex === 5) { // 5명이 그리기를 완료한 후
->>>>>>> develop-front
+      if (nextIndex === 5) {
+        // 5명이 그리기를 완료한 후
         startReplay();
       }
       return nextIndex;
@@ -319,7 +290,12 @@ const Game1 = ({ roomId }) => {
   };
 
   useEffect(() => {
-    if (!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen) {
+    if (
+      !isIntroGuideModalOpen &&
+      !isIntroModalOpen &&
+      !isDrawingWelcomeModalOpen &&
+      !isDrawingGuideModalOpen
+    ) {
       if (timeLeft > 0 && !isReplaying) {
         const timer = setTimeout(() => {
           setTimeLeft(timeLeft - 1);
@@ -330,28 +306,14 @@ const Game1 = ({ roomId }) => {
         switchToNextMember();
       }
     }
-<<<<<<< HEAD
   }, [
     timeLeft,
     isIntroGuideModalOpen,
     isIntroModalOpen,
     isDrawingWelcomeModalOpen,
     isDrawingGuideModalOpen,
+    isReplaying,
   ]);
-
-  useEffect(() => {
-    console.log("--------------------------------");
-    console.log("연결 상태 : ", client.connected);
-    console.log("--------------------------------");
-
-    client.send(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log("받은 메시지 : ", parsedMessage);
-    });
-  }, []);
-=======
-  }, [timeLeft, isIntroGuideModalOpen, isIntroModalOpen, isDrawingWelcomeModalOpen, isDrawingGuideModalOpen, isReplaying]);
->>>>>>> develop-front
 
   const replayDrawing = () => {
     if (replayIndex < drawingHistory.length) {
@@ -396,13 +358,9 @@ const Game1 = ({ roomId }) => {
 
   return (
     <Wrap>
-<<<<<<< HEAD
       {error && <div style={{ color: "red" }}>{error}</div>}{" "}
       {/* 에러 메시지 표시 */}
-=======
-      {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
       {/* {statusMessage && <div>{statusMessage}</div>} 상태 메시지 표시 */}
->>>>>>> develop-front
       {isIntroGuideModalOpen && (
         <IntroductionGuideModal
           onClose={closeIntroGuideModal}
@@ -425,10 +383,7 @@ const Game1 = ({ roomId }) => {
         <GameInfoModal
           planetImg={blue}
           RedBtnText={"게임 시작"}
-<<<<<<< HEAD
-=======
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
->>>>>>> develop-front
           RedBtnFn={closeDrawingWelcomeModal}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={openDrawingGuideModal}
@@ -439,10 +394,7 @@ const Game1 = ({ roomId }) => {
       {isDrawingGuideModalOpen && (
         <GameModal
           RedBtnText={"게임 시작"}
-<<<<<<< HEAD
-=======
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
->>>>>>> develop-front
           RedBtnFn={closeDrawingGuideModal}
           modalText={
             <>
@@ -454,142 +406,94 @@ const Game1 = ({ roomId }) => {
           onClose={closeDrawingGuideModal}
         />
       )}
-<<<<<<< HEAD
+      {/* 이어그리기 화면 (캔버스) */}
       {!isIntroGuideModalOpen &&
         !isIntroModalOpen &&
         !isDrawingWelcomeModalOpen &&
         !isDrawingGuideModalOpen && (
           <>
-            <Header>
-              <ProfileInfo>
-                <ProfileImage
-                  src="path/to/profile-image.png"
-                  alt="프로필 이미지"
-                />
-                <ProfileDetails>
-                  <HeaderText>이름: 홍길동</HeaderText>
-                  <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
-                </ProfileDetails>
-              </ProfileInfo>
-              <HeaderText>
-                주어진 정보를 활용하여 아바타를 그려주세요!
-              </HeaderText>
-            </Header>
-=======
-      {/* 이어그리기 화면 (캔버스) */}
-      {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
-        <>
-          {!isReplaying ? (
-            <>
-              <Header>
-                <ProfileInfo>
-                  <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-                  <ProfileDetails>
-                    <HeaderText>이름: {members[5]}</HeaderText> {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
-                    <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
-                  </ProfileDetails>
-                </ProfileInfo>
-                <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-              </Header>
+            {!isReplaying ? (
+              <>
+                <Header>
+                  <ProfileInfo>
+                    <ProfileImage
+                      src="path/to/profile-image.png"
+                      alt="프로필 이미지"
+                    />
+                    <ProfileDetails>
+                      <HeaderText>이름: {members[5]}</HeaderText>{" "}
+                      {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
+                      <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
+                    </ProfileDetails>
+                  </ProfileInfo>
+                  <HeaderText>
+                    주어진 정보를 활용하여 아바타를 그려주세요!
+                  </HeaderText>
+                </Header>
+                <CanvasWrapper>
+                  <ReactSketchCanvas
+                    ref={canvasRef}
+                    width="970px"
+                    height="600px"
+                    strokeColor={isEraser ? "#FFFFFF" : brushColor}
+                    strokeWidth={brushRadius}
+                    eraserWidth={isEraser ? brushRadius : 0}
+                  />
+                  <ToolsWrapper>
+                    <CustomSwatchesPicker>
+                      {colors.map((color) => (
+                        <ColorSquare
+                          key={color}
+                          color={color}
+                          selected={brushColor === color}
+                          onClick={() => handleColorChange(color)}
+                        />
+                      ))}
+                    </CustomSwatchesPicker>
+                    <SliderWrapper>
+                      <SliderLabel>펜 굵기</SliderLabel>
+                      <Slider
+                        type="range"
+                        min="1"
+                        max="20"
+                        value={brushRadius}
+                        onChange={(e) => setBrushRadius(e.target.value)}
+                      />
+                    </SliderWrapper>
+                    <ToolButton
+                      onClick={() => setIsEraser(false)}
+                      active={!isEraser}
+                    >
+                      펜
+                    </ToolButton>
+                    <ToolButton
+                      onClick={() => setIsEraser(true)}
+                      active={isEraser}
+                    >
+                      지우개
+                    </ToolButton>
+                    <Timer>{formatTime(timeLeft)}</Timer>
+                  </ToolsWrapper>
+                </CanvasWrapper>
+              </>
+            ) : (
               <CanvasWrapper>
                 <ReactSketchCanvas
                   ref={canvasRef}
                   width="970px"
                   height="600px"
-                  strokeColor={isEraser ? "#FFFFFF" : brushColor}
-                  strokeWidth={brushRadius}
-                  eraserWidth={isEraser ? brushRadius : 0}
                 />
-                <ToolsWrapper>
-                  <CustomSwatchesPicker>
-                    {colors.map((color) => (
-                      <ColorSquare
-                        key={color}
-                        color={color}
-                        selected={brushColor === color}
-                        onClick={() => handleColorChange(color)}
-                      />
-                    ))}
-                  </CustomSwatchesPicker>
-                  <SliderWrapper>
-                    <SliderLabel>펜 굵기</SliderLabel>
-                    <Slider
-                      type="range"
-                      min="1"
-                      max="20"
-                      value={brushRadius}
-                      onChange={(e) => setBrushRadius(e.target.value)}
-                    />
-                  </SliderWrapper>
-                  <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
-                    펜
-                  </ToolButton>
-                  <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
-                    지우개
-                  </ToolButton>
-                  <Timer>{formatTime(timeLeft)}</Timer>
-                </ToolsWrapper>
               </CanvasWrapper>
-            </>
-          ) : (
->>>>>>> develop-front
-            <CanvasWrapper>
-              <ReactSketchCanvas
-                ref={canvasRef}
-                width="970px"
-                height="600px"
-<<<<<<< HEAD
-                strokeColor={isEraser ? "#FFFFFF" : brushColor}
-                strokeWidth={brushRadius}
-                eraserWidth={isEraser ? brushRadius : 0}
-              />
-              <ToolsWrapper>
-                <CustomSwatchesPicker>
-                  {colors.map((color) => (
-                    <ColorSquare
-                      key={color}
-                      color={color}
-                      selected={brushColor === color}
-                      onClick={() => handleColorChange(color)}
-                    />
-                  ))}
-                </CustomSwatchesPicker>
-                <SliderWrapper>
-                  <SliderLabel>펜 굵기</SliderLabel>
-                  <Slider
-                    type="range"
-                    min="1"
-                    max="20"
-                    value={brushRadius}
-                    onChange={(e) => setBrushRadius(e.target.value)}
-                  />
-                </SliderWrapper>
-                <ToolButton
-                  onClick={() => setIsEraser(false)}
-                  active={!isEraser}
-                >
-                  펜
-                </ToolButton>
-                <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
-                  지우개
-                </ToolButton>
-                <Timer>{formatTime(timeLeft)}</Timer>
-              </ToolsWrapper>
-            </CanvasWrapper>
-          </>
-        )}
-=======
-                />
-            </CanvasWrapper>
-          )}
-          {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-          {/* {!isReplaying && replayIndex === drawingHistory.length && (
+            )}
+            {/* 결과화면 재생이 끝난 후 버튼 표시 */}
+            {/* {!isReplaying && replayIndex === drawingHistory.length && (
             <button onClick={navigate('/icebreaking/games/game1NickName')}>별명짓기페이지</button>
           )} */}
-        </>
-      )}
-      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
->>>>>>> develop-front
+          </>
+        )}
+      <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
+        버튼
+      </button>
     </Wrap>
   );
 };
