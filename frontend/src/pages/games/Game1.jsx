@@ -189,7 +189,8 @@ const Game1 = () => {
           setIsDrawingWelcomeModalOpen(false);
           setIsDrawingGuideModalOpen(false);
         } else if (cmd == "GAME_MODAL_START") {
-          setIsIntroGuideModalOpen(false);
+          // setIsIntroGuideModalOpen(false);
+          openIntroModal();
         }
       });
     }
@@ -356,11 +357,10 @@ const Game1 = () => {
       {/* 자기소개 가이드 모달 */}
       {isIntroGuideModalOpen && (
         <IntroductionGuideModal
-          onClick={() => {
-            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`); //몸으로 말해요는 아니지만 아무거나 써도됨
-          }}
           // onClose={closeIntroGuideModal}
-          onConfirm={openIntroModal}
+          onConfirm={() =>
+            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
+          }
         />
       )}
       {/* 자기소개 모달 */}

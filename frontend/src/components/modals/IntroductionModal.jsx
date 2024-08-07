@@ -82,7 +82,14 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
-  const questionList = useSelector((state) => state.question.questionList);
+  // const questionList = useSelector((state) => state.question.questionList);
+  const questionList = [
+    "주변 사람들에게 자주 듣는 외모에 대한 칭찬은 무엇인가요?",
+    "외모와 관련된 스트레스를 받는 부분이 있나요? 있다면 어디인가요?",
+    "머리 스타일을 자주 바꾸는 편인가요?",
+    "외모와 관련하여 가장 자신 있는 부분은 무엇인가요?",
+    "본인의 외모 중에서 가장 마음에 드는 부분은 어디인가요?",
+  ];
 
   // 서버에서 질문 목록을 받아오는 함수
 
@@ -107,9 +114,9 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
     });
   }, [client, roomId]);
 
-  useEffect(() => {
-    console.log("Current questions list:", questionList);
-  }, [questionList]);
+  // useEffect(() => {
+  //   console.log("Current questions list:", questionList);
+  // }, [questionList]);
 
   // 답변을 서버에 제출하는 함수
   const submitAnswers = () => {

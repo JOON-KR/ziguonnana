@@ -61,7 +61,7 @@ const Loading = () => {
     console.log("방에서 받은 메시지:", parsedMessage);
     if (parsedMessage.data == true && parsedMessage.commandType == "GAME_START")
       // navigate("/icebreaking/intro");
-      navigate("/icebreaking/games/game1");
+      navigate("/icebreaking/games");
     // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
     else if (parsedMessage.message == "질문리스트 전파\n") {
       dispatch(setQuestionList(parsedMessage.data.question));
