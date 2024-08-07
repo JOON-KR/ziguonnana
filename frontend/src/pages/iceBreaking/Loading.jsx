@@ -55,7 +55,7 @@ const Loading = () => {
   client.subscribe(`/topic/game/${roomId}`, (message) => {
     const parsedMessage = JSON.parse(message.body);
     console.log("방에서 받은 메시지:", parsedMessage);
-    if (parsedMessage.data == true) navigate("/icebreaking/intro");
+    if (parsedMessage.data == true && parsedMessage.commandType == "GAME_START") navigate("/icebreaking/intro");
     // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
   });
 
