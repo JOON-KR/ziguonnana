@@ -1,66 +1,69 @@
-import React, { useRef, useState } from "react";
-import { createWorker } from "ffmpeg.js";
+import React, { useState, useEffect } from "react";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 
-const worker = createWorker();
+const ffmpeg = new FFmpeg({ log: true });
 
-const VideoMergeTest = () => {
-  const videoRefs = useRef([]);
+const App = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [mergedVideo, setMergedVideo] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleMergeVideos = async () => {
-    setLoading(true);
+  useEffect(() => {
+    const loadFFmpeg = async () => {
+      console.log("Loading FFmpeg...");
+      await ffmpeg.load();
+      setIsLoaded(true);
+      console.log("FFmpeg loaded");
+    };
+    loadFFmpeg();
+  }, []);
 
-    await worker.load();
+  const mergeVideos = async () => {
+    setIsLoading(true);
+    const videoFiles = [
+      'videos/ten_second_video1.mp4',
+      'videos/ten_second_video2.mp4',
+      'videos/ten_second_video3.mp4',
+      'videos/ten_second_video4.mp4',
+      'videos/ten_second_video5.mp4',
+      'videos/ten_second_video6.mp4',
+    ];
 
-    // 각 비디오 파일을 ffmpeg로 로드
-    for (let i = 0; i < 6; i++) {
-      const videoFile = videoRefs.current[i].src;
-      const response = await fetch(videoFile);
-      const data = await response.arrayBuffer();
-      await worker.write(`input${i + 1}.mp4`, new Uint8Array(data));
-    }
+    try {
+      // 비디오 파일을 읽고 FFmpeg 파일 시스템에 쓰기
+      for (let i = 0; i < videoFiles.length; i++) {
+        console.log(`Fetching video ${i + 1}`);
+        const response = await fetch(videoFiles[i]);
+        if (!response.ok) throw new Error(`Failed to fetch video ${i + 1}`);
+        const data = await response.arrayBuffer();
+        await ffmpeg.FS('writeFile', `input${i}.mp4`, new Uint8Array(data));
+        console.log(`Fetched and wrote video ${i + 1}`);
+      }
 
-    // concat.txt 파일 작성
-    const concatTxt = `
-      file 'input1.mp4'
-      file 'input2.mp4'
-      file 'input3.mp4'
-      file 'input4.mp4'
-      file 'input5.mp4'
-      file 'input6.mp4'
-    `;
-    await worker.write("concat.txt", new TextEncoder().encode(concatTxt));
+      // concat.txt 파일 생성
+      const concatFileContent = videoFiles.map((_, index) => `file 'input${index}.mp4'`).join('\n');
+      await ffmpeg.FS('writeFile', 'concat.txt', new TextEncoder().encode(concatFileContent));
+      console.log("Concat file written");
 
-    // ffmpeg 명령어를 사용하여 비디오 병합
-    await worker.run(
-      "-f",
-      "concat",
-      "-safe",
-      "0",
-      "-i",
-      "concat.txt",
-      "-c",
-      "copy",
-      "output.mp4"
-    );
+      // 비디오 병합 실행
+      await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', 'output.mp4');
+      console.log("Videos merged");
 
     // 병합된 비디오 파일 가져오기
-    const { data } = await worker.read("output.mp4");
+    const { data } = await worker.read('output.mp4');
 
     // Blob URL 생성
-    const videoURL = URL.createObjectURL(
-      new Blob([data.buffer], { type: "video/mp4" })
-    );
+    const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
     setMergedVideo(videoURL);
     setLoading(false);
   };
 
   const handleSaveVideo = () => {
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = mergedVideo;
-    a.download = "merged_video.mp4";
+    a.download = 'merged_video.mp4';
     a.click();
+    document.body.removeChild(a);
   };
 
   return (
@@ -77,7 +80,7 @@ const VideoMergeTest = () => {
         ))}
       </div>
       <button onClick={handleMergeVideos} disabled={loading}>
-        {loading ? "Merging..." : "Merge Videos"}
+        {loading ? 'Merging...' : 'Merge Videos'}
       </button>
       {mergedVideo && (
         <div>
@@ -89,4 +92,4 @@ const VideoMergeTest = () => {
   );
 };
 
-export default VideoMergeTest;
+export default App;
