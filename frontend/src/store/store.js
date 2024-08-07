@@ -3,6 +3,7 @@ import authSlice from "./authSlice";
 import { roomSlice } from "./roomSlice";
 import clientSlice from "./clientSlice";
 import nicknameSlice from "./nicknameSlice";
+import drawingSlice from "./drawingSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     room: roomSlice.reducer,
     client: clientSlice.reducer,
     nickname: nicknameSlice.reducer,
+    drawing: drawingSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
