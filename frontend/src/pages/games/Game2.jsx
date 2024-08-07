@@ -6,31 +6,73 @@ import orange from "../../assets/icons/orange.png";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
-import bigNana from "../../assets/images/bigNana.png";
+import bigNana from "../../assets/icons/game2nana.png";
 
 const Wrap = styled.div`
-  width: 90%;
-  height: 90vh;
+  width: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
+  padding: 20px;
 `;
 
-const FormWrap = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+const Header = styled.h1`
+  color: #FF007A;
+  font-size: 28px;
+  margin-bottom: 20px;
+`;
+
+const Header2 = styled.h1`
+  color: white;
 `;
 
 const ChatWrap = styled.div`
-  /* width: 60%; */
+  width: 60%;
   position: fixed;
   bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 `;
 
-// 몸으로 말해요 페이지 (BodyTalk)
+const Input = styled.input`
+  width: 20%;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.3s ease-in-out;
+
+  &:focus {
+    border-color: #ff6b6b;
+  }
+`;
+
+const Button = styled.button`
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #58FFF5;
+  color: #54595E;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #ff4b4b;
+  }
+`;
+
+const Image = styled.img`
+  max-width: 300px;
+  height: auto;
+  margin: 20px 0;
+`;
 
 const Game2 = () => {
   const [isBodyTalkWelcomeModalOpen, setIsBodyTalkWelcomeModalOpen] =
@@ -152,18 +194,6 @@ const Game2 = () => {
     setIsBodyTalkGuideModalOpen(false);
   };
 
-  //이후에 채팅 친 내용 보낼 떄 아래 코드 갖다 사용
-  // if (client && client.connected) {
-  //   client.send(
-  //     `/app/game/${roomId}/bodyTalk/chat`,
-  //     {},
-  //     JSON.stringify({
-  //       senderNum: userNo,
-  //       content: typedChat,
-  //     })
-  //   );
-  // }
-
   return (
     <Wrap>
       {isBodyTalkWelcomeModalOpen && (
@@ -202,16 +232,13 @@ const Game2 = () => {
           }}
         />
       )}
-      <SpeechBubble text={keywordType} />
-      <img src={bigNana} />
-
-      <h1>제시어 종류 : {keywordType}</h1>
-      {/* {cmdType == "BODYGAME_EXPLANIER" && <h1>제시어 : {receivedKeyword}</h1>} */}
-      <h1>제시어 : {receivedKeyword}</h1>
-      <div>라운드 {round}</div>
+      <Header>{round} 라운드 </Header>
+      <SpeechBubble text={`제시어 종류 : ${keywordType}`} />
+      <Image src={bigNana} />
+      <Header2>제시어 : {receivedKeyword}</Header2>
 
       <ChatWrap>
-        <input
+        <Input
           type="text"
           value={typedText}
           onChange={(e) => setTypedText(e.target.value)}
@@ -221,20 +248,10 @@ const Game2 = () => {
             }
           }}
         />
-        <button onClick={sendMessage}>보냄</button>
+        <Button onClick={sendMessage}>보냄</Button>
       </ChatWrap>
     </Wrap>
   );
 };
 
 export default Game2;
-
-// 종료 키워드 타입 :
-// {
-//   "message": "SUCCESS",
-//   "commandType": "BODYGAME_RESULT",
-//   "data": {
-//       "durationTime": 24,
-//       "correctCnt": 6
-//   }
-// }

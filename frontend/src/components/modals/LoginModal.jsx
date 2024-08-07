@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { login } from "../../api/login/loginAPI";
-
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -142,6 +140,11 @@ const LoginModal = ({
     AquaBtnFn(email, password);
   };
 
+  const handleKakaoLogin = () => {
+    const kakaoLoginUrl = 'https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=http://localhost:8081/api/v1/member/login/kakao/callback&response_type=code';
+    window.location.href = kakaoLoginUrl;
+  };
+
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
@@ -179,6 +182,7 @@ const LoginModal = ({
           <SocialLoginText>소셜 로그인</SocialLoginText>
           <div>
             <SocialLoginButton src={GoogleIcon} onClick={onGoogleLogin} />
+            <SocialLoginButton src={KakaoIcon} onClick={handleKakaoLogin} />
           </div>
         </SocialLoginSection>
       </ModalWrap>
