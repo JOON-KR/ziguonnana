@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { OpenVidu } from "openvidu-browser";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,7 +18,7 @@ const VideoContainer = styled.div`
 const OpenViduSession = ({ token }) => {
   const dispatch = useDispatch();
   const session = useSelector((state) => state.room.session);
-  const videoRef = useRef(null);
+  const userNo = useSelector((state) => state.auth.userNo);
 
   useEffect(() => {
     const initSession = async () => {
@@ -29,13 +29,17 @@ const OpenViduSession = ({ token }) => {
       // 스트림 생성 이벤트 리스너 설정
       session.on("streamCreated", (event) => {
         const subscriber = session.subscribe(event.stream, undefined); // 스트림 구독
+        console.log(`Subscribing to ${event.stream.connection.connectionId}`);
+        console.log(
+          `Subscriber connection data: ${event.stream.connection.data}`
+        );
         dispatch(addSubscriber(subscriber)); // 구독자 추가 액션 디스패치
         console.log("Stream created and subscriber added");
       });
 
       try {
         // 세션 연결
-        await session.connect(token, {});
+        await session.connect(token, { userNo: userNo });
         console.log("Session connected with token:", token);
 
         // 퍼블리셔 초기화
@@ -76,7 +80,7 @@ const OpenViduSession = ({ token }) => {
         dispatch(clearSession()); // 세션 초기화 액션 디스패치
       }
     };
-  }, [token, session, dispatch]);
+  }, [token, session, userNo, dispatch]);
 
   return <VideoContainer />; // 비디오 컨테이너 반환
 };
