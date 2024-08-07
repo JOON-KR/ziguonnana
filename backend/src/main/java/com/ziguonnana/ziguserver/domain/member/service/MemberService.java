@@ -1,23 +1,34 @@
 package com.ziguonnana.ziguserver.domain.member.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import com.ziguonnana.ziguserver.domain.member.dto.EmailListResponse;
 import com.ziguonnana.ziguserver.domain.member.dto.LoginRequest;
 import com.ziguonnana.ziguserver.domain.member.dto.MemberResponse;
+import com.ziguonnana.ziguserver.domain.member.dto.RoleType;
 import com.ziguonnana.ziguserver.domain.member.dto.UpdateRequest;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
 import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
 import com.ziguonnana.ziguserver.global.TokenInfo;
 import com.ziguonnana.ziguserver.redis.RedisService;
 import com.ziguonnana.ziguserver.security.dto.CustomUserInfo;
+import com.ziguonnana.ziguserver.security.dto.TokenResponse;
 import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;
 import com.ziguonnana.ziguserver.security.exception.SameMemberException;
 import com.ziguonnana.ziguserver.security.exception.ValidateMemberException;
@@ -36,6 +47,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder encoder;
     private final RedisService redisService;
+    private final RestTemplate restTemplate;
+
+    @Value("${kakao.client_id}")
+    private String clientId;
+
+    @Value("${kakao.redirect_uri}")
+    private String redirectUri;
+
+    @Value("${kakao.token_uri}")
+    private String tokenUri;
+
+    @Value("${kakao.user_info_uri}")
+    private String userInfoUri;
 
     public String login(LoginRequest request) {
         String email = request.email();
@@ -60,7 +84,49 @@ public class MemberService {
         redisService.saveRefreshToken(info.email(), refreshToken);
         return accessToken;
     }
+    
+    public TokenResponse kakaoLogin(String code) {
+        // 토큰 요청
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", clientId);
+        params.add("redirect_uri", redirectUri);
+        params.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, entity, Map.class);
+        String accessToken = response.getBody().get("access_token").toString();
+
+        // 사용자 정보 요청
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<?> userInfoEntity = new HttpEntity<>(userInfoHeaders);
+        ResponseEntity<Map> userInfoResponse = restTemplate.postForEntity(userInfoUri, userInfoEntity, Map.class);
+        Map<String, Object> kakaoAccount = (Map<String, Object>) userInfoResponse.getBody().get("kakao_account");
+
+        String email = kakaoAccount.get("email").toString();
+        String nickname = ((Map<String, Object>) kakaoAccount.get("profile")).get("nickname").toString();
+
+        Member member = memberRepository.findByEmail(email)
+            .orElseGet(() -> memberRepository.save(Member.builder()
+                    .email(email)
+                    .name(nickname)
+                    .role(RoleType.USER)
+                    .build()));
+
+        CustomUserInfo userInfo = CustomUserInfo.from(member);
+        String jwtToken = jwtUtil.createAccessToken(userInfo);
+        String refreshToken = jwtUtil.createRefreshToken(userInfo);
+
+        //redisService.saveRefreshToken(email, refreshToken);
+
+        return new TokenResponse(jwtToken, refreshToken);
+    }
+	
 	public void delete() {
 	    Long memberId = TokenInfo.getMemberId();
 	    Optional<Member> originMember = Optional.ofNullable(memberRepository.findById(memberId)
@@ -71,7 +137,6 @@ public class MemberService {
 
 	    memberRepository.saveAndFlush(origin); 
 	}
-
 
 	public MemberResponse getMember() {
 	    Long memberId = TokenInfo.getMemberId();
@@ -87,7 +152,8 @@ public class MemberService {
 	            .regDate(member.getRegDate())
 	            .build();
 	}
-    public void logout( String accessToken) {
+
+    public void logout(String accessToken) {
     	String email = getMember(TokenInfo.getMemberId()).get().getEmail();
         long remainingTime = 86400000;
         redisService.addTokenToBlacklist(accessToken, remainingTime);
