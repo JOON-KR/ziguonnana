@@ -14,8 +14,10 @@ import com.ziguonnana.ziguserver.websocket.answer.dto.QuestionResponse;
 import com.ziguonnana.ziguserver.websocket.answer.dto.SelfIntroductionQuestion;
 import com.ziguonnana.ziguserver.websocket.answer.dto.SelfIntroductionRequest;
 import com.ziguonnana.ziguserver.websocket.art.service.ArtService;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
@@ -79,7 +81,7 @@ public class AnswerService {
 	private void nextGame(String roomId) {
 		// 결과 전송
 		boolean relayStart = true;
-		GameMessage<Boolean> nextMessage = GameMessage.info("이어그리기 시작", relayStart);
+		Response<Boolean> nextMessage = Response.ok(CommandType.ART_START, relayStart);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
 		artService.spreadKeyword(roomId);
 	}
