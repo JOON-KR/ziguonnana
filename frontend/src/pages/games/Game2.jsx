@@ -93,6 +93,7 @@ const Game2 = () => {
   const [subscribed, setSubscribed] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
+  const [isExplainer, setIsExplainer] = useState(false);
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -126,6 +127,7 @@ const Game2 = () => {
         console.log("출제자 키워드 :", parsedMessage);
 
         if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
+          setIsExplainer(true);
           setKeywordType(parsedMessage.data.type);
           console.log(parsedMessage.data.type);
           console.log(keywordType);
