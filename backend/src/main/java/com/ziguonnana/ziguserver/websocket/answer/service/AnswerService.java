@@ -31,7 +31,7 @@ public class AnswerService {
 	private final RoomRepository roomRepository;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ArtService artService;
-	@Transactional
+
 	public void getSelfIntroductionAnswer(String roomId, SelfIntroductionRequest request) {
 		Room room = roomRepository.getRoom(roomId);
 		Player player = room.getPlayers().get(request.getNum());
@@ -54,6 +54,11 @@ public class AnswerService {
 	}
 	
 	public void getQuestion(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		int questionRequestCnt = room.getQuestionRequestCnt();
+		if(questionRequestCnt > 0) return;
+		room.countQuestionRequestCnt();
+
         List<String> questionList = new ArrayList<>();
         SelfIntroductionQuestion[] questions = SelfIntroductionQuestion.values();
         
