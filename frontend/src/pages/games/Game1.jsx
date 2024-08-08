@@ -6,7 +6,8 @@ import IntroductionGuideModal from "../../components/modals/IntroductionGuideMod
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png";
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setDrawingData } from "../../store/drawingSlice";
 import Game1Drawing from "./Game1Drawing";
 
 const Wrap = styled.div`
@@ -22,13 +23,13 @@ const Wrap = styled.div`
 const Game1 = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
-    useState(false); // DrawingWelcomeModal 상태
+  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("--------------------------------");
@@ -42,8 +43,8 @@ const Game1 = () => {
         const cmd = parsedMessage.commandType;
         const data = parsedMessage.data;
 
-        console.log("닫기 요청 데이터 ", parsedMessage);
-        console.log("닫기 요청 데이터 ", data);
+        console.log("닫기 요청 데이터1 ", parsedMessage);
+        console.log("닫기 요청 데이터2 ", data);
 
         if (data == "SAME_POSE") {
           setIsDrawingWelcomeModalOpen(false);
@@ -51,6 +52,15 @@ const Game1 = () => {
         } else if (cmd == "GAME_MODAL_START") {
           // setIsIntroGuideModalOpen(false);
           openIntroModal();
+        }
+        if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
+          // 데이터 받아와서 Redux 상태 업데이트
+          dispatch(setDrawingData(data));
+          // art 데이터 캔버스에 그리기
+          navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
+          //모달 닫기
+          setIsDrawingWelcomeModalOpen(false);
+          setIsDrawingGuideModalOpen(false);
         }
       });
     }
@@ -120,12 +130,12 @@ const Game1 = () => {
       {isDrawingWelcomeModalOpen && (
         <GameInfoModal
           planetImg={blue}
-          RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={() => {
-            console.log("닫기 요청");
-            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          }}
+          // RedBtnText={"게임 시작"}
+          // // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
+          // RedBtnFn={() => {
+          //   console.log("닫기 요청");
+          //   client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          // }}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={() =>
             // client.send(`/app/game/${roomId}/start-modal/SAME_POSE`)
@@ -137,29 +147,28 @@ const Game1 = () => {
       )}
       {isDrawingGuideModalOpen && (
         <GameModal
-          RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={() => {
-            console.log("닫기 요청");
-            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          }}
+          // RedBtnText={"게임 시작"}
+          // // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
+          // RedBtnFn={() => {
+          //   console.log("닫기 요청");
+          //   client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          // }}
           modalText={
             <>
-              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
-              <br />
-              제한시간은 20초입니다.
+              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "} <br />
+              제한시간은 20초입니다. <br /> 잠시만 기다려주세요.
             </>
           }
           // onClose={closeDrawingGuideModal}
         />
       )}
 
-      {/* 이어그리기 화면 이동 */}
-      {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
+      {/* 이어그리기 화면 이동 <= 수정수정 필요 : 응답데이터 오고 3초 후 Game1Drawing open */}
+      {/* {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
         <Game1Drawing roomId={roomId} />
-      )}      
+      )}       */}
       {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>별명짓기</button>
+      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>버튼</button>
     </Wrap>
   );
 };
