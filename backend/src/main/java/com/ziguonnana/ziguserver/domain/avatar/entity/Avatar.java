@@ -34,6 +34,5 @@ public class Avatar {
     private Timestamp regDate;
     private Boolean isDelete;
     private List<String>feature;
-    @OneToMany(mappedBy = "avatar")
     private List<AvatarArticle> avatarArticles;
 }
