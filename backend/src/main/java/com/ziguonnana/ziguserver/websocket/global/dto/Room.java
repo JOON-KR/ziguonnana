@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 
-import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,7 +42,7 @@ public class Room {
 	private int poseRequestCnt;
 
 	//게임 결과 계산용 벡터 저장
-	private ConcurrentMap<Integer, List<Double>>vectors;
+	private ConcurrentMap<Integer, List<KeyPoint>>vectors;
 	//이구동성 게임결과 저장용
 	private List<IgudongseongResult> Igudongseong;
 

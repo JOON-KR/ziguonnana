@@ -1,8 +1,6 @@
-package com.ziguonnana.ziguserver.websocket.igudongseong.dto;
+package com.ziguonnana.ziguserver.websocket.pose.controller;
 
 import java.util.List;
-
-import com.ziguonnana.ziguserver.websocket.global.dto.KeyPoint;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SimilarRequest {
+
+public class PoseResult {
+	private List<List<Double>> vector;
 	private int num;
-	private List<KeyPoint> keypoints;
 }

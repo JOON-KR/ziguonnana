@@ -38,7 +38,7 @@ public class ArtService {
 		int people = room.getPeople();
 		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
 		int num = (art.getNum() + cycle) % people;
-		map.computeIfAbsent(num, k -> new ArrayList<>()).add(art);
+		map.get(num).add(art);
 
 		room.countUp();
 		log.info("roomCount: {}", room.getCount());
@@ -77,7 +77,7 @@ public class ArtService {
 				RelayArt originalArt = artList.get(artList.size() - 1);
 
 				// 원본 객체 깊은 복사 및 키워드 설정
-				RelayArt relayArt = RelayArt.builder().num(originalArt.getNum()).keyword(selectRandomKeyword(room))
+				RelayArt relayArt = RelayArt.builder().num(originalArt.getNum()).keyword(selectRandomKeyword(room,i))
 						.art(originalArt.getArt()).build();
 
 				tmp.put(i, relayArt);
@@ -87,17 +87,16 @@ public class ArtService {
 		return tmp;
 	}
 
-	public String selectRandomKeyword(Room room) {
+	public String selectRandomKeyword(Room room, int num) {
 		List<String> combinedList = new ArrayList<>();
 		ConcurrentMap<Integer, Player> players = room.getPlayers();
+		Player player = players.get(num);
 
-		for (Player player : players.values()) {
-			List<String> feature = player.getProfile().getFeature();
-			List<String> answer = player.getAnswer();
-			for (String f : feature)
-				combinedList.add(f);
-			combinedList.addAll(answer);
-		}
+		List<String> feature = player.getProfile().getFeature();
+		List<String> answer = player.getAnswer();
+		for (String f : feature)
+			combinedList.add(f);
+		combinedList.addAll(answer);
 
 		if (!combinedList.isEmpty()) {
 			Random random = new Random();
@@ -122,46 +121,41 @@ public class ArtService {
 		Response<Boolean> endResponse = Response.ok(CommandType.ART_END, endArt);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, endResponse);
 		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, artResult);
-		
-		//아바타 결과 반환
+		spreadAvatarCard(roomId);
+		// 아바타 결과 반환
 	}
-	//아직 어디서 호출할지 회의해봐야함
+
+	// 아직 어디서 호출할지 회의해봐야함
 	public void spreadAvatarCard(String roomId) {
-	    Room room = roomRepository.getRoom(roomId);
-	    ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-	    int people = room.getPeople();
-	    ConcurrentMap<Integer, AvatarCard> cards = new ConcurrentHashMap<>();
+		Room room = roomRepository.getRoom(roomId);
+		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
+		int people = room.getPeople();
+		ConcurrentMap<Integer, AvatarCard> cards = new ConcurrentHashMap<>();
 
-	    for (int i = 1; i <= people; i++) {
-	        List<RelayArt> tmp = map.get(i);
+		for (int i = 1; i <= people; i++) {
+			List<RelayArt> tmp = map.get(i);
 
-	        if (tmp != null && !tmp.isEmpty()) {
-	            RelayArt art = tmp.get(tmp.size() - 1);
-	            List<String> features = tmp.stream()
-	                                       .limit(3)
-	                                       .map(RelayArt::getKeyword)
-	                                       .collect(Collectors.toList());
+			if (tmp != null && !tmp.isEmpty()) {
+				RelayArt art = tmp.get(tmp.size() - 1);
+				List<String> features = tmp.stream().limit(3).map(RelayArt::getKeyword).collect(Collectors.toList());
 
-	            AvatarCard card = AvatarCard.builder()
-	                                        .avatarImage("") // art.getArt()) 나중에 s3로 연결 해야하는데 로직을 고민해봐야함
-	                                        .feature(features)
-	                                        .build();
-	            cards.put(i, card);
-	        }
-	    }
-	    GameMessage<ConcurrentMap<Integer, AvatarCard>> cardMessage = GameMessage.info("아바타 명함 전파", cards);
+				AvatarCard card = AvatarCard.builder().avatarImage(art.getArt()) // art.getArt()) 나중에 s3로 연결 해야하는데 로직을
+																					// 고민해봐야함
+						.feature(features).build();
+				cards.put(i, card);
+			}
+		}
+		Response<ConcurrentMap<Integer, AvatarCard>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
 		log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
 	}
-
-	
 
 	public void spreadKeyword(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
 		List<RelayArt> keywordList = getKeyword(room);
 		ConcurrentMap<Integer, RelayArt> map = new ConcurrentHashMap<>();
-		for(int i=0; i<keywordList.size();i++) {
-			map.put(i+1, keywordList.get(i));
+		for (int i = 0; i < keywordList.size(); i++) {
+			map.put(i + 1, keywordList.get(i));
 		}
 		GameMessage<ConcurrentMap<Integer, RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", map);
 		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);

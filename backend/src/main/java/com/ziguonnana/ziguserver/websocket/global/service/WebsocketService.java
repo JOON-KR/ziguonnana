@@ -17,6 +17,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
+import com.ziguonnana.ziguserver.websocket.global.dto.KeyPoint;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
@@ -38,7 +39,7 @@ public class WebsocketService {
     public void createRoom(String roomId, CreateRequest request) {
         log.info("----------웹소켓 방 생성 시작 -----------");
         ConcurrentHashMap<Integer, Player> players = new ConcurrentHashMap<>();
-        ConcurrentHashMap<Integer, List<Double>> vector= new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, List<KeyPoint>> vector= new ConcurrentHashMap<>();
         List<IgudongseongResult> Igudongseong = new ArrayList<>();
         Player player = Player.builder()
                 .memberId(request.getMemberId())
