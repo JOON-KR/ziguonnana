@@ -3,7 +3,7 @@ import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import TimerBtn from "../common/TimerBtn"; // 타이머 버튼 컴포넌트
 import AquaBtn from "../common/AquaBtn"; // 완료 버튼 컴포넌트
-import { submitAnswers } from "../../api/game/submitAnswers";
+import { useSelector } from "react-redux";
 
 // 배경 스타일 컴포넌트
 const BlackBg = styled.div`
@@ -70,30 +70,84 @@ const BtnWrap = styled.div`
   margin-top: 20px;
 `;
 
-// 질문 목록
-const questionsList = [
-  "당신과 가장 닮은 연예인의 이름은?",
-  "자신만의 얼굴 특징은?",
-  "자신이 닮은 동물은?",
-  "지금 표정에 드러나는 내 기분은?",
-  "쿨톤인가요 웜톤인가요?",
-];
-
 // 기본 답변 목록
 const defaultAnswers = ["유재석", "조각같음", "꽃사슴", "황홀함", "플랑크톤"];
 
 // IntroductionModal 컴포넌트
-const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
+const IntroductionModal = ({ onClose, onConfirm }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // 현재 질문 인덱스 상태
-  const [answers, setAnswers] = useState(Array(questionsList.length).fill("")); // 각 질문에 대한 답변 상태
+  const [answers, setAnswers] = useState([]); // 각 질문에 대한 답변 상태
   const [timerKey, setTimerKey] = useState(0); // 타이머 재시작을 위한 키 상태
+  // Redux 상태에서 필요한 값들 가져오기
+  const userNo = useSelector((state) => state.auth.userNo);
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+  const questionList = useSelector((state) => state.question.questionList);
+  // const questionList = [
+  //   "주변 사람들에게 자주 듣는 외모에 대한 칭찬은 무엇인가요?",
+  //   "외모와 관련된 스트레스를 받는 부분이 있나요? 있다면 어디인가요?",
+  //   "머리 스타일을 자주 바꾸는 편인가요?",
+  //   "외모와 관련하여 가장 자신 있는 부분은 무엇인가요?",
+  //   "본인의 외모 중에서 가장 마음에 드는 부분은 어디인가요?",
+  // ];
+
+  // 서버에서 질문 목록을 받아오는 함수
+
+  useEffect(() => {
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+      console.log("방에서 받은 메시지:", parsedMessage);
+      // if (
+      //   parsedMessage.data == true &&
+      //   parsedMessage.commandType == "GAME_START"
+      // )
+      //   navigate("/icebreaking/intro");
+      // // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      // else if (parsedMessage.message == "질문리스트 전파\n") {
+      //   dispatch(setQuestionList(parsedMessage.data.question));
+      //   console.log(parsedMessage.data.question);
+      // }
+    });
+  }, [client, roomId]);
+
+  // useEffect(() => {
+  //   console.log("Current questions list:", questionList);
+  // }, [questionList]);
+
+  // 답변을 서버에 제출하는 함수
+  const submitAnswers = () => {
+    try {
+      const message = {
+        num: userNo, // 요청 바디에 userNo 포함
+        answer: answers, // 요청 바디에 답변 배열 포함
+      };
+
+      client.send(
+        `/app/game/${roomId}/self-introduction`, // 엔드포인트 URL
+        {},
+        JSON.stringify(message) // 메시지를 JSON 문자열로 변환하여 전송
+      );
+
+      console.log("답변 전송 성공:", message); // 성공 시 메시지 로그
+    } catch (error) {
+      console.error("답변 전송 실패:", error); // 오류 발생 시 오류 로그
+    }
+  };
 
   // currentQuestionIndex가 모든 질문을 초과하면 서버에 답변 제출
   useEffect(() => {
-    if (currentQuestionIndex >= questionsList.length) {
-      submitAnswersToServer();
+    if (
+      currentQuestionIndex >= questionList.length &&
+      questionList.length > 0
+    ) {
+      submitAnswers();
+      onClose();
     }
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, questionList, onClose]);
 
   // 입력 필드 값이 변경될 때 호출되는 함수
   const handleQuestionChange = (e) => {
@@ -109,14 +163,8 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
       newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
       setAnswers(newAnswers);
     }
-    // 마지막 handleConfirm 호출 시
-    if (currentQuestionIndex === questionsList.length - 1) {
-      submitAnswersToServer();
-      onClose();
-    } else {
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-      setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
-    }
+    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
   // 타이머가 종료될 때 호출되는 함수
@@ -124,29 +172,14 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
     setAnswers(newAnswers);
-    if (currentQuestionIndex === questionsList.length - 1) {
-      submitAnswersToServer();
-      onClose();
-    } else {
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-      setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
-    }
+    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    setTimerKey((prevKey) => prevKey + 1); // 타이머 재시작
   };
 
   // 엔터 키를 누를 때 호출되는 함수
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleConfirm();
-    }
-  };
-
-  // 답변을 서버에 제출하는 함수
-  const submitAnswersToServer = async () => {
-    try {
-      await submitAnswers({ roomId, memberId, answers });
-      onConfirm(answers); // 성공적으로 답변을 전송한 후 onConfirm 호출
-    } catch (error) {
-      console.error("Error submitting answers:", error);
     }
   };
 
@@ -157,17 +190,25 @@ const IntroductionModal = ({ onClose, onConfirm, roomId, memberId }) => {
           e.stopPropagation(); // 클릭 이벤트가 부모로 전파되지 않도록 방지
         }}
       >
-        <Title>{questionsList[currentQuestionIndex]}</Title> {/* 현재 질문 표시 */}
-        <TimerBtn key={timerKey} initialTime={5} onTimerEnd={handleTimerEnd} /> {/* 타이머 버튼 */}
+        {questionList.length > 0 && (
+          <Title>{questionList[currentQuestionIndex]}</Title>
+        )}
+        {/* 현재 질문 표시 */}
+        <TimerBtn
+          key={timerKey}
+          initialTime={5}
+          onTimerEnd={handleTimerEnd}
+        />{" "}
+        {/* 타이머 버튼 */}
         <InputField
           type="text"
           placeholder="답변을 입력해주세요."
-          value={answers[currentQuestionIndex]}
+          value={answers[currentQuestionIndex] || ""}
           onChange={handleQuestionChange}
           onKeyPress={handleKeyPress} // 엔터 키 누를 때 처리
         />
         <BtnWrap>
-          <AquaBtn text="입력" BtnFn={() => handleConfirm(onClose)} /> {/* 입력 버튼 */}
+          <AquaBtn text="입력" BtnFn={handleConfirm} /> {/* 입력 버튼 */}
         </BtnWrap>
       </ModalWrap>
     </BlackBg>

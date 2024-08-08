@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { login } from "../../api/login/loginAPI";
-
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -8,6 +6,7 @@ import AquaBtn from "../common/AquaBtn";
 // 소셜 로그인 아이콘
 import GoogleIcon from "../../assets/icons/google.png";
 import KakaoIcon from "../../assets/icons/kakao.png";
+import GreyBtn from "../common/GrayBtn";
 
 // 공통 스타일
 const FlexCenter = styled.div`
@@ -96,6 +95,8 @@ const FindPassword = styled.div`
 const BtnWrap = styled(FlexCenter)`
   margin-top: 20px;
   width: 100%;
+  display: flex;
+  gap: 10px;
 `;
 
 // 소셜 로그인 섹션 스타일
@@ -139,6 +140,12 @@ const LoginModal = ({
     AquaBtnFn(email, password);
   };
 
+  //url 연결
+  const handleKakaoLogin = () => {
+    const kakaoLoginUrl = 'https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=http://localhost:8081/api/v1/member/login/kakao/callback&response_type=code';
+    window.location.href = kakaoLoginUrl;
+  };
+
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap
@@ -170,11 +177,13 @@ const LoginModal = ({
         <FindPassword onClick={onFindPasswordClick}>비밀번호 찾기</FindPassword>
         <BtnWrap>
           <AquaBtn text="로그인" BtnFn={handleSubmit} />
+          <GreyBtn text="닫기" BtnFn={onClose} />
         </BtnWrap>
         <SocialLoginSection>
           <SocialLoginText>소셜 로그인</SocialLoginText>
           <div>
             <SocialLoginButton src={GoogleIcon} onClick={onGoogleLogin} />
+            <SocialLoginButton src={KakaoIcon} onClick={handleKakaoLogin} />
           </div>
         </SocialLoginSection>
       </ModalWrap>

@@ -22,7 +22,8 @@ const Wrap = styled.div`
 const Game1 = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
+  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
+    useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   const roomId = useSelector((state) => state.room.roomId);
@@ -62,33 +63,28 @@ const Game1 = () => {
     setIsIntroModalOpen(true);
   };
 
-  // IntroductionGuideModal 닫기
   const closeIntroGuideModal = () => {
     console.log("Closing Introduction Guide Modal");
     setIsIntroGuideModalOpen(false);
   };
 
-  // IntroductionModal 닫기
   const closeIntroModal = () => {
     console.log("Closing Introduction Modal");
     setIsIntroModalOpen(false);
     setIsDrawingWelcomeModalOpen(true); // 자기소개 종료 후 DrawingWelcomeModal 열기
   };
 
-  // IntroductionModal 닫고 DrawingWelcomeModal 열기
   const openDrawingWelcomeModal = () => {
     console.log("Opening Drawing Welcome Modal");
     setIsIntroModalOpen(false);
     setIsDrawingWelcomeModalOpen(true);
   };
 
-  // DrawingWelcomeModal 닫기
   const closeDrawingWelcomeModal = () => {
     console.log("Closing Drawing Welcome Modal");
     setIsDrawingWelcomeModalOpen(false);
   };
 
-  // DrawingGuideModal 닫기
   const closeDrawingGuideModal = () => {
     console.log("Closing Drawing Guide Modal");
     setIsDrawingGuideModalOpen(false);

@@ -38,35 +38,64 @@ const NameTag = styled.div`
 
 const VideoBox = ({ index }) => {
   const videoRef = useRef(null);
-  const subscribers = useSelector((state) => state.room.subscribers);
-  const localStream = useSelector((state) => state.room.localStream);
   const nicknameList = useSelector((state) => state.nickname.nicknameList);
+  const localStream = useSelector((state) => state.room.localStream);
+  const subscribers = useSelector((state) => state.room.subscribers);
 
   // 해당 인덱스에 맞는 사용자 번호 찾기
   const userNo = index + 1;
 
   // 사용자 번호에 맞는 별명 찾기
-  const userNickname = nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름";
-
-  console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
+  const userNickname =
+    nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름";
 
   useEffect(() => {
-    if (index === 0 && localStream && videoRef.current) {
-      videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림 설정
-      console.log("Added local video element");
-    } else if (
-      subscribers.length > index - 1 &&
-      subscribers[index - 1] &&
-      videoRef.current
-    ) {
-      subscribers[index - 1].addVideoElement(videoRef.current); // 구독자 비디오 요소 추가
-      console.log(`Added video element for subscriber ${index - 1}`);
+    // console.log(
+    //   `VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
+    // );
+
+    let assigned = false;
+
+    // 로컬 스트림의 userNo 확인 및 할당
+    if (localStream) {
+      // console.log(
+      //   `LocalStream connection data: ${localStream.connection.data}`
+      // );
+      const localUserNo = JSON.parse(localStream.connection.data).userNo;
+      // console.log(`LocalStream userNo: ${localUserNo}`);
+      if (localUserNo === userNo && videoRef.current) {
+        videoRef.current.srcObject = localStream.getMediaStream();
+        assigned = true;
+        // console.log(`Added local video element for userNo ${userNo}`);
+      }
     }
-  }, [subscribers, index, localStream]);
+
+    // 구독자 스트림의 userNo 확인 및 할당
+    if (!assigned) {
+      const subscriber = subscribers.find((sub) => {
+        // console.log(
+        //   `Subscriber connection data: ${sub.stream.connection.data}`
+        // );
+        return JSON.parse(sub.stream.connection.data).userNo === userNo;
+      });
+      if (subscriber && videoRef.current) {
+        subscriber.addVideoElement(videoRef.current);
+        // console.log(`Added video element for subscriber userNo ${userNo}`);
+      }
+    }
+  }, [localStream, subscribers, userNo]);
 
   useEffect(() => {
-    console.log(`VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`);
-  }, [nicknameList]);
+    if (videoRef.current) {
+      videoRef.current.addEventListener("loadeddata", () => {
+        // console.log(`Video element for userNo ${userNo} is playing`);
+      });
+    }
+  }, [videoRef]);
+
+  // console.log(
+  //   `Rendering VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
+  // );
 
   return (
     <Box>

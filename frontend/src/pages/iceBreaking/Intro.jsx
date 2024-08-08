@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import introGif from "../../assets/gifs/gameIntro.gif";
 import firstGame from "../../assets/images/firstGame.png";
+import { useSelector } from "react-redux";
 
 const Wrap = styled.div`
   display: flex;
@@ -46,6 +47,22 @@ const SkipButton = styled.button`
 const Introduce = () => {
   const [isStoryFinished, setIsStoryFinished] = useState(false);
   const navigate = useNavigate();
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+
+  useEffect(() => {
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+
+      const cmd = parsedMessage.commandType;
+
+      if (cmd == "GAME_MODAL_START") {
+        skipIntro();
+      }
+
+      console.log("키워드 타입 :", parsedMessage);
+    });
+  }, [client, roomId]);
 
   const skipIntro = () => {
     setIsStoryFinished(true);
@@ -65,13 +82,19 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
-          <SkipButton onClick={skipIntro}>Skip</SkipButton>
+          <SkipButton
+            onClick={() =>
+              client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
+            }
+          >
+            Skip
+          </SkipButton>
         </>
       ) : (
         <Image
           src={firstGame}
           onClick={() => {
-            navigate("/icebreaking/games/game1");
+            navigate("/icebreaking/games/game1Nickname");
           }}
           alt="First Game"
         />
