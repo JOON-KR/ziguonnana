@@ -76,8 +76,8 @@ public class IgudongseongService {
         ConcurrentMap<Integer, List<KeyPoint>> vectors = room.getVectors();
         vectors.put(request.getNum(), request.getKeypoints());
         room.countUp();
-
         if (room.getCount() == people) {
+        	log.info("----------이구동성 결과전송--------------");
             room.countInit();
             List<List<KeyPoint>> list = new ArrayList<>();
             for (int i = 1; i <= people; i++) {
@@ -105,6 +105,7 @@ public class IgudongseongService {
 
     public void endGame(String roomId) {
         boolean end = true;
+        log.info("----------------------이구동성 종료 -----------------------");
         GameMessage<Boolean> result = GameMessage.info("이구동성 게임 종료", end);
         messagingTemplate.convertAndSend("/topic/game/" + roomId, result);
     }
@@ -116,11 +117,12 @@ public class IgudongseongService {
         for (int i = 0; i < numUsers; i++) {
             int similarCount = 0;
             List<KeyPoint> currentUser = userVectors.get(i);
-
+            
             for (int j = 0; j < numUsers; j++) {
                 if (i != j) {
                     List<KeyPoint> otherUser = userVectors.get(j);
                     double similarity = cosineSimilarity(currentUser, otherUser);
+                    log.info("------{} 와 {} 의 유사도 : {}------------",i+1,j+1,similarity);
                     if (similarity >= 0.7) {
                         similarCount++;
                     }
