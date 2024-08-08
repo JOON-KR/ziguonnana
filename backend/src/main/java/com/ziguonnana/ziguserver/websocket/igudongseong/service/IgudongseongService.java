@@ -86,7 +86,7 @@ public class IgudongseongService {
             }
             double[] similarityScores = calculateSimilarity(list);
             int mostSimilarUserCount = findMostSimilarUserCount(similarityScores);
-            String resultMessage = (mostSimilarUserCount == people) ? "성공!" : "실패!";
+            String resultMessage = (mostSimilarUserCount == people-1) ? "성공!" : "실패!";
             GameMessage<Integer> result = GameMessage.info(resultMessage, mostSimilarUserCount);
 
             List<IgudongseongResult> Igudongseong = room.getIgudongseong();
