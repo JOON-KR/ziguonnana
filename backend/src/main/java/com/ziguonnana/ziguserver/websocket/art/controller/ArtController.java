@@ -29,4 +29,10 @@ public class ArtController {
         return Response.ok(CommandType.KEYWORD_TYPE, art);
     }
     
+    @MessageMapping("/game/{roomId}/avatar")
+    @SendTo("/topic/game/{roomId}")
+    public void avatarTest(@DestinationVariable("roomId") String roomId) {
+    	artService.spreadAvatarCard(roomId);
+    }
+    
 }
