@@ -8,7 +8,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.SimilarRequest;
 import com.ziguonnana.ziguserver.websocket.igudongseong.service.IgudongseongService;
 
@@ -35,5 +37,12 @@ public class IgudongseongController {
     public void getResult(@DestinationVariable("roomId") String roomId, @Payload SimilarRequest request) {
     	log.info("=======이구동성 유사도 검증=======");
     	igudongseongService.getSimilar(roomId,request);
+    }
+    
+    @MessageMapping("/game/{roomId}/igudongseong-cycle")
+    @SendTo("/topic/game/{roomId}") 
+    public Response<Boolean> getResult(@DestinationVariable("roomId") String roomId) {
+    	log.info("=======이구동성 cycle 시작=======");
+    	return Response.ok(CommandType.IGUDONGSEONG_CYCLE, true);
     }
 }
