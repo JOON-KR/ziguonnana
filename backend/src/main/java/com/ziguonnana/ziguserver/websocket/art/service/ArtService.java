@@ -44,12 +44,12 @@ public class ArtService {
 		log.info("roomCount: {}", room.getCount());
 		if (room.getCount() == people) {
 			// 그림 전파 함수 호출
+			room.cycleUp();
 			Map<Integer, RelayArt> artMap = artResponse(roomId);
 			messagingTemplate.convertAndSend("/topic/game/" + roomId, GameMessage.info("그림 전파", artMap));
 
 			// 카운트 초기화 및 사이클 증가
 			room.countInit();
-			room.cycleUp();
 			log.info("roomCycle: {}", room.getCycle());
 			// 사이클이 people - 1에 도달하면 다음 단계로 전환
 			if (room.getCycle() == people ) {
