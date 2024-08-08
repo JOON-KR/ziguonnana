@@ -96,7 +96,7 @@ public class IgudongseongService {
             room.cycleUp();
             messagingTemplate.convertAndSend("/topic/game/" + roomId, result);
 
-            if (room.getCycle() == people) {
+            if (room.getCycle() == 6) {
                 room.cycleInit();
                 endGame(roomId);
             }
