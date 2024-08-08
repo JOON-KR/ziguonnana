@@ -226,6 +226,10 @@ const Home = () => {
       )}
       {isRoomJoinModalOpen && <RoomJoinModal onClose={closeRoomJoinModal} />}
       <Header>
+        {/* 테스트 용입니다 */}
+        <HeaderText onClick={() => navigate("/MyPage")}>
+            마이페이지
+          </HeaderText>
         <HeaderText
           onClick={() => {
             if (isLoggedIn) {
