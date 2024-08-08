@@ -125,7 +125,7 @@ const Game3 = () => {
         // 5초 후에 PoseNet 실행
         setTimeout(() => {
           runPoseNet(videoElement);
-        }, 5000); // 5초 후에 포즈넷 실행
+        }, 3000); // 5초 후에 포즈넷 실행
       }
     }
   }, [localStream, videoRef, round, isGameStarted]); // localStream이 변경될 때마다 useEffect 실행
@@ -190,7 +190,7 @@ const Game3 = () => {
       <button
         onClick={() => {
           // setRound(round + 1);
-          client.send(`/game/${roomId}/igudongseong-cycle`);
+          client.send(`/app/game/${roomId}/igudongseong-cycle`);
           console.log(round);
         }}
       >
