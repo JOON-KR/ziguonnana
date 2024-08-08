@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PoseService {
 	
-	private RoomRepository roomRepository;
+	private final RoomRepository roomRepository;
 	private final SimpMessagingTemplate messagingTemplate;
 	
 	public void calculate(String roomId, PoseResult request) {

@@ -13,8 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.Builder;
 import lombok.Data;
-
+@Builder
 @Entity
 @Data
 public class Avatar {
@@ -32,7 +33,6 @@ public class Avatar {
 
     private Timestamp regDate;
     private Boolean isDelete;
-
-    @OneToMany(mappedBy = "avatar")
+    private List<String>feature;
     private List<AvatarArticle> avatarArticles;
 }
