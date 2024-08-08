@@ -11,8 +11,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.KeyPoint;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongKeyword;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
@@ -177,4 +179,5 @@ public class IgudongseongService {
             return dotProduct / (magnitude1 * magnitude2);
         }
     }
+
 }
