@@ -122,7 +122,7 @@ public class ArtService {
 		Response<Boolean> endResponse = Response.ok(CommandType.ART_END, endArt);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, endResponse);
 		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, artResult);
-		
+		spreadAvatarCard(roomId);
 		//아바타 결과 반환
 	}
 	//아직 어디서 호출할지 회의해봐야함
@@ -143,13 +143,13 @@ public class ArtService {
 	                                       .collect(Collectors.toList());
 
 	            AvatarCard card = AvatarCard.builder()
-	                                        .avatarImage("") // art.getArt()) 나중에 s3로 연결 해야하는데 로직을 고민해봐야함
+	                                        .avatarImage(art.getArt()) // art.getArt()) 나중에 s3로 연결 해야하는데 로직을 고민해봐야함
 	                                        .feature(features)
 	                                        .build();
 	            cards.put(i, card);
 	        }
 	    }
-	    GameMessage<ConcurrentMap<Integer, AvatarCard>> cardMessage = GameMessage.info("아바타 명함 전파", cards);
+	    Response<ConcurrentMap<Integer, AvatarCard>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
 		log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
 	}
