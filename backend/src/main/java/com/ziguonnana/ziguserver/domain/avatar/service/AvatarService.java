@@ -38,7 +38,6 @@ public class AvatarService {
                 .avatarImage(path)
                 .isDelete(false)
                 .member(getMember(memberId))
-                .avatarArticles(new ArrayList<>())
                 .nickname(request.nickname())
                 .feature(request.feature())
                 .build();
