@@ -222,6 +222,7 @@ const RoomCreateModal = ({ onClose }) => {
             );
           }
         },
+
         (error) => {
           console.error("STOMP error:", error);
         }

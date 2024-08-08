@@ -135,50 +135,59 @@ const ColorSquare = styled.div`
 `;
 
 const Game1Drawing = () => {
+  const userNo = useSelector((state) => state.auth.userNo);
+  const roomId = useSelector((state) => state.room.roomId);
+  const dispatch = useDispatch();
+  const client = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5);
+
+  const [currentRelay, setCurrentRelay] = useState({
+    art: "",
+    num: userNo,
+    keyword: "",
+  });
   const [drawingResult, setDrawingResult] = useState(null);
+  const [isGameStarted, setIsGameStarted] = true;
+
   const canvasRef = useRef(null);
 
-  const userNo = useSelector((state) => state.auth.userNo);
-  const roomId = useSelector((state) => state.room.roomId);
-  const drawingData = useSelector((state) => state.drawing.drawingData);
-  const dispatch = useDispatch();
-  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
-
   useEffect(() => {
-    // 이어그리기 첫 키워드 전파 데이터 받아오기
-    // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
-    if (stompClient && stompClient.connected) {
-      console.log("Subscribing to topic:", `/topic/game/${roomId}`);
-      // 방의 메시지를 구독
-      const subscription = stompClient.subscribe(
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+    if (client && client.connected) {
+      const subscription = client.subscribe(
         `/topic/game/${roomId}`,
         (message) => {
-          const response = JSON.parse(message.body);
-          console.log("Received message from server:", response); // 서버로부터 받은 메시지 로그
-          if (response.message.trim() === "이어그리기 첫 키워드 전파") {
-            // 데이터 받아와서 Redux 상태 업데이트
-            dispatch(setDrawingData(response.data));
+          const parsedMessage = JSON.parse(message.body);
+          console.log("서버에서 전달받은 메시지 :", parsedMessage);
+
+          if (parsedMessage.message.trim() === "그림 전파") {
+            setCurrentRelay(parsedMessage.data[userNo]);
+          }
+          // 이어그리기 종료 데이터 받아오기
+          else if (parsedMessage.message.trim() === "이어그리기 종료") {
+            // 새로운 변수에 그림 저장
+            setDrawingResult(parsedMessage.data);
+            console.log("Drawing result received:", parsedMessage.data);
+            // 데이터 반복 전송 종료
+            clearInterval(sendDrawingInterval);
+            subscription.unsubscribe();
+          } else if (parsedMessage.message === "이어그리기 결과 확인") {
+            setIsGameStarted(false);
           }
         }
       );
 
-      // 컴포넌트 언마운트 시 구독 취소
       return () => {
-        console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
         subscription.unsubscribe();
       };
-    } else {
-      console.error("Stomp client is not connected in useEffect");
     }
-  }, [dispatch, roomId, stompClient]);
-
-  const resData = drawingData[userNo];
-  // console.log("resDatad:", resData);
-  // console.log('drawing', drawingData)
+  }, []);
 
   // 타이머
   useEffect(() => {
@@ -192,97 +201,50 @@ const Game1Drawing = () => {
     }
   }, [timeLeft]);
 
-  // 응답 받아오면 캔버스 띄우기
+  // 현재 저장된 그림 상태에 따라 캔버스에 다시그리기
   useEffect(() => {
-    if (drawingData[userNo] && drawingData[userNo].art) {
+    if (currentRelay) {
       const canvas = canvasRef.current;
       if (canvas) {
-        console.log("Loading paths:", drawingData[userNo].art);
+        console.log("현재 저장된 그림을 캔버스에 표현");
         canvas.clearCanvas();
-        canvas.loadPaths(JSON.parse(drawingData[userNo].art));
+        canvas.loadPaths(currentRelay.art);
       }
     }
-  }, [drawingData, userNo]);
-
-  // 중간 그림 저장
-  const [savedDrawing, setSavedDrawing] = useState("");
+  }, [currentRelay, userNo]);
 
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
       try {
-        // 캔버스에 그린 그림을 png 파일로 저장 <- 저장 잘되는지 모르겠음.
         const exportImage = await currentCanvas.exportImage("png");
-        const imageBlob = await (await fetch(exportImage)).blob();
+        const imageBlob = await exportImage.blob();
         const formData = new FormData();
         formData.append("file", imageBlob, "drawing.png");
 
-        // 저장한 png 파일을 S3 서버로 전송 - multipart 형식으로
         const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
-        console.log("S3 전송해서 받은 결과 : ", response);
-        // S3 서버에서 받아온 response data 저장
-        setSavedDrawing(response.data);
-        console.log("Drawing sent successfully:", response.data);
+        setSavedDrawing(response.data); //"shortsExample/335de704-84d4-4b32-8af0-bcd37f2782ea.png"
+        console.log("그림 전송 완료 : ", response.data);
 
         // S3 서버에서 받아온 response data를 서버로 전송 (소켓)
         // relayart 데이터 형식으로 전송
-        const relayart = {
+        const relayArt = {
           art: resData.art,
           num: userNo,
           keyword: resData.keyword,
         };
-
-        const sendDrawingInterval = setInterval(() => {
-          if (stompClient && stompClient.connected) {
-            stompClient.send(
-              `/app/game/${roomId}/saveArt`,
-              {},
-              JSON.stringify(relayart)
-            );
-            console.log("Data sent to server via socket:", relayart);
-          }
-        }, 5000); // 5초 간격으로 데이터 전송
-
-        // 응답 처리 및 반복 종료
-        const subscription = stompClient.subscribe(
-          `/topic/game/${roomId}`,
-          (message) => {
-            const response = JSON.parse(message.body);
-            console.log("Received repeated message from server:", response);
-            // 그림 전파 데이터 받아오기
-            if (response.message.trim() === "그림 전파") {
-              // 데이터 받아와서 Redux 상태 업데이트
-              dispatch(setDrawingData(response.data));
-            }
-            // 이어그리기 종료 데이터 받아오기
-            if (response.message.trim() === "이어그리기 종료") {
-              // 새로운 변수에 그림 저장
-              setDrawingResult(response.data);
-              console.log("Drawing result received:", response.data);
-              // 데이터 반복 전송 종료
-              clearInterval(sendDrawingInterval);
-              subscription.unsubscribe();
-            }
-
-            resData = Object.values(drawingData)[1];
-          }
-        );
-
-        return () => {
-          clearInterval(sendDrawingInterval);
-          subscription.unsubscribe();
-        };
-      } catch (error) {
-        console.error("Error sending drawing:", error);
+      } catch (e) {
+        console.log(e);
       }
     }
   };
 
+  //=======================================================================================
   const handleColorChange = (color) => {
     setBrushColor(color);
     setIsEraser(false);

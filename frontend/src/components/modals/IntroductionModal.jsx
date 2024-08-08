@@ -83,13 +83,6 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
   const questionList = useSelector((state) => state.question.questionList);
-  // const questionList = [
-  //   "주변 사람들에게 자주 듣는 외모에 대한 칭찬은 무엇인가요?",
-  //   "외모와 관련된 스트레스를 받는 부분이 있나요? 있다면 어디인가요?",
-  //   "머리 스타일을 자주 바꾸는 편인가요?",
-  //   "외모와 관련하여 가장 자신 있는 부분은 무엇인가요?",
-  //   "본인의 외모 중에서 가장 마음에 드는 부분은 어디인가요?",
-  // ];
 
   // 서버에서 질문 목록을 받아오는 함수
 
@@ -98,20 +91,18 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
 
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log("방에서 받은 메시지:", parsedMessage);
-      // if (
-      //   parsedMessage.data == true &&
-      //   parsedMessage.commandType == "GAME_START"
-      // )
-      //   navigate("/icebreaking/intro");
-      // // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-      // else if (parsedMessage.message == "질문리스트 전파\n") {
-      //   dispatch(setQuestionList(parsedMessage.data.question));
-      //   console.log(parsedMessage.data.question);
-      // }
-    });
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        console.log("방에서 받은 메시지:", parsedMessage);
+      }
+    );
+
+    return () => {
+      console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
+      subscription.unsubscribe();
+    };
   }, [client, roomId]);
 
   // useEffect(() => {

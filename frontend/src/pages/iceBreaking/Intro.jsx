@@ -51,17 +51,28 @@ const Introduce = () => {
   const client = useSelector((state) => state.client.stompClient);
 
   useEffect(() => {
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
+    // 구독을 설정하고 구독 객체를 저장합니다.
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessage = JSON.parse(message.body);
 
-      const cmd = parsedMessage.commandType;
+        const cmd = parsedMessage.commandType;
 
-      if (cmd == "GAME_MODAL_START") {
-        skipIntro();
+        if (cmd === "GAME_MODAL_START") {
+          skipIntro();
+        }
+
+        console.log("키워드 타입 :", parsedMessage);
       }
+    );
 
-      console.log("키워드 타입 :", parsedMessage);
-    });
+    // 클린업 함수에서 구독을 해지합니다.
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [client, roomId]);
 
   const skipIntro = () => {
