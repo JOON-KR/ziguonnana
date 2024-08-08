@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PoseController {
 
-	private PoseService poseService;
+	private final PoseService poseService;
 
 	@MessageMapping("/game/{roomId}/pose/{number}")
 	@SendTo("/topic/game/{roomId}")
