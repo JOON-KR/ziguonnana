@@ -34,5 +34,4 @@ public class Avatar {
     private Timestamp regDate;
     private Boolean isDelete;
     private List<String>feature;
-    private List<AvatarArticle> avatarArticles;
 }
