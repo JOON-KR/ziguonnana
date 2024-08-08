@@ -33,7 +33,7 @@ const OpenViduSession = ({ token }) => {
         // console.log(
         //   `Subscriber connection data: ${event.stream.connection.data}`
         // );
-        // dispatch(addSubscriber(subscriber)); // 구독자 추가 액션 디스패치
+        dispatch(addSubscriber(subscriber)); // 구독자 추가 액션 디스패치
         // console.log("Stream created and subscriber added");
       });
 
