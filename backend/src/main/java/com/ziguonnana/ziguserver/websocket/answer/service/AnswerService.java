@@ -56,8 +56,8 @@ public class AnswerService {
 	
 	public void getQuestion(String roomId) {
 		Room room = roomRepository.getRoom(roomId);
-		int questionRequestCnt = room.getQuestionRequestCnt();
-		if(questionRequestCnt > 0) return;
+//		int questionRequestCnt = room.getQuestionRequestCnt();
+//		if(questionRequestCnt > 0) return;
 		room.countQuestionRequestCnt();
 
         List<String> questionList = new ArrayList<>();
