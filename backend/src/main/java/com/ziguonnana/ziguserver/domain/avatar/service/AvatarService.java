@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ziguonnana.ziguserver.domain.avatar.dto.AvatarRequest;
 import com.ziguonnana.ziguserver.domain.avatar.dto.AvatarResponse;
@@ -30,9 +31,9 @@ public class AvatarService {
     private final S3Util s3Util;
     private final MemberRepository memberRepository;
 
-    public String createAvatar(AvatarRequest request) throws IOException {
+    public String createAvatar(MultipartFile image, AvatarRequest request) throws IOException {
         Long memberId = TokenInfo.getMemberId();
-        String path = s3Util.upload(request.image(), "avatar/" + memberId + "/");
+        String path = s3Util.upload(image, "avatar/" + memberId + "/");
         Avatar avatar = Avatar.builder()
                 .avatarImage(path)
                 .isDelete(false)
