@@ -6,6 +6,17 @@ import OpenViduSession from "../../components/OpenViduSession";
 import VideoBox from "../../components/layout/VideoBox";
 import { clearSession } from "../../store/roomSlice";
 
+// Global style to reset body and html to avoid scrolling
+const GlobalStyle = createGlobalStyle`
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrolling */
+  }
+`;
+
 // Styled components
 const PageWrap = styled.div`
   width: 100%;
@@ -24,6 +35,8 @@ const Frame = styled.div`
   box-sizing: border-box;
   height: 100%;
   gap: 16px;
+  margin-left:30px;
+  margin-right:30px;
   width: 200px; /* Fixed width for Frame */
 `;
 
@@ -75,37 +88,27 @@ const IceBreaking = () => {
   // };
 
   return (
-    <PageWrap>
-      {/* OpenViduSession 컴포넌트 렌더링 */}
-      {openviduToken && <OpenViduSession token={openviduToken} />}
-      {/* VideoBox 컴포넌트 렌더링 */}
-      <Frame>
-        <VideoBox index={0} />
-        <VideoBox index={1} />
-        <VideoBox index={2} />
-      </Frame>
-      <Content>
-        <Outlet />
-        {/* <ChatWrap>
-          <input
-            type="text"
-            value={typedText}
-            onChange={(e) => setTypedText(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-          />
-          <button onClick={sendMessage}>보냄</button>
-        </ChatWrap> */}
-      </Content>
-      <Frame>
-        <VideoBox index={3} />
-        <VideoBox index={4} />
-        <VideoBox index={5} />
-      </Frame>
-    </PageWrap>
+    <>
+      <GlobalStyle />
+      <PageWrap>
+        {/* OpenViduSession 컴포넌트 렌더링 */}
+        {openviduToken && <OpenViduSession token={openviduToken} />}
+        {/* VideoBox 컴포넌트 렌더링 */}
+        <Frame>
+          <VideoBox index={0} />
+          <VideoBox index={1} />
+          <VideoBox index={2} />
+        </Frame>
+        <Content>
+          <Outlet />
+        </Content>
+        <Frame>
+          <VideoBox index={3} />
+          <VideoBox index={4} />
+          <VideoBox index={5} />
+        </Frame>
+      </PageWrap>
+    </>
   );
 };
 

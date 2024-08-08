@@ -37,7 +37,7 @@ const Game5 = () => {
 
       const cmd = parsedMessage.commandType;
 
-      if (cmd == "GAME_MODAL_START") {
+      if (cmd === "GAME_MODAL_START") {
         setIsShortFormWelcomeModalOpen(false);
         setIsShortFormDanceGuideModalOpen(false);
         setIsShortFormTeamIntroGuideModalOpen(false);
@@ -59,13 +59,13 @@ const Game5 = () => {
     setIsShortFormTeamIntroGuideModalOpen(true);
   };
 
-  // 댄스 챌린지 설명 모달 닫기
+  // 댄스 챌린지 설명 모달 닫기 및 페이지 이동
   const closeShortFormDanceGuideModal = () => {
     setIsShortFormDanceGuideModalOpen(false);
     navigate("/icebreaking/games/Game5Dance");
   };
 
-  // 팀 소개 챌린지 설명 모달 닫기
+  // 팀 소개 챌린지 설명 모달 닫기 및 페이지 이동
   const closeShortFormTeamIntroGuideModal = () => {
     setIsShortFormTeamIntroGuideModalOpen(false);
     navigate("/icebreaking/games/Game5TeamIntro");
@@ -82,7 +82,6 @@ const Game5 = () => {
           BlueBtnText={"팀 소개 챌린지"}
           BlueBtnFn={openisShortFormTeamIntroGuideModalOpen}
           modalText={<>숏폼 챌린지에 오신걸 환영합니다 !</>}
-          // onClose={() => setIsShortFormWelcomeModalOpen(false)}
         />
       )}
       {isShortFormDanceGuideModalOpen && (
@@ -90,7 +89,7 @@ const Game5 = () => {
           exImg={""}
           RedBtnText={"챌린지 시작"}
           // 버튼 누르면, 댄스 챌린지 페이지로 넘어가도록 수정
-          RedBtnFn={() => client.send(`/app/game/${roomId}/start-modal/SHORTS`)}
+          RedBtnFn={closeShortFormDanceGuideModal}
           modalText={
             <>
               댄스 챌린지를 선택하셨습니다.
@@ -101,7 +100,6 @@ const Game5 = () => {
               댄스 챌린지 영상을 완성해봅시다!
             </>
           }
-          // onClose={closeShortFormDanceGuideModal}
         />
       )}
       {isShortFormTeamIntroGuideModalOpen && (
@@ -109,7 +107,7 @@ const Game5 = () => {
           exImg={""}
           RedBtnText={"챌린지 시작"}
           // 버튼 누르면, 팀소개 챌린지 페이지로 넘어가도록 수정
-          RedBtnFn={() => client.send(`/app/game/${roomId}/start-modal/SHORTS`)}
+          RedBtnFn={closeShortFormTeamIntroGuideModal}
           modalText={
             <>
               팀 소개 챌린지를 선택하셨습니다.
@@ -119,7 +117,6 @@ const Game5 = () => {
               완성해봅시다!
             </>
           }
-          // onClose={closeShortFormTeamIntroGuideModal}
         />
       )}
       숏폼 챌린지 화면 여기서 x -- 다른 페이지로 이동
