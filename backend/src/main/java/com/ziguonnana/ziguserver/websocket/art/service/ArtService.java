@@ -37,7 +37,7 @@ public class ArtService {
 		int cycle = room.getCycle();
 		int people = room.getPeople();
 		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-		int num = (art.getNum() + cycle) % people;
+		int num = (art.getNum() + cycle + 1) % people == 0? 1: (art.getNum() + cycle + 1)%people;
 		map.get(num).add(art);
 
 		room.countUp();
@@ -71,7 +71,7 @@ public class ArtService {
 		Random random = new Random();
 
 		for (int i = 1; i <= people; i++) {
-			List<RelayArt> artList = map.get((i + cycle) % people);
+			List<RelayArt> artList = map.get((i + cycle) % people == 0? 1: (i + cycle) % people);
 
 			if (artList != null && !artList.isEmpty()) {
 				RelayArt originalArt = artList.get(artList.size() - 1);
