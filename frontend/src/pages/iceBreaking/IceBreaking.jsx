@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import styled, { createGlobalStyle } from "styled-components";
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 import { Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import OpenViduSession from "../../components/OpenViduSession";
@@ -46,18 +46,46 @@ const Content = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  position: relative;
+`;
+
+const ChatWrap = styled.div`
+  /* width: 60%; */
+  position: fixed;
+  bottom: 30px;
 `;
 
 const IceBreaking = () => {
   const dispatch = useDispatch();
   const openviduToken = useSelector((state) => state.auth.openViduToken);
-
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const [typedText, setTypedText] = useState("");
   // 컴포넌트 언마운트 시 세션 초기화
   useEffect(() => {
     return () => {
       dispatch(clearSession());
     };
   }, [dispatch]);
+
+  // const sendMessage = () => {
+  //   if (client && client.connected) {
+  //     console.log("보내는 메시지:", {
+  //       // sender: profile.name,
+  //       content: typedText,
+  //     });
+  //     client.send(
+  //       `/app/game/${roomId}/chat`,
+  //       {},
+  //       JSON.stringify({
+  //         // sender: profile.name,
+  //         content: typedText,
+  //       })
+  //     );
+  //     setTypedText("");
+  //   }
+  // };
 
   return (
     <>

@@ -50,37 +50,37 @@ const VideoBox = ({ index }) => {
     nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름";
 
   useEffect(() => {
-    console.log(
-      `VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
-    );
+    // console.log(
+    //   `VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
+    // );
 
     let assigned = false;
 
     // 로컬 스트림의 userNo 확인 및 할당
     if (localStream) {
-      console.log(
-        `LocalStream connection data: ${localStream.connection.data}`
-      );
+      // console.log(
+      //   `LocalStream connection data: ${localStream.connection.data}`
+      // );
       const localUserNo = JSON.parse(localStream.connection.data).userNo;
-      console.log(`LocalStream userNo: ${localUserNo}`);
+      // console.log(`LocalStream userNo: ${localUserNo}`);
       if (localUserNo === userNo && videoRef.current) {
         videoRef.current.srcObject = localStream.getMediaStream();
         assigned = true;
-        console.log(`Added local video element for userNo ${userNo}`);
+        // console.log(`Added local video element for userNo ${userNo}`);
       }
     }
 
     // 구독자 스트림의 userNo 확인 및 할당
     if (!assigned) {
       const subscriber = subscribers.find((sub) => {
-        console.log(
-          `Subscriber connection data: ${sub.stream.connection.data}`
-        );
+        // console.log(
+        //   `Subscriber connection data: ${sub.stream.connection.data}`
+        // );
         return JSON.parse(sub.stream.connection.data).userNo === userNo;
       });
       if (subscriber && videoRef.current) {
         subscriber.addVideoElement(videoRef.current);
-        console.log(`Added video element for subscriber userNo ${userNo}`);
+        // console.log(`Added video element for subscriber userNo ${userNo}`);
       }
     }
   }, [localStream, subscribers, userNo]);
@@ -88,14 +88,14 @@ const VideoBox = ({ index }) => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.addEventListener("loadeddata", () => {
-        console.log(`Video element for userNo ${userNo} is playing`);
+        // console.log(`Video element for userNo ${userNo} is playing`);
       });
     }
   }, [videoRef]);
 
-  console.log(
-    `Rendering VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
-  );
+  // console.log(
+  //   `Rendering VideoBox ${index}: userNo = ${userNo}, userNickname = ${userNickname}`
+  // );
 
   return (
     <Box>
