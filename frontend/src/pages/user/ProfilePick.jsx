@@ -111,6 +111,7 @@ const ProfilePick = () => {
   const stompClientRef = useRef(null);
 
   useEffect(() => {
+    console.log("프로필 유저 번호 : ", userNo);
     const fetchProfiles = async () => {
       if (isLoggedIn) {
         try {

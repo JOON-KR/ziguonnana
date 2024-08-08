@@ -36,6 +36,8 @@ const Game3 = () => {
         setIsIgudongseongGuideModalOpen(false);
       }
 
+      client.send(`/app/game/${roomId}/igudongseong`);
+
       console.log("키워드 타입 :", parsedMessage);
     });
   }, [client, roomId]);

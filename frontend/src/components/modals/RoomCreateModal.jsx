@@ -164,23 +164,6 @@ const RoomCreateModal = ({ onClose }) => {
           // console.log("웹소켓 서버와 연결됨!", frame);
 
           if (client && client.connected) {
-            //방 생성 요청
-            console.log("소켓 방 생성 요청:", {
-              teamName,
-              people: selectedCapacity,
-            });
-            client.send(
-              `/app/game/${roomId}/create`,
-              {},
-              JSON.stringify({
-                teamName,
-                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
-                memberId, // memberId 포함
-              })
-            );
-          }
-
-          if (client && client.connected) {
             // 방에 대한 구독
             client.subscribe(`/topic/game/${roomId}`, (message) => {
               const parsedMessage = JSON.parse(message.body);
@@ -195,8 +178,9 @@ const RoomCreateModal = ({ onClose }) => {
               const parsedMessage = JSON.parse(message.body);
               console.log("개별 구독 받은 메시지:", parsedMessage);
 
-              dispatch(setUserNo(parsedMessage.data.num));
+              dispatch(setUserNo(parsedMessage.data.num)); // 수정
               console.log("유저 번호 :", parsedMessage.data.num);
+
               // 응답 메시지에서 num 저장
               if (parsedMessage.data && parsedMessage.data.num !== undefined) {
                 setSessionInfo((prevSessionInfo) => ({
@@ -220,15 +204,23 @@ const RoomCreateModal = ({ onClose }) => {
             );
           }
 
-          // setStClient(client);
-          // client.publish(
-          //   `/app/game/${roomId}/create`,
-          //   {}, // 헤더가 필요 없는 경우 빈 객체
-          //   JSON.stringify({
-          //     people: selectedCapacity,
-          //     teamName: teamName,
-          //   })
-          // );
+          if (client && client.connected) {
+            //방 생성 요청
+            console.log("소켓 방 생성 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            console.log("설정한 방 인원 수 : ", selectedCapacity);
+            client.send(
+              `/app/game/${roomId}/create`,
+              {},
+              JSON.stringify({
+                teamName,
+                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
+                memberId, // memberId 포함
+              })
+            );
+          }
         },
         (error) => {
           console.error("STOMP error:", error);

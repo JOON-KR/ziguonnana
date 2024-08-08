@@ -103,6 +103,10 @@ const RoomJoinModal = ({ onClose }) => {
       dispatch(setStompClient(client));
       setStClient(client);
 
+      console.log("--------------------------------");
+      console.log("연결 상태 : ", client.connected);
+      console.log("--------------------------------");
+
       const getResponse = async () => {
         const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`);
         console.log("오픈비두 방 참가 응답 : ", response.data.data);
@@ -146,6 +150,7 @@ const RoomJoinModal = ({ onClose }) => {
                     parsedMessage.data.num !== undefined
                   ) {
                     dispatch(setUserNo(parsedMessage.data.num));
+                    console.log("유저 번호 :", parsedMessage.data.num);
                     setSessionInfo((prevSessionInfo) => ({
                       ...prevSessionInfo,
                       num: parsedMessage.data.num,
