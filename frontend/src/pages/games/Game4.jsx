@@ -1,9 +1,56 @@
-import React, { useEffect, useState } from "react";
-import GameModal from "../../components/modals/GameModal";
-import GameInfoModal from "../../components/modals/GameInfoModal";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
-import gray from "../../assets/icons/gray.png";
 import { useSelector } from "react-redux";
+import GameInfoModal from "../../components/modals/GameInfoModal";
+import OpenViduSession from "../../components/OpenViduSession";
+import * as posenet from "@tensorflow-models/posenet";
+import "@tensorflow/tfjs";
+import gray from "../../assets/icons/gray.png";
+import transparentEdgeImage from "../../assets/images/transparent_edges_image.jpg";
+
+// styled-components
+const PageWrap = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  color: #333;
+`;
+
+const VideoCanvas = styled.video`
+  width: 640px;
+  height: 480px;
+  border: 1px solid #ccc;
+  position: relative;
+`;
+
+const OverlayImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 640px;
+  height: 480px;
+  opacity: 0.5;
+`;
+
+const OverlayText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 5px;
+`;
 
 const Wrap = styled.div`
   width: 90%;
@@ -14,7 +61,45 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
-// 포즈 따라하기 페이지 (FollowPose)
+const PoseSelectionModal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure modal is in front */
+`;
+
+const PoseList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+`;
+
+const PoseItem = styled.button`
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: ${(props) => (props.selected ? "#007bff" : "#e0e0e0")};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
 const Game4 = () => {
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
     useState(true);
@@ -24,14 +109,22 @@ const Game4 = () => {
   const [isPoseDrawingModalOpen, setIsPoseDrawingModalOpen] = useState(false);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const localStream = useSelector((state) => state.room.localStream);
+  const openViduToken = useSelector((state) => state.auth.openViduToken);
+  const userNo = useSelector((state) => state.auth.userNo);
+  const videoRef = useRef(null);
+  const [isPoseSelectionModalOpen, setIsPoseSelectionModalOpen] =
+    useState(false);
+  const [selectedPose, setSelectedPose] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [showText, setShowText] = useState(false);
 
   useEffect(() => {
     client.subscribe(`/topic/game/${roomId}`, (message) => {
       const parsedMessage = JSON.parse(message.body);
-
       const cmd = parsedMessage.commandType;
 
-      if (cmd == "GAME_MODAL_START") {
+      if (cmd === "GAME_MODAL_START") {
         setIsFollowPoseWelcomeModalOpen(false);
         setIsFollowPoseSelectModalOpen(false);
         setIsPoseSystemModalOpen(false);
@@ -42,39 +135,93 @@ const Game4 = () => {
     });
   }, [client, roomId]);
 
-  // isFollowPoseWelcomeModalOpen 닫고 isFollowPoseSelectModalOpen 열기
+  useEffect(() => {
+    const runPoseNet = async (videoElement) => {
+      const net = await posenet.load();
+      const pose = await net.estimateSinglePose(videoElement, {
+        flipHorizontal: false,
+        decodingMethod: "single-person",
+      });
+
+      console.log("Pose:", pose);
+
+      const payload = {
+        num: userNo,
+        keypoints: pose.keypoints.map((keypoint) => ({
+          part: keypoint.part,
+          position: keypoint.position,
+          score: keypoint.score,
+        })),
+      };
+
+      console.log("Sending pose result:", payload);
+      client.send(
+        `/ws/app/game/${roomId}/pose/result`,
+        {},
+        JSON.stringify(payload)
+      );
+    };
+
+    if (localStream && videoRef.current) {
+      const videoElement = videoRef.current;
+      videoElement.srcObject = localStream.getMediaStream();
+      videoElement.onloadedmetadata = () => {
+        videoElement.play();
+      };
+
+      if (selectedPose !== null) {
+        setShowOverlay(true);
+        setShowText(true);
+        setTimeout(() => {
+          setShowText(false);
+          setTimeout(() => {
+            setShowOverlay(false);
+            setTimeout(() => {
+              runPoseNet(videoElement);
+            }, 1000);
+          }, 4000);
+        }, 1000);
+      }
+    }
+  }, [localStream, selectedPose, userNo, client, roomId]);
+
   const openIsFollowPoseSelectModalOpen = () => {
     setIsFollowPoseWelcomeModalOpen(false);
     setIsFollowPoseSelectModalOpen(true);
   };
 
-  // isFollowPoseSelectModalOpen 닫고 isPoseSystemModalOpen 열기
   const openIsPoseSystemModalOpen = () => {
     setIsFollowPoseSelectModalOpen(false);
     setIsPoseSystemModalOpen(true);
   };
 
-  // isFollowPoseSelectModalOpen 닫고 isPoseDrawingModalOpen 열기
-  const openIsPoseDrawingModalOpen = () => {
-    setIsFollowPoseSelectModalOpen(false);
-    setIsPoseDrawingModalOpen(true);
+  const openPoseSelectionModal = () => {
+    setIsPoseSelectionModalOpen(true);
   };
 
-  // isPoseSystemModalOpen 닫기
-  const closePoseSystemModal = () => {
-    setIsPoseSystemModalOpen(false);
+  const closePoseSelectionModal = () => {
+    setIsPoseSelectionModalOpen(false);
   };
 
-  // isPoseSystemModalOpen/isPoseDrawingModalOpen 닫고 isFollowPoseSelectModalOpen 열기
+  const selectPose = (poseNumber) => {
+    setSelectedPose(poseNumber);
+    closePoseSelectionModal();
+  };
+
+  const sendPoseSelection = () => {
+    if (selectedPose !== null) {
+      client.send(
+        `/ws/app/game/${roomId}/pose/number`,
+        {},
+        JSON.stringify({ number: selectedPose })
+      );
+      setIsPoseSystemModalOpen(true); // 다음 모달로 이동
+    }
+  };
+
   const backToSelectModal = () => {
     setIsPoseSystemModalOpen(false);
-    setIsPoseDrawingModalOpen(false);
     setIsFollowPoseSelectModalOpen(true);
-  };
-
-  // isPoseDrawingModalOpen 닫기
-  const closePoseDrawingModal = () => {
-    setIsPoseDrawingModalOpen(false);
   };
 
   return (
@@ -83,30 +230,37 @@ const Game4 = () => {
         <GameInfoModal
           planetImg={gray}
           planetWidth="150px"
-          BlueBtnText={"게임방식 선택"}
+          BlueBtnText={"게임설명 보기"}
           BlueBtnFn={openIsFollowPoseSelectModalOpen}
           modalText={
             <>
               포즈 따라하기 게임에 오신걸 <br /> 환영합니다 !
             </>
           }
-          // onClose={() => setIsFollowPoseWelcomeModalOpen(false)}
         />
       )}
       {isFollowPoseSelectModalOpen && (
         <GameInfoModal
           planetWidth="150px"
-          RedBtnText={"시스템 제공 포즈"}
-          RedBtnFn={openIsPoseSystemModalOpen}
-          BlueBtnText={"직접 그린 포즈"}
-          BlueBtnFn={openIsPoseDrawingModalOpen}
+          RedBtnText={"포즈 선택"}
+          RedBtnFn={openPoseSelectionModal}
+          BlueBtnText={"선택 완료"}
+          BlueBtnFn={sendPoseSelection}
           modalText={
-            <>
-              포즈를 직접 그려 진행할수도, <br /> 제공된 포즈를 활용하여 <br />
-              진행할수도 있습니다. <br /> 원하는 방식을 선택하세요.
-            </>
+            selectedPose !== null ? (
+              <>
+                {selectedPose}번 포즈를 선택하셨습니다. <br />
+                이제 선택 완료 버튼을 눌러주세요.
+              </>
+            ) : (
+              <>
+                여러분이 따라해야 할 포즈가 <br /> 난이도와 함께 제공합니다.{" "}
+                <br />
+                방 생성자는 따라할 포즈를 선택하시고 <br />
+                가운데 화면에 틀 안에서 나오는 <br /> 포즈를 따라하세요.
+              </>
+            )
           }
-          // onClose={() => setIsFollowPoseSelectModalOpen(false)}
         />
       )}
       {isPoseSystemModalOpen && (
@@ -125,30 +279,40 @@ const Game4 = () => {
               최대한 유사하게 포즈를 취해주세요.
             </>
           }
-          // onClose={() => setIsPoseSystemModalOpen(false)}
         />
       )}
-      {isPoseDrawingModalOpen && (
-        <GameInfoModal
-          planetWidth="150px"
-          RedBtnText={"뒤로 가기"}
-          RedBtnFn={backToSelectModal}
-          BlueBtnText={"게임 시작"}
-          BlueBtnFn={() =>
-            client.send(`/app/game/${roomId}/start-modal/FOLLOW_POSE`)
-          }
-          modalText={
-            <>
-              우선, 랜덤 지정된 한 명이 포즈를 <br /> 그리게 됩니다. 이 포즈에
-              따라 맞춰 <br /> 최대한 유사하게 포즈를 취해주세요.
-            </>
-          }
-          // onClose={() => setIsPoseDrawingModalOpen(false)}
-        />
+      {isPoseSelectionModalOpen && (
+        <PoseSelectionModal>
+          <h3>포즈를 선택하세요</h3>
+          <PoseList>
+            {Array.from({ length: 20 }, (_, index) => (
+              <PoseItem
+                key={index + 1}
+                selected={selectedPose === index + 1}
+                onClick={() => selectPose(index + 1)}
+              >
+                {index + 1}
+              </PoseItem>
+            ))}
+          </PoseList>
+        </PoseSelectionModal>
       )}
-      포즈 따라하기 게임 화면
+      <PageWrap>
+        <Title>포즈 페이지</Title>
+        <div style={{ position: "relative" }}>
+          <VideoCanvas ref={videoRef} width="640" height="480" />
+          {showOverlay && <OverlayImage src={transparentEdgeImage} />}
+          {showText && (
+            <OverlayText>
+              화면에 나온 선에 맞춰 포즈를 따라해 주세요
+            </OverlayText>
+          )}
+        </div>
+        <OpenViduSession token={openViduToken} />
+      </PageWrap>
     </Wrap>
   );
 };
 
 export default Game4;
+//끝
