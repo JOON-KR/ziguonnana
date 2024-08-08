@@ -3,6 +3,7 @@ import authSlice from "./authSlice";
 import { roomSlice } from "./roomSlice";
 import clientSlice from "./clientSlice";
 import nicknameSlice from "./nicknameSlice";
+import drawingSlice from "./drawingSlice";
 import questionSlice from "./questionSlice";
 import messageSlice from "./messageSlice";
 
@@ -12,6 +13,7 @@ const store = configureStore({
     room: roomSlice.reducer,
     client: clientSlice.reducer,
     nickname: nicknameSlice.reducer,
+    drawing: drawingSlice.reducer,
     question: questionSlice.reducer,
     message: messageSlice.reducer,
   },
