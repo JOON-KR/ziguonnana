@@ -79,8 +79,8 @@ const Game5 = () => {
           planetWidth="180px"
           RedBtnText={"댄스 챌린지"}
           RedBtnFn={openisShortFormDanceGuideModalOpen}
-          BlueBtnText={"팀 소개 챌린지"}
-          BlueBtnFn={openisShortFormTeamIntroGuideModalOpen}
+          // BlueBtnText={"팀 소개 챌린지"}
+          // BlueBtnFn={openisShortFormTeamIntroGuideModalOpen}
           modalText={<>숏폼 챌린지에 오신걸 환영합니다 !</>}
         />
       )}
@@ -102,7 +102,7 @@ const Game5 = () => {
           }
         />
       )}
-      {isShortFormTeamIntroGuideModalOpen && (
+      {/* {isShortFormTeamIntroGuideModalOpen && (
         <GameModal
           exImg={""}
           RedBtnText={"챌린지 시작"}
@@ -118,7 +118,7 @@ const Game5 = () => {
             </>
           }
         />
-      )}
+      )} */}
       숏폼 챌린지 화면 여기서 x -- 다른 페이지로 이동
       {/* <Link to={"/icebreaking/games/gameRecord"}>게임 기록</Link> */}
     </Wrap>
