@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ziguonnana.ziguserver.domain.member.dto.EmailAuth;
 import com.ziguonnana.ziguserver.domain.member.dto.LoginRequest;
 import com.ziguonnana.ziguserver.domain.member.dto.LogoutRequest;
 import com.ziguonnana.ziguserver.domain.member.dto.MemberRequest;
@@ -97,5 +98,17 @@ public class MemberController {
     public ResponseEntity<ResponseDto<TokenResponse>> loginKakaoCallback(@RequestParam("code") String code) {
         TokenResponse tokenResponse = memberService.kakaoLogin(code);
         return ResponseEntity.status(200).body(ResponseDto.success(tokenResponse));
+    }
+    
+    @GetMapping("/password/{email}")
+    public ResponseEntity<ResponseDto<String>> findPassword(@PathVariable("email")String email){
+    	memberService.findPassword(email);
+    	return ResponseEntity.ok(ResponseDto.success("성공"));
+    }
+    
+    @PostMapping("/password")
+    public ResponseEntity<ResponseDto<String>> findPassword( @RequestBody EmailAuth auth){
+    	String password = memberService.resetPassword(auth);
+    	return ResponseEntity.ok(ResponseDto.success(password));
     }
 }

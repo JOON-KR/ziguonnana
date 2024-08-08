@@ -36,6 +36,7 @@ public class Member {
     private LocalDateTime regDate;
     private Timestamp editDate;
     private Boolean isDelete;
+    private String auth;
     @Enumerated(EnumType.STRING)
 	@Column(name = "ROLE", nullable = false)
 	private RoleType role;
