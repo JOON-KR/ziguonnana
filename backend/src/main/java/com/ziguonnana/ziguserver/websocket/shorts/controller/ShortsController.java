@@ -22,8 +22,18 @@ public class ShortsController {
     @MessageMapping("/game/{roomId}/shorts/{shortsId}")
     @SendTo("/topic/game/{roomId}")
     public Response<Boolean> selectVideo(@DestinationVariable String roomId, @DestinationVariable int shortsId) {
+        log.info("============ 예시 영상 선택 ==============");
         shortsService.selectVideo(roomId, shortsId);
         return Response.ok(CommandType.SHORTS_CHOICE,true);
+    }
+
+    // 해당 userNum의 숏츠 예시 영상 모두에게 전달
+    @MessageMapping("/game/{roomId}/shorts/record/{userNum}")
+    @SendTo("/topic/game/{roomId}")
+    public Response<String> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNum) {
+        log.info("========== " + userNum + "이 녹화할 예시 영상 요청==============");
+        String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNum);
+        return Response.ok(CommandType.SHORTS_SPLITED, splitedVideoUrl);
     }
 
 }

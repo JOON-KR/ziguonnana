@@ -3,7 +3,6 @@ package com.ziguonnana.ziguserver.websocket.shorts.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor

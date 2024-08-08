@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,7 @@ public class WebsocketService {
                 .count(0)
                 .roomId(roomId)
                 .bodyTalkGame(new BodyTalkGame())
+                .shorts(new Shorts(0,new ArrayList<>()))
                 .vectors(vector)
                 .Igudongseong(Igudongseong)
                 .build();

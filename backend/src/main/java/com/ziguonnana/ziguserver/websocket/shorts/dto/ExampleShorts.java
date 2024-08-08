@@ -16,9 +16,9 @@ public enum ExampleShorts {
             "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/split/9dd9581c-0954-4adc-9aaa-98813afa3ddc.mp4",
             "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/split/b232b329-d139-4288-8e72-288965e57f31.mp4"));
 
-    private int shortsId;
-    private int people;
-    private List<String> exampleShortsUrl;
+    private final int shortsId;
+    private final int people;
+    private final List<String> exampleShortsUrl;
 
     public static List<String> getUrlsByShortsIdAndPeople(int shortsId, int people) {
         // Optional을 사용하여 특정 조건을 만족하는 enum 값을 찾기
@@ -28,4 +28,5 @@ public enum ExampleShorts {
                 .findFirst()
                 .map(ExampleShorts::getExampleShortsUrl)
                 .orElse(Collections.emptyList());
-    }}
+    }
+}
