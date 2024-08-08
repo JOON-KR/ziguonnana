@@ -488,7 +488,7 @@ const Game1 = () => {
             )}
           </>
         )}
-      <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
+      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>
         버튼
       </button>
     </Wrap>
