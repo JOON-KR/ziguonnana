@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
 import { useSelector, useDispatch } from "react-redux";
-import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
 import { setDrawingData } from "../../store/drawingSlice";
 import axios from "axios";
@@ -140,55 +138,46 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(5);
-  const [showMessage, setShowMessage] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [drawingResult, setDrawingResult] = useState(null);
   const canvasRef = useRef(null);
 
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const drawingData = useSelector((state) => state.drawing.drawingData);
   const dispatch = useDispatch();
-  const stompClient = useRef(null);
+  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
 
-  useEffect(() => {
-    const socket = new SockJS(`${BASE_URL}/ws`);
-    stompClient.current = Stomp.over(socket);
-    
-    stompClient.current.connect({}, (frame) => {
-      console.log("drawingConnected: " + frame);
-      
-      // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
-      stompClient.current.subscribe(`/topic/game/${roomId}`, (message) => {
+  useEffect(() => {   
+    // 이어그리기 첫 키워드 전파 데이터 받아오기
+    // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
+    if (stompClient && stompClient.connected) {
+      console.log("Subscribing to topic:", `/topic/game/${roomId}`);
+      // 방의 메시지를 구독
+      const subscription = stompClient.subscribe(`/topic/game/${roomId}`, (message) => {
         const response = JSON.parse(message.body);
-        console.log("Received message from server:", response);
-        
-        dispatch(setDrawingData(response.data));
-
-        // art 데이터를 받았을 때 캔버스에 그리기
-        if (response.data.art) {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            canvas.clearCanvas();
-            canvas.loadPaths(JSON.parse(response.data.art));
-          }
+        console.log("Received message from server:", response); // 서버로부터 받은 메시지 로그
+        if (response.message.trim() === "이어그리기 첫 키워드 전파") {
+          // 데이터 받아와서 Redux 상태 업데이트
+          dispatch(setDrawingData(response.data));
         }
       });
-    });
-    
-    return () => {
-      if (stompClient.current) {
-        stompClient.current.disconnect(() => {
-          console.log("Disconnected");
-        });
-      }
-    };
-  }, [dispatch, roomId]);
-  
-  const data = Object.values(drawingData)[1][userNo]
-  // console.log('data:')
-  // console.log(data)
-  // console.log('drawing'+drawingData)
 
+      // 컴포넌트 언마운트 시 구독 취소
+      return () => {
+        console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
+        subscription.unsubscribe();
+      };
+    } else {
+      console.error("Stomp client is not connected in useEffect");
+    }
+  }, [dispatch, roomId, stompClient]);
+  
+  const resData = drawingData[userNo]
+  // console.log('resDatad:', resData)
+  // console.log('drawing', drawingData)
+
+  // 타이머
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setTimeout(() => {
@@ -197,7 +186,6 @@ const Game1Drawing = () => {
       return () => clearTimeout(timer);
     } else {
       handleSendDrawing();
-      setShowMessage(true);
     }
   }, [timeLeft]);
 
@@ -206,6 +194,7 @@ const Game1Drawing = () => {
     if (drawingData[userNo] && drawingData[userNo].art) {
       const canvas = canvasRef.current;
       if (canvas) {
+        console.log('Loading paths:', drawingData[userNo].art);
         canvas.clearCanvas();
         canvas.loadPaths(JSON.parse(drawingData[userNo].art));
       }
@@ -219,50 +208,63 @@ const Game1Drawing = () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
       try {
+        // 캔버스에 그린 그림을 png 파일로 저장 <- 저장 잘되는지 모르겠음.
         const exportImage = await currentCanvas.exportImage("png");
         const imageBlob = await (await fetch(exportImage)).blob();
         const formData = new FormData();
         formData.append("file", imageBlob, "drawing.png");
 
+        // 저장한 png 파일을 S3 서버로 전송 - multipart 형식으로
         const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-
+        // S3 서버에서 받아온 response data 저장
         setSavedDrawing(response.data);
-        console.log("Drawing sent successfully");
+        console.log("Drawing sent successfully:", response.data);
 
-        // 서버로 데이터 전송 (소켓)
+        // S3 서버에서 받아온 response data를 서버로 전송 (소켓)
+        // relayart 데이터 형식으로 전송
         const relayart = {
-          art: response.data,
+          art: resData.art,
           num: userNo,
-          keyword: data.keyword,
+          keyword: resData.keyword,
         };
         
         const sendDrawingInterval = setInterval(() => {
-          if (stompClient.current && stompClient.current.connected) {
-            stompClient.current.send(`/app/game/${roomId}/saveArt`, {}, JSON.stringify(relayart));
+          if (stompClient && stompClient.connected) {
+            stompClient.send(`/app/game/${roomId}/saveArt`, {}, JSON.stringify(relayart));
             console.log("Data sent to server via socket:", relayart);
           }
         }, 5000); // 5초 간격으로 데이터 전송
 
         // 응답 처리 및 반복 종료
-        const subscription = stompClient.current.subscribe(`/topic/game/${roomId}`, (message) => {
+        const subscription = stompClient.subscribe(`/topic/game/${roomId}`, (message) => {
           const response = JSON.parse(message.body);
           console.log("Received repeated message from server:", response);
-
-          dispatch(setDrawingData(response.data));
-
-          if (response.someCondition) { // 종료 조건 수정 필요
-            clearInterval(sendDrawingInterval);
-            subscription.unsubscribe(); // 구독 해제
+          // 그림 전파 데이터 받아오기
+          if (response.message.trim() === "그림 전파") {
+            // 데이터 받아와서 Redux 상태 업데이트
             dispatch(setDrawingData(response.data));
-            setShowMessage(true);
+          }
+          // 이어그리기 종료 데이터 받아오기
+          if (response.message.trim() === "이어그리기 종료") {
+            // 새로운 변수에 그림 저장
+            setDrawingResult(response.data);
+            console.log("Drawing result received:", response.data);
+            // 데이터 반복 전송 종료
+            clearInterval(sendDrawingInterval);
+            subscription.unsubscribe();
           }
 
-          data = Object.values(drawingData)[1][userNo]
+          resData = Object.values(drawingData)[1]
         });
+
+        return () => {
+          clearInterval(sendDrawingInterval);
+          subscription.unsubscribe();
+        };
 
       } catch (error) {
         console.error("Error sending drawing:", error);
@@ -290,60 +292,59 @@ const Game1Drawing = () => {
 
   return (
     <Wrap>
-      {!showMessage ? (
-        <>
-          <Header>
-            <ProfileInfo>
-              <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-              <ProfileDetails>
-                {/* <HeaderText>이름: {'UserNo.' + data.num}</HeaderText> */}
-                <HeaderText>키워드: {'#' + data.keyword}</HeaderText>
-              </ProfileDetails>
-            </ProfileInfo>
-            <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-          </Header>
-          <CanvasWrapper>
-            <ReactSketchCanvas
-              ref={canvasRef}
-              width="970px"
-              height="600px"
-              strokeColor={isEraser ? "#FFFFFF" : brushColor}
-              strokeWidth={brushRadius}
-              eraserWidth={isEraser ? brushRadius : 0}
+      <Header>
+        <ProfileInfo>
+          <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
+          <ProfileDetails>
+            {/* <HeaderText>키워드: {'#' + resData.keyword}</HeaderText> */}
+          </ProfileDetails>
+        </ProfileInfo>
+        <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+      </Header>
+      <CanvasWrapper>
+        <ReactSketchCanvas
+          ref={canvasRef}
+          width="970px"
+          height="600px"
+          strokeColor={isEraser ? "#FFFFFF" : brushColor}
+          strokeWidth={brushRadius}
+          eraserWidth={isEraser ? brushRadius : 0}
+        />
+        <ToolsWrapper>
+          <CustomSwatchesPicker>
+            {colors.map((color) => (
+              <ColorSquare
+                key={color}
+                color={color}
+                selected={brushColor === color}
+                onClick={() => handleColorChange(color)}
+              />
+            ))}
+          </CustomSwatchesPicker>
+          <SliderWrapper>
+            <SliderLabel>펜 굵기</SliderLabel>
+            <Slider
+              type="range"
+              min="1"
+              max="20"
+              value={brushRadius}
+              onChange={(e) => setBrushRadius(e.target.value)}
             />
-            <ToolsWrapper>
-              <CustomSwatchesPicker>
-                {colors.map((color) => (
-                  <ColorSquare
-                    key={color}
-                    color={color}
-                    selected={brushColor === color}
-                    onClick={() => handleColorChange(color)}
-                  />
-                ))}
-              </CustomSwatchesPicker>
-              <SliderWrapper>
-                <SliderLabel>펜 굵기</SliderLabel>
-                <Slider
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={brushRadius}
-                  onChange={(e) => setBrushRadius(e.target.value)}
-                />
-              </SliderWrapper>
-              <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
-                펜
-              </ToolButton>
-              <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
-                지우개
-              </ToolButton>
-              <Timer>{formatTime(timeLeft)}</Timer>
-            </ToolsWrapper>
-          </CanvasWrapper>
-        </>
-      ) : (
-        <h1>{data.num}번 유저가 그린 아바타 전송</h1>
+          </SliderWrapper>
+          <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
+            펜
+          </ToolButton>
+          <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
+            지우개
+          </ToolButton>
+          <Timer>{formatTime(timeLeft)}</Timer>
+        </ToolsWrapper>
+      </CanvasWrapper>
+      {drawingResult && (
+        <div>
+          <h2>이어그리기 종료 결과</h2>
+          <img src={drawingResult} alt="Drawing Result" />
+        </div>
       )}
     </Wrap>
   );
