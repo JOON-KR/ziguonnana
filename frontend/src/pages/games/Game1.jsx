@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
+import { useSelector } from "react-redux";
 
 const Wrap = styled.div`
   width: 100%;
@@ -139,8 +140,7 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
-
-const Game1 = ({ roomId }) => {
+const Game1 = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
   const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
@@ -167,6 +167,34 @@ const Game1 = ({ roomId }) => {
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
   const navigate = useNavigate();
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+
+  useEffect(() => {
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+    if (client && client.connected) {
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        // console.log("게임 종류 선택 메시지:", parsedMessage);
+
+        const cmd = parsedMessage.commandType;
+        const data = parsedMessage.data;
+
+        console.log("닫기 요청 데이터 ", parsedMessage);
+        console.log("닫기 요청 데이터 ", data);
+
+        if (data == "SAME_POSE") {
+          setIsDrawingWelcomeModalOpen(false);
+          setIsDrawingGuideModalOpen(false);
+        } else if (cmd == "GAME_MODAL_START") {
+          // setIsIntroGuideModalOpen(false);
+          openIntroModal();
+        }
+      });
+    }
+  }, [client, roomId]);
 
   const openIntroModal = () => {
     console.log("Opening Introduction Modal");
@@ -324,15 +352,23 @@ const Game1 = ({ roomId }) => {
 
   return (
     <Wrap>
-      {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
-      
+      {error && <div style={{ color: "red" }}>{error}</div>}{" "}
+      {/* 에러 메시지 표시 */}
       {/* 자기소개 가이드 모달 */}
       {isIntroGuideModalOpen && (
-        <IntroductionGuideModal onClose={closeIntroGuideModal} onConfirm={openIntroModal} />
+        <IntroductionGuideModal
+          // onClose={closeIntroGuideModal}
+          onConfirm={() =>
+            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
+          }
+        />
       )}
       {/* 자기소개 모달 */}
       {isIntroModalOpen && (
-        <IntroductionModal onClose={closeIntroModal} onConfirm={openDrawingWelcomeModal} />
+        <IntroductionModal
+          onClose={closeIntroModal}
+          onConfirm={openDrawingWelcomeModal}
+        />
       )}
       {/* 이어그리기 행성 입장 */}
       {isDrawingWelcomeModalOpen && (
@@ -340,18 +376,27 @@ const Game1 = ({ roomId }) => {
           planetImg={blue}
           RedBtnText={"게임 시작"}
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={closeDrawingWelcomeModal}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           BlueBtnText={"게임 설명"}
-          BlueBtnFn={openDrawingGuideModal}
+          BlueBtnFn={() =>
+            // client.send(`/app/game/${roomId}/start-modal/SAME_POSE`)
+            openDrawingGuideModal()
+          }
           modalText={"이어그리기 게임에 오신걸 환영합니다 !"}
-          onClose={closeDrawingWelcomeModal}
+          // onClose={closeDrawingWelcomeModal}
         />
       )}
       {isDrawingGuideModalOpen && (
         <GameModal
           RedBtnText={"게임 시작"}
           // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={closeDrawingGuideModal}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           modalText={
             <>
               주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
@@ -359,7 +404,7 @@ const Game1 = ({ roomId }) => {
               제한시간은 20초입니다.
             </>
           }
-          onClose={closeDrawingGuideModal}
+          // onClose={closeDrawingGuideModal}
         />
       )}
       {/* 이어그리기 화면 (캔버스) */}
@@ -440,19 +485,12 @@ const Game1 = ({ roomId }) => {
                   height="600px"
                 />
               </CanvasWrapper>
-            </>
-          ) : (
-            <CanvasWrapper>
-              <ReactSketchCanvas
-                ref={canvasRef}
-                width="970px"
-                height="600px"
-                />
-            </CanvasWrapper>
-          )}
-        </>
-      )}
-      <button onClick={() => navigate('/icebreaking/games/game1NickName')}>버튼</button>
+            )}
+          </>
+        )}
+      <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
+        버튼
+      </button>
     </Wrap>
   );
 };
