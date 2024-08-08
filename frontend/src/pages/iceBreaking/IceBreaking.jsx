@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import OpenViduSession from "../../components/OpenViduSession";
