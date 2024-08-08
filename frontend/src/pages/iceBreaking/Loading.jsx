@@ -38,6 +38,7 @@ const Loading = () => {
   const location = useLocation();
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+
   const [messages, setMessages] = useState([]);
 
   const questionList = useSelector((state) => state.question.questionList);
@@ -52,29 +53,39 @@ const Loading = () => {
   //   }, 3000);
   //   return () => clearTimeout(timer);
   // }, [navigate, roomId]);
-  console.log("--------------------------------");
-  console.log("연결 상태 : ", client.connected);
-  console.log("--------------------------------");
+  useEffect(() => {
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
 
-  client.subscribe(`/topic/game/${roomId}`, (message) => {
-    const parsedMessage = JSON.parse(message.body);
-    console.log("방에서 받은 메시지:", parsedMessage);
-    if (parsedMessage.data == true && parsedMessage.commandType == "GAME_START")
-      // navigate("/icebreaking/intro");
-      navigate("/icebreaking/games");
-    // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-    else if (parsedMessage.message == "질문리스트 전파\n") {
-      dispatch(setQuestionList(parsedMessage.data.question));
-      console.log(parsedMessage.data.question);
+    client.subscribe(`/topic/game/${roomId}`, (message) => {
+      const parsedMessage = JSON.parse(message.body);
+      console.log("방에서 받은 메시지:", parsedMessage);
+      if (
+        parsedMessage.data == true &&
+        parsedMessage.commandType == "GAME_START"
+      ) {
+        navigate("/icebreaking/intro");
+      }
+      // navigate("/icebreaking/games");
+      // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      else if (parsedMessage.message == "질문리스트 전파\n") {
+        dispatch(setQuestionList(parsedMessage.data.question));
+        console.log(parsedMessage.data.question);
+      }
+    });
+
+    client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
+
+    if (client && client.connected) {
+      console.log("소켓에 전송할 데이터 : ", profileData);
+      client.send(
+        `/app/game/${roomId}/profile`,
+        {},
+        JSON.stringify(profileData)
+      );
     }
-  });
-
-  client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
-
-  if (client && client.connected) {
-    console.log("소켓에 전송할 데이터 : ", profileData);
-    client.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profileData));
-  }
+  }, []);
 
   return (
     <PageWrap>
