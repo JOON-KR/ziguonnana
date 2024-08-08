@@ -34,7 +34,7 @@ public class IgudongseongService {
 		int peopleCount = room.getPeople();
 		//사람수만큼 랜덤 키워드 가져와서 반환
         Set<IgudongseongKeyword> uniqueKeywords = new HashSet<>();
-        while (uniqueKeywords.size() < peopleCount) {
+        while (uniqueKeywords.size() < 6) {
             uniqueKeywords.add(IgudongseongKeyword.getRandomKeyword());
         }
 
