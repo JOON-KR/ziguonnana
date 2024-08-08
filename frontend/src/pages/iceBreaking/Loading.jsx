@@ -7,6 +7,7 @@ import { setQuestionList } from "../../store/questionSlice";
 
 const PageWrap = styled.div`
   width: 100%;
+  /* height: 100vh; Viewport height to fill the screen */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -25,24 +26,11 @@ const Frame = styled.div`
 `;
 
 const Content = styled.div`
-  flex-grow: 1;
+  flex-grow: 1; /* Allow Content to grow and take remaining space */
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const Button = styled.button`
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-
-  &:hover {
-    background-color: #0056b3;
-  }
+  /* height: 100%; */
 `;
 
 const Loading = () => {
@@ -50,11 +38,21 @@ const Loading = () => {
   const location = useLocation();
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+
   const [messages, setMessages] = useState([]);
+
   const questionList = useSelector((state) => state.question.questionList);
   const dispatch = useDispatch();
+
   const { profileData } = location.state || {};
 
+  //이 부분 수정 필요
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     navigate("/icebreaking/games", { state: { roomId } });
+  //   }, 3000);
+  //   return () => clearTimeout(timer);
+  // }, [navigate, roomId]);
   useEffect(() => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
@@ -64,11 +62,14 @@ const Loading = () => {
       const parsedMessage = JSON.parse(message.body);
       console.log("방에서 받은 메시지:", parsedMessage);
       if (
-        parsedMessage.data === true &&
-        parsedMessage.commandType === "GAME_START"
+        parsedMessage.data == true &&
+        parsedMessage.commandType == "GAME_START"
       ) {
         navigate("/icebreaking/intro");
-      } else if (parsedMessage.message === "질문리스트 전파\n") {
+      }
+      // navigate("/icebreaking/games");
+      // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      else if (parsedMessage.message == "질문리스트 전파\n") {
         dispatch(setQuestionList(parsedMessage.data.question));
         console.log(parsedMessage.data.question);
       }
@@ -84,17 +85,12 @@ const Loading = () => {
         JSON.stringify(profileData)
       );
     }
-  }, [client, roomId, profileData, navigate, dispatch]);
-
-  const handleNavigateToGame4 = () => {
-    navigate("/icebreaking/games/game4");
-  };
+  }, []);
 
   return (
     <PageWrap>
       <Content>
         <Loader />
-        <Button onClick={handleNavigateToGame4}>Game4로 이동</Button>
       </Content>
     </PageWrap>
   );

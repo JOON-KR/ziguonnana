@@ -1,8 +1,56 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
-import GameInfoModal from "../../components/modals/GameInfoModal";
-import gray from "../../assets/icons/gray.png";
 import { useSelector } from "react-redux";
+import GameInfoModal from "../../components/modals/GameInfoModal";
+import OpenViduSession from "../../components/OpenViduSession";
+import * as posenet from "@tensorflow-models/posenet";
+import "@tensorflow/tfjs";
+import gray from "../../assets/icons/gray.png";
+import transparentEdgeImage from "../../assets/images/transparent_edges_image.jpg";
+
+// styled-components
+const PageWrap = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  color: #333;
+`;
+
+const VideoCanvas = styled.video`
+  width: 640px;
+  height: 480px;
+  border: 1px solid #ccc;
+  position: relative;
+`;
+
+const OverlayImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 640px;
+  height: 480px;
+  opacity: 0.5;
+`;
+
+const OverlayText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 5px;
+`;
 
 const Wrap = styled.div`
   width: 90%;
@@ -11,32 +59,6 @@ const Wrap = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-
-const VideoContainer = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-`;
-
-const Video = styled.video`
-  width: 80%;
-  height: auto;
-  border: 2px solid black;
-  border-radius: 10px;
-`;
-
-const OverlayText = styled.div`
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 16px;
 `;
 
 const PoseSelectionModal = styled.div`
@@ -78,33 +100,24 @@ const PoseItem = styled.button`
   }
 `;
 
-const BlueButton = styled.button`
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
 const Game4 = () => {
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
     useState(true);
   const [isFollowPoseSelectModalOpen, setIsFollowPoseSelectModalOpen] =
     useState(false);
   const [isPoseSystemModalOpen, setIsPoseSystemModalOpen] = useState(false);
+  const [isPoseDrawingModalOpen, setIsPoseDrawingModalOpen] = useState(false);
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const localStream = useSelector((state) => state.room.localStream);
+  const openViduToken = useSelector((state) => state.auth.openViduToken);
+  const userNo = useSelector((state) => state.auth.userNo);
+  const videoRef = useRef(null);
   const [isPoseSelectionModalOpen, setIsPoseSelectionModalOpen] =
     useState(false);
   const [selectedPose, setSelectedPose] = useState(null);
-  const roomId = useSelector((state) => state.room.roomId);
-  const client = useSelector((state) => state.client.stompClient);
-  const userNo = useSelector((state) => state.auth.userNo);
-  const localVideoRef = useRef(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [showText, setShowText] = useState(false);
 
   useEffect(() => {
     client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -115,23 +128,62 @@ const Game4 = () => {
         setIsFollowPoseWelcomeModalOpen(false);
         setIsFollowPoseSelectModalOpen(false);
         setIsPoseSystemModalOpen(false);
+        setIsPoseDrawingModalOpen(false);
       }
 
       console.log("키워드 타입 :", parsedMessage);
     });
-
-    // Get user media
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-      })
-      .catch((error) => {
-        console.error("Error accessing media devices.", error);
-      });
   }, [client, roomId]);
+
+  useEffect(() => {
+    const runPoseNet = async (videoElement) => {
+      const net = await posenet.load();
+      const pose = await net.estimateSinglePose(videoElement, {
+        flipHorizontal: false,
+        decodingMethod: "single-person",
+      });
+
+      console.log("Pose:", pose);
+
+      const payload = {
+        num: userNo,
+        keypoints: pose.keypoints.map((keypoint) => ({
+          part: keypoint.part,
+          position: keypoint.position,
+          score: keypoint.score,
+        })),
+      };
+
+      console.log("Sending pose result:", payload);
+      client.send(
+        `/ws/app/game/${roomId}/pose/result`,
+        {},
+        JSON.stringify(payload)
+      );
+    };
+
+    if (localStream && videoRef.current) {
+      const videoElement = videoRef.current;
+      videoElement.srcObject = localStream.getMediaStream();
+      videoElement.onloadedmetadata = () => {
+        videoElement.play();
+      };
+
+      if (selectedPose !== null) {
+        setShowOverlay(true);
+        setShowText(true);
+        setTimeout(() => {
+          setShowText(false);
+          setTimeout(() => {
+            setShowOverlay(false);
+            setTimeout(() => {
+              runPoseNet(videoElement);
+            }, 1000);
+          }, 4000);
+        }, 1000);
+      }
+    }
+  }, [localStream, selectedPose, userNo, client, roomId]);
 
   const openIsFollowPoseSelectModalOpen = () => {
     setIsFollowPoseWelcomeModalOpen(false);
@@ -159,7 +211,7 @@ const Game4 = () => {
   const sendPoseSelection = () => {
     if (selectedPose !== null) {
       client.send(
-        `/app/game/${roomId}/pose/number`,
+        `/ws/app/game/${roomId}/pose/number`,
         {},
         JSON.stringify({ number: selectedPose })
       );
@@ -245,10 +297,19 @@ const Game4 = () => {
           </PoseList>
         </PoseSelectionModal>
       )}
-      <VideoContainer>
-        <Video ref={localVideoRef} autoPlay muted />
-        <OverlayText>{userNo} 님의 화면입니다</OverlayText>
-      </VideoContainer>
+      <PageWrap>
+        <Title>포즈 페이지</Title>
+        <div style={{ position: "relative" }}>
+          <VideoCanvas ref={videoRef} width="640" height="480" />
+          {showOverlay && <OverlayImage src={transparentEdgeImage} />}
+          {showText && (
+            <OverlayText>
+              화면에 나온 선에 맞춰 포즈를 따라해 주세요
+            </OverlayText>
+          )}
+        </div>
+        <OpenViduSession token={openViduToken} />
+      </PageWrap>
     </Wrap>
   );
 };
