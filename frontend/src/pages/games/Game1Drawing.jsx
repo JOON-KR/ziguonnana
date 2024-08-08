@@ -157,12 +157,21 @@ const Game1Drawing = () => {
     stompClient.current.connect({}, (frame) => {
       console.log("drawingConnected: " + frame);
       
-      // userNo, keyword 데이터 받아오기
+      // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
       stompClient.current.subscribe(`/topic/game/${roomId}`, (message) => {
         const response = JSON.parse(message.body);
         console.log("Received message from server:", response);
         
         dispatch(setDrawingData(response.data));
+
+        // art 데이터를 받았을 때 캔버스에 그리기
+        if (response.data.art) {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            canvas.clearCanvas();
+            canvas.loadPaths(JSON.parse(response.data.art));
+          }
+        }
       });
     });
     
@@ -173,9 +182,12 @@ const Game1Drawing = () => {
         });
       }
     };
-  }, [dispatch]);
+  }, [dispatch, roomId]);
   
-  const data = Object.values(drawingData)[1]
+  const data = Object.values(drawingData)[1][userNo]
+  // console.log('data:')
+  // console.log(data)
+  // console.log('drawing'+drawingData)
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -189,8 +201,20 @@ const Game1Drawing = () => {
     }
   }, [timeLeft]);
 
+  // 응답 받아오면 캔버스 띄우기
+  useEffect(() => {
+    if (drawingData[userNo] && drawingData[userNo].art) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.clearCanvas();
+        canvas.loadPaths(JSON.parse(drawingData[userNo].art));
+      }
+    }
+  }, [drawingData, userNo]);
+
   // 중간 그림 저장
   const [savedDrawing, setSavedDrawing] = useState('');
+
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
@@ -210,15 +234,35 @@ const Game1Drawing = () => {
         console.log("Drawing sent successfully");
 
         // 서버로 데이터 전송 (소켓)
-        if (stompClient.current && stompClient.current.connected) {
-          const relayart = {
-            art: response.data,
-            num: userNo,
-            keyword: data[userNo+1]["keyword"],
-          };
-          stompClient.current.send(`/app/game/${roomId}/saveArt`, {}, JSON.stringify(relayart));
-          console.log("Data sent to server via socket:", relayart);
-        }
+        const relayart = {
+          art: response.data,
+          num: userNo,
+          keyword: data.keyword,
+        };
+        
+        const sendDrawingInterval = setInterval(() => {
+          if (stompClient.current && stompClient.current.connected) {
+            stompClient.current.send(`/app/game/${roomId}/saveArt`, {}, JSON.stringify(relayart));
+            console.log("Data sent to server via socket:", relayart);
+          }
+        }, 5000); // 5초 간격으로 데이터 전송
+
+        // 응답 처리 및 반복 종료
+        const subscription = stompClient.current.subscribe(`/topic/game/${roomId}`, (message) => {
+          const response = JSON.parse(message.body);
+          console.log("Received repeated message from server:", response);
+
+          dispatch(setDrawingData(response.data));
+
+          if (response.someCondition) { // 종료 조건 수정 필요
+            clearInterval(sendDrawingInterval);
+            subscription.unsubscribe(); // 구독 해제
+            dispatch(setDrawingData(response.data));
+            setShowMessage(true);
+          }
+
+          data = Object.values(drawingData)[1][userNo]
+        });
 
       } catch (error) {
         console.error("Error sending drawing:", error);
@@ -252,8 +296,8 @@ const Game1Drawing = () => {
             <ProfileInfo>
               <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
               <ProfileDetails>
-                <HeaderText>이름: {'UserNo.' + data[userNo+1]["num"]}</HeaderText>
-                <HeaderText>키워드: {'#' + data[userNo+1]["keyword"]}</HeaderText>
+                {/* <HeaderText>이름: {'UserNo.' + data.num}</HeaderText> */}
+                <HeaderText>키워드: {'#' + data.keyword}</HeaderText>
               </ProfileDetails>
             </ProfileInfo>
             <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
@@ -299,7 +343,7 @@ const Game1Drawing = () => {
           </CanvasWrapper>
         </>
       ) : (
-        <h1>{data[userNo+1]["num"]}번 유저의 그린 아바타 전송</h1>
+        <h1>{data.num}번 유저가 그린 아바타 전송</h1>
       )}
     </Wrap>
   );
