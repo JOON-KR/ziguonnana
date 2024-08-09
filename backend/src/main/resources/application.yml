@@ -13,6 +13,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false   # OSIV 설정
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -33,3 +34,5 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
+S3:
+  baseURL: https://ziguonnana.s3.ap-northeast-2.amazonaws.com/

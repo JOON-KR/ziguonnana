@@ -51,6 +51,8 @@ public class Room {
 	private Shorts shorts;
 	// 숏폼 선택 request count
 	private int shortsRequestCnt;
+	// 숏폼 합치기 request count;
+	private int shortsMergeRequestCnt;
 
 
 	public void initArt() {
@@ -91,5 +93,10 @@ public class Room {
 	// 숏폼 선택 request count 함수
 	public void countShortsRequestCnt(){
 		shortsRequestCnt++;
+	}
+
+	// 숏폼 합치기 request count 함수
+	public void countShortsMergeRequestCnt(){
+		shortsMergeRequestCnt++;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 public class Shorts {
     private int shortsId;
     private List<String> splitedExampleVideoUrl;
+    private List<String> userSplitedVideoUrl;
 
     public void setExampleVideoInfo(int shortsId, int people){
         this.shortsId = shortsId;

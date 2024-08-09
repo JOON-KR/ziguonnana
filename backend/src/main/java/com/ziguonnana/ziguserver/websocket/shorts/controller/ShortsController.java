@@ -10,6 +10,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +36,16 @@ public class ShortsController {
         log.info("========== " + userNo + "이 녹화할 예시 영상 요청==============");
         String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNo);
         return Response.ok(CommandType.SHORTS_SPLITED, splitedVideoUrl);
+    }
+
+    // 비디오 합치기 요청
+    // 비디오 합치기 요청되었다고 방 모두에게 전달
+    @MessageMapping("/game/{roomId}/shorts/merge")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> mergeVideo(@DestinationVariable String roomId) throws IOException {
+        log.info("============ 비디오 합치기 요청 ==============");
+        shortsService.mergeVideo(roomId);
+        return Response.ok(CommandType.SHORTS_MERGE,true);
     }
 
 }
