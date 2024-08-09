@@ -146,7 +146,6 @@ const Game1Drawing = () => {
   const [avatarList, setAvatarList] = useState([]);
   const [drawingResult, setDrawingResult] = useState(null); //완전히 다 끝난 결과 1인당 이어그린 리스트
 
-  const [canDraw, setCanDraw] = useState(false); //권한 설정
   const [isGameEnded, setIsGameEnded] = useState(false);
 
   const canvasRef = useRef(null);
@@ -164,22 +163,24 @@ const Game1Drawing = () => {
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessages = JSON.parse(message.body);
-          console.log("그림그리기 수신 메시지 : ", parsedMessages); // 서버로부터 받은 메시지 로그
+          // console.log("그림그리기 수신 메시지 : ", parsedMessages); // 서버로부터 받은 메시지 로그
 
           //이어그리기 메시지 도착하면 타겟, 권한 유저 번호 설정
           if (parsedMessages.commandType == "ART_RELAY") {
             console.log("타겟, 유저 번호 변경!");
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
-            setKeyword(parsedMessages.data.keywrod);
-            // const prevDrawing = parsedMessages.data.art; // "shortsExample/3b69b8ec-a35d-4dfa-983a-0093d41bc8e7.png" 같은 형태
+            setKeyword(parsedMessages.data.keyword);
+            setTimeLeft(5);
+            // setPrevDrawing(parsedMessages.data.??) // "shortsExample/3b69b8ec-a35d-4dfa-983a-0093d41bc8e7.png" 같은 형태
           }
           //이어그리기 결과 저장
           else if (parsedMessages.commandType === "ART_END") {
             console.log("이어그리기 결과 받음 :", parsedMessages.data);
+            setIsGameEnded(true);
             canvasRef.current.clearCanvas();
             setDrawingResult(parsedMessages.data);
-            setIsGameEnded(true);
+            //To Do : 끝나고 나서 이어그리기 내역 보여주기
           }
 
           //응답으로 받은 그림을 prevDrawing으로 설정로직 필요
@@ -228,18 +229,12 @@ const Game1Drawing = () => {
     }
   }, [prevDrawing]);
 
-  //권한 설정
-  useEffect(() => {
-    setCanDraw(userNo == currentUser ? true : false);
-    setTimeLeft(5);
-  }, [currentUser]);
-
   //그리는 대상 변하면 캔버스 비워주기
   useEffect(() => {
     canvasRef.current.clearCanvas();
   }, [targetUser]);
 
-  // 타이머
+  // 5부터 감소, 0미만 되면 s3로 png이미지 axios 전송, 받은 응답을 소켓으로 전송
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setTimeout(() => {
@@ -340,7 +335,7 @@ const Game1Drawing = () => {
           strokeColor={isEraser ? "#FFFFFF" : brushColor}
           strokeWidth={brushRadius}
           eraserWidth={isEraser ? brushRadius : 0}
-          style={{ pointerEvents: canDraw ? "auto" : "none" }} // 그림 권한 제어
+          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }} // 그림 권한 제어
         />
         <ToolsWrapper>
           <CustomSwatchesPicker>
@@ -366,14 +361,14 @@ const Game1Drawing = () => {
           <ToolButton
             onClick={() => setIsEraser(false)}
             active={!isEraser}
-            disabled={!canDraw}
+            disabled={!(userNo == currentUser)}
           >
             펜
           </ToolButton>
           <ToolButton
             onClick={() => setIsEraser(true)}
             active={isEraser}
-            disabled={!canDraw}
+            disabled={!(userNo == currentUser)}
           >
             지우개
           </ToolButton>
