@@ -59,7 +59,7 @@ public class ArtService {
 			Set<String> uniqueSelections = new HashSet<>();
 			Random random = new Random();
 
-			while (uniqueSelections.size() <= people && !combinedList.isEmpty()) {
+			while (uniqueSelections.size() <= 6 && !combinedList.isEmpty()) {
 				String randomSelection = combinedList.get(random.nextInt(combinedList.size()));
 				uniqueSelections.add(randomSelection);
 			}
