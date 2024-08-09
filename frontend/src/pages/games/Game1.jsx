@@ -11,6 +11,7 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import BASE_URL from "../../api/APIconfig";
 import { useSelector } from "react-redux";
+import Game1Drawing from "./Game1Drawing";
 
 const Wrap = styled.div`
   width: 100%;
@@ -241,19 +242,6 @@ const Game1 = () => {
     setIsEraser(false);
   };
 
-  const saveDrawing = () => {
-    canvasRef.current
-      .exportPaths()
-      .then((paths) => {
-        console.log("Saving drawing paths:", paths);
-        setDrawingHistory((prev) => [...prev, { paths }]);
-      })
-      .catch((error) => {
-        console.error("Error saving drawing:", error);
-        setError("그린 과정 저장 중 오류가 발생했습니다.");
-      });
-  };
-
   const startReplay = () => {
     console.log("Starting replay");
     setIsReplaying(true);
@@ -281,32 +269,31 @@ const Game1 = () => {
     setTimeLeft(5); // 타이머 초기화
   };
 
-  useEffect(() => {
-    if (
-      !isIntroGuideModalOpen &&
-      !isIntroModalOpen &&
-      !isDrawingWelcomeModalOpen &&
-      !isDrawingGuideModalOpen
-    ) {
-      if (timeLeft > 0 && !isReplaying) {
-        const timer = setTimeout(() => {
-          console.log("Timer countdown:", timeLeft);
-          setTimeLeft(timeLeft - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else if (!isReplaying) {
-        saveDrawing();
-        switchToNextMember();
-      }
-    }
-  }, [
-    timeLeft,
-    isIntroGuideModalOpen,
-    isIntroModalOpen,
-    isDrawingWelcomeModalOpen,
-    isDrawingGuideModalOpen,
-    isReplaying,
-  ]);
+  // useEffect(() => {
+  //   if (
+  //     !isIntroGuideModalOpen &&
+  //     !isIntroModalOpen &&
+  //     !isDrawingWelcomeModalOpen &&
+  //     !isDrawingGuideModalOpen
+  //   ) {
+  //     if (timeLeft > 0 && !isReplaying) {
+  //       const timer = setTimeout(() => {
+  //         console.log("Timer countdown:", timeLeft);
+  //         setTimeLeft(timeLeft - 1);
+  //       }, 1000);
+  //       return () => clearTimeout(timer);
+  //     } else if (!isReplaying) {
+  //       switchToNextMember();
+  //     }
+  //   }
+  // }, [
+  //   timeLeft,
+  //   isIntroGuideModalOpen,
+  //   isIntroModalOpen,
+  //   isDrawingWelcomeModalOpen,
+  //   isDrawingGuideModalOpen,
+  //   isReplaying,
+  // ]);
 
   const replayDrawing = () => {
     if (replayIndex < drawingHistory.length) {
@@ -407,87 +394,14 @@ const Game1 = () => {
           // onClose={closeDrawingGuideModal}
         />
       )}
-      {/* 이어그리기 화면 (캔버스) */}
+      {/* {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
+        <Game1Drawing roomId={roomId} />
+      )}       */}
+      이어그리기 화면 (캔버스)
       {!isIntroGuideModalOpen &&
         !isIntroModalOpen &&
         !isDrawingWelcomeModalOpen &&
-        !isDrawingGuideModalOpen && (
-          <>
-            {!isReplaying ? (
-              <>
-                <Header>
-                  <ProfileInfo>
-                    <ProfileImage
-                      src="path/to/profile-image.png"
-                      alt="프로필 이미지"
-                    />
-                    <ProfileDetails>
-                      <HeaderText>이름: {members[5]}</HeaderText>{" "}
-                      {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
-                      <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
-                    </ProfileDetails>
-                  </ProfileInfo>
-                  <HeaderText>
-                    주어진 정보를 활용하여 아바타를 그려주세요!
-                  </HeaderText>
-                </Header>
-                <CanvasWrapper>
-                  <ReactSketchCanvas
-                    ref={canvasRef}
-                    width="970px"
-                    height="600px"
-                    strokeColor={isEraser ? "#FFFFFF" : brushColor}
-                    strokeWidth={brushRadius}
-                    eraserWidth={isEraser ? brushRadius : 0}
-                  />
-                  <ToolsWrapper>
-                    <CustomSwatchesPicker>
-                      {colors.map((color) => (
-                        <ColorSquare
-                          key={color}
-                          color={color}
-                          selected={brushColor === color}
-                          onClick={() => handleColorChange(color)}
-                        />
-                      ))}
-                    </CustomSwatchesPicker>
-                    <SliderWrapper>
-                      <SliderLabel>펜 굵기</SliderLabel>
-                      <Slider
-                        type="range"
-                        min="1"
-                        max="20"
-                        value={brushRadius}
-                        onChange={(e) => setBrushRadius(e.target.value)}
-                      />
-                    </SliderWrapper>
-                    <ToolButton
-                      onClick={() => setIsEraser(false)}
-                      active={!isEraser}
-                    >
-                      펜
-                    </ToolButton>
-                    <ToolButton
-                      onClick={() => setIsEraser(true)}
-                      active={isEraser}
-                    >
-                      지우개
-                    </ToolButton>
-                    <Timer>{formatTime(timeLeft)}</Timer>
-                  </ToolsWrapper>
-                </CanvasWrapper>
-              </>
-            ) : (
-              <CanvasWrapper>
-                <ReactSketchCanvas
-                  ref={canvasRef}
-                  width="970px"
-                  height="600px"
-                />
-              </CanvasWrapper>
-            )}
-          </>
-        )}
+        !isDrawingGuideModalOpen && <Game1Drawing />}
       <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
         버튼
       </button>

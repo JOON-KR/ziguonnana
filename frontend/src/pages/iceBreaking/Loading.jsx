@@ -65,7 +65,7 @@ const Loading = () => {
         parsedMessage.data == true &&
         parsedMessage.commandType == "GAME_START"
       ) {
-        navigate("/icebreaking/intro");
+        navigate("/icebreaking/games/game1");
       }
       // navigate("/icebreaking/games");
       // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
