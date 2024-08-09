@@ -37,22 +37,22 @@ public class ArtService {
 		int cycle = room.getCycle();
 		int people = room.getPeople();
 		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
-		int num = (art.getNum() + cycle) % people;
+		int num = (art.getNum() + cycle ) % people == 0? people:(art.getNum() + cycle)%people ;
 		map.get(num).add(art);
 
 		room.countUp();
 		log.info("roomCount: {}", room.getCount());
 		if (room.getCount() == people) {
 			// 그림 전파 함수 호출
+			room.cycleUp();
 			Map<Integer, RelayArt> artMap = artResponse(roomId);
 			messagingTemplate.convertAndSend("/topic/game/" + roomId, GameMessage.info("그림 전파", artMap));
 
 			// 카운트 초기화 및 사이클 증가
 			room.countInit();
-			room.cycleUp();
 			log.info("roomCycle: {}", room.getCycle());
 			// 사이클이 people - 1에 도달하면 다음 단계로 전환
-			if (room.getCycle() == people - 1) {
+			if (room.getCycle() == people ) {
 				log.info("이어그리기 종료=================다음단계로================");
 				room.cycleInit();
 				endRelay(roomId);
@@ -71,7 +71,7 @@ public class ArtService {
 		Random random = new Random();
 
 		for (int i = 1; i <= people; i++) {
-			List<RelayArt> artList = map.get((i + cycle) % people);
+			List<RelayArt> artList = map.get((i + cycle) % people == 0? people: (i + cycle) % people);
 
 			if (artList != null && !artList.isEmpty()) {
 				RelayArt originalArt = artList.get(artList.size() - 1);
@@ -157,6 +157,7 @@ public class ArtService {
 		for (int i = 0; i < keywordList.size(); i++) {
 			map.put(i + 1, keywordList.get(i));
 		}
+		room.cycleUp();
 		GameMessage<ConcurrentMap<Integer, RelayArt>> keyword = GameMessage.info("이어그리기 첫 키워드 전파", map);
 		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), keyword);
 		log.info("이어그리기 키워드 발송");
