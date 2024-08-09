@@ -13,6 +13,7 @@ import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ShortsService {
+
+    @Value("${S3.baseURL}")
+    private String S3_BASEURL;
     private final RoomRepository roomRepository;
     private final S3Util s3Util;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -85,7 +89,7 @@ public class ShortsService {
         log.info("쇼츠 합치기 완료 : " + mergeVideoUrl);
 
         // 합치기 완료된 쇼츠 보내기
-        Response<String> response = Response.ok(CommandType.SHORTS_MERGE_COMPLETE, mergeVideoUrl);
+        Response<String> response = Response.ok(CommandType.SHORTS_MERGE_COMPLETE, S3_BASEURL + mergeVideoUrl);
         simpMessagingTemplate.convertAndSend("/topic/game/" + roomId, response);
     }
 

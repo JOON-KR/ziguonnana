@@ -15,7 +15,8 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class VideoService {
-    @Value("S3.baseURL")
+
+    @Value("${S3.baseURL}")
     private String S3_URL;
     private final S3Util s3Util;
     private final RoomRepository roomRepository;
