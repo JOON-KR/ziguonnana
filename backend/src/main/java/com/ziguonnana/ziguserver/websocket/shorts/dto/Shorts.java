@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class Shorts {
     private int shortsId;
-    private List<String> splitedExampleVideoUrl;
+    private List<ShortsInfo> splitedExampleVideoUrl;
     private List<String> userSplitedVideoUrl;
 
     public void setExampleVideoInfo(int shortsId, int people){

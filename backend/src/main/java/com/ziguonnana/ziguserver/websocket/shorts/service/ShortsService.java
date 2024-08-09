@@ -7,6 +7,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
+import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFmpeg;
@@ -53,11 +54,11 @@ public class ShortsService {
         // 숏츠 선택 request cnt 초기화 필요
     }
 
-    public String sendSplitVideoByUserNum(String roomId, int userNo) {
+    public ShortsInfo sendSplitVideoByUserNum(String roomId, int userNo) {
         Room room = roomRepository.getRoom(roomId);
         Shorts shorts = room.getShorts();
-        String splitedVideoUrl = shorts.getSplitedExampleVideoUrl().get(userNo - 1);
-        return splitedVideoUrl;
+        ShortsInfo splitedVideoInfo = shorts.getSplitedExampleVideoUrl().get(userNo - 1);
+        return splitedVideoInfo;
     }
 
 

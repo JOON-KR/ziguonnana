@@ -2,6 +2,7 @@ package com.ziguonnana.ziguserver.websocket.shorts.controller;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
+import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsInfo;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsResponse;
 import com.ziguonnana.ziguserver.websocket.shorts.service.ShortsService;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class ShortsController {
     @SendTo("/topic/game/{roomId}")
     public Response<ShortsResponse> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNo) {
         log.info("========== " + userNo + "이 녹화할 예시 영상 요청==============");
-        String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNo);
-        ShortsResponse response = new ShortsResponse(splitedVideoUrl, userNo);
+        ShortsInfo shortsInfo = shortsService.sendSplitVideoByUserNum(roomId, userNo);
+        ShortsResponse response = new ShortsResponse(shortsInfo.getVideoUrl(), userNo, shortsInfo.getVideoDuration());
         return Response.ok(CommandType.SHORTS_SPLITED, response);
     }
 
