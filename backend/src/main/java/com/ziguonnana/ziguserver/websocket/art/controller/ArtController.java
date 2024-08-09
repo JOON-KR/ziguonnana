@@ -18,15 +18,15 @@ import lombok.RequiredArgsConstructor;
 @Controller
 public class ArtController {
     private final ArtService artService;
-
+    private final String DEFAULT_IMAGE = "";
     @MessageMapping("/game/{roomId}/saveArt")
-    public void relaySave(@DestinationVariable("roomId") String roomId, @Payload RelayArt art) {
+    public void relaySave(@DestinationVariable("roomId") String roomId, @Payload String art) {
         artService.save(roomId, art);
     }
-    @MessageMapping("/game/{roomId}/artTest")
+    @MessageMapping("/game/{roomId}/art-start")
     @SendTo("/topic/game/{roomId}")
-    public Response<RelayArt> art(@DestinationVariable("roomId") String roomId,@Payload RelayArt art) {
-        return Response.ok(CommandType.KEYWORD_TYPE, art);
+    public void art(@DestinationVariable("roomId") String roomId) {
+    	artService.save(roomId, DEFAULT_IMAGE);
     }
     
     @MessageMapping("/game/{roomId}/avatar")
