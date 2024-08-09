@@ -96,7 +96,7 @@ public class ShortsService {
     private String videoMerge(String roomId, String mergeInputfile) throws IOException {
         FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
         FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
-        String outputPath = "/app/" + roomId + "/output/";
+        String outputPath = "/app/";
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true)
@@ -104,7 +104,7 @@ public class ShortsService {
                 .addExtraArgs("-protocol_whitelist", "file,http,https,tcp,tls")
                 .addExtraArgs("-f", "concat")
                 .addExtraArgs("-safe","0")
-                .addOutput(outputPath + "mergeVideo.mp4")
+                .addOutput(outputPath + roomId + "-mergeVideo.mp4")
                 .done();
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
@@ -121,6 +121,7 @@ public class ShortsService {
         File txtFile = new File(mergeInputfile);
         deleteFile(txtFile);
         deleteFile(videoFile);
+        log.info("텍스트파일 & 비디오 파일 삭제 완료");
 
         return key;
 
