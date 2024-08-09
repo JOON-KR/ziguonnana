@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 const Wrap = styled.div`
   width: 100%;
@@ -112,42 +112,52 @@ const TimeDisplay = styled.div`
 
 const Game5Dance = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState("00:00"); // 비디오 현재 시간
-  const [duration, setDuration] = useState("00:00"); // 비디오 전체 시간
-  const [selectedVideoId, setSelectedVideoId] = useState(null); // 선택한 비디오 ID
-  const [videoSrc, setVideoSrc] = useState(""); // 선택한 비디오 소스 URL
-  const [subscribed, setSubscribed] = useState(false);
-  const videoRef = useRef(null); // 비디오 참조
-  const roomId = useSelector((state) => state.room.roomId); 
+  const [currentTime, setCurrentTime] = useState("00:00");
+  const [duration, setDuration] = useState("00:00");
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const [videoSrc, setVideoSrc] = useState("");
+  const videoRef = useRef(null);
+  const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
-  const userNo = useSelector((state) => state.auth.userNo);
   const navigate = useNavigate();
 
-  //비디오 썸네일 클릭하면 모달이 열림
+  // 비디오 썸네일 클릭 시 모달 열기
   const handleThumbnailClick = (videoId, videoUrl) => {
     setSelectedVideoId(videoId);
     setVideoSrc(videoUrl);
     setIsModalOpen(true);
   };
 
+  // 모달 닫기
   const handleCloseModal = () => {
     setIsModalOpen(false);
-  }
+  };
 
-  // 모달 안에 있는 선택 버튼 클릭하면 서버로 send
+  // 비디오 선택 시 메시지 전송
   const handleSelectVideo = () => {
     if (client && client.connected) {
-      client.send(
-        `/app/game/${roomId}/shorts/${selectedVideoId}`,
-        {},
-        JSON.stringify({ userNo })
-      );
+      client.send(`/app/game/${roomId}/shorts/${selectedVideoId}`, {}, JSON.stringify({ command: "VIDEO_SELECTED" }));
       console.log(`숏츠 선택 메시지를 전송했습니다: /app/game/${roomId}/shorts/${selectedVideoId}`);
     }
     setIsModalOpen(false);
   };
 
-  // 비디오 현재 시간 업데이트
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const response = JSON.parse(message.body);
+        console.log("서버로부터 받은 메시지:", response);
+        if (response.commandType === "SHORTS_CHOICE" && response.message === "SUCCESS") {
+          navigate("/icebreaking/games/game5TeamDance");
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate]);
+
   const updateTime = () => {
     if (videoRef.current) {
       const minutes = Math.floor(videoRef.current.currentTime / 60);
@@ -160,7 +170,6 @@ const Game5Dance = () => {
     }
   };
 
-  // 비디오 메타데이터 로드 시 전체 시간 설정
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       const minutes = Math.floor(videoRef.current.duration / 60);
@@ -172,21 +181,6 @@ const Game5Dance = () => {
       );
     }
   };
-
-  //구독
-  useEffect(() => {
-    if (client && client.connected && !subscribed) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("서버로부터 받은 메시지:", response);
-        if (response.commandType === "SHORTS_CHOICE" && response.message === "SUCCESS") {
-          console.log("숏츠 선택 결과를 받았습니다:", response.data);
-          // navigate("icebreaking/games/game5TeamDance");
-        }
-      });
-      setSubscribed(true);
-    }
-  }, [client, roomId, subscribed]);
 
   return (
     <Wrap>
