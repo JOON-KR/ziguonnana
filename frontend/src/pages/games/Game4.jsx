@@ -8,7 +8,7 @@ import "@tensorflow/tfjs";
 import gray from "../../assets/icons/gray.png";
 import transparentEdgeImage from "../../assets/images/transparent_edges_image.jpg";
 
-// styled-components
+// styled-components를 사용하여 스타일이 적용된 컴포넌트 정의
 const PageWrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -73,7 +73,7 @@ const PoseSelectionModal = styled.div`
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Ensure modal is in front */
+  z-index: 1000; /* 모달이 항상 최상위에 위치하도록 z-index 설정 */
 `;
 
 const PoseList = styled.div`
@@ -101,52 +101,60 @@ const PoseItem = styled.button`
 `;
 
 const Game4 = () => {
+  // 여러 모달의 열림 상태를 관리하는 state
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
-    useState(true);
+    useState(true); // 웰컴 모달 열림 상태
   const [isFollowPoseSelectModalOpen, setIsFollowPoseSelectModalOpen] =
-    useState(false);
-  const [isPoseSystemModalOpen, setIsPoseSystemModalOpen] = useState(false);
-  const [isPoseDrawingModalOpen, setIsPoseDrawingModalOpen] = useState(false);
-  const roomId = useSelector((state) => state.room.roomId);
-  const client = useSelector((state) => state.client.stompClient);
-  const localStream = useSelector((state) => state.room.localStream);
-  const openViduToken = useSelector((state) => state.auth.openViduToken);
-  const userNo = useSelector((state) => state.auth.userNo);
-  const videoRef = useRef(null);
-  const [isPoseSelectionModalOpen, setIsPoseSelectionModalOpen] =
-    useState(false);
-  const [selectedPose, setSelectedPose] = useState(null);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [showText, setShowText] = useState(false);
+    useState(false); // 포즈 선택 모달 열림 상태
+  const [isPoseSystemModalOpen, setIsPoseSystemModalOpen] = useState(false); // 포즈 시스템 모달 열림 상태
+  const [isPoseDrawingModalOpen, setIsPoseDrawingModalOpen] = useState(false); // 포즈 드로잉 모달 열림 상태
 
+  // Redux를 통해 상태를 가져옴
+  const roomId = useSelector((state) => state.room.roomId); // 현재 방 ID
+  const client = useSelector((state) => state.client.stompClient); // STOMP 클라이언트
+  const localStream = useSelector((state) => state.room.localStream); // 로컬 비디오 스트림
+  const openViduToken = useSelector((state) => state.auth.openViduToken); // OpenVidu 토큰
+  const userNo = useSelector((state) => state.auth.userNo); // 유저 번호
+
+  const videoRef = useRef(null); // 비디오 엘리먼트를 참조하기 위한 ref
+  const [isPoseSelectionModalOpen, setIsPoseSelectionModalOpen] =
+    useState(false); // 포즈 선택 모달 열림 상태
+  const [selectedPose, setSelectedPose] = useState(null); // 선택된 포즈 번호
+  const [showOverlay, setShowOverlay] = useState(false); // 오버레이 이미지 표시 상태
+  const [showText, setShowText] = useState(false); // 오버레이 텍스트 표시 상태
+
+  // 클라이언트에서 서버로부터 메시지를 구독하고, 특정 명령어가 올 경우 모달 상태를 변경함
   useEffect(() => {
     client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      const cmd = parsedMessage.commandType;
+      const parsedMessage = JSON.parse(message.body); // 서버로부터 받은 메시지를 파싱
+      const cmd = parsedMessage.commandType; // 명령어 타입을 추출
 
       if (cmd === "GAME_MODAL_START") {
+        // 특정 명령어가 오면 모든 모달을 닫음
         setIsFollowPoseWelcomeModalOpen(false);
         setIsFollowPoseSelectModalOpen(false);
         setIsPoseSystemModalOpen(false);
         setIsPoseDrawingModalOpen(false);
       }
 
-      console.log("키워드 타입 :", parsedMessage);
+      console.log("키워드 타입 :", parsedMessage); // 디버깅을 위한 로그 출력
     });
   }, [client, roomId]);
 
+  // 포즈넷을 실행하여 비디오 스트림에서 자세를 추정하고 결과를 서버로 전송하는 함수
   useEffect(() => {
     const runPoseNet = async (videoElement) => {
-      const net = await posenet.load();
+      const net = await posenet.load(); // PoseNet 모델 로드
       const pose = await net.estimateSinglePose(videoElement, {
         flipHorizontal: false,
         decodingMethod: "single-person",
-      });
+      }); // 비디오에서 단일 인물의 자세를 추정
 
-      console.log("Pose:", pose);
+      console.log("Pose:", pose); // 추정된 포즈를 로그로 출력
 
+      // 서버로 보낼 데이터 형식으로 변환
       const payload = {
-        num: userNo,
+        num: userNo, // 유저 번호를 포함
         keypoints: pose.keypoints.map((keypoint) => ({
           part: keypoint.part,
           position: keypoint.position,
@@ -154,21 +162,23 @@ const Game4 = () => {
         })),
       };
 
-      console.log("Sending pose result:", payload);
+      console.log("Sending pose result:", payload); // 전송할 데이터 로그 출력
       client.send(
-        `/ws/app/game/${roomId}/pose/result`,
+        `/ws/app/game/${roomId}/pose/result`, // 서버로 PoseNet 결과 전송
         {},
         JSON.stringify(payload)
       );
     };
 
+    // 로컬 스트림이 존재하고, 비디오 엘리먼트가 참조되어 있을 때 실행
     if (localStream && videoRef.current) {
       const videoElement = videoRef.current;
-      videoElement.srcObject = localStream.getMediaStream();
+      videoElement.srcObject = localStream.getMediaStream(); // 비디오 엘리먼트에 로컬 스트림을 설정
       videoElement.onloadedmetadata = () => {
-        videoElement.play();
+        videoElement.play(); // 메타데이터가 로드되면 비디오 재생
       };
 
+      // 포즈가 선택된 경우, 오버레이와 텍스트를 표시하고, 지정된 시간 후에 PoseNet을 실행
       if (selectedPose !== null) {
         setShowOverlay(true);
         setShowText(true);
@@ -177,14 +187,15 @@ const Game4 = () => {
           setTimeout(() => {
             setShowOverlay(false);
             setTimeout(() => {
-              runPoseNet(videoElement);
+              runPoseNet(videoElement); // 1초 후에 PoseNet 실행
             }, 1000);
-          }, 4000);
-        }, 1000);
+          }, 4000); // 오버레이 이미지를 4초 동안 표시
+        }, 1000); // 텍스트를 1초 동안 표시
       }
     }
   }, [localStream, selectedPose, userNo, client, roomId]);
 
+  // 각 버튼 클릭 시 모달 상태를 제어하는 함수들
   const openIsFollowPoseSelectModalOpen = () => {
     setIsFollowPoseWelcomeModalOpen(false);
     setIsFollowPoseSelectModalOpen(true);
@@ -203,6 +214,7 @@ const Game4 = () => {
     setIsPoseSelectionModalOpen(false);
   };
 
+  // 포즈를 선택한 후 서버로 전송하는 함수
   const selectPose = (poseNumber) => {
     setSelectedPose(poseNumber);
     closePoseSelectionModal();
@@ -211,17 +223,17 @@ const Game4 = () => {
   const sendPoseSelection = () => {
     if (selectedPose !== null) {
       client.send(
-        `/ws/app/game/${roomId}/pose/number`,
+        `/ws/app/game/${roomId}/pose/number`, // 선택된 포즈 번호를 서버로 전송
         {},
         JSON.stringify({ number: selectedPose })
       );
-      setIsPoseSystemModalOpen(true); // 다음 모달로 이동
+      setIsPoseSystemModalOpen(true); // 포즈 시스템 모달로 전환
     }
   };
 
   const backToSelectModal = () => {
     setIsPoseSystemModalOpen(false);
-    setIsFollowPoseSelectModalOpen(true);
+    setIsFollowPoseSelectModalOpen(true); // 포즈 선택 모달로 돌아가기
   };
 
   return (
@@ -315,4 +327,3 @@ const Game4 = () => {
 };
 
 export default Game4;
-//끝
