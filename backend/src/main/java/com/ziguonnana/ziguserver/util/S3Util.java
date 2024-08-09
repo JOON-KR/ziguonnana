@@ -56,9 +56,9 @@ public class S3Util {
     }
 
     @Transactional
-    public String uploadVideo(File file, String path, int index) throws IOException {
+    public String uploadVideo(File file, String path) throws IOException {
         String uuid = generateUniqueFileName(file.getName());
-        String key = path + uuid + index;
+        String key = path + uuid;
         log.info(key);
         S3Resource resource;
         try (InputStream inputStream = new FileInputStream(file)) {

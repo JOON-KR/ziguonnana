@@ -23,6 +23,4 @@ public class VideoController {
         String key = videoService.uploadVideo(file, roomId, userNo);
         return ResponseDto.success(userNo + "번 영상 업로드 완료 : " + key);
     }
-
-
 }

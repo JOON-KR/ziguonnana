@@ -60,7 +60,7 @@ public class WebsocketService {
                 .count(0)
                 .roomId(roomId)
                 .bodyTalkGame(new BodyTalkGame())
-                .shorts(new Shorts(0,new ArrayList<>()))
+                .shorts(new Shorts(0,new ArrayList<>(), new ArrayList<>()))
                 .vectors(vector)
                 .Igudongseong(Igudongseong)
                 .poseResult(new ArrayList<>())
