@@ -142,6 +142,7 @@ const Game1Drawing = () => {
   const [drawingHistory, setDrawingHistory] = useState([]);
   const [targetUser, setTargetUser] = useState(0);
   const [currentUser, setCurrentUser] = useState(0);
+  const [canDraw, setCanDraw] = useState(false);
 
   const canvasRef = useRef(null);
 
@@ -159,11 +160,28 @@ const Game1Drawing = () => {
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessages = JSON.parse(message.body);
-          console.log("Received message from server:", parsedMessages); // 서버로부터 받은 메시지 로그
+          console.log("그림그리기 수신 메시지 : ", parsedMessages); // 서버로부터 받은 메시지 로그
+
+          //이어그리기 메시지 도착하면 타겟, 권한 유저 번호 설정
+          if (parsedMessages.commandType == "ART_RELAY") {
+            console.log("타겟, 유저 번호 변경!");
+            setTargetUser(parsedMessages.data.targetUser);
+            setCurrentUser(parsedMessages.data.currentUser);
+          }
         }
       );
 
-      client.send(`app/game/${roomId}/art-start`);
+      client.send(`/app/game/${roomId}/art-start`);
+      //   {
+      //     "message": "SUCCESS",
+      //     "commandType": "ART_RELAY",
+      //     "data": {
+      //         "art": "",
+      //         "targetUser": 1,
+      //         "currentUser": 1,
+      //         "keyword": ""
+      //     }
+      // }
 
       // 컴포넌트 언마운트 시 구독 취소
       return () => {
@@ -173,6 +191,12 @@ const Game1Drawing = () => {
     }
   }, [dispatch, roomId, client]);
 
+  //권한 설정
+  useEffect(() => {
+    setCanDraw(userNo == currentUser ? true : false);
+    setTimeLeft(5);
+  }, [currentUser]);
+
   // 타이머
   useEffect(() => {
     if (timeLeft > 0) {
@@ -181,25 +205,11 @@ const Game1Drawing = () => {
       }, 1000);
       return () => clearTimeout(timer);
     } else {
-      //전송
+      const imageData = canvasRef.current.exportImage("png");
+
+      client.send();
     }
   }, [timeLeft]);
-
-  // 응답 받아오면 캔버스 띄우기
-  // useEffect(() => {
-  //   if (drawingData[userNo] && drawingData[userNo].art) {
-  //     const canvas = canvasRef.current;
-  //     if (canvas) {
-  //       console.log("Loading paths:", drawingData[userNo].art);
-  //       canvas.clearCanvas();
-  //       canvas.loadPaths(JSON.parse(drawingData[userNo].art));
-  //     }
-  //   }
-  // }, [drawingData, userNo]);
-
-  // 중간 그림 저장
-
-  // 응답 처리 및 반복 종료
 
   const handleColorChange = (color) => {
     setBrushColor(color);
@@ -258,6 +268,8 @@ const Game1Drawing = () => {
           <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
           <ProfileDetails>
             {/* <HeaderText>키워드: {'#' + resData.keyword}</HeaderText> */}
+            <h1>{targetUser}님 그리는중~~</h1>
+            <h1>{currentUser}님이 그릴 차례</h1>
           </ProfileDetails>
         </ProfileInfo>
         <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
@@ -270,6 +282,7 @@ const Game1Drawing = () => {
           strokeColor={isEraser ? "#FFFFFF" : brushColor}
           strokeWidth={brushRadius}
           eraserWidth={isEraser ? brushRadius : 0}
+          style={{ pointerEvents: canDraw ? "auto" : "none" }} // 그림 권한 제어
         />
         <ToolsWrapper>
           <CustomSwatchesPicker>
@@ -292,10 +305,18 @@ const Game1Drawing = () => {
               onChange={(e) => setBrushRadius(e.target.value)}
             />
           </SliderWrapper>
-          <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
+          <ToolButton
+            onClick={() => setIsEraser(false)}
+            active={!isEraser}
+            disabled={!canDraw}
+          >
             펜
           </ToolButton>
-          <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
+          <ToolButton
+            onClick={() => setIsEraser(true)}
+            active={isEraser}
+            disabled={!canDraw}
+          >
             지우개
           </ToolButton>
           <Timer>{formatTime(timeLeft)}</Timer>
