@@ -36,16 +36,16 @@ public class ShortsService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
 
-    public synchronized void selectVideo(String roomId, int shortsId){
+    public synchronized void selectVideo(String roomId, int shortsId) {
         Room room = roomRepository.getRoom(roomId);
-        if(room.getShortsRequestCnt() > 0) {
+        if (room.getShortsRequestCnt() > 0) {
             log.info("========= 예시 영상 선택 요청 여러번 ======");
             return; // 여러번 요청들어오면 한번 외에는 무시
         }
         // 쇼츠 선택 request cnt 증가
         room.countShortsRequestCnt();
         Shorts shorts = room.getShorts();
-        if(shortsId > 3 || shortsId <= 0) return;
+        if (shortsId > 3 || shortsId <= 0) return;
 
         // 숏츠 id와 인원수에 따라 분할된 예시 영상 url 세팅
         shorts.setExampleVideoInfo(shortsId, room.getPeople());
@@ -53,18 +53,18 @@ public class ShortsService {
         // 숏츠 선택 request cnt 초기화 필요
     }
 
-    public String sendSplitVideoByUserNum(String roomId, int userNo){
+    public String sendSplitVideoByUserNum(String roomId, int userNo) {
         Room room = roomRepository.getRoom(roomId);
         Shorts shorts = room.getShorts();
         String splitedVideoUrl = shorts.getSplitedExampleVideoUrl().get(userNo - 1);
         return splitedVideoUrl;
     }
-    
-    
+
+
     // 쇼츠 합치기
     public synchronized void mergeVideo(String roomId) throws IOException {
         Room room = roomRepository.getRoom(roomId);
-        if(room.getShortsMergeRequestCnt() > 0) {
+        if (room.getShortsMergeRequestCnt() > 0) {
             log.info("========= 영상 합치기 요청 여러번 ======");
             return; // 여러번 요청들어오면 한번 외에는 무시
         }
@@ -83,7 +83,7 @@ public class ShortsService {
     @Async
     public void mergeStart(String roomId, List<String> userSplitedVideoUrl) throws IOException {
         String mergeInputfile = createTxtFile(roomId, userSplitedVideoUrl);
-        log.info("mergeInputfile(txt) path: "  + mergeInputfile);
+        log.info("mergeInputfile(txt) path: " + mergeInputfile);
 
         String mergeVideoUrl = videoMerge(roomId, mergeInputfile);
         log.info("쇼츠 합치기 완료 : " + mergeVideoUrl);
@@ -103,7 +103,7 @@ public class ShortsService {
                 .addInput(mergeInputfile)
                 .addExtraArgs("-protocol_whitelist", "file,http,https,tcp,tls")
                 .addExtraArgs("-f", "concat")
-                .addExtraArgs("-safe","0")
+                .addExtraArgs("-safe", "0")
                 .addOutput(outputfile)
                 .done();
 
@@ -126,9 +126,10 @@ public class ShortsService {
         return key;
 
     }
+
     private boolean deleteFile(File file) {
-        if( file.exists() ){
-            if(file.delete()){
+        if (file.exists()) {
+            if (file.delete()) {
                 log.info(file + "삭제 완료");
                 return true;
             }
@@ -137,22 +138,24 @@ public class ShortsService {
         log.info("파일이 존재하지 않습니다.");
         return false;
     }
-    private String createTxtFile(String roomId, List<String> userSplitedVideoUrl){
+
+    private String createTxtFile(String roomId, List<String> userSplitedVideoUrl) {
         String fileName = "/app/" + roomId + "-mergeInfo.txt";
 
         // 파일 객체 생성
         File file = new File(fileName);
 
         // 파일에 내용 쓰기
-        for(String filePath : userSplitedVideoUrl){
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (String filePath : userSplitedVideoUrl) {
                 String fileContent = "file '" + filePath + "'\n";
                 writer.write(fileContent);
-            } catch (IOException e) {
-                log.info("파일 쓰기 실패 : " + e.getMessage());
-                return "";
             }
+        } catch (IOException e) {
+            log.info("파일 쓰기 실패 : " + e.getMessage());
+            return "";
         }
+
         return fileName;
     }
 }
