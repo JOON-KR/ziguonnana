@@ -51,7 +51,7 @@ const OpenViduSession = ({ token }) => {
           resolution: "640x480",
           frameRate: 30,
           insertMode: "APPEND",
-          mirror: false,
+          mirror: true,
         });
 
         // 퍼블리셔를 세션에 공개
