@@ -80,9 +80,6 @@ public class AnswerService {
 	
 	private void nextGame(String roomId) {
 		// 결과 전송
-		boolean relayStart = true;
-		Response<Boolean> nextMessage = Response.ok(CommandType.ART_START, relayStart);
-		messagingTemplate.convertAndSend("/topic/game/" + roomId, nextMessage);
 		artService.spreadKeyword(roomId);
 	}
 }
