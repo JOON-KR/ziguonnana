@@ -40,7 +40,6 @@ public class ArtService {
 		Room room = roomRepository.getRoom(roomId);
 		createRandomKeyword(room);
 		messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_START, true));
-		log.info("이어그리기 키워드 생성");
 	}
 
 	public void createRandomKeyword(Room room) {
@@ -68,11 +67,13 @@ public class ArtService {
 			// Set을 List로 변환하여 플레이어의 번호를 키로 하고 맵에 추가
 			player.createAnswer(new ArrayList<>(uniqueSelections));
 		}
+		log.info("----이어그리기 랜덤 키워드 생성  : {}",players);
 
 	}
 
 	// 그림 저장 후 응답전달
 	public void save(String roomId, String art) {
+		log.info("----이어그리기 그림 저장 요청: {}",art);
 		Room room = roomRepository.getRoom(roomId);
 		int cycle = room.getCycle();
 		int people = room.getPeople();
@@ -80,7 +81,6 @@ public class ArtService {
 		int targetUser = cycle+1;
 		int userNo = (targetUser+room.getCount()) % people == 0 ? people : (targetUser+room.getCount()) % people;
 		//저장
-		
 		//첫번째 카운트 ( 다음사람이 첫번쨰로 그릴 수 있게 반환)
 		if(room.getCount() == 0) {
 			if(userNo == people) userNo = 1;
@@ -92,11 +92,13 @@ public class ArtService {
 					.targetUser(targetUser)
 					.keyword(keyword)
 					.build();
+			log.info("----{}번째 사이클 시작 -------",cycle+1);
 			//저장안하고 다음 타겟 및 그릴사람 반환 
 			messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(),Response.ok(CommandType.ART_RELAY, response));
 			room.countUp();
 			return;
 		}
+		log.info("----그림저장 --- targetUser : {}, currentUser : {}",targetUser,userNo);
 		//현재 전달받은 그림 타겟에 저장
 		List<RelayArt> artList = map.get(targetUser);
 		RelayArt relayArt = RelayArt.builder()
@@ -109,6 +111,7 @@ public class ArtService {
 		room.countUp();
 		// 사이클이 끝나면 사이클업
 		if(room.getCount() == people -1) {
+			log.info("----{}번 사이클 종료 ",cycle+1);
 			room.cycleUp();
 			room.countInit();
 			//이어그리기 끝나면
@@ -126,6 +129,7 @@ public class ArtService {
 					.keyword(room.getPlayers().get(targetUser).getAnswer().get(room.getCount()))
 					.build();
 
+		log.info("----다음 그림 반환 : targetUser : {}, currentUser : {}, art: {}",response.getTargetUser(),response.getCurrentUser(),response.getArt());
 		messagingTemplate.convertAndSend("/topic/game/"+room.getRoomId(),Response.ok(CommandType.ART_RELAY,response));
 	}
 
