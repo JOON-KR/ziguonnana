@@ -1,4 +1,6 @@
 FROM openjdk:17-alpine
+# FFmpeg와 FFprobe 설치
+RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 
