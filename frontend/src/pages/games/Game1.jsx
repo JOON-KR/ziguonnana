@@ -5,7 +5,7 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
 import IntroductionModal from "../../components/modals/IntroductionModal";
 import blue from "../../assets/icons/blue.png";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setDrawingData } from "../../store/drawingSlice";
 import Game1Drawing from "./Game1Drawing";
@@ -23,7 +23,8 @@ const Wrap = styled.div`
 const Game1 = () => {
   const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] = useState(false); // DrawingWelcomeModal 상태
+  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
+    useState(false); // DrawingWelcomeModal 상태
   const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
   const [error, setError] = useState(""); // 에러 메시지 상태
   const roomId = useSelector((state) => state.room.roomId);
@@ -100,7 +101,7 @@ const Game1 = () => {
     setIsDrawingGuideModalOpen(false);
   };
 
-  // DrawingWelcomeModal 닫고 DrawingGuideModal 열기  
+  // DrawingWelcomeModal 닫고 DrawingGuideModal 열기
   const openDrawingGuideModal = () => {
     console.log("Opening Drawing Guide Modal");
     setIsDrawingWelcomeModalOpen(false);
@@ -109,7 +110,8 @@ const Game1 = () => {
 
   return (
     <Wrap>
-      {error && <div style={{ color: "red" }}>{error}</div>}{" "} {/* 에러 메시지 표시 */}
+      {error && <div style={{ color: "red" }}>{error}</div>}{" "}
+      {/* 에러 메시지 표시 */}
       {/* 자기소개 가이드 모달 */}
       {isIntroGuideModalOpen && (
         <IntroductionGuideModal
@@ -155,20 +157,23 @@ const Game1 = () => {
           // }}
           modalText={
             <>
-              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "} <br />
+              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
+              <br />
               제한시간은 20초입니다. <br /> 잠시만 기다려주세요.
             </>
           }
           // onClose={closeDrawingGuideModal}
         />
       )}
-
       {/* 이어그리기 화면 이동 <= 수정수정 필요 : 응답데이터 오고 3초 후 Game1Drawing open */}
-      {/* {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
-        <Game1Drawing roomId={roomId} />
-      )}       */}
+      {!isIntroGuideModalOpen &&
+        !isIntroModalOpen &&
+        !isDrawingWelcomeModalOpen &&
+        !isDrawingGuideModalOpen && <Game1Drawing roomId={roomId} />}
       {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>버튼</button>
+      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>
+        버튼
+      </button>
     </Wrap>
   );
 };
