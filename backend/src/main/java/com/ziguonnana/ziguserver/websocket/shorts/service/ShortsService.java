@@ -96,7 +96,7 @@ public class ShortsService {
     private String videoMerge(String roomId, String mergeInputfile) throws IOException {
         FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
         FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
-        String outputPath = "/app/";
+        String outputfile = "/app/" + roomId + "-mergeVideo.mp4";
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true)
@@ -104,7 +104,7 @@ public class ShortsService {
                 .addExtraArgs("-protocol_whitelist", "file,http,https,tcp,tls")
                 .addExtraArgs("-f", "concat")
                 .addExtraArgs("-safe","0")
-                .addOutput(outputPath + roomId + "-mergeVideo.mp4")
+                .addOutput(outputfile)
                 .done();
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
@@ -113,7 +113,7 @@ public class ShortsService {
         log.info("video merge 로컬 완료");
 
 
-        File videoFile = new File(outputPath +"mergeVideo.mp4");
+        File videoFile = new File(outputfile);
         // s3 업로드
         String path = "shorts/" + roomId + "/mergeVideo-";
         String key = s3Util.uploadVideo(videoFile, path);
