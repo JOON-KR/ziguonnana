@@ -12,8 +12,8 @@ import java.io.IOException;
 public class VideoService {
     private final S3Util s3Util;
 
-    public String uploadVideo(MultipartFile file, String roomId, int userNum) throws IOException {
+    public String uploadVideo(MultipartFile file, String roomId, int userNo) throws IOException {
         String path = "shorts/" + roomId + "/";
-        return s3Util.uploadSplitedVideo(file, path, userNum);
+        return s3Util.uploadSplitedVideo(file, path, userNo);
     }
 }

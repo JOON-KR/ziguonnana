@@ -16,12 +16,12 @@ import java.io.IOException;
 public class VideoController {
     private final VideoService videoService;
 
-    @PostMapping("/{roomId}/member/{userNum}")
+    @PostMapping("/{roomId}/member/{userNo}")
     public ResponseDto<String> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("roomId") String roomId,
-                                             @PathVariable("userNum") int userNum) throws IOException {
-        log.info("=========== 분할 영상 업로드, userNum:" + userNum + "=========");
-        String key = videoService.uploadVideo(file, roomId, userNum);
-        return ResponseDto.success(userNum + "번 영상 업로드 완료 : " + key);
+                                             @PathVariable("userNo") int userNo) throws IOException {
+        log.info("=========== 분할 영상 업로드, userNo:" + userNo + "=========");
+        String key = videoService.uploadVideo(file, roomId, userNo);
+        return ResponseDto.success(userNo + "번 영상 업로드 완료 : " + key);
     }
 
 
