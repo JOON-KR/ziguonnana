@@ -28,11 +28,11 @@ public class ShortsController {
     }
 
     // 해당 userNum의 숏츠 예시 영상 모두에게 전달
-    @MessageMapping("/game/{roomId}/shorts/record/{userNum}")
+    @MessageMapping("/game/{roomId}/shorts/record/{userNo}")
     @SendTo("/topic/game/{roomId}")
-    public Response<String> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNum) {
-        log.info("========== " + userNum + "이 녹화할 예시 영상 요청==============");
-        String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNum);
+    public Response<String> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNo) {
+        log.info("========== " + userNo + "이 녹화할 예시 영상 요청==============");
+        String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNo);
         return Response.ok(CommandType.SHORTS_SPLITED, splitedVideoUrl);
     }
 
