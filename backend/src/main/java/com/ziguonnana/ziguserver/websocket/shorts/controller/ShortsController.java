@@ -2,6 +2,7 @@ package com.ziguonnana.ziguserver.websocket.shorts.controller;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
+import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsResponse;
 import com.ziguonnana.ziguserver.websocket.shorts.service.ShortsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +33,11 @@ public class ShortsController {
     // 해당 userNum의 숏츠 예시 영상 모두에게 전달
     @MessageMapping("/game/{roomId}/shorts/record/{userNo}")
     @SendTo("/topic/game/{roomId}")
-    public Response<String> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNo) {
+    public Response<ShortsResponse> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNo) {
         log.info("========== " + userNo + "이 녹화할 예시 영상 요청==============");
         String splitedVideoUrl = shortsService.sendSplitVideoByUserNum(roomId, userNo);
-        return Response.ok(CommandType.SHORTS_SPLITED, splitedVideoUrl);
+        ShortsResponse response = new ShortsResponse(splitedVideoUrl, userNo);
+        return Response.ok(CommandType.SHORTS_SPLITED, response);
     }
 
     // 비디오 합치기 요청
