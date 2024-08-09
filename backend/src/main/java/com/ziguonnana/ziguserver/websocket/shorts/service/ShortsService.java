@@ -30,10 +30,10 @@ public class ShortsService {
         log.info("해당 숏츠 id의 분할된 예시 영상 리스트: " + shorts.getSplitedExampleVideoUrl());
     }
 
-    public String sendSplitVideoByUserNum(String roomId, int userNum){
+    public String sendSplitVideoByUserNum(String roomId, int userNo){
         Room room = roomRepository.getRoom(roomId);
         Shorts shorts = room.getShorts();
-        String splitedVideoUrl = shorts.getSplitedExampleVideoUrl().get(userNum - 1);
+        String splitedVideoUrl = shorts.getSplitedExampleVideoUrl().get(userNo - 1);
         return splitedVideoUrl;
     }
     
