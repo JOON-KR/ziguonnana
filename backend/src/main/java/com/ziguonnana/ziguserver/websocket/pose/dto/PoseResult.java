@@ -1,4 +1,4 @@
-package com.ziguonnana.ziguserver.websocket.pose.controller;
+package com.ziguonnana.ziguserver.websocket.pose.dto;
 
 import java.util.List;
 
@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class PoseResult {
-	private List<List<Double>> vector;
+	private List<List<Integer>> vector;
 	private int num;
 }

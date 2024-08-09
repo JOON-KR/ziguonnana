@@ -63,6 +63,7 @@ public class WebsocketService {
                 .shorts(new Shorts(0,new ArrayList<>(), new ArrayList<>()))
                 .vectors(vector)
                 .Igudongseong(Igudongseong)
+                .poseResult(new ArrayList<>())
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);

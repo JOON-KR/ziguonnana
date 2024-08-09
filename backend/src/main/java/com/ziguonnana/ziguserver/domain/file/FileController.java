@@ -27,4 +27,11 @@ public class FileController {
         s3Util.deleteImageFromS3(imageAddress);
         return ResponseEntity.ok().build();
     }
+    
+    @PostMapping("/pose/{fileName}")
+    public ResponseEntity<String> createPose(@RequestParam("file") MultipartFile file,@PathVariable("fileName") String name) throws IOException {
+        // path 설정
+        String uploadedAddress = s3Util.createAndUploadPoseFile(file, "poseType"+name);
+        return ResponseEntity.ok().body(uploadedAddress);
+    }
 }
