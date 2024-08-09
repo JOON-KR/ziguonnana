@@ -17,6 +17,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.KeyPoint;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
+import com.ziguonnana.ziguserver.websocket.pose.dto.PoseRequest;
 import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResult;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
@@ -32,20 +33,23 @@ public class PoseService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final S3Util s3Util;
 
-	public void processKeyPoints(String roomId, int poseType, List<KeyPoint> keyPoints) {
-		// score가 0.7 이상인 Position만 필터링
-		List<List<Integer>> filteredPositions = keyPoints.stream().filter(keyPoint -> keyPoint.getScore() >= 0.7)
-				.map(keyPoint -> List.of((int) keyPoint.getPosition().getX(), (int) keyPoint.getPosition().getY()))
-				.collect(Collectors.toList());
+	public void processKeyPoints(String roomId, int poseType, PoseRequest poseRequest) {
+	    // score가 0.7 이상인 Position만 필터링
+	    List<List<Integer>> filteredPositions = poseRequest.getKeypoints().stream()
+	        .filter(keyPoint -> keyPoint.getScore() >= 0.7)
+	        .map(keyPoint -> List.of((int) keyPoint.getPosition().getX(), (int) keyPoint.getPosition().getY()))
+	        .collect(Collectors.toList());
 
-		// PoseResult로 변환
-		PoseResult poseResult = new PoseResult();
-		poseResult.setVector(filteredPositions);
-		poseResult.setNum(0); // 적절한 num을 설정해야 합니다.
+	    // PoseResult로 변환
+	    PoseResult poseResult = PoseResult.builder()
+	    		.num(poseRequest.getNum())
+	    		.vector(filteredPositions)
+	    		.build();
 
-		// PoseService의 calculate 함수 호출
-		calculate(roomId,poseType, poseResult);
+	    // PoseService의 calculate 함수 호출
+	    calculate(roomId, poseType, poseResult);
 	}
+
 
 	public void calculate(String roomId, int poseType, PoseResult request) {
 		String fileName = "pose/poseType" + poseType + ".txt";
