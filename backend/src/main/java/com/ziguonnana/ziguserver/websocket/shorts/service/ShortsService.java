@@ -146,7 +146,7 @@ public class ShortsService {
         // 파일에 내용 쓰기
         for(String filePath : userSplitedVideoUrl){
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                String fileContent = "file '" + filePath + "'";
+                String fileContent = "file '" + filePath + "'\n";
                 writer.write(fileContent);
             } catch (IOException e) {
                 log.info("파일 쓰기 실패 : " + e.getMessage());
