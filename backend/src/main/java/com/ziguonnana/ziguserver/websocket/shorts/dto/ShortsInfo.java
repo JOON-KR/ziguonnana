@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ShortsResponse {
-    private String challengeVideoUrl;
-    private int currentUserNo;
+public class ShortsInfo {
+    private String videoUrl;
     private long videoDuration;
 }
