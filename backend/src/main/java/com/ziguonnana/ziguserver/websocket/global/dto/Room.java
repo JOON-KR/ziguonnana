@@ -8,6 +8,7 @@ import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 
+import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,6 +47,11 @@ public class Room {
 	//이구동성 게임결과 저장용
 	private List<IgudongseongResult> Igudongseong;
 
+	//숏폼 챌린지
+	private Shorts shorts;
+	// 숏폼 선택 request count
+	private int shortsRequestCnt;
+
 
 	public void initArt() {
 		for(int i=1;i<=people;i++) {
@@ -80,5 +86,10 @@ public class Room {
 	// 자기소개 문답
 	public void countQuestionRequestCnt(){
 		questionRequestCnt++;
+	}
+
+	// 숏폼 선택 request count 함수
+	public void countShortsRequestCnt(){
+		shortsRequestCnt++;
 	}
 }
