@@ -351,6 +351,7 @@ const Game1 = () => {
         />
       )}
       {/* 자기소개 모달 */}
+      {/* {false && ( */}
       {isIntroModalOpen && (
         <IntroductionModal
           onClose={closeIntroModal}

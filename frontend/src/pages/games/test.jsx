@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
 import { useSelector, useDispatch } from "react-redux";
 import BASE_URL from "../../api/APIconfig";
+import { setDrawingData } from "../../store/drawingSlice";
 import axios from "axios";
 
 const Wrap = styled.div`
@@ -138,106 +139,46 @@ const Game1Drawing = () => {
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5);
-
-  const [targetUser, setTargetUser] = useState(0); //현재 그릴 대상
-  const [currentUser, setCurrentUser] = useState(0); //현재 그릴 권한 가진 사람
-  const [keyword, setKeyword] = useState("");
-  const [prevDrawing, setPrevDrawing] = useState(null); //이전 사람이 그린 그림
-  const [avatarList, setAvatarList] = useState([]);
-  const [drawingResult, setDrawingResult] = useState(null); //완전히 다 끝난 결과 1인당 이어그린 리스트
-
-  const [canDraw, setCanDraw] = useState(false); //권한 설정
-  const [isGameEnded, setIsGameEnded] = useState(false);
-
+  const [drawingResult, setDrawingResult] = useState(null);
   const canvasRef = useRef(null);
 
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
-  const client = useSelector((state) => state.client.stompClient);
+  const drawingData = useSelector((state) => state.drawing.drawingData);
+  const dispatch = useDispatch();
+  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
 
   useEffect(() => {
-    console.log("--------------------------------");
-    console.log("연결 상태 : ", client.connected);
-    console.log("--------------------------------");
-    if (client && client.connected) {
-      const subscription = client.subscribe(
+    // 이어그리기 첫 키워드 전파 데이터 받아오기
+    // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
+    if (stompClient && stompClient.connected) {
+      console.log("Subscribing to topic:", `/topic/game/${roomId}`);
+      // 방의 메시지를 구독
+      const subscription = stompClient.subscribe(
         `/topic/game/${roomId}`,
         (message) => {
-          const parsedMessages = JSON.parse(message.body);
-          console.log("그림그리기 수신 메시지 : ", parsedMessages); // 서버로부터 받은 메시지 로그
-
-          //이어그리기 메시지 도착하면 타겟, 권한 유저 번호 설정
-          if (parsedMessages.commandType == "ART_RELAY") {
-            console.log("타겟, 유저 번호 변경!");
-            setTargetUser(parsedMessages.data.targetUser);
-            setCurrentUser(parsedMessages.data.currentUser);
-            setKeyword(parsedMessages.data.keywrod);
-            // const prevDrawing = parsedMessages.data.art; // "shortsExample/3b69b8ec-a35d-4dfa-983a-0093d41bc8e7.png" 같은 형태
+          const response = JSON.parse(message.body);
+          console.log("Received message from server:", response); // 서버로부터 받은 메시지 로그
+          if (response.message.trim() === "이어그리기 첫 키워드 전파") {
+            // 데이터 받아와서 Redux 상태 업데이트
+            dispatch(setDrawingData(response.data));
           }
-          //이어그리기 결과 저장
-          else if (parsedMessages.commandType === "ART_END") {
-            console.log("이어그리기 결과 받음 :", parsedMessages.data);
-            canvasRef.current.clearCanvas();
-            setDrawingResult(parsedMessages.data);
-            setIsGameEnded(true);
-          }
-
-          //응답으로 받은 그림을 prevDrawing으로 설정로직 필요
         }
       );
-
-      client.send(`/app/game/${roomId}/art-start`);
 
       // 컴포넌트 언마운트 시 구독 취소
       return () => {
         console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
         subscription.unsubscribe();
       };
+    } else {
+      console.error("Stomp client is not connected in useEffect");
     }
-  }, []);
-  // }, [ roomId, client]);
+  }, [dispatch, roomId, stompClient]);
 
-  //이전 사람이 그린 그림 받으면 현재 캔버스에 반영
-  useEffect(() => {
-    if (prevDrawing && canvasRef.current) {
-      const loadImageOntoCanvas = async () => {
-        try {
-          const image = new Image();
-          image.src = prevDrawing;
-          image.crossOrigin = "Anonymous"; // 크로스 도메인 문제를 방지하기 위해 추가
-
-          image.onload = () => {
-            const canvas = canvasRef.current;
-            const context = canvas.canvas.getContext("2d");
-
-            // 캔버스 크기에 맞게 이미지를 조정하여 그리기
-            context.drawImage(
-              image,
-              0,
-              0,
-              canvas.canvas.width,
-              canvas.canvas.height
-            );
-          };
-        } catch (error) {
-          console.error("Failed to load the image onto the canvas:", error);
-        }
-      };
-
-      loadImageOntoCanvas();
-    }
-  }, [prevDrawing]);
-
-  //권한 설정
-  useEffect(() => {
-    setCanDraw(userNo == currentUser ? true : false);
-    setTimeLeft(5);
-  }, [currentUser]);
-
-  //그리는 대상 변하면 캔버스 비워주기
-  useEffect(() => {
-    canvasRef.current.clearCanvas();
-  }, [targetUser]);
+  const resData = drawingData[userNo];
+  // console.log("resDatad:", resData);
+  // console.log('drawing', drawingData)
 
   // 타이머
   useEffect(() => {
@@ -251,29 +192,100 @@ const Game1Drawing = () => {
     }
   }, [timeLeft]);
 
-  //현재 캔버스에서 그려진 그림 png형태로 추출해서 서버로 전송, 서버에서 받은 응답을 소켓으로 전송
+  // 응답 받아오면 캔버스 띄우기
+  useEffect(() => {
+    if (drawingData[userNo] && drawingData[userNo].art) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        console.log("Loading paths:", drawingData[userNo].art);
+        canvas.clearCanvas();
+        canvas.loadPaths(JSON.parse(drawingData[userNo].art));
+      }
+    }
+  }, [drawingData, userNo]);
+
+  // 중간 그림 저장
+  const [savedDrawing, setSavedDrawing] = useState("");
+
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
-      const exportImage = await currentCanvas.exportImage("png");
-      const imageBlob = await (await fetch(exportImage)).blob();
-      const formData = new FormData();
-      formData.append("file", imageBlob, "drawing.png");
+      try {
+        // 캔버스에 그린 그림을 png 파일로 저장 <- 저장 잘되는지 모르겠음.
+        const exportImage = await currentCanvas.exportImage("png");
+        const imageBlob = await (await fetch(exportImage)).blob();
+        const formData = new FormData();
+        formData.append("file", imageBlob, "drawing.png");
 
-      const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("S3 전송해서 받은 결과 : ", response);
+        // 저장한 png 파일을 S3 서버로 전송 - multipart 형식으로
+        const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-      console.log("S3에서 받은 결과 전송!");
-      client.send(
-        `/app/game/${roomId}/saveArt`,
-        {},
-        JSON.stringify(response.data)
-      );
+        console.log("S3 전송해서 받은 결과 : ", response);
+        // S3 서버에서 받아온 response data 저장
+        setSavedDrawing(response.data);
+        console.log("Drawing sent successfully:", response.data);
+
+        // S3 서버에서 받아온 response data를 서버로 전송 (소켓)
+        // relayart 데이터 형식으로 전송
+        const relayart = {
+          art: resData.art,
+          num: userNo,
+          keyword: resData.keyword,
+        };
+
+        const sendDrawingInterval = setInterval(() => {
+          if (stompClient && stompClient.connected) {
+            stompClient.send(
+              `/app/game/${roomId}/saveArt`,
+              {},
+              JSON.stringify(relayart)
+            );
+            console.log("Data sent to server via socket:", relayart);
+          }
+        }, 5000); // 5초 간격으로 데이터 전송
+
+        // 응답 처리 및 반복 종료
+        const subscription = stompClient.subscribe(
+          `/topic/game/${roomId}`,
+          (message) => {
+            const response = JSON.parse(message.body);
+            console.log("Received repeated message from server:", response);
+            // 그림 전파 데이터 받아오기
+            if (response.message.trim() === "그림 전파") {
+              // 데이터 받아와서 Redux 상태 업데이트
+              dispatch(setDrawingData(response.data));
+            }
+            // 이어그리기 종료 데이터 받아오기
+            if (response.message.trim() === "이어그리기 종료") {
+              // 새로운 변수에 그림 저장
+              setDrawingResult(response.data);
+              console.log("Drawing result received:", response.data);
+              // 데이터 반복 전송 종료
+              clearInterval(sendDrawingInterval);
+              subscription.unsubscribe();
+            }
+
+            resData = Object.values(drawingData)[1];
+          }
+        );
+
+        return () => {
+          clearInterval(sendDrawingInterval);
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error sending drawing:", error);
+      }
     }
+  };
+
+  const handleColorChange = (color) => {
+    setBrushColor(color);
+    setIsEraser(false);
   };
 
   const colors = [
@@ -300,10 +312,7 @@ const Game1Drawing = () => {
     "#D3D3D3",
     "#A9A9A9",
   ];
-  const handleColorChange = (color) => {
-    setBrushColor(color);
-    setIsEraser(false);
-  };
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60)
       .toString()
@@ -319,15 +328,6 @@ const Game1Drawing = () => {
           <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
           <ProfileDetails>
             {/* <HeaderText>키워드: {'#' + resData.keyword}</HeaderText> */}
-            {!isGameEnded ? (
-              <>
-                <h1>{targetUser}님 그리는중~~</h1>
-                <h1>{currentUser}님이 그릴 차례</h1>
-                <h1>키워드 : {keyword}</h1>
-              </>
-            ) : (
-              <h1>이어그리기 종료!</h1>
-            )}
           </ProfileDetails>
         </ProfileInfo>
         <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
@@ -340,7 +340,6 @@ const Game1Drawing = () => {
           strokeColor={isEraser ? "#FFFFFF" : brushColor}
           strokeWidth={brushRadius}
           eraserWidth={isEraser ? brushRadius : 0}
-          style={{ pointerEvents: canDraw ? "auto" : "none" }} // 그림 권한 제어
         />
         <ToolsWrapper>
           <CustomSwatchesPicker>
@@ -363,18 +362,10 @@ const Game1Drawing = () => {
               onChange={(e) => setBrushRadius(e.target.value)}
             />
           </SliderWrapper>
-          <ToolButton
-            onClick={() => setIsEraser(false)}
-            active={!isEraser}
-            disabled={!canDraw}
-          >
+          <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
             펜
           </ToolButton>
-          <ToolButton
-            onClick={() => setIsEraser(true)}
-            active={isEraser}
-            disabled={!canDraw}
-          >
+          <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
             지우개
           </ToolButton>
           <Timer>{formatTime(timeLeft)}</Timer>
