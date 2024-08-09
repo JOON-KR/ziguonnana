@@ -26,6 +26,7 @@ const Header = styled.h1`
 
 const Header2 = styled.h1`
   color: white;
+  margin-bottom: 20px;
 `;
 
 const ChatWrap = styled.div`
@@ -39,7 +40,7 @@ const ChatWrap = styled.div`
 `;
 
 const Input = styled.input`
-  width: 20%;
+  width: 50%;
   padding: 10px;
   font-size: 16px;
   border: 2px solid #ccc;
@@ -56,6 +57,7 @@ const Input = styled.input`
 const Button = styled.button`
   padding: 10px 20px;
   font-size: 16px;
+  font-weight: bold;
   background-color: #58FFF5;
   color: #54595E;
   border: none;
@@ -74,6 +76,7 @@ const Image = styled.img`
   margin: 20px 0;
 `;
 
+// 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
   const [isBodyTalkWelcomeModalOpen, setIsBodyTalkWelcomeModalOpen] =
     useState(true);
@@ -162,7 +165,6 @@ const Game2 = () => {
           setReceivedKeyword("");
           setRound((prev) => prev + 1);
         }
-        // setKeywordType
 
         if (parsedMessage.commandType == "GAME_MODAL_START") {
           setIsBodyTalkGuideModalOpen(false);
@@ -183,6 +185,8 @@ const Game2 = () => {
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
     if (client && client.connected && isGameStarted == true) {
+      // isExplainer 초기화
+      setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
   }, [round, client, roomId]);
@@ -201,9 +205,6 @@ const Game2 = () => {
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
           planetImg={orange}
-          RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={closeBodyTalkGuideModal}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={openBodyTalkGuideModal}
           modalText={"몸으로말해요 게임에 오신걸 환영합니다 !"}
@@ -234,24 +235,46 @@ const Game2 = () => {
           }}
         />
       )}
-      <Header>{round} 라운드 </Header>
-      <SpeechBubble text={`제시어 종류 : ${keywordType}`} />
-      <Image src={bigNana} />
-      <Header2>제시어 : {receivedKeyword}</Header2>
 
-      <ChatWrap>
-        <Input
-          type="text"
-          value={typedText}
-          onChange={(e) => setTypedText(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              sendMessage();
+      {/* 모달 끝나고 화면 */}
+      {isExplainer ? (
+        <>
+          <Header>{round} 라운드 - 출제자</Header>
+          <SpeechBubble
+            type={
+              <>
+                제시어 종류 : {keywordType} <br /><br />
+              </>
             }
-          }}
-        />
-        <Button onClick={sendMessage}>보냄</Button>
-      </ChatWrap>
+            word={`제시어 : ${receivedKeyword}`}
+          />
+          <Image src={bigNana} />
+          <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
+        </>
+      ) : (
+        <>
+          <Header>{round} 라운드 - 맞추는 사람</Header>
+          <SpeechBubble
+            type={`현재 제시어 종류 : ${keywordType}`}
+          />
+          <h1>출제자 화면 출력</h1>
+          <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
+          <Header2>채팅창에 정답을 입력하세요.</Header2>
+          <ChatWrap>
+            <Input
+              type="text"
+              value={typedText}
+              onChange={(e) => setTypedText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();
+                }
+              }}
+            />
+            <Button onClick={sendMessage}>SEND</Button>
+          </ChatWrap>
+        </>
+      )}
     </Wrap>
   );
 };
