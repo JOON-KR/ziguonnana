@@ -77,10 +77,19 @@ const Game5TeamDance = () => {
     }
   }, [localStream]);
 
+  // 서버로 쪼개진 영상 요청을 보내는 부분
+useEffect(() => {
+    if (client && client.connected) {
+      console.log("서버로 요청을 보냅니다:", `/app/game/${roomId}/shorts/record/${userNo}`);
+      client.send(`/app/game/${roomId}/shorts/record/${userNo}`, {}, {});
+    }
+  }, [client, roomId, userNo]);
+  
   // 서버에서 브로드캐스트된 현재 사용자 번호 수신
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        console.log("서버로부터 받은 메시지:", message.body);
         const response = JSON.parse(message.body);
         if (
           response.commandType === "SHORTS_SPLITED" &&
@@ -93,12 +102,13 @@ const Game5TeamDance = () => {
           console.log("챌린지 비디오 URL:", response.data.challengeVideoUrl);
         }
       });
-
+  
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [client, roomId]);
+  
 
   // 비디오 및 녹화 시작 로직
   useEffect(() => {
