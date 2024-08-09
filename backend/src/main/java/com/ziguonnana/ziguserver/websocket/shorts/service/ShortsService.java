@@ -96,7 +96,7 @@ public class ShortsService {
     private String videoMerge(String roomId, String mergeInputfile) throws IOException {
         FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
         FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
-        String outputfile = "/app/" + roomId + "-mergeVideo.mp4";
+        String outputfile = "/app/" + roomId + "-mergeVideo.webm";
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true)
