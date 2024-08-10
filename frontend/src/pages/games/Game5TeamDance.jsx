@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import BASE_URL from "../../api/APIconfig"; // BASE_URL 가져오기
+import BASE_URL from "../../api/APIconfig";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -71,26 +71,42 @@ const Game5TeamDance = () => {
   const userNo = useSelector((state) => state.auth.userNo);
   const client = useSelector((state) => state.client.stompClient);
   const localStream = useSelector((state) => state.room.localStream);
-  const maxNo = useSelector((state) => state.room.maxNo); // 방 인원 수
+  const subscribers = useSelector((state) => state.room.subscribers);
+  const maxNo = useSelector((state) => state.room.maxNo);
+
   const userVideoRef = useRef(null);
+  const subscriberVideoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunks = useRef([]);
 
   const [countdown, setCountdown] = useState(3);
-  const [currentUserNo, setCurrentUserNo] = useState(1); //현재 챌린지 순서인 사람 번호
-  const [challengeVideoUrl, setChallengeVideoUrl] = useState(""); //잘려진 영상 url
-  const [isRecording, setIsRecording] = useState(false); //영상 녹화
-  const [isButtonVisible, setIsButtonVisible] = useState(false); //영상 재생 끝나면 다음 턴 버튼 생김
+  const [currentUserNo, setCurrentUserNo] = useState(1);
+  const [challengeVideoUrl, setChallengeVideoUrl] = useState("");
+  const [videoDuration, setVideoDuration] = useState(5000); // 기본 녹화 시간을 5초로 설정
+  const [isRecording, setIsRecording] = useState(false);
+  const [isButtonVisible, setIsButtonVisible] = useState(false);
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
 
-  // 사용자 비디오 스트림 설정
+  // 자신의 로컬 스트림 설정
   useEffect(() => {
-    if (localStream && userVideoRef.current) {
+    if (localStream && userVideoRef.current && currentUserNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
     }
-  }, [localStream]);
+  }, [localStream, currentUserNo, userNo]);
 
-  // 서버로 쪼개진 영상 요청 send
+  // 다른 사용자의 스트림 설정
+  useEffect(() => {
+    if (subscribers.length > 0 && subscriberVideoRef.current && currentUserNo !== userNo) {
+      const subscriber = subscribers.find(sub => sub.stream.connection.data === `{"userNo":${currentUserNo}}`);
+      if (subscriber) {
+        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
+        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);
+      }
+    }
+  }, [subscribers, currentUserNo, userNo]);
+
+  // 서버로 메시지 전송
   useEffect(() => {
     if (client && client.connected) {
       console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
@@ -100,7 +116,7 @@ const Game5TeamDance = () => {
     }
   }, [client, roomId, currentUserNo]);
 
-  // 서버에서 브로드캐스트된 현재 사용자 번호 수신
+  // 서버로부터 메시지 수신 및 상태 업데이트
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -111,8 +127,11 @@ const Game5TeamDance = () => {
             console.log("서버로부터 받은 데이터:", response.data);
             setCurrentUserNo(response.data.currentUserNo);
             setChallengeVideoUrl(response.data.challengeVideoUrl);
-            console.log("현재 사용자 번호:", response.data.currentUserNo);
-            console.log("챌린지 비디오 URL:", response.data.challengeVideoUrl);
+            setVideoDuration(response.data.videoDuration || 5000); // 서버에서 받아온 videoDuration 값 설정
+            setCountdown(3);
+            setIsButtonVisible(false);
+            setIsRecording(false);
+            setShouldPlayVideo(false); // 카운트다운 동안 비디오 재생 금지
           }
         } catch (error) {
           console.error("메시지 처리 중 오류 발생:", error);
@@ -128,25 +147,22 @@ const Game5TeamDance = () => {
     }
   }, [client, roomId]);
 
-  // 비디오 및 녹화 시작 로직
+  // 카운트다운 및 녹화 시작
   useEffect(() => {
-    if (challengeVideoUrl) {
-      console.log("카운트다운 시작");
-      const interval = setInterval(() => {
+    let interval;
+    if (challengeVideoUrl && countdown > 0) {
+      interval = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
-
-      if (countdown === 0) {
-        console.log("카운트다운 완료, 녹화 시작");
-        clearInterval(interval);
-        startRecording();
-      }
-
-      return () => clearInterval(interval);
+    } else if (countdown === 0) {
+      clearInterval(interval);
+      setShouldPlayVideo(true); // 카운트다운이 끝나면 비디오 재생 시작
+      startRecording(); // 녹화 시작
     }
-  }, [challengeVideoUrl, countdown]);
 
-  // 녹화 시작 함수
+    return () => clearInterval(interval);
+  }, [challengeVideoUrl, countdown, currentUserNo, userNo]);
+
   const startRecording = () => {
     if (currentUserNo === userNo && !isRecording) {
       setIsRecording(true);
@@ -168,19 +184,17 @@ const Game5TeamDance = () => {
         console.log("녹화된 Blob:", blob);
 
         const formData = new FormData();
-        formData.append("file", blob, `${roomId}_user_${userNo}.webm`);
+        formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
 
         try {
-          const response = await axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${userNo}`, formData, {
+          const response = await axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
           });
-
           console.log("녹화된 비디오 업로드 성공:", response.data);
 
-          // 버튼 표시
-          setIsButtonVisible(true);
+          setIsButtonVisible(true); // 녹화가 완료된 후에 버튼 표시
         } catch (error) {
           console.error("비디오 업로드 실패:", error);
         }
@@ -188,22 +202,23 @@ const Game5TeamDance = () => {
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
+
+      // 녹화가 끝나면 자동으로 중지
       setTimeout(() => {
         mediaRecorder.stop();
         setIsRecording(false);
-      }, 5000); // 5초 후 녹화 중지
+      }, videoDuration); // 서버에서 받아온 비디오 재생 시간만큼 녹화
     }
   };
 
-  // 다음 사용자로 넘어가는 함수
   const handleNextUser = () => {
     setIsButtonVisible(false);
+
     if (currentUserNo < maxNo) {
       console.log("다음 사용자로 요청을 보냅니다:", currentUserNo + 1);
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo + 1}`, {}, {});
-    } else {
+    } else if (currentUserNo === maxNo) {
       console.log("모든 사용자가 완료되었습니다.");
-      // 여기서 게임 종료 로직 등을 추가할 수 있습니다.
     }
   };
 
@@ -213,7 +228,7 @@ const Game5TeamDance = () => {
       {countdown > 0 && <Countdown>{countdown}</Countdown>}
       <VideoContainer>
         <VideoWrapper>
-          {challengeVideoUrl && (
+          {shouldPlayVideo && challengeVideoUrl && (
             <ChallengeVideo
               src={challengeVideoUrl}
               controls={false}
@@ -222,8 +237,10 @@ const Game5TeamDance = () => {
           )}
         </VideoWrapper>
         <VideoWrapper>
-          {currentUserNo === userNo && (
+          {currentUserNo === userNo ? (
             <UserVideo ref={userVideoRef} autoPlay muted />
+          ) : (
+            <UserVideo ref={subscriberVideoRef} autoPlay muted />
           )}
         </VideoWrapper>
       </VideoContainer>
