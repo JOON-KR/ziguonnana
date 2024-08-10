@@ -2,7 +2,6 @@ package com.ziguonnana.ziguserver.websocket.shorts.controller;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
-import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsInfo;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsResponse;
 import com.ziguonnana.ziguserver.websocket.shorts.service.ShortsService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +39,16 @@ public class ShortsController {
         log.info("shortsResponse : " + response);
         return Response.ok(CommandType.SHORTS_SPLITED, response);
     }
+
+    // 숏츠 영상 녹화 완료 요청
+    // 다같이 대기 페이지로 넘어가기 위한 요청과 응답
+    @MessageMapping("/game/{roomId}/shorts/end")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> endRecord(@DestinationVariable String roomId) {
+        log.info("============= 숏츠 녹화 완료 요청 =============");
+        return Response.ok(CommandType.SHORTS_RECORD_END, true);
+    }
+
 
     // 비디오 합치기 요청
     // 비디오 합치기 요청되었다고 방 모두에게 전달
