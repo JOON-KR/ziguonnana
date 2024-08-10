@@ -6,16 +6,13 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
-import authSlice, {
-  setMemberId,
-  setOpenViduToken,
-  setUserNo,
-} from "../../store/authSlice";
+import { setRoomId, setTeamCode } from "../../store/roomSlice";
+import { setMemberId, setOpenViduToken, setUserNo } from "../../store/authSlice";
 import SockJS from "sockjs-client";
-import BASE_URL from "../../api/APIconfig";
 import { setStompClient } from "../../store/clientSlice";
 import { Stomp } from "@stomp/stompjs";
+import BASE_URL from "../../api/APIconfig";
+
 
 const BlackBg = styled.div`
   position: fixed;
@@ -96,78 +93,53 @@ const RoomJoinModal = ({ onClose }) => {
   const [memId, setMemId] = useState("");
 
   useEffect(() => {
-    if (inviteCode != "") {
-      // 소켓 방 생성
+    if (inviteCode !== "") {
       const socket = new SockJS(`${BASE_URL}/ws`);
       const client = Stomp.over(socket);
-      dispatch(setStompClient(client));
-      setStClient(client);
 
-      console.log("--------------------------------");
-      console.log("연결 상태 : ", client.connected);
-      console.log("--------------------------------");
+      client.connect({}, async (frame) => {
+        console.log("웹소켓 서버와 연결됨!", frame);
 
-      const getResponse = async () => {
+        // 오픈비두 방 입장 처리
         const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`);
         console.log("오픈비두 방 참가 응답 : ", response.data.data);
 
-        dispatch(setMemberId(response.data.data.memberId));
-        dispatch(setOpenViduToken(response.data.data.openviduToken));
+        const { memberId, openviduToken } = response.data.data;
+
+        // 전역 상태 업데이트
+        dispatch(setMemberId(memberId));
+        dispatch(setOpenViduToken(openviduToken));
         dispatch(setRoomId(inviteCode));
-        console.log("memberID : ", response.data.data.memberId);
-        console.log("viduToken : ", response.data.data.openviduToken);
-        console.log("---------------------------------");
 
-        setMemId(response.data.data.memberId);
+        setMemId(memberId);
 
-        return response;
-      };
-
-      getResponse()
-        .then((response) => {
-          client.connect(
-            {},
-            (frame) => {
-              console.log("웹소켓 서버와 연결됨!", frame);
-
-              console.log("방 구독");
-              client.subscribe(`/topic/game/${inviteCode}`, (message) => {
-                const parsedMessage = JSON.parse(message.body);
-                console.log("방에서 받은 메시지:", parsedMessage);
-                setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-              });
-
-              // 각 memberId에 대한 구독
-              console.log("memId로 구독:");
-              client.subscribe(
-                `/topic/game/${inviteCode}/${response.data.data.memberId}`,
-                (message) => {
-                  const parsedMessage = JSON.parse(message.body);
-                  console.log("개별 구독 받은 메시지:", parsedMessage);
-                  // 응답 메시지에서 num 저장
-                  if (
-                    parsedMessage.data &&
-                    parsedMessage.data.num !== undefined
-                  ) {
-                    dispatch(setUserNo(parsedMessage.data.num));
-                    console.log("유저 번호 :", parsedMessage.data.num);
-                    setSessionInfo((prevSessionInfo) => ({
-                      ...prevSessionInfo,
-                      num: parsedMessage.data.num,
-                    }));
-                  }
-                }
-              );
-            },
-
-            (error) => {
-              console.error("STOMP error:", error);
-            }
-          );
-        })
-        .catch((error) => {
-          console.error("Failed to get response:", error);
+        // 방에 대한 구독
+        client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          console.log("방에서 받은 메시지:", parsedMessage);
+          setMessages((prevMessages) => [...prevMessages, parsedMessage]);
         });
+
+        // 각 memberId에 대한 구독
+        client.subscribe(`/topic/game/${inviteCode}/${memberId}`, (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          console.log("개별 구독 받은 메시지:", parsedMessage);
+          if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+            dispatch(setUserNo(parsedMessage.data.num));
+            console.log("유저 번호 :", parsedMessage.data.num);
+            setSessionInfo((prevSessionInfo) => ({
+              ...prevSessionInfo,
+              num: parsedMessage.data.num,
+            }));
+          }
+        });
+
+        setStClient(client);
+        dispatch(setStompClient(client));
+
+      }, (error) => {
+        console.error("STOMP error:", error);
+      });
     }
   }, [inviteCode]);
 
@@ -177,7 +149,6 @@ const RoomJoinModal = ({ onClose }) => {
       stClient.send(`/app/game/${inviteCode}/${memId}/join`);
     }
 
-    // 로그인 여부를 state에 포함시켜 navigate
     navigate("/user/profilePick", {
       state: {
         inviteCode,
