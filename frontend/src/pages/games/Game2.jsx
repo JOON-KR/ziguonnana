@@ -22,7 +22,7 @@ const Wrap = styled.div`
 const HeaderContainer = styled.div`
   width: 100%;
   display: flex;
-  justify-content: row; /* Header와 Timer를 양쪽 끝에 배치 */
+  justify-content: row;
   align-items: center;
   margin-top: 30px;
   margin-bottom: 100px;
@@ -134,6 +134,7 @@ const Game2 = () => {
   const localStream = useSelector((state) => state.room.localStream);
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const videoRef = useRef(null);
+  // const explainerNo = useSelector((state) => state.bodytalk.explainerNo);
   
   const [round, setRound] = useState(1);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
@@ -144,29 +145,20 @@ const Game2 = () => {
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
-  const [explainerNo, setExplainerNo] = useState(0);
+  const [explainerNo, setExplainerNo] = useState(1);
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
 
-  // 타이머 로직
+  
+  // 출제자 영상
+  // 사용자 비디오 스트림 설정
+  const userVideoRef = useRef(null);
+
   useEffect(() => {
-    if (isGameStarted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-
-      return () => clearInterval(timer); // cleanup
-    } else if (timeLeft === 0) {
-      // 타이머가 0이 되면 게임 종료 로직 추가 가능
-      console.log("시간 종료");
+    if (localStream && userVideoRef.current) {
+      userVideoRef.current.srcObject = localStream.getMediaStream();
+      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
     }
-  }, [isGameStarted, timeLeft]);
-
-  // 타이머 포맷
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
+  }, [localStream]);
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -202,11 +194,13 @@ const Game2 = () => {
         if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
           setIsExplainer(true);
           setExplainerNo(userNo);
+          console.log('userNo: ', userNo);
+          console.log('explainerNo: ', explainerNo);
           setKeywordType(parsedMessage.data.type);
           console.log(parsedMessage.data.type);
           console.log(keywordType);
           setReceivedKeyword(parsedMessage.data.word);
-          console.log(receivedKeyword);
+          console.log(parsedMessage.data.word);
         } else if (
           parsedMessage.commandType == "RESULT" &&
           parsedMessage.data.durationTime
@@ -227,6 +221,9 @@ const Game2 = () => {
           parsedMessage.data !== "요청 불가"
         ) {
           setKeywordType(parsedMessage.data);
+        } else {
+          console.log('userNo: ', userNo);
+          console.log('explainerNo: ', explainerNo);
         }
         if (
           parsedMessage.commandType == "CHAT" &&
@@ -252,17 +249,6 @@ const Game2 = () => {
     }
   }, [client, roomId, userNo, subscribed]);
 
-  // 출제자 영상
-  // 사용자 비디오 스트림 설정
-  const userVideoRef = useRef(null);
-
-  useEffect(() => {
-    if (localStream && userVideoRef.current) {
-      userVideoRef.current.srcObject = localStream.getMediaStream();
-      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
-    }
-  }, [localStream, explainerNo]);
-
   //라운드 변경시 실행
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
@@ -272,6 +258,27 @@ const Game2 = () => {
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
   }, [round, client, roomId]);
+  
+  // 타이머 로직
+  useEffect(() => {
+    if (isGameStarted && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+
+      return () => clearInterval(timer); // cleanup
+    } else if (timeLeft === 0) {
+      // 타이머가 0이 되면 게임 종료 로직 추가 가능
+      console.log("시간 종료");
+    }
+  }, [isGameStarted, timeLeft]);
+
+  // 타이머 포맷
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
 
   const openBodyTalkGuideModal = () => {
     setIsBodyTalkWelcomeModalOpen(false);
@@ -347,10 +354,6 @@ const Game2 = () => {
             type={`현재 제시어 종류 : ${keywordType}`}
           />
           {/* <h1>출제자 화면 출력</h1> */}
-          <div>
-            {/* <VideoCanvas ref={videoRef} width="640" height="480" /> */}
-            {/* <OpenViduSession token={openViduToken} />             */}
-          </div>
           <VideoWrapper>
             {explainerNo === userNo && (
               <UserVideo ref={userVideoRef} autoPlay muted />
