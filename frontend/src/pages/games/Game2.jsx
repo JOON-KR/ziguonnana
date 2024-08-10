@@ -98,7 +98,7 @@ const UserVideo = styled.video`
   width: 100%;
   max-width: 600px;
   height: auto;
-  border-radius: 10px;
+  border-radius: 6px;
   background-color: black;
   margin: 20px 0;
 `;
@@ -134,7 +134,7 @@ const Game2 = () => {
   const localStream = useSelector((state) => state.room.localStream);
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const videoRef = useRef(null);
-
+  
   const [round, setRound] = useState(1);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
   const [receivedKeyword, setReceivedKeyword] = useState("");
@@ -144,6 +144,7 @@ const Game2 = () => {
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
+  const [explainerNo, setExplainerNo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
 
   // 타이머 로직
@@ -200,6 +201,7 @@ const Game2 = () => {
 
         if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
           setIsExplainer(true);
+          setExplainerNo(userNo);
           setKeywordType(parsedMessage.data.type);
           console.log(parsedMessage.data.type);
           console.log(keywordType);
@@ -259,16 +261,7 @@ const Game2 = () => {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
     }
-  }, [localStream]);
-  // useEffect(() => {
-  //   if (localStream && videoRef.current) {
-  //     const videoElement = videoRef.current;
-  //     videoElement.srcObject = localStream.getMediaStream();
-  //     videoElement.onloadedmetadata = () => {
-  //       videoElement.play();
-  //     };
-  //   }
-  // }, [localStream, roomId]);
+  }, [localStream, explainerNo]);
 
   //라운드 변경시 실행
   useEffect(() => {
@@ -359,9 +352,9 @@ const Game2 = () => {
             {/* <OpenViduSession token={openViduToken} />             */}
           </div>
           <VideoWrapper>
-          {/* {currentUserNo === userNo && ( */}
-            <UserVideo ref={userVideoRef} autoPlay muted />
-          {/* )} */}
+            {explainerNo === userNo && (
+              <UserVideo ref={userVideoRef} autoPlay muted />
+            )}
           </VideoWrapper>
           <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
           <ChatWrap>
