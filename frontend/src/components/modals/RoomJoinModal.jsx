@@ -98,7 +98,9 @@ const RoomJoinModal = ({ onClose }) => {
   useEffect(() => {
     if (inviteCode != "") {
       // 소켓 방 생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
+      // const socket = new SockJS(`${BASE_URL}/ws`);
+      const socket = new SockJS("http://172.30.1.10:8081/ws");
+
       const client = Stomp.over(socket);
       dispatch(setStompClient(client));
       setStClient(client);
