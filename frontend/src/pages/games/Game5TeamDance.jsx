@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import styled from "styled-components";
@@ -72,7 +73,7 @@ const Game5TeamDance = () => {
   const client = useSelector((state) => state.client.stompClient);
   const localStream = useSelector((state) => state.room.localStream);
   const subscribers = useSelector((state) => state.room.subscribers);
-  const maxNo = useSelector((state) => state.room.maxNo);
+  // const maxNo = useSelector((state) => state.room.maxNo);
 
   const userVideoRef = useRef(null);
   const subscriberVideoRef = useRef(null);
@@ -81,28 +82,41 @@ const Game5TeamDance = () => {
 
   const [countdown, setCountdown] = useState(3);
   const [currentUserNo, setCurrentUserNo] = useState(1);
+  const [maxNo, setMaxNo] = useState(1);
   const [challengeVideoUrl, setChallengeVideoUrl] = useState("");
   const [videoDuration, setVideoDuration] = useState(5000); // 기본 녹화 시간을 5초로 설정
   const [isRecording, setIsRecording] = useState(false);
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("userNo는: ", userNo);
+    console.log("currentUserNo는: ", currentUserNo);
+    console.log("maxNo는: ", maxNo);
+  }, [userNo, currentUserNo, maxNo]);
+  
+
   // 자신의 로컬 스트림 설정
   useEffect(() => {
     if (localStream && userVideoRef.current && currentUserNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+      console.log("currentUserNo는: ", currentUserNo);
+      console.log("maxNo는: ", maxNo);
     }
-  }, [localStream, currentUserNo, userNo]);
+  }, [localStream, currentUserNo, userNo, maxNo]);
 
   // 다른 사용자의 스트림 설정
   useEffect(() => {
     if (subscribers.length > 0 && subscriberVideoRef.current && currentUserNo !== userNo) {
-      const subscriber = subscribers.find(sub => sub.stream.connection.data === `{"userNo":${currentUserNo}}`);
+      const subscriber = subscribers.find(
+        (sub) => sub.stream.connection.data === `{"userNo":${currentUserNo}}`);
       if (subscriber) {
         subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
-        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);
-      }
+        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);    
+      } 
     }
   }, [subscribers, currentUserNo, userNo]);
 
@@ -111,10 +125,12 @@ const Game5TeamDance = () => {
     if (client && client.connected) {
       console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
+      console.log("currentUserNo는", currentUserNo);
+        console.log("maxNo는", maxNo);
     } else {
       console.warn("send 부분에서 문제 발생");
     }
-  }, [client, roomId, currentUserNo]);
+  }, [client, roomId, currentUserNo, maxNo]);
 
   // 서버로부터 메시지 수신 및 상태 업데이트
   useEffect(() => {
@@ -126,6 +142,7 @@ const Game5TeamDance = () => {
           if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
             console.log("서버로부터 받은 데이터:", response.data);
             setCurrentUserNo(response.data.currentUserNo);
+            setMaxNo(response.data.maxNo);
             setChallengeVideoUrl(response.data.challengeVideoUrl);
             setVideoDuration(response.data.videoDuration || 5000); // 서버에서 받아온 videoDuration 값 설정
             setCountdown(3);
@@ -186,18 +203,18 @@ const Game5TeamDance = () => {
         const formData = new FormData();
         formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
 
-        try {
-          const response = await axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
+        // 비디오 업로드를 비동기로 처리
+        axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }).then(response => {
           console.log("녹화된 비디오 업로드 성공:", response.data);
-
-          setIsButtonVisible(true); // 녹화가 완료된 후에 버튼 표시
-        } catch (error) {
+        }).catch(error => {
           console.error("비디오 업로드 실패:", error);
-        }
+        });
+
+        setIsButtonVisible(true); // 녹화가 완료된 후에 버튼 표시
       };
 
       mediaRecorderRef.current = mediaRecorder;
@@ -216,9 +233,14 @@ const Game5TeamDance = () => {
 
     if (currentUserNo < maxNo) {
       console.log("다음 사용자로 요청을 보냅니다:", currentUserNo + 1);
+      console.log("currentUserNo는: ", currentUserNo);
+      console.log("maxNo는: ", maxNo);
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo + 1}`, {}, {});
     } else if (currentUserNo === maxNo) {
       console.log("모든 사용자가 완료되었습니다.");
+      //여기서 게임 끝났다는 요청 응답 받아야함.
+      navigate("/icebreaking/games/game5End");
+
     }
   };
 
