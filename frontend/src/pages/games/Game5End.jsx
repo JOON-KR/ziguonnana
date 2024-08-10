@@ -21,6 +21,19 @@ const Game5End = () => {
         }
     }, [client, roomId])
 
+    //숏폼 합치기 응답 받기
+    useEffect(() => {
+        if (client && client.connected) {
+            const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+                const response = JSON.parse(message.body);
+                console.log("서버로부터 받은 메시지:", response);
+                if (response.commandType === "SHORTS_MERGE" && response.message === "SUCCESS") {
+                    console.log("숏폼 합치기 완료");
+                }
+            } );
+        }
+    }, [client, roomId])
+
     return (
         <h1>숏폼 합쳐지는거 기다리는 컨텐츠 필요</h1>
     );
