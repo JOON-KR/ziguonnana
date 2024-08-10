@@ -36,8 +36,8 @@ public class ShortsController {
     @SendTo("/topic/game/{roomId}")
     public Response<ShortsResponse> sendSplitVideoByUserNum(@DestinationVariable String roomId, @DestinationVariable int userNo) {
         log.info("========== " + userNo + "이 녹화할 예시 영상 요청==============");
-        ShortsInfo shortsInfo = shortsService.sendSplitVideoByUserNum(roomId, userNo);
-        ShortsResponse response = new ShortsResponse(shortsInfo.getVideoUrl(), userNo, shortsInfo.getVideoDuration());
+        ShortsResponse response  = shortsService.sendSplitVideoByUserNum(roomId, userNo);
+        log.info("shortsResponse : " + response);
         return Response.ok(CommandType.SHORTS_SPLITED, response);
     }
 
