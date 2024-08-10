@@ -74,6 +74,7 @@ public class WebsocketService {
                 .build();
         log.info("방 생성 :: roomId : {}, room : {}, player : {}", roomId, room.toString(), player.toString());
         messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + request.getMemberId(), GameMessage.info("방 생성 완료", info));
+        log.info("웹소켓 상태: {} ",roomRepository.getAllRooms().size());
     }
 
     public void createProfile(String roomId, GameProfileRequest request) {

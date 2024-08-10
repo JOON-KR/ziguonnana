@@ -25,8 +25,8 @@ public class ArtController {
     }
     @MessageMapping("/game/{roomId}/art-start")
     @SendTo("/topic/game/{roomId}")
-    public void art(@DestinationVariable("roomId") String roomId) {
-    	artService.save(roomId, DEFAULT_IMAGE);
+    public void art(@DestinationVariable("roomId") String roomId ) {
+    	artService.start(roomId,DEFAULT_IMAGE);
     }
     
     @MessageMapping("/game/{roomId}/avatar")
