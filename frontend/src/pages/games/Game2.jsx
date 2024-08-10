@@ -342,6 +342,7 @@ const Game2 = () => {
           />
           <Image src={bigNana} />
           <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
+          <h1>마이크는 꺼집니다.</h1>
         </>
       ) : (
         <>
