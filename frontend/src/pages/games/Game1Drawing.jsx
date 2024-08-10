@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
 import { useSelector, useDispatch } from "react-redux";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { S3_BASE_URL, TAMTAM_URL } from "../../api/APIconfig";
 import axios from "axios";
 
 const Wrap = styled.div`
@@ -168,6 +168,20 @@ const Game1Drawing = () => {
           //이어그리기 메시지 도착하면 타겟, 권한 유저 번호 설정
           if (parsedMessages.commandType == "ART_RELAY") {
             console.log("타겟, 유저 번호 변경!");
+            console.log("소켓 서버에서 온 메세지 : ", parsedMessages);
+            setPrevDrawing(parsedMessages.data.art); // "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/realyArt/7c8f35b5-521f-444d-8b0f-c643b38795e0.png"
+
+            if (prevDrawing && canvasRef.current) {
+              const img = new Image();
+              img.src = parsedMessages.data.art;
+              img.onload = () => {
+                const canvas = canvasRef.current.canvasContainer.childNodes[1]; // ReactSketchCanvas 내부의 실제 <canvas> 엘리먼트를 가져옵니다.
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              };
+            }
+
+            console.log(`이전 사람이 그린 그림 : ${prevDrawing}`);
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
@@ -199,35 +213,17 @@ const Game1Drawing = () => {
   // }, [ roomId, client]);
 
   //이전 사람이 그린 그림 받으면 현재 캔버스에 반영
-  useEffect(() => {
-    if (prevDrawing && canvasRef.current) {
-      const loadImageOntoCanvas = async () => {
-        try {
-          const image = new Image();
-          image.src = prevDrawing;
-          image.crossOrigin = "Anonymous"; // 크로스 도메인 문제를 방지하기 위해 추가
-
-          image.onload = () => {
-            const canvas = canvasRef.current;
-            const context = canvas.canvas.getContext("2d");
-
-            // 캔버스 크기에 맞게 이미지를 조정하여 그리기
-            context.drawImage(
-              image,
-              0,
-              0,
-              canvas.canvas.width,
-              canvas.canvas.height
-            );
-          };
-        } catch (error) {
-          console.error("Failed to load the image onto the canvas:", error);
-        }
-      };
-
-      loadImageOntoCanvas();
-    }
-  }, [prevDrawing]);
+  // useEffect(() => {
+  //   if (prevDrawing && canvasRef.current) {
+  //     const img = new Image();
+  //     img.src = prevDrawing;
+  //     img.onload = () => {
+  //       const canvas = canvasRef.current.canvasContainer.childNodes[1]; // ReactSketchCanvas 내부의 실제 <canvas> 엘리먼트를 가져옵니다.
+  //       const ctx = canvas.getContext("2d");
+  //       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  //     };
+  //   }
+  // }, [prevDrawing]);
 
   //그리는 대상 변하면 캔버스 비워주기
   useEffect(() => {
@@ -249,25 +245,22 @@ const Game1Drawing = () => {
   //현재 캔버스에서 그려진 그림 png형태로 추출해서 서버로 전송, 서버에서 받은 응답을 소켓으로 전송
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
-    if (currentCanvas) {
+    if (currentCanvas && currentUser == userNo) {
       const exportImage = await currentCanvas.exportImage("png");
       const imageBlob = await (await fetch(exportImage)).blob();
       const formData = new FormData();
       formData.append("file", imageBlob, "drawing.png");
 
-      const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
+      const response = await axios.post(`${TAMTAM_URL}/api/v1/file`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       console.log("S3 전송해서 받은 결과 : ", response);
+      console.log("S3에서 받은 그림 : ", response.data); // "shortsExample/18ea86bf-17f6-4466-8df0-365cff321a80.png"
 
       console.log("S3에서 받은 결과 전송!");
-      client.send(
-        `/app/game/${roomId}/saveArt`,
-        {},
-        JSON.stringify(response.data)
-      );
+      client.send(`/app/game/${roomId}/saveArt`, {}, response.data);
     }
   };
 
@@ -386,3 +379,10 @@ const Game1Drawing = () => {
 };
 
 export default Game1Drawing;
+
+// {
+//   "art": "\"shortsExample/08d94bda-9047-4d7d-8526-c8e9854ec68f.png\"",
+//   "targetUser": 3,
+//   "currentUser": 2,
+//   "keyword": "c"
+// }
