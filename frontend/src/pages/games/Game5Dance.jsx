@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const Wrap = styled.div`
@@ -23,32 +25,40 @@ const StyledH2 = styled.h2`
   transition: transform 0.3s;
 `;
 
-const VideoWrapper = styled.div`
-  width: 90%;
-  height: 80%;
+const VideoContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+`;
+
+const ThumbnailWrapper = styled.div`
+  width: 200px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #000; /* 비디오 주위에 검정색 배경 추가 */
-  border-radius: 10px; /* 비디오 주위에 둥근 테두리 추가 */
-  overflow: hidden; /* 자식 요소가 부모 요소를 벗어나지 않도록 설정 */
+  background-color: #000;
+  border-radius: 10px;
+  overflow: hidden;
   cursor: pointer;
 `;
 
 const StyledVideo = styled.video`
   width: 100%;
   height: 100%;
-  border-radius: 10px; /* 비디오에 둥근 테두리 추가 */
-  object-fit: cover; /* 비디오가 부모 요소를 완전히 덮도록 설정 */
+  border-radius: 10px;
+  object-fit: cover;
 `;
 
 const Modal = styled.div`
-  position: fixed; /* 모달을 화면에 고정 */
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* 모달을 화면 중앙으로 이동 */
-  width: 300px;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  max-width: 300px;
   height: auto;
+  max-height: 60%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,8 +68,8 @@ const Modal = styled.div`
 
 const ModalContent = styled.div`
   position: relative;
-  width: 90%;
-  max-width: 800px; /* 최대 너비 설정 */
+  width: 100%;
+  max-height: 100%;
   background: #fff;
   border-radius: 10px;
   padding: 20px;
@@ -104,20 +114,49 @@ const Game5Dance = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState("00:00");
   const [duration, setDuration] = useState("00:00");
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const [videoSrc, setVideoSrc] = useState("");
   const videoRef = useRef(null);
+  const roomId = useSelector((state) => state.room.roomId);
+  const client = useSelector((state) => state.client.stompClient);
+  const navigate = useNavigate();
 
-  const handleThumbnailClick = () => {
+  // 비디오 썸네일 클릭 시 모달 열기
+  const handleThumbnailClick = (videoId, videoUrl) => {
+    setSelectedVideoId(videoId);
+    setVideoSrc(videoUrl);
     setIsModalOpen(true);
   };
 
+  // 모달 닫기
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  // 비디오 선택 시 메시지 전송
   const handleSelectVideo = () => {
-    alert("비디오가 선택되었습니다.");
+    if (client && client.connected) {
+      client.send(`/app/game/${roomId}/shorts/${selectedVideoId}`, {}, JSON.stringify({ command: "VIDEO_SELECTED" }));
+      console.log(`숏츠 선택 메시지를 전송했습니다: /app/game/${roomId}/shorts/${selectedVideoId}`);
+    }
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const response = JSON.parse(message.body);
+        console.log("서버로부터 받은 메시지:", response);
+        if (response.commandType === "SHORTS_CHOICE" && response.message === "SUCCESS") {
+          navigate("/icebreaking/games/game5TeamDance");
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate]);
 
   const updateTime = () => {
     if (videoRef.current) {
@@ -146,12 +185,18 @@ const Game5Dance = () => {
   return (
     <Wrap>
       <StyledH2>챌린지 영상 선택</StyledH2>
-      <VideoWrapper onClick={handleThumbnailClick}>
-        <StyledVideo>
-          <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/shortsExample/e208cace-0f18-4dad-a2f7-e5d441870fe0.mp4" type="video/mp4" />
-          브라우저가 동영상을 지원하지 않습니다.
-        </StyledVideo>
-      </VideoWrapper>
+      <VideoContainer>
+        <ThumbnailWrapper onClick={() => handleThumbnailClick(1, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4")}>
+          <StyledVideo>
+            <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4" type="video/mp4" />
+          </StyledVideo>
+        </ThumbnailWrapper>
+        <ThumbnailWrapper onClick={() => handleThumbnailClick(2, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4")}>
+          <StyledVideo>
+            <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4" type="video/mp4" />
+          </StyledVideo>
+        </ThumbnailWrapper>
+      </VideoContainer>
       {isModalOpen && (
         <Modal>
           <ModalContent>
@@ -161,7 +206,7 @@ const Game5Dance = () => {
               onTimeUpdate={updateTime}
               onLoadedMetadata={handleLoadedMetadata}
             >
-              <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/shortsExample/e208cace-0f18-4dad-a2f7-e5d441870fe0.mp4" type="video/mp4" />
+              <source src={videoSrc} type="video/mp4" />
               브라우저가 동영상을 지원하지 않습니다.
             </StyledVideo>
             <TimeDisplay>재생 시간: {currentTime} / 전체 시간: {duration}</TimeDisplay>
