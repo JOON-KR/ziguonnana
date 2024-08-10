@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import GameInfoModal from "../../components/modals/GameInfoModal";
@@ -18,11 +18,41 @@ const Wrap = styled.div`
 const Game5 = () => {
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(true);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const client = useSelector((state) => state.client.stompClient);
+  const roomId = useSelector((state) => state.room.roomId);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const response = JSON.parse(message.body);
+        if (
+          response.commandType === "GAME_MODAL_START" &&
+          response.data === "SHORTS"
+        ) {
+          navigate("/icebreaking/games/Game5Dance");
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate]);
 
   const closeGuideModalAndStartChallenge = () => {
     setIsGuideModalOpen(false);
-    navigate("/icebreaking/games/Game5Dance");
+    if (client && client.connected) {
+      client.send(
+        `/app/game/${roomId}/start-modal/SHORTS`,
+        {},
+        JSON.stringify({
+          message: "SUCCESS",
+          commandType: "GAME_MODAL_START",
+          data: "SHORTS",
+        })
+      );
+    }
   };
 
   return (
