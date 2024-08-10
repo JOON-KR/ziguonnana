@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/icons/game2nana.png";
+import OpenViduSession from "../../components/OpenViduSession";
 
 const Wrap = styled.div`
   width: 100%;
@@ -76,6 +77,13 @@ const Image = styled.img`
   margin: 20px 0;
 `;
 
+const VideoCanvas = styled.video`
+  width: 640px;
+  height: 480px;
+  border: 1px solid #ccc;
+  position: relative;
+`;
+
 // 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
   const [isBodyTalkWelcomeModalOpen, setIsBodyTalkWelcomeModalOpen] =
@@ -87,6 +95,9 @@ const Game2 = () => {
   const navigate = useNavigate();
   const userNo = useSelector((state) => state.auth.userNo);
   const maxNo = useSelector((state) => state.room.maxNo);
+  // const localStream = useSelector((state) => state.room.localStream);
+  // const openViduToken = useSelector((state) => state.auth.openViduToken);
+  // const videoRef = useRef(null);
 
   const [round, setRound] = useState(1);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
@@ -181,6 +192,17 @@ const Game2 = () => {
     }
   }, [client, roomId, userNo, subscribed]);
 
+  // 출제자 영상
+  // useEffect(() => {
+  //   if (localStream && videoRef.current) {
+  //     const videoElement = videoRef.current;
+  //     videoElement.srcObject = localStream.getMediaStream();
+  //     videoElement.onloadedmetadata = () => {
+  //       videoElement.play();
+  //     };
+  //   }
+  // }, [localStream, roomId]);
+
   //라운드 변경시 실행
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
@@ -258,6 +280,10 @@ const Game2 = () => {
             type={`현재 제시어 종류 : ${keywordType}`}
           />
           <h1>출제자 화면 출력</h1>
+          <div>
+            {/* <VideoCanvas ref={videoRef} width="640" height="480" /> */}
+            {/* <OpenViduSession token={openViduToken} />             */}
+          </div>
           <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
           <Header2>채팅창에 정답을 입력하세요.</Header2>
           <ChatWrap>
