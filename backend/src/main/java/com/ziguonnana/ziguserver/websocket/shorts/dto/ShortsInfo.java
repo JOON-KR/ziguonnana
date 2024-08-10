@@ -8,4 +8,12 @@ import lombok.Getter;
 public class ShortsInfo {
     private String videoUrl;
     private long videoDuration;
+
+    @Override
+    public String toString() {
+        return "ShortsInfo{" +
+                "videoUrl='" + videoUrl + '\'' +
+                ", videoDuration=" + videoDuration +
+                '}';
+    }
 }
