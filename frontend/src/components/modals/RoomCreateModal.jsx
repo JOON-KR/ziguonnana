@@ -12,7 +12,7 @@ import authSlice, {
   setOpenViduToken,
   setUserNo,
 } from "../../store/authSlice";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";
@@ -154,7 +154,9 @@ const RoomCreateModal = ({ onClose }) => {
       dispatch(setMemberId(memberId));
 
       //소켓 방생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
+      // const socket = new SockJS(`${BASE_URL}/ws`);
+      const socket = new SockJS(`${TAMTAM_URL}/ws`);
+
       const client = Stomp.over(socket);
       dispatch(setStompClient(client));
 
