@@ -19,14 +19,28 @@ const Wrap = styled.div`
   padding: 20px;
 `;
 
+const HeaderContainer = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: row; /* Header와 Timer를 양쪽 끝에 배치 */
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 100px;
+  // margin-right: 190px;
+  margin-left: 170px;
+  // padding: 0 130px; /* 좌우에 패딩 추가 */
+`;
+
 const Header = styled.h1`
   color: #FF007A;
   font-size: 28px;
-  margin-bottom: 20px;
+  // margin-top: 30px;
+  // margin-bottom: 100px;
 `;
 
 const Header2 = styled.h1`
   color: white;
+  font-size: 24px;
   margin-bottom: 20px;
 `;
 
@@ -41,7 +55,7 @@ const ChatWrap = styled.div`
 `;
 
 const Input = styled.input`
-  width: 50%;
+  width: 45%;
   padding: 10px;
   font-size: 16px;
   border: 2px solid #ccc;
@@ -74,14 +88,36 @@ const Button = styled.button`
 const Image = styled.img`
   max-width: 300px;
   height: auto;
+  // margin: 35px 0;
+  margin-left: 140px;
+  margin-top: 50px;
+  margin-bottom: 20px;
+`;
+
+const UserVideo = styled.video`
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 10px;
+  background-color: black;
   margin: 20px 0;
 `;
 
-const VideoCanvas = styled.video`
-  width: 640px;
-  height: 480px;
-  border: 1px solid #ccc;
-  position: relative;
+const VideoWrapper = styled.div`
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Timer = styled.div`
+  font-size: 38px;
+  color: #58FFF5;
+  font-weight: bold;
+  // background-color: white;
+  padding-left: 120px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 `;
 
 // 몸으로 말해요 (BodyTalk)
@@ -95,9 +131,9 @@ const Game2 = () => {
   const navigate = useNavigate();
   const userNo = useSelector((state) => state.auth.userNo);
   const maxNo = useSelector((state) => state.room.maxNo);
-  // const localStream = useSelector((state) => state.room.localStream);
-  // const openViduToken = useSelector((state) => state.auth.openViduToken);
-  // const videoRef = useRef(null);
+  const localStream = useSelector((state) => state.room.localStream);
+  const openViduToken = useSelector((state) => state.auth.openViduToken);
+  const videoRef = useRef(null);
 
   const [round, setRound] = useState(1);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
@@ -108,6 +144,28 @@ const Game2 = () => {
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
+
+  // 타이머 로직
+  useEffect(() => {
+    if (isGameStarted && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+
+      return () => clearInterval(timer); // cleanup
+    } else if (timeLeft === 0) {
+      // 타이머가 0이 되면 게임 종료 로직 추가 가능
+      console.log("시간 종료");
+    }
+  }, [isGameStarted, timeLeft]);
+
+  // 타이머 포맷
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -193,6 +251,15 @@ const Game2 = () => {
   }, [client, roomId, userNo, subscribed]);
 
   // 출제자 영상
+  // 사용자 비디오 스트림 설정
+  const userVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (localStream && userVideoRef.current) {
+      userVideoRef.current.srcObject = localStream.getMediaStream();
+      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+    }
+  }, [localStream]);
   // useEffect(() => {
   //   if (localStream && videoRef.current) {
   //     const videoElement = videoRef.current;
@@ -261,7 +328,10 @@ const Game2 = () => {
       {/* 모달 끝나고 화면 */}
       {isExplainer ? (
         <>
-          <Header>{round} 라운드 - 출제자</Header>
+          <HeaderContainer>
+            <Header>{round} 라운드 - 출제자</Header>
+            <Timer>{formatTime(timeLeft)}</Timer> {/* 타이머 표시 */}
+          </HeaderContainer>
           <SpeechBubble
             type={
               <>
@@ -275,21 +345,29 @@ const Game2 = () => {
         </>
       ) : (
         <>
-          <Header>{round} 라운드 - 맞추는 사람</Header>
+          <HeaderContainer>
+            <Header>{round} 라운드 - 맞추는 사람</Header>
+            <Timer>{formatTime(timeLeft)}</Timer> {/* 타이머 표시 */}
+          </HeaderContainer>
           <SpeechBubble
             type={`현재 제시어 종류 : ${keywordType}`}
           />
-          <h1>출제자 화면 출력</h1>
+          {/* <h1>출제자 화면 출력</h1> */}
           <div>
             {/* <VideoCanvas ref={videoRef} width="640" height="480" /> */}
             {/* <OpenViduSession token={openViduToken} />             */}
           </div>
+          <VideoWrapper>
+          {/* {currentUserNo === userNo && ( */}
+            <UserVideo ref={userVideoRef} autoPlay muted />
+          {/* )} */}
+          </VideoWrapper>
           <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
-          <Header2>채팅창에 정답을 입력하세요.</Header2>
           <ChatWrap>
             <Input
               type="text"
               value={typedText}
+              placeholder="여기에 정답을 입력하세요."
               onChange={(e) => setTypedText(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter") {

@@ -154,7 +154,8 @@ const RoomCreateModal = ({ onClose }) => {
       dispatch(setMemberId(memberId));
 
       //소켓 방생성
-      const socket = new SockJS(`${BASE_URL}/ws`);
+      // const socket = new SockJS(`${BASE_URL}/ws`);
+      const socket = new SockJS(`http://172.30.1.10:8081/ws`);
       const client = Stomp.over(socket);
       dispatch(setStompClient(client));
 
