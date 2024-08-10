@@ -12,7 +12,7 @@ import authSlice, {
   setOpenViduToken,
   setUserNo,
 } from "../../store/authSlice";
-import BASE_URL from "../../api/APIconfig";
+import { TomTom_URL } from "../../api/APIconfig";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";
@@ -131,38 +131,38 @@ const RoomCreateModal = ({ onClose }) => {
 
   const handleCreateRoom = async () => {
     try {
-      // 오픈비두 방 생성
+      //오픈비두 방생성
       const response = await axiosInstance.post("/api/v1/room", {
         teamName: teamName,
         people: selectedCapacity,
       });
+      // console.log("오픈비두 엔드포인트 응답 :"x, response.data.data);
 
       const roomId = response.data.data.roomId;
       console.log("roomID : ", roomId);
       dispatch(setRoomId(roomId));
 
-      // 방 생성 후 maxNo 설정
-      dispatch(setMaxNo(selectedCapacity));
-
-      // 오픈비두 방 입장
+      //오픈비두 방입장
       const enterResponse = await axiosInstance.post(`/api/v1/room/${roomId}`);
-      console.log("오픈비두 방 입장 응답 : ", enterResponse.data.data);
+      console.log("오픈비두 방입장 응답 : ", enterResponse.data.data);
 
       const viduToken = enterResponse.data.data.openviduToken;
       const memberId = enterResponse.data.data.memberId;
 
-      // 전역 상태 저장
+      //전역상태 저장
       dispatch(setOpenViduToken(viduToken));
       dispatch(setMemberId(memberId));
 
-      // 소켓 방 생성
-      const socket = new SockJS("http://172.30.1.10:8081/ws");
+      //소켓 방생성
+      const socket = new SockJS(`${TomTom_URL}/ws`);
       const client = Stomp.over(socket);
       dispatch(setStompClient(client));
 
       client.connect(
         {},
         (frame) => {
+          // console.log("웹소켓 서버와 연결됨!", frame);
+
           if (client && client.connected) {
             // 방에 대한 구독
             client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -170,7 +170,9 @@ const RoomCreateModal = ({ onClose }) => {
               console.log("방에서 받은 메시지:", parsedMessage);
               setMessages((prevMessages) => [...prevMessages, parsedMessage]);
             });
+          }
 
+          if (client && client.connected) {
             // 각 memberId에 대한 구독
             client.subscribe(`/topic/game/${roomId}/${memberId}`, (message) => {
               const parsedMessage = JSON.parse(message.body);
@@ -187,22 +189,35 @@ const RoomCreateModal = ({ onClose }) => {
                 }));
               }
             });
+          }
 
-            // 소켓 방 구독
+          //소켓 방 구독
+          if (client && client.connected) {
+            console.log("소켓 방 구독 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
             client.subscribe(
               `/app/game/${roomId}/join`,
               {},
               JSON.stringify({})
             );
+          }
 
-            // 방 생성 요청
+          if (client && client.connected) {
+            //방 생성 요청
+            console.log("소켓 방 생성 요청:", {
+              teamName,
+              people: selectedCapacity,
+            });
+            console.log("설정한 방 인원 수 : ", selectedCapacity);
             client.send(
               `/app/game/${roomId}/create`,
               {},
               JSON.stringify({
                 teamName,
-                people: selectedCapacity,
-                memberId,
+                people: selectedCapacity, // 임의로 설정, 필요에 따라 변경
+                memberId, // memberId 포함
               })
             );
           }
@@ -212,11 +227,14 @@ const RoomCreateModal = ({ onClose }) => {
         }
       );
 
+      // 메시지 발행
+
       client.onStompError = (frame) => {
         console.error("Stomp 에러", frame.headers["message"], frame.body);
       };
 
       client.activate();
+
       dispatch(setStompClient(client));
 
       navigate("/user/profilePick", {

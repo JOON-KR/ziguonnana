@@ -228,7 +228,7 @@ import {
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";
 import { Stomp } from "@stomp/stompjs";
-import BASE_URL from "../../api/APIconfig";
+import { BASE_URL, TomTom_URL } from "../../api/APIconfig";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -309,16 +309,11 @@ const RoomJoinModal = ({ onClose }) => {
   const [memId, setMemId] = useState("");
 
   useEffect(() => {
-<<<<<<< HEAD
     if (inviteCode != "") {
       // 소켓 방 생성
       // const socket = new SockJS(`${BASE_URL}/ws`);
-      const socket = new SockJS("http://172.30.1.10:8081/ws");
+      const socket = new SockJS(`${TomTom_URL}/ws`);
 
-=======
-    if (inviteCode !== "") {
-      const socket = new SockJS(`${BASE_URL}/ws`);
->>>>>>> develop-front
       const client = Stomp.over(socket);
 
       client.connect(
