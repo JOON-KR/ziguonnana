@@ -141,7 +141,7 @@ public class ShortsService {
         log.info("최종 merge된 비디오 s3 업로드 완료: " + key);
         // 텍스트 파일 & 비디오 파일 삭제
         File txtFile = new File(mergeInputfile);
-        File mergedVideoNoAudio = new File(mergeInputfile);
+        File mergedVideoNoAudio = new File(mergedVideoFile);
         deleteFile(txtFile);
         deleteFile(mergedVideoNoAudio);
         deleteFile(finalVideoFile);
