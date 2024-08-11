@@ -7,6 +7,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
+import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsAudio;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsInfo;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.ShortsResponse;
 import lombok.RequiredArgsConstructor;
@@ -99,7 +100,7 @@ public class ShortsService {
     private String videoMerge(String roomId, String mergeInputfile) throws IOException {
         FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
         FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
-        String outputfile = "/app/" + roomId + "-mergeVideo.webm";
+        String mergedVideoFile = "/app/" + roomId + "-mergeVideo.webm";
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true)
@@ -107,27 +108,44 @@ public class ShortsService {
                 .addExtraArgs("-protocol_whitelist", "file,http,https,tcp,tls")
                 .addExtraArgs("-f", "concat")
                 .addExtraArgs("-safe", "0")
-                .addOutput(outputfile)
+                .addOutput(mergedVideoFile)
                 .done();
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         executor.createJob(builder).run();
 
         log.info("video merge 로컬 완료");
+        String outputWithAudio = "/app/" + roomId + "-mergeVideo-with-audio.webm";
 
+        // 음원 삽입
+        int shortsId = roomRepository.getRoom(roomId).getShorts().getShortsId();
+        String shortsAudioUrlByShortsId = ShortsAudio.getShortsAudioUrlByShortsId(shortsId);
+        FFmpegBuilder audioBuilder = new FFmpegBuilder()
+                .overrideOutputFiles(true)
+                .addInput(mergedVideoFile)  // 병합된 비디오 파일
+                .addInput(shortsAudioUrlByShortsId)  // 원하는 오디오 파일
+                .addOutput(outputWithAudio)
+                .setAudioCodec("copy") // 오디오 코덱 설정
+                .setVideoCodec("copy") // 비디오 코덱 복사
+                .addExtraArgs("-shortest") // 더 짧은 쪽에 맞춰 병합
+                .done();
+        executor.createJob(audioBuilder).run();
+        log.info("video with audio 완료");
 
-        File videoFile = new File(outputfile);
+        File finalVideoFile = new File(outputWithAudio);
         // s3 업로드
-        String path = "shorts/" + roomId + "/mergeVideo-";
-        String key = s3Util.uploadVideo(videoFile, path);
+        String path = "shorts/" + roomId + "/mergeVideoWithAudio-";
+        String key = s3Util.uploadVideo(finalVideoFile, path);
+        log.info("최종 merge된 비디오 s3 업로드 완료: " + key);
         // 텍스트 파일 & 비디오 파일 삭제
         File txtFile = new File(mergeInputfile);
+        File mergedVideoNoAudio = new File(mergeInputfile);
         deleteFile(txtFile);
-        deleteFile(videoFile);
+        deleteFile(mergedVideoNoAudio);
+        deleteFile(finalVideoFile);
         log.info("텍스트파일 & 비디오 파일 삭제 완료");
 
         return key;
-
     }
 
     private boolean deleteFile(File file) {
