@@ -34,5 +34,3 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
-S3:
-  baseURL: https://ziguonnana.s3.ap-northeast-2.amazonaws.com/
