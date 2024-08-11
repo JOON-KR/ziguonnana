@@ -62,7 +62,11 @@ public class S3Util {
         log.info(key);
         S3Resource resource;
         try (InputStream inputStream = new FileInputStream(file)) {
-            resource = s3Operations.upload(BUCKET, key, inputStream);
+            resource = s3Operations.upload(BUCKET, key, inputStream,
+                    ObjectMetadata.builder() //메타데이터 설정
+                    .contentType("video/webm")
+                    .contentDisposition("inline")
+                    .build());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
