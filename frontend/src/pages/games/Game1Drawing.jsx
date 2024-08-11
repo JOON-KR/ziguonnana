@@ -149,6 +149,7 @@ const Game1Drawing = () => {
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
     if (client && client.connected) {
@@ -162,6 +163,7 @@ const Game1Drawing = () => {
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
             setTimeLeft(15);
+            setIsStarted(true);
           } else if (parsedMessages.commandType === "DRAW_PREV") {
             canvasRef.current.loadPaths(parsedMessages.data);
           } else if (parsedMessages.commandType === "ART_END") {
@@ -183,7 +185,7 @@ const Game1Drawing = () => {
 
   useEffect(() => {
     const sendDrawingAndClearCanvas = async () => {
-      await handleSendDrawing();
+      // await handleSendDrawing();
       canvasRef.current.clearCanvas();
     };
 
@@ -193,13 +195,17 @@ const Game1Drawing = () => {
   }, [targetUser]);
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      handleSendDrawing();
+    if (!isGameEnded) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => {
+          setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        if (isStarted) {
+          handleSendDrawing();
+        }
+      }
     }
   }, [timeLeft]);
 
@@ -368,7 +374,11 @@ const Game1Drawing = () => {
             )}
           </ProfileDetails>
         </ProfileInfo>
-        <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+        {!isGameEnded ? (
+          <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+        ) : (
+          <button>다른 게임들 보러가기</button>
+        )}
       </Header>
       <CanvasWrapper onMouseUp={handleMouseUp}>
         <ReactSketchCanvas
@@ -429,3 +439,5 @@ const Game1Drawing = () => {
 };
 
 export default Game1Drawing;
+
+// ("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/realyArt/b0adaf11-9e0f-4d9d-87b3-67cfb3f34ede.png");
