@@ -102,7 +102,7 @@ const Loading = () => {
   }, [client, roomId, profileData, navigate, dispatch]);
 
   const handleNavigateToGame4 = () => {
-    navigate("/icebreaking/games/game3");
+    navigate("/icebreaking/games/game4");
   };
 
   return (
