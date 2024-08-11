@@ -14,11 +14,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Room {
 	//key: 클라이언트의 "num" value : Player
 	private ConcurrentMap<Integer,Player> players;
@@ -103,5 +105,11 @@ public class Room {
 	// 숏폼 합치기 request count 함수
 	public void countShortsMergeRequestCnt(){
 		shortsMergeRequestCnt++;
+	}
+
+	// 숏폼 결과 set
+	public void updateShortsResult(String shortsResult){
+		this.shortsResult=shortsResult;
+		log.info("숏폼 결과 room에 setting");
 	}
 }
