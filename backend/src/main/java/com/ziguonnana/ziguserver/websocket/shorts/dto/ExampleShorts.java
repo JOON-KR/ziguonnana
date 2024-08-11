@@ -42,14 +42,15 @@ public enum ExampleShorts {
     private static void loadConfig() {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            Map<String, List<ShortsInfo>> data = mapper.readValue(new File(CONFIG_FILE), new TypeReference<Map<String, List<ShortsInfo>>>() {});
+            Map<String, List<ShortsInfo>> data = mapper.readValue(new File(CONFIG_FILE), new TypeReference<>() {
+            });
             for (ExampleShorts exampleShorts : ExampleShorts.values()) {
                 String key = exampleShorts.getShortsId() + "_SHORTS_PEOPLE" + exampleShorts.getPeople();
                 exampleShorts.exampleShortsUrl.addAll(data.getOrDefault(key, Collections.emptyList()));
             }
             log.info("숏츠 예시 영상 세팅 완료");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info(e.getMessage() + ": 숏츠 예시 영상 세팅 오류");
         }
     }
     public static List<ShortsInfo> getUrlsByShortsIdAndPeople(int shortsId, int people) {
