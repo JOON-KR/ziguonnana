@@ -155,6 +155,7 @@ const RoomCreateModal = ({ onClose }) => {
 
       //소켓 방생성
       const socket = new SockJS(`${BASE_URL}/ws`);
+      // const socket = new SockJS(`${TAMTAM_URL}/ws`);
 
       const client = Stomp.over(socket);
       dispatch(setStompClient(client));
