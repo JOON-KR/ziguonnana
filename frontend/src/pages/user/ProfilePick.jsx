@@ -125,7 +125,7 @@ const ProfilePick = () => {
     };
     fetchProfiles();
 
-    const socket = new SockJS(`${TAMTAM_URL}/ws`);
+    const socket = new SockJS(`${BASE_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,

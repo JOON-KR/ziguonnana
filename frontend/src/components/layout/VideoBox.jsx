@@ -22,6 +22,7 @@ const Video = styled.video`
   background-color: white;
   border-radius: 10px;
   padding: 10px;
+  transform: scaleX(-1); /* 좌우 반전 */
 `;
 
 const NameTag = styled.div`

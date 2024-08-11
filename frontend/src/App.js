@@ -11,6 +11,7 @@ import Intro from "./pages/iceBreaking/Intro";
 import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
 import TestPage from "./pages/TestPage";
+import PosePage from "./pages/PosePage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="intro" element={<Intro />} />
         </Route>
         <Route path="/create-room" element={<RoomCreateModal />} />
+        <Route path="/pose" element={<PosePage />} />
       </Routes>
     </div>
   );

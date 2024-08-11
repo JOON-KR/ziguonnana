@@ -82,6 +82,9 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
+          <button onClick={() => navigate("/icebreaking/games/game3")}>
+            숏폼 페이지로 이동
+          </button>
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
