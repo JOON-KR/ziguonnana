@@ -145,7 +145,7 @@ const Game2 = () => {
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
-  const [explainerNo, setExplainerNo] = useState(1);
+  const [explainerNo, setExplainerNo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
 
   
@@ -185,11 +185,13 @@ const Game2 = () => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
     console.log("유저 번호 :", userNo);
+
     if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
       client.subscribe(`/topic/game/${roomId}/${userNo}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
         console.log("출제자 키워드 :", parsedMessage);
+        console.log(message)
 
         if (parsedMessage.commandType == "BODYGAME_EXPLANIER") {
           setIsExplainer(true);
@@ -221,9 +223,6 @@ const Game2 = () => {
           parsedMessage.data !== "요청 불가"
         ) {
           setKeywordType(parsedMessage.data);
-        } else {
-          console.log('userNo: ', userNo);
-          console.log('explainerNo: ', explainerNo);
         }
         if (
           parsedMessage.commandType == "CHAT" &&
@@ -233,7 +232,11 @@ const Game2 = () => {
           setReceivedKeyword("");
           setRound((prev) => prev + 1);
         }
-
+        // 출제자이면,
+        // if (parsedMessage.commandType === "BODYGAME_EXPLANIER") {
+        //   setExplainerNo(userNo); // 서버에서 받은 출제자 번호 설정
+        //   setIsExplainer(true); // 현재 사용자가 출제자인지 확인
+        // }
         if (parsedMessage.commandType == "GAME_MODAL_START") {
           setIsBodyTalkGuideModalOpen(false);
           setIsBodyTalkWelcomeModalOpen(false);
@@ -241,8 +244,11 @@ const Game2 = () => {
         }
         //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
         if (parsedMessage.data.isCorrect === true) {
+          setIsExplainer(false);
           setRound((prevRound) => prevRound + 1);
         }
+        console.log("userNo:", userNo);
+        console.log("explainerNo:", explainerNo);
       });
 
       setSubscribed(true);
@@ -257,7 +263,7 @@ const Game2 = () => {
       setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
-  }, [round, client, roomId]);
+  }, [round, client, roomId, isGameStarted]);
   
   // 타이머 로직
   useEffect(() => {
@@ -330,7 +336,7 @@ const Game2 = () => {
         <>
           <HeaderContainer>
             <Header>{round} 라운드 - 출제자</Header>
-            <Timer>{formatTime(timeLeft)}</Timer> {/* 타이머 표시 */}
+            <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
           <SpeechBubble
             type={
@@ -348,16 +354,16 @@ const Game2 = () => {
         <>
           <HeaderContainer>
             <Header>{round} 라운드 - 맞추는 사람</Header>
-            <Timer>{formatTime(timeLeft)}</Timer> {/* 타이머 표시 */}
+            <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
           <SpeechBubble
             type={`현재 제시어 종류 : ${keywordType}`}
           />
           {/* <h1>출제자 화면 출력</h1> */}
           <VideoWrapper>
-            {explainerNo === userNo && (
+            {/* {explainerNo === userNo && ( */}
               <UserVideo ref={userVideoRef} autoPlay muted />
-            )}
+            {/* // )} */}
           </VideoWrapper>
           <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
           <ChatWrap>
