@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
@@ -47,14 +48,17 @@ public class Room {
 	private ConcurrentMap<Integer, List<KeyPoint>>vectors;
 	//이구동성 게임결과 저장용
 	private List<IgudongseongResult> Igudongseong;
-
+	
 	//숏폼 챌린지
 	private Shorts shorts;
 	// 숏폼 선택 request count
 	private int shortsRequestCnt;
 	// 숏폼 합치기 request count;
 	private int shortsMergeRequestCnt;
-
+	// 숏폼 결과 URL
+	private String shortsResult;
+	//아바타 명함
+	private ConcurrentMap<Integer, AvatarResult> Avatarcards;
 
 	public void initArt() {
 		for(int i=1;i<=people;i++) {

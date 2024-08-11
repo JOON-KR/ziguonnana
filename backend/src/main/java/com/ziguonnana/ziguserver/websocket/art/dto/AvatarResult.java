@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AvatarCard {
-	String avatarImage;
-	List<String>feature;
+public class AvatarResult {
+	private String avatarImage;
+	private List<String>feature;
+	private String nickname;
 }

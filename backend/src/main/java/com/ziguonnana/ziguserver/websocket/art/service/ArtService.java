@@ -15,7 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.ArtResponse;
-import com.ziguonnana.ziguserver.websocket.art.dto.AvatarCard;
+import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
@@ -157,7 +157,7 @@ public class ArtService {
 		Room room = roomRepository.getRoom(roomId);
 		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
 		int people = room.getPeople();
-		ConcurrentMap<Integer, AvatarCard> cards = new ConcurrentHashMap<>();
+		ConcurrentMap<Integer, AvatarResult> cards = new ConcurrentHashMap<>();
 
 		for (int i = 1; i <= people; i++) {
 			List<RelayArt> tmp = map.get(i);
@@ -169,14 +169,14 @@ public class ArtService {
 				for(int j=0;j<3;j++) {
 					features.add(answer.get(i));
 				}
-				AvatarCard card = AvatarCard.builder()
+				AvatarResult card = AvatarResult.builder()
 						.avatarImage(art.getArt()) 
 						.feature(features)
 						.build();
 				cards.put(i, card);
 			}
 		}
-		Response<ConcurrentMap<Integer, AvatarCard>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
+		Response<ConcurrentMap<Integer, AvatarResult>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
 		log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
 	}
@@ -184,7 +184,8 @@ public class ArtService {
 	public void start(String roomId, String image) {
 		Room room = roomRepository.getRoom(roomId);
 		room.countUp();
-		if(room.getCount()>=room.getPeople()) {
+		if(room.getCount()>=room.getPeople()&&!room.isRelay()) {
+			room.relayEnd();
 			room.countInit();
 			room.cycleInit();
 			save(roomId, DEFAULT_IMAGE);		
