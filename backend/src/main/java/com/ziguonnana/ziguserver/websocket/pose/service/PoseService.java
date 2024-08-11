@@ -3,11 +3,11 @@ package com.ziguonnana.ziguserver.websocket.pose.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -34,36 +34,61 @@ public class PoseService {
 	private final S3Util s3Util;
 
 	public void processKeyPoints(String roomId, int poseType, PoseRequest poseRequest) {
-	    // score가 0.7 이상인 Position만 필터링하여 포인트를 수집
-	    List<List<Integer>> filteredPositions = poseRequest.getKeypoints().stream()
+	    // Set을 사용하여 중복을 제거
+	    Set<List<Integer>> expandedPositions = new HashSet<>();
+
+	    // score가 0.7 이상인 Position만 필터링하고, 각 포인트에 대해 확장된 포인트들을 추가
+	    poseRequest.getKeypoints().stream()
 	        .filter(keyPoint -> keyPoint.getScore() >= 0.7)
-	        .map(keyPoint -> List.of((int) keyPoint.getPosition().getX(), (int) keyPoint.getPosition().getY()))
-	        .collect(Collectors.toList());
-
-	    log.info("필터링된 키포인트: {}", filteredPositions);
-
+	        .forEach(keyPoint -> {
+	            int x = (int) keyPoint.getPosition().getX();
+	            int y = (int) keyPoint.getPosition().getY();
+	            
+	            // 각 포인트에 대해 반지름 5인 원 안의 모든 포인트를 추가
+	            for (int dx = -20; dx <= 20; dx++) {
+	                for (int dy = -20; dy <= 20; dy++) {
+	                    if (dx * dx + dy * dy <= 400) { // 원 안에 있는지 확인 (반지름이 5이므로 5^2 = 25)
+	                        expandedPositions.add(List.of(x + dx, y + dy));
+	                    }
+	                }
+	            }
+	        });
+	    
+	    
+	    
+	    // Set을 List로 변환
+	    List<List<Integer>> expandedList = new ArrayList<>(expandedPositions);
+	    log.info("키포인트: {}",expandedList);
 	    // PoseResult로 변환
 	    PoseResult poseResult = PoseResult.builder()
 	            .num(poseRequest.getNum())
-	            .vector(filteredPositions)
+	            .vector(expandedList)
 	            .build();
 
 	    // PoseService의 calculate 함수 호출
 	    calculate(roomId, poseType, poseResult);
 	}
 
-
 	public void calculate(String roomId, int poseType, PoseResult request) {
 	    String fileName = "pose/poseType" + poseType + ".txt";
 	    Room room = roomRepository.getRoom(roomId);
+	    
 	    // S3에서 파일을 읽어옵니다.
 	    Set<List<Integer>> savedPoints = readPointsFromS3(fileName);
 
 	    // request로 들어온 vector를 set으로 변환하여 비교합니다.
 	    Set<List<Integer>> inputPoints = new HashSet<>(request.getVector());
 
-	    // 일치하는 포인트가 하나라도 있으면 실패 (isSuccess = false)
-	    boolean isSuccess = !inputPoints.stream().anyMatch(savedPoints::contains);
+	    // 일치하는 포인트를 세어 성공률을 계산합니다.
+	    long matchingPoints = inputPoints.stream().filter(savedPoints::contains).count();
+	    double totalPoints = inputPoints.size();
+	    double successRate = (totalPoints - matchingPoints) / totalPoints * 100;
+
+	    log.info("포즈 계산 결과: 총 포인트 수 = {}, 일치하는 포인트 수 = {}, 성공률 = {}%", 
+	             totalPoints, matchingPoints, successRate);
+
+	    // 성공률이 97% 이상일 경우에만 성공으로 판단
+	    boolean isSuccess = successRate >= 97.0;
 
 	    List<ConcurrentHashMap<Integer, String>> poselist = room.getPoseResult();
 	    if (poselist.size() <= room.getCycle()) {
