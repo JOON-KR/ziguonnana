@@ -132,8 +132,12 @@ const Game2 = () => {
   const userNo = useSelector((state) => state.auth.userNo);
   const maxNo = useSelector((state) => state.room.maxNo);
   const localStream = useSelector((state) => state.room.localStream);
+  const userVideoRef = useRef(null);  // 출제자 영상 - 사용자 비디오 스트림 설정
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const videoRef = useRef(null);
+  const subscribers = useSelector((state) => state.room.subscribers);
+  const subscriberVideoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
   // const explainerNo = useSelector((state) => state.bodytalk.explainerNo);
   
   const [round, setRound] = useState(1);
@@ -145,20 +149,20 @@ const Game2 = () => {
   const [typedText, setTypedText] = useState("");
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
-  const [explainerNo, setExplainerNo] = useState(0);
+  const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
 
-  
-  // 출제자 영상
-  // 사용자 비디오 스트림 설정
-  const userVideoRef = useRef(null);
-
   useEffect(() => {
-    if (localStream && userVideoRef.current) {
-      userVideoRef.current.srcObject = localStream.getMediaStream();
-      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+    if (explainerNo === userNo) {
+      setIsExplainer(true);
+    } else {
+      setIsExplainer(false);
     }
-  }, [localStream]);
+    console.log("userNo: ", userNo);
+    console.log("explainerNo: ", explainerNo);
+    console.log("isExplainer:", isExplainer)
+  }, [userNo, explainerNo, client, roomId, subscribed]);
+
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -224,6 +228,11 @@ const Game2 = () => {
         ) {
           setKeywordType(parsedMessage.data);
         }
+        // 출제자이면,
+        if (parsedMessage.commandType === "BODYGAME_EXPLANIER") {
+          setExplainerNo(userNo); // 서버에서 받은 출제자 번호 설정
+          setIsExplainer(true); // 현재 사용자가 출제자인지 확인
+        }
         if (
           parsedMessage.commandType == "CHAT" &&
           parsedMessage.data.correct == true
@@ -232,11 +241,6 @@ const Game2 = () => {
           setReceivedKeyword("");
           setRound((prev) => prev + 1);
         }
-        // 출제자이면,
-        // if (parsedMessage.commandType === "BODYGAME_EXPLANIER") {
-        //   setExplainerNo(userNo); // 서버에서 받은 출제자 번호 설정
-        //   setIsExplainer(true); // 현재 사용자가 출제자인지 확인
-        // }
         if (parsedMessage.commandType == "GAME_MODAL_START") {
           setIsBodyTalkGuideModalOpen(false);
           setIsBodyTalkWelcomeModalOpen(false);
@@ -247,24 +251,41 @@ const Game2 = () => {
           setIsExplainer(false);
           setRound((prevRound) => prevRound + 1);
         }
-        console.log("userNo:", userNo);
-        console.log("explainerNo:", explainerNo);
       });
 
       setSubscribed(true);
     }
-  }, [client, roomId, userNo, subscribed]);
+  }, [client, roomId, userNo, subscribed, explainerNo]);
 
   //라운드 변경시 실행
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
-    if (client && client.connected && isGameStarted == true) {
+    if (client && client.connected && isGameStarted) {
       // isExplainer 초기화
-      setIsExplainer(false);
+      // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
-  }, [round, client, roomId, isGameStarted]);
+  }, [round, client, isGameStarted, roomId]);
   
+  useEffect(() => {
+    if (localStream && userVideoRef.current && explainerNo === userNo) {
+      userVideoRef.current.srcObject = localStream.getMediaStream();
+      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+    }
+  }, [localStream, explainerNo, userNo]);
+
+  useEffect(() => {
+    if (subscribers.length > 0 && subscriberVideoRef.current && explainerNo !== userNo) {
+      const subscriber = subscribers.find(
+        (sub) => sub.stream.connection.data === `{"userNo":${explainerNo}}`);
+      if (subscriber) {
+        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
+        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);    
+      } 
+    }
+  }, [subscribers, explainerNo, userNo]);
+
+
   // 타이머 로직
   useEffect(() => {
     if (isGameStarted && timeLeft > 0) {
@@ -277,7 +298,7 @@ const Game2 = () => {
       // 타이머가 0이 되면 게임 종료 로직 추가 가능
       console.log("시간 종료");
     }
-  }, [isGameStarted, timeLeft]);
+  }, [isGameStarted, timeLeft, userNo, explainerNo]);
 
   // 타이머 포맷
   const formatTime = (seconds) => {
@@ -361,9 +382,11 @@ const Game2 = () => {
           />
           {/* <h1>출제자 화면 출력</h1> */}
           <VideoWrapper>
-            {/* {explainerNo === userNo && ( */}
+            {explainerNo === userNo ? (
               <UserVideo ref={userVideoRef} autoPlay muted />
-            {/* // )} */}
+            ) : (
+              <UserVideo ref={subscriberVideoRef} autoPlay muted />
+            )} 
           </VideoWrapper>
           <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
           <ChatWrap>
