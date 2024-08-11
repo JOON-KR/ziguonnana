@@ -73,10 +73,15 @@ public class ArtService {
 
 	// 그림 저장 후 응답전달
 	public void save(String roomId, String art) {
+		
 		log.info("----이어그리기 그림 저장 요청: {}",art);
 		Room room = roomRepository.getRoom(roomId);
 		int cycle = room.getCycle();
+		
 		int people = room.getPeople();
+		if(cycle>=people) {
+			return;
+		}
 		ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
 		int targetUser = cycle+1;
 		int userNo = (targetUser+room.getCount()) % people == 0 ? people : (targetUser+room.getCount()) % people;
@@ -93,6 +98,7 @@ public class ArtService {
 					.keyword(keyword)
 					.build();
 			log.info("----{}번째 사이클 시작 -------",cycle+1);
+			log.info("---- targetUser : {}, currentUser : {}, art: {}",response.getTargetUser(),response.getCurrentUser(),response.getArt());
 			//저장안하고 다음 타겟 및 그릴사람 반환 
 			messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(),Response.ok(CommandType.ART_RELAY, response));
 			room.countUp();
@@ -110,7 +116,7 @@ public class ArtService {
 		//세이브 카운트 업
 		room.countUp();
 		// 사이클이 끝나면 사이클업
-		if(room.getCount() == people -1) {
+		if(room.getCount() >= people) {
 			log.info("----{}번 사이클 종료 ",cycle+1);
 			room.cycleUp();
 			room.countInit();
@@ -141,7 +147,7 @@ public class ArtService {
 		// 결과 전송
 		Response<ConcurrentMap<Integer, List<RelayArt>>> endResponse = Response.ok(CommandType.ART_END, map);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, endResponse);
-		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, endResponse);
+		log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, endResponse.getData());
 		// 아바타 결과 반환
 		spreadAvatarCard(roomId);
 	}
@@ -173,6 +179,16 @@ public class ArtService {
 		Response<ConcurrentMap<Integer, AvatarCard>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
 		messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
 		log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
+	}
+
+	public void start(String roomId, String image) {
+		Room room = roomRepository.getRoom(roomId);
+		room.countUp();
+		if(room.getCount()>=room.getPeople()) {
+			room.countInit();
+			room.cycleInit();
+			save(roomId, DEFAULT_IMAGE);		
+		}
 	}
 
 }

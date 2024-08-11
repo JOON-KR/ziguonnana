@@ -8,6 +8,7 @@ import java.util.*;
 @AllArgsConstructor
 @Getter
 public enum ExampleShorts {
+
     FIRST_SHORTS_PEOPLE1(1,1, Arrays.asList(
             new ShortsInfo("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4", 38000)
     )),
@@ -41,6 +42,7 @@ public enum ExampleShorts {
             new ShortsInfo("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/people6/c893971a-8340-4793-8a4a-66f11c0d8080-4.mp4", 5000),
             new ShortsInfo("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/people6/f6394341-d19d-4889-8d2e-3ceb8173cdd4-5.mp4", 13000)
     ));
+
 
     private final int shortsId;
     private final int people;
