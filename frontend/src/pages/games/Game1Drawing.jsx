@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import { useSelector, useDispatch } from "react-redux";
-import BASE_URL, { S3_BASE_URL, TAMTAM_URL } from "../../api/APIconfig";
+import { useSelector } from "react-redux";
 import axios from "axios";
+import BASE_URL from "../../api/APIconfig";
 
 const Wrap = styled.div`
   width: 100%;
@@ -137,101 +137,61 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(5);
-
-  const [targetUser, setTargetUser] = useState(0); //현재 그릴 대상
-  const [currentUser, setCurrentUser] = useState(0); //현재 그릴 권한 가진 사람
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [targetUser, setTargetUser] = useState(0);
+  const [currentUser, setCurrentUser] = useState(0);
   const [keyword, setKeyword] = useState("");
-  const [prevDrawing, setPrevDrawing] = useState(null); //이전 사람이 그린 그림
-  const [avatarList, setAvatarList] = useState([]);
-  const [drawingResult, setDrawingResult] = useState(null); //완전히 다 끝난 결과 1인당 이어그린 리스트
-
+  const [drawingResult, setDrawingResult] = useState(null);
   const [isGameEnded, setIsGameEnded] = useState(false);
+  const [lastSentPaths, setLastSentPaths] = useState([]);
 
   const canvasRef = useRef(null);
-
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
 
   useEffect(() => {
-    console.log("--------------------------------");
-    console.log("연결 상태 : ", client.connected);
-    console.log("--------------------------------");
     if (client && client.connected) {
       const subscription = client.subscribe(
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessages = JSON.parse(message.body);
-          // console.log("그림그리기 수신 메시지 : ", parsedMessages); // 서버로부터 받은 메시지 로그
 
-          //이어그리기 메시지 도착하면 타겟, 권한 유저 번호 설정
           if (parsedMessages.commandType === "ART_RELAY") {
-            console.log("타겟, 유저 번호 변경!");
-            console.log("소켓 서버에서 온 메세지 : ", parsedMessages);
-
-            // 이전 사람이 그린 그림의 URL을 상태로 저장합니다.
-            setPrevDrawing(parsedMessages.data.art);
-
-            // 타겟 유저와 현재 유저, 키워드 상태 업데이트
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(5);
-          }
-          //이어그리기 결과 저장
-          else if (parsedMessages.commandType === "ART_END") {
-            console.log("이어그리기 결과 받음 :", parsedMessages.data);
+            setTimeLeft(15);
+          } else if (parsedMessages.commandType === "DRAW_PREV") {
+            canvasRef.current.loadPaths(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_END") {
             setIsGameEnded(true);
+            setCurrentUser(0);
             canvasRef.current.clearCanvas();
             setDrawingResult(parsedMessages.data);
-            //To Do : 끝나고 나서 이어그리기 내역 보여주기
           }
-
-          //응답으로 받은 그림을 prevDrawing으로 설정로직 필요
         }
       );
 
       client.send(`/app/game/${roomId}/art-start`);
 
-      // 컴포넌트 언마운트 시 구독 취소
       return () => {
-        console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
         subscription.unsubscribe();
       };
     }
-  }, []);
+  }, [client, roomId]);
 
   useEffect(() => {
-    if (prevDrawing && canvasRef.current) {
-      const img = new Image();
-      img.src = prevDrawing;
-      console.log("전달받은 이미지 url : ", prevDrawing);
+    const sendDrawingAndClearCanvas = async () => {
+      await handleSendDrawing();
+      canvasRef.current.clearCanvas();
+    };
 
-      img.onload = () => {
-        const canvasContainer = canvasRef.current.canvasContainer;
-        if (canvasContainer && canvasContainer.childNodes.length > 1) {
-          const canvas = canvasContainer.childNodes[1]; // canvas 요소 직접 참조
-          const ctx = canvas.getContext("2d");
-
-          const canvasWidth = canvas.width;
-          const canvasHeight = canvas.height;
-
-          ctx.clearRect(0, 0, canvasWidth, canvasHeight); // 기존 그림 지우기
-          ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight); // 이미지 그리기
-        } else {
-          console.error("Canvas element not found");
-        }
-      };
+    if (targetUser !== 0 && canvasRef.current) {
+      sendDrawingAndClearCanvas();
     }
-  }, [prevDrawing]);
-
-  //그리는 대상 변하면 캔버스 비워주기
-  useEffect(() => {
-    canvasRef.current.clearCanvas();
   }, [targetUser]);
 
-  // 5부터 감소, 0미만 되면 s3로 png이미지 axios 전송, 받은 응답을 소켓으로 전송
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setTimeout(() => {
@@ -243,10 +203,9 @@ const Game1Drawing = () => {
     }
   }, [timeLeft]);
 
-  //현재 캔버스에서 그려진 그림 png형태로 추출해서 서버로 전송, 서버에서 받은 응답을 소켓으로 전송
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
-    if (currentCanvas && currentUser == userNo) {
+    if (currentCanvas) {
       const exportImage = await currentCanvas.exportImage("png");
       const imageBlob = await (await fetch(exportImage)).blob();
       const formData = new FormData();
@@ -258,10 +217,101 @@ const Game1Drawing = () => {
         },
       });
       console.log("S3 전송해서 받은 결과 : ", response);
-      console.log("S3에서 받은 그림 : ", response.data); // "shortsExample/18ea86bf-17f6-4466-8df0-365cff321a80.png"
 
       console.log("S3에서 받은 결과 전송!");
-      client.send(`/app/game/${roomId}/saveArt`, {}, response.data);
+      if (currentUser == userNo) {
+        client.send(
+          `/app/game/${roomId}/saveArt`,
+          {},
+          JSON.stringify(response.data)
+        );
+      }
+    }
+  };
+
+  const simplifyPath = (path, tolerance = 1.0) => {
+    if (!path || path.length <= 2) return path;
+
+    const sqTolerance = tolerance * tolerance;
+
+    const simplifyDPStep = (points, first, last, sqTolerance, simplified) => {
+      let maxSqDist = sqTolerance;
+      let index = null;
+
+      for (let i = first + last; i < last; i++) {
+        const sqDist = getSquareSegmentDistance(
+          points[i],
+          points[first],
+          points[last]
+        );
+
+        if (sqDist > maxSqDist) {
+          index = i;
+          maxSqDist = sqDist;
+        }
+      }
+
+      if (maxSqDist > sqTolerance) {
+        if (index - first > 1)
+          simplifyDPStep(points, first, index, sqTolerance, simplified);
+        simplified.push(points[index]);
+        if (last - index > 1)
+          simplifyDPStep(points, index, last, sqTolerance, simplified);
+      }
+    };
+
+    const getSquareDistance = (p1, p2) => {
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      return dx * dx + dy * dy;
+    };
+
+    const getSquareSegmentDistance = (p, p1, p2) => {
+      let x = p1.x;
+      let y = p1.y;
+      const dx = p2.x - x;
+      const dy = p2.y - y;
+
+      if (dx !== 0 || dy !== 0) {
+        const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+
+        if (t > 1) {
+          x = p2.x;
+          y = p2.y;
+        } else if (t > 0) {
+          x += dx * t;
+          y += dy * t;
+        }
+      }
+
+      const d2 = (p.x - x) ** 2 + (p.y - y) ** 2;
+
+      return d2;
+    };
+
+    const simplified = [path[0]];
+    simplifyDPStep(path, 0, path.length - 1, sqTolerance, simplified);
+    simplified.push(path[path.length - 1]);
+
+    return simplified;
+  };
+
+  const handleMouseUp = async () => {
+    console.log(`타겟 : ${targetUser}, 권한 : ${currentUser}, 나 : ${userNo}`);
+    if (canvasRef.current && currentUser == userNo) {
+      const currentPaths = await canvasRef.current.exportPaths();
+      const simplifiedPaths = currentPaths.map((path) => ({
+        ...path,
+        path: simplifyPath(path.path),
+      }));
+      const newPaths = simplifiedPaths.slice(lastSentPaths.length);
+
+      if (newPaths.length > 0) {
+        client.send(`/app/game/${roomId}/draw`, {}, JSON.stringify(newPaths));
+        setLastSentPaths(currentPaths);
+      }
+    } else {
+      console.log("캔버스레프 없음!!!!!!!!!!!!!!!!!!!!!!!");
     }
   };
 
@@ -289,6 +339,7 @@ const Game1Drawing = () => {
     "#D3D3D3",
     "#A9A9A9",
   ];
+
   const handleColorChange = (color) => {
     setBrushColor(color);
     setIsEraser(false);
@@ -298,16 +349,14 @@ const Game1Drawing = () => {
       .toString()
       .padStart(2, "0");
     const seconds = (time % 60).toString().padStart(2, "0");
-    return `${minutes} : ${seconds}`;
+    return `${minutes}:${seconds}`;
   };
-
   return (
     <Wrap>
       <Header>
         <ProfileInfo>
           <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
           <ProfileDetails>
-            {/* <HeaderText>키워드: {'#' + resData.keyword}</HeaderText> */}
             {!isGameEnded ? (
               <>
                 <h1>{targetUser}님 그리는중~~</h1>
@@ -321,7 +370,7 @@ const Game1Drawing = () => {
         </ProfileInfo>
         <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
       </Header>
-      <CanvasWrapper>
+      <CanvasWrapper onMouseUp={handleMouseUp}>
         <ReactSketchCanvas
           ref={canvasRef}
           width="970px"
@@ -329,7 +378,7 @@ const Game1Drawing = () => {
           strokeColor={isEraser ? "#FFFFFF" : brushColor}
           strokeWidth={brushRadius}
           eraserWidth={isEraser ? brushRadius : 0}
-          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }} // 그림 권한 제어
+          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
         />
         <ToolsWrapper>
           <CustomSwatchesPicker>
@@ -380,11 +429,3 @@ const Game1Drawing = () => {
 };
 
 export default Game1Drawing;
-
-// {
-//   "art": "\"shortsExample/08d94bda-9047-4d7d-8526-c8e9854ec68f.png\"",
-//   "targetUser": 3,
-//   "currentUser": 2,
-//   "keyword": "c"
-// }
-// "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/shortsExample/18ea86bf-17f6-4466-8df0-365cff321a80.png"
