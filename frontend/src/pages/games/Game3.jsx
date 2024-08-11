@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 훅 임포트
 import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
@@ -67,6 +68,7 @@ const StyledSpeechBubble = styled(SpeechBubble)`
 `;
 
 const Game3 = () => {
+  const navigate = useNavigate(); // useNavigate 훅 사용
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const localStream = useSelector((state) => state.room.localStream);
@@ -97,16 +99,21 @@ const Game3 = () => {
         const parsedMessage = JSON.parse(message.body);
 
         if (parsedMessage.commandType === "IGUDONGSEONG_CYCLE") {
-          console.log("다음 라운드 시작================");
-          setRound((prevRound) => prevRound + 1);
-          const nextKeyword = keywords[round];
-          setCurrentKeyword(nextKeyword);
-          setShowStartImages(true);
+          if (round < 6) {
+            console.log("다음 라운드 시작================");
+            setRound((prevRound) => prevRound + 1);
+            const nextKeyword = keywords[round];
+            setCurrentKeyword(nextKeyword);
+            setShowStartImages(true);
 
-          setTimeout(() => {
-            setShowStartImages(false);
-            setIsGameStarted(true);
-          }, 5000);
+            setTimeout(() => {
+              setShowStartImages(false);
+              setIsGameStarted(true);
+            }, 5000);
+          } else {
+            console.log("게임 종료!");
+            navigate("/icebreaking/games"); // 게임 종료 후 리다이렉트
+          }
         } else if (parsedMessage.message === "이구동성 시작!\n") {
           console.log("이구동성 키워드 수신:", parsedMessage.data);
           setKeywords(parsedMessage.data);
@@ -123,8 +130,15 @@ const Game3 = () => {
           parsedMessage.message === "실패!\n"
         ) {
           console.log(`결과 수신: ${parsedMessage.message}`);
-          // 결과에 따라 다음 라운드로 이동
-          client.send(`/app/game/${roomId}/igudongseong-cycle`);
+          // 결과에 따라 3초 후에 다음 라운드로 이동
+          setTimeout(() => {
+            if (round < 6) {
+              client.send(`/app/game/${roomId}/igudongseong-cycle`);
+            } else {
+              console.log("게임이 끝났습니다.");
+              navigate("/icebreaking/games"); // 게임 종료 후 리다이렉트
+            }
+          }, 3000);
         }
       }
     );
@@ -132,7 +146,7 @@ const Game3 = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [client, roomId, round, keywords]);
+  }, [client, roomId, round, keywords, navigate]);
 
   useEffect(() => {
     if (isGameStarted) {
@@ -162,7 +176,7 @@ const Game3 = () => {
         }, 3000);
       }
     }
-  }, [localStream, videoRef, round, isGameStarted]);
+  }, [localStream, videoRef, round, isGameStarted, client, roomId, userNo]);
 
   const startGameSequence = () => {
     client.send(`/app/game/${roomId}/igudongseong`);
