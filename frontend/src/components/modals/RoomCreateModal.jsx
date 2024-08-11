@@ -12,7 +12,7 @@ import authSlice, {
   setOpenViduToken,
   setUserNo,
 } from "../../store/authSlice";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";

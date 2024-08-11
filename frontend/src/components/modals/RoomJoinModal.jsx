@@ -220,11 +220,15 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { setRoomId, setTeamCode } from "../../store/roomSlice";
-import { setMemberId, setOpenViduToken, setUserNo } from "../../store/authSlice";
+import {
+  setMemberId,
+  setOpenViduToken,
+  setUserNo,
+} from "../../store/authSlice";
 import SockJS from "sockjs-client";
 import { setStompClient } from "../../store/clientSlice";
 import { Stomp } from "@stomp/stompjs";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -307,51 +311,61 @@ const RoomJoinModal = ({ onClose }) => {
   useEffect(() => {
     if (inviteCode !== "") {
       const socket = new SockJS(`${BASE_URL}/ws`);
+      // const socket = new SockJS(`${TAMTAM_URL}/ws`);
+      //
       const client = Stomp.over(socket);
 
-      client.connect({}, async (frame) => {
-        console.log("웹소켓 서버와 연결됨!", frame);
+      client.connect(
+        {},
+        async (frame) => {
+          console.log("웹소켓 서버와 연결됨!", frame);
 
-        // 오픈비두 방 입장 처리
-        const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`);
-        console.log("오픈비두 방 참가 응답 : ", response.data.data);
+          // 오픈비두 방 입장 처리
+          const response = await axiosInstance.post(
+            `/api/v1/room/${inviteCode}`
+          );
+          console.log("오픈비두 방 참가 응답 : ", response.data.data);
 
-        const { memberId, openviduToken } = response.data.data;
+          const { memberId, openviduToken } = response.data.data;
 
-        // 전역 상태 업데이트
-        dispatch(setMemberId(memberId));
-        dispatch(setOpenViduToken(openviduToken));
-        dispatch(setRoomId(inviteCode));
+          // 전역 상태 업데이트
+          dispatch(setMemberId(memberId));
+          dispatch(setOpenViduToken(openviduToken));
+          dispatch(setRoomId(inviteCode));
 
-        setMemId(memberId);
+          setMemId(memberId);
 
-        // 방에 대한 구독
-        client.subscribe(`/topic/game/${inviteCode}`, (message) => {
-          const parsedMessage = JSON.parse(message.body);
-          console.log("방에서 받은 메시지:", parsedMessage);
-          setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-        });
+          // 방에 대한 구독
+          client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("방에서 받은 메시지:", parsedMessage);
+            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+          });
 
-        // 각 memberId에 대한 구독
-        client.subscribe(`/topic/game/${inviteCode}/${memberId}`, (message) => {
-          const parsedMessage = JSON.parse(message.body);
-          console.log("개별 구독 받은 메시지:", parsedMessage);
-          if (parsedMessage.data && parsedMessage.data.num !== undefined) {
-            dispatch(setUserNo(parsedMessage.data.num));
-            console.log("유저 번호 :", parsedMessage.data.num);
-            setSessionInfo((prevSessionInfo) => ({
-              ...prevSessionInfo,
-              num: parsedMessage.data.num,
-            }));
-          }
-        });
+          // 각 memberId에 대한 구독
+          client.subscribe(
+            `/topic/game/${inviteCode}/${memberId}`,
+            (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("개별 구독 받은 메시지:", parsedMessage);
+              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+                dispatch(setUserNo(parsedMessage.data.num));
+                console.log("유저 번호 :", parsedMessage.data.num);
+                setSessionInfo((prevSessionInfo) => ({
+                  ...prevSessionInfo,
+                  num: parsedMessage.data.num,
+                }));
+              }
+            }
+          );
 
-        setStClient(client);
-        dispatch(setStompClient(client));
-
-      }, (error) => {
-        console.error("STOMP error:", error);
-      });
+          setStClient(client);
+          dispatch(setStompClient(client));
+        },
+        (error) => {
+          console.error("STOMP error:", error);
+        }
+      );
     }
   }, [inviteCode]);
 
