@@ -1,5 +1,7 @@
 package com.ziguonnana.ziguserver.domain.records.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,13 +25,13 @@ public class RecordController {
 	private final RecordService recordService;
 
 	@GetMapping
-	public ResponseEntity<ResponseDto> getMemberRecords() {
+	public ResponseEntity<ResponseDto<List<RecordsResponse>>> getMemberRecords() {
 		return ResponseEntity.ok().body(ResponseDto.success(recordService.getRecords()));
 	}
 	
 	@PostMapping
-	public ResponseEntity<ResponseDto> createRecords(@RequestBody RecordsRequest recordsRequest) {
-		RecordsResponse recordsResponse = recordService.createRecords(recordsRequest);
+	public ResponseEntity<ResponseDto<RecordsResponse>> createRecords(@RequestBody RecordsRequest request) {
+		RecordsResponse recordsResponse = recordService.createRecords(request);
 		return ResponseEntity.status(201).body(ResponseDto.success(recordsResponse));
 	}
 }
