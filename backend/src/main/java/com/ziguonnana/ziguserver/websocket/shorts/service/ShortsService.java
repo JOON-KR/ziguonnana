@@ -98,6 +98,7 @@ public class ShortsService {
     }
 
     private String videoMerge(String roomId, String mergeInputfile) throws IOException {
+        log.info("videoMerge 시작");
         FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
         FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
         String mergedVideoFile = "/app/" + roomId + "-mergeVideo.webm";
@@ -109,7 +110,8 @@ public class ShortsService {
                 .addExtraArgs("-f", "concat")
                 .addExtraArgs("-safe", "0")
                 .addOutput(mergedVideoFile)
-                .done();
+                .addExtraArgs("-an") //영상의 소리를 제거하고
+                .done();  //저장
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         executor.createJob(builder).run();
