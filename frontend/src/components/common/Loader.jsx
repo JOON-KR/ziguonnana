@@ -121,9 +121,7 @@ const Loader = ({ currentNum, MaxNum }) => {
         </TerminalHeader>
         <Text>Loading...</Text>
       </TerminalLoader>
-      <Counts>
-        ({currentNum} / {MaxNum})
-      </Counts>
+      <Counts></Counts>
     </Wrap>
   );
 };

@@ -12,6 +12,7 @@ import { signup } from "../api/signup/signupAPI"; // 회원가입 API 함수 imp
 import { useDispatch, useSelector } from "react-redux";
 import { setLoggedIn, setLoggedOut } from "../store/authSlice";
 import { isAccessTokenExpired } from "../utils/auth";
+import SpeechBubble from "../components/speechBubble/SpeechBubble";
 
 // Home 페이지 전체를 감싸는 스타일 컴포넌트
 const HomeWrap = styled.div`
@@ -225,6 +226,10 @@ const Home = () => {
       )}
       {isRoomJoinModalOpen && <RoomJoinModal onClose={closeRoomJoinModal} />}
       <Header>
+        {/* 테스트 용입니다 */}
+        <HeaderText onClick={() => navigate("/MyPage")}>
+            마이페이지
+          </HeaderText>
         <HeaderText
           onClick={() => {
             if (isLoggedIn) {
@@ -255,6 +260,11 @@ const Home = () => {
         </HeaderText>
       </Header>
       <Wrap>
+        {/* <SpeechBubble
+          text={
+            "hello worldhello worldhello worldhello worldhello worldhello worldhello worldhello worldhello world"
+          }
+        ></SpeechBubble> */}
         <SubTitle>마음속의 얼음을 부수다</SubTitle>
         <Title>지구 ON 나나</Title>
         <BtnWrap>

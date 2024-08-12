@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@tensorflow-models/posenet": "^2.2.2",
+    "@tensorflow/tfjs": "^4.20.0",
+    "ffmpeg": "^0.0.4",
+    "ffmpeg.js": "^4.2.9003",
+    "g": "^2.0.1",
+    "jwt-decode": "^4.0.0",
+    "react-sketch-canvas": "^6.2.0",
+    "wcat": "^0.1.1"
+  }
+}

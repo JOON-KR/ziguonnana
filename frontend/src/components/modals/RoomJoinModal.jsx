@@ -1,4 +1,217 @@
-import React, { useState } from "react";
+// import React, { useEffect, useState } from "react";
+// import styled from "styled-components";
+// import GoogleModal from "../../assets/images/googleModal.png";
+// import AquaBtn from "../common/AquaBtn";
+// import GrayBtn from "../common/GrayBtn";
+// import { useNavigate } from "react-router-dom";
+// import axiosInstance from "../../api/axiosInstance";
+// import { useDispatch, useSelector } from "react-redux";
+// import roomSlice, { setRoomId, setTeamCode } from "../../store/roomSlice";
+// import authSlice, {
+//   setMemberId,
+//   setOpenViduToken,
+//   setUserNo,
+// } from "../../store/authSlice";
+// import SockJS from "sockjs-client";
+// import BASE_URL from "../../api/APIconfig";
+// import { setStompClient } from "../../store/clientSlice";
+// import { Stomp } from "@stomp/stompjs";
+
+// const BlackBg = styled.div`
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   z-index: 4;
+//   background: rgba(0, 0, 0, 0.6);
+// `;
+
+// const ModalWrap = styled.div`
+//   background-image: url(${GoogleModal});
+//   background-size: cover;
+//   background-position: center;
+//   width: 721px;
+//   height: 610px;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   padding: 40px 20px;
+//   text-align: center;
+//   box-sizing: border-box;
+//   justify-content: center;
+// `;
+
+// const Title = styled.h2`
+//   font-size: 30px;
+//   font-weight: bold;
+//   margin-bottom: 48px;
+//   color: #54595e;
+// `;
+
+// const InputWrapper = styled.div`
+//   width: 100%;
+//   max-width: 465px;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   margin-bottom: 20px;
+// `;
+
+// const InputField = styled.input`
+//   width: 374px;
+//   height: 48px;
+//   padding: 0 10px;
+//   font-size: 14px;
+//   font-weight: bold;
+//   color: #54595e;
+//   border: 1px solid #ccc;
+//   border-radius: 4px;
+//   box-sizing: border-box;
+//   margin-bottom: 20px;
+//   ::placeholder {
+//     color: #acacac;
+//   }
+// `;
+
+// const BtnWrap = styled.div`
+//   margin-top: 20px;
+//   display: flex;
+//   justify-content: center;
+//   width: 100%;
+//   gap: 20px;
+// `;
+
+// const RoomJoinModal = ({ onClose }) => {
+//   const dispatch = useDispatch();
+//   const [inviteCode, setInviteCode] = useState("");
+//   const navigate = useNavigate();
+//   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+//   const [messages, setMessages] = useState([]);
+//   const [sessionInfo, setSessionInfo] = useState({});
+//   const [stClient, setStClient] = useState(null);
+//   const [memId, setMemId] = useState("");
+
+//   useEffect(() => {
+//     if (inviteCode != "") {
+//       // 소켓 방 생성
+//       const socket = new SockJS(`${BASE_URL}/ws`);
+//       const client = Stomp.over(socket);
+//       dispatch(setStompClient(client));
+//       setStClient(client);
+
+//       console.log("--------------------------------");
+//       console.log("연결 상태 : ", client.connected);
+//       console.log("--------------------------------");
+
+//       const getResponse = async () => {
+//         const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`);
+//         console.log("오픈비두 방 참가 응답 : ", response.data.data);
+
+//         dispatch(setMemberId(response.data.data.memberId));
+//         dispatch(setOpenViduToken(response.data.data.openviduToken));
+//         dispatch(setRoomId(inviteCode));
+//         console.log("memberID : ", response.data.data.memberId);
+//         console.log("viduToken : ", response.data.data.openviduToken);
+//         console.log("---------------------------------");
+
+//         setMemId(response.data.data.memberId);
+
+//         return response;
+//       };
+
+//       getResponse()
+//         .then((response) => {
+//           client.connect(
+//             {},
+//             (frame) => {
+//               console.log("웹소켓 서버와 연결됨!", frame);
+
+//               console.log("방 구독");
+//               client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+//                 const parsedMessage = JSON.parse(message.body);
+//                 console.log("방에서 받은 메시지:", parsedMessage);
+//                 setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+//               });
+
+//               // 각 memberId에 대한 구독
+//               console.log("memId로 구독:");
+//               client.subscribe(
+//                 `/topic/game/${inviteCode}/${response.data.data.memberId}`,
+//                 (message) => {
+//                   const parsedMessage = JSON.parse(message.body);
+//                   console.log("개별 구독 받은 메시지:", parsedMessage);
+//                   // 응답 메시지에서 num 저장
+//                   if (
+//                     parsedMessage.data &&
+//                     parsedMessage.data.num !== undefined
+//                   ) {
+//                     dispatch(setUserNo(parsedMessage.data.num));
+//                     console.log("유저 번호 :", parsedMessage.data.num);
+//                     setSessionInfo((prevSessionInfo) => ({
+//                       ...prevSessionInfo,
+//                       num: parsedMessage.data.num,
+//                     }));
+//                   }
+//                 }
+//               );
+//             },
+
+//             (error) => {
+//               console.error("STOMP error:", error);
+//             }
+//           );
+//         })
+//         .catch((error) => {
+//           console.error("Failed to get response:", error);
+//         });
+//     }
+//   }, [inviteCode]);
+
+//   const handleJoinRoom = () => {
+//     if (stClient && stClient.connected) {
+//       console.log("방 참가 요청 :  ");
+//       stClient.send(`/app/game/${inviteCode}/${memId}/join`);
+//     }
+
+//     // 로그인 여부를 state에 포함시켜 navigate
+//     navigate("/user/profilePick", {
+//       state: {
+//         inviteCode,
+//         isJoin: true,
+//         isLoggedIn: isLoggedIn,
+//         from: "joinModal",
+//       },
+//     });
+//   };
+
+//   return (
+//     <BlackBg onClick={onClose}>
+//       <ModalWrap onClick={(e) => e.stopPropagation()}>
+//         <Title>이글루에 초대받으셨나요?</Title>
+//         <InputWrapper>
+//           <InputField
+//             type="password"
+//             placeholder="초대코드를 입력해주세요."
+//             value={inviteCode}
+//             onChange={(e) => setInviteCode(e.target.value)}
+//           />
+//         </InputWrapper>
+//         <BtnWrap>
+//           <GrayBtn text="취소" BtnFn={onClose} />
+//           <AquaBtn text="입장" BtnFn={handleJoinRoom} />
+//         </BtnWrap>
+//       </ModalWrap>
+//     </BlackBg>
+//   );
+// };
+
+// export default RoomJoinModal;
+
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -6,11 +219,16 @@ import GrayBtn from "../common/GrayBtn";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { setRoomId } from "../../store/roomSlice";
+import { setRoomId, setTeamCode } from "../../store/roomSlice";
+import {
+  setMemberId,
+  setOpenViduToken,
+  setUserNo,
+} from "../../store/authSlice";
 import SockJS from "sockjs-client";
-import BASE_URL from "../../api/APIconfig";
-import { Client } from "@stomp/stompjs";
 import { setStompClient } from "../../store/clientSlice";
+import { Stomp } from "@stomp/stompjs";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -85,72 +303,86 @@ const RoomJoinModal = ({ onClose }) => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const [messages, setMessages] = useState([]);
+  const [sessionInfo, setSessionInfo] = useState({});
+  const [stClient, setStClient] = useState(null);
+  const [memId, setMemId] = useState("");
 
-  const handleJoinRoom = async () => {
-    try {
-      const response = await axiosInstance.post(`/api/v1/room/${inviteCode}`, {
-        groupCode: inviteCode,
-      });
-
-      console.log("오픈비두 엔드포인트 연결 : ", response);
-      const openviduToken = response.data.data.openviduToken; // 수정된 부분: 응답에서 openviduToken 추출
-      console.log("OpenVidu Token:", openviduToken);
-
-      dispatch(setRoomId(inviteCode));
-
-      // 소켓 생성
+  useEffect(() => {
+    if (inviteCode !== "") {
       const socket = new SockJS(`${BASE_URL}/ws`);
-      console.log("Socket created");
+      // const socket = new SockJS(`${TAMTAM_URL}/ws`);
+      //
+      const client = Stomp.over(socket);
 
-      const stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-        debug: (str) => {
-          console.log("STOMP Debug:", str);
-        },
-      });
+      client.connect(
+        {},
+        async (frame) => {
+          console.log("웹소켓 서버와 연결됨!", frame);
 
-      stompClient.onConnect = () => {
-        const serverUrl = socket._transport.url;
-        console.log("서버 연결됨 : ", serverUrl);
-
-        // roomId를 소켓 엔드포인트로 연결하면서 보냄
-        stompClient.subscribe(`/game/${inviteCode}/join`, (message) => {
-          console.log(
-            `/game/${inviteCode}/join 에서 온 메세지 : `,
-            message.body
+          // 오픈비두 방 입장 처리
+          const response = await axiosInstance.post(
+            `/api/v1/room/${inviteCode}`
           );
-        });
+          console.log("오픈비두 방 참가 응답 : ", response.data.data);
 
-        console.log("Subscribing to destination");
-        var destination = `/app/game/${inviteCode}/join`;
+          const { memberId, openviduToken } = response.data.data;
 
-        stompClient.activate();
-        console.log("STOMP Client activated");
+          // 전역 상태 업데이트
+          dispatch(setMemberId(memberId));
+          dispatch(setOpenViduToken(openviduToken));
+          dispatch(setRoomId(inviteCode));
 
-        dispatch(setStompClient(stompClient));
+          setMemId(memberId);
 
-        // 로그인 여부를 state에 포함시켜 navigate
-        navigate("/user/profilePick", {
-          state: {
-            roomId: inviteCode,
-            openviduToken,
-            isJoin: true,
-            isLoggedIn: isLoggedIn,
-            from: "joinModal",
-          },
-        });
-      };
+          // 방에 대한 구독
+          client.subscribe(`/topic/game/${inviteCode}`, (message) => {
+            const parsedMessage = JSON.parse(message.body);
+            console.log("방에서 받은 메시지:", parsedMessage);
+            setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+          });
 
-      stompClient.onStompError = (frame) => {
-        console.error("Broker reported error: " + frame.headers["message"]);
-        console.error("Additional details: " + frame.body);
-      };
+          // 각 memberId에 대한 구독
+          client.subscribe(
+            `/topic/game/${inviteCode}/${memberId}`,
+            (message) => {
+              const parsedMessage = JSON.parse(message.body);
+              console.log("개별 구독 받은 메시지:", parsedMessage);
+              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+                dispatch(setUserNo(parsedMessage.data.num));
+                console.log("유저 번호 :", parsedMessage.data.num);
+                setSessionInfo((prevSessionInfo) => ({
+                  ...prevSessionInfo,
+                  num: parsedMessage.data.num,
+                }));
+              }
+            }
+          );
 
-      stompClient.activate();
-    } catch (e) {
-      console.error("방참여 오류", e);
+          setStClient(client);
+          dispatch(setStompClient(client));
+        },
+        (error) => {
+          console.error("STOMP error:", error);
+        }
+      );
     }
+  }, [inviteCode]);
+
+  const handleJoinRoom = () => {
+    if (stClient && stClient.connected) {
+      console.log("방 참가 요청 :  ");
+      stClient.send(`/app/game/${inviteCode}/${memId}/join`);
+    }
+
+    navigate("/user/profilePick", {
+      state: {
+        inviteCode,
+        isJoin: true,
+        isLoggedIn: isLoggedIn,
+        from: "joinModal",
+      },
+    });
   };
 
   return (

@@ -1,0 +1,76 @@
+<>
+            {!isReplaying ? (
+              <>
+                <Header>
+                  <ProfileInfo>
+                    <ProfileImage
+                      src="path/to/profile-image.png"
+                      alt="프로필 이미지"
+                    />
+                    <ProfileDetails>
+                      <HeaderText>이름: {members[5]}</HeaderText>{" "}
+                      {/* 마지막 멤버를 그리는 중 => 수정 필요*/}
+                      <HeaderText>키워드: #뾰족코 #근엄한</HeaderText>
+                    </ProfileDetails>
+                  </ProfileInfo>
+                  <HeaderText>
+                    주어진 정보를 활용하여 아바타를 그려주세요!
+                  </HeaderText>
+                </Header>
+                <CanvasWrapper>
+                  <ReactSketchCanvas
+                    ref={canvasRef}
+                    width="970px"
+                    height="600px"
+                    strokeColor={isEraser ? "#FFFFFF" : brushColor}
+                    strokeWidth={brushRadius}
+                    eraserWidth={isEraser ? brushRadius : 0}
+                  />
+                  <ToolsWrapper>
+                    <CustomSwatchesPicker>
+                      {colors.map((color) => (
+                        <ColorSquare
+                          key={color}
+                          color={color}
+                          selected={brushColor === color}
+                          onClick={() => handleColorChange(color)}
+                        />
+                      ))}
+                    </CustomSwatchesPicker>
+                    <SliderWrapper>
+                      <SliderLabel>펜 굵기</SliderLabel>
+                      <Slider
+                        type="range"
+                        min="1"
+                        max="20"
+                        value={brushRadius}
+                        onChange={(e) => setBrushRadius(e.target.value)}
+                      />
+                    </SliderWrapper>
+                    <ToolButton
+                      onClick={() => setIsEraser(false)}
+                      active={!isEraser}
+                    >
+                      펜
+                    </ToolButton>
+                    <ToolButton
+                      onClick={() => setIsEraser(true)}
+                      active={isEraser}
+                    >
+                      지우개
+                    </ToolButton>
+                    <Timer>{formatTime(timeLeft)}</Timer>
+                  </ToolsWrapper>
+                </CanvasWrapper>
+              </>
+            ) : (
+              <CanvasWrapper>
+                <ReactSketchCanvas
+                  ref={canvasRef}
+                  width="970px"
+                  height="600px"
+                />
+              </CanvasWrapper>
+            )}
+          </>
+        )}

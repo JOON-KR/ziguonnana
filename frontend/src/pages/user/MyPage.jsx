@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import mypage_bg from "../../assets/images/mypage_bg.png";
 import profilePic from "../../assets/images/profile.png";
 import cardPic from "../../assets/images/profileCard.png";
 import grayPic from "../../assets/icons/gray.png";
 import orangePic from "../../assets/icons/orange.png";
 import bluePic from "../../assets/icons/blue.png";
-import { useNavigate } from "react-router-dom";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -126,8 +127,42 @@ const Icon = styled.img`
 `;
 
 const MyPage = () => {
+  const [profile, setProfile] = useState({
+    name: "",
+    picture: profilePic,
+    hashtags: "",
+  });
+  const [avatarCard, setAvatarCard] = useState(cardPic);
+  const [records, setRecords] = useState([]);
   const [setIsLoggedIn] = useState(true); //로그인 상태
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get("/api/v1/member", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+
+        const data = response.data.data;
+        console.log(data);
+        //회원 정보 조회
+        setProfile({
+          name: data.name,
+          picture: data.picture || profilePic,
+          hashtags: data.feature.join(", "),
+        });
+        setAvatarCard(data.avatarCard || cardPic);
+        setRecords(data.records || []);
+      } catch (error) {
+        console.error("프로필 데이터를 가져오는 중 오류가 발생했습니다:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -148,9 +183,9 @@ const MyPage = () => {
       <BodyContainer>
         <LeftBox>
           <Title>내 프로필</Title>
-          <ProfileImage src={profilePic} alt="프로필 사진" />
-          <ProfileName>홍길동</ProfileName>
-          <ProfileKeywords>#개발자, #음악 애호가, #여행자</ProfileKeywords>
+          <ProfileImage src={profile.picture} alt="프로필 사진" />
+          <ProfileName>{profile.name}</ProfileName>
+          <ProfileKeywords>#{profile.hashtags}</ProfileKeywords>
           <ButtonContainer>
             <ProfileButton onClick={handleLogout}>로그아웃</ProfileButton>
             <ProfileButton onClick={handleProfileUpdate}>
@@ -161,7 +196,7 @@ const MyPage = () => {
         <RightBox>
           <TopBox>
             <Title>아바타 명함</Title>
-            <CardImage src={cardPic} alt="아바타 명함" />
+            <CardImage src={avatarCard} alt="아바타 명함" />
           </TopBox>
           <BottomBox>
             <Title>나의 기록</Title>

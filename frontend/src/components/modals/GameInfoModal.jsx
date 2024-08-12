@@ -75,7 +75,7 @@ const GameInfoModal = ({
         <GameInfo>{modalText}</GameInfo>
         <BtnWrap>
           {RedBtnText && <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />}
-          <BlueBtn text={BlueBtnText} BtnFn={BlueBtnFn} />
+          {BlueBtnText && <BlueBtn text={BlueBtnText} BtnFn={BlueBtnFn} />}
         </BtnWrap>
       </ModalWrap>
     </BlackBg>

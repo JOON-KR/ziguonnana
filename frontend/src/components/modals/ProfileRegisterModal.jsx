@@ -4,6 +4,8 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import ProfileNana from "../../assets/icons/ProfileNana.png";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -124,6 +126,14 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [hashTag1, setHashTag1] = useState("");
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
+  const userNo = useSelector((state) => state.auth.userNo);
+  const memberId = useSelector((state) => state.auth.memberId);
+  const openviduToken = useSelector((state) => state.auth.openViduToken);
+  const roomId = useSelector((state) => state.room.roomId);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const client = useSelector((state) => state.client.stompClient);
+  const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
 
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
@@ -135,19 +145,40 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
   // 프로필 등록 핸들러
   const handleRegister = async () => {
-    const hashTags = [hashTag1, hashTag2, hashTag3].filter(
-      (tag) => tag.trim() !== ""
-    );
-    if (hashTags.length > 3) {
-      alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
-      return;
-    }
     const profileData = {
-      profileImageFile,
-      name,
-      feature: hashTags.join(", "),
+      memberId: memberId,
+      num: userNo,
+      profileImageFile: "",
+      feature: [hashTag1, hashTag2, hashTag3],
+      name: name,
     };
+
+    console.log("연결 상태 : ", client.connected);
+
+    // client.subscribe(`/topic/game/${roomId}`, (message) => {
+    //   const parsedMessage = JSON.parse(message.body);
+    //   console.log("방에서 받은 메시지:", parsedMessage);
+    //   if(parsedMessage.data == true)
+    //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+    // });
+
+    // if (client && client.connected) {
+    //   console.log("소켓에 전송할 데이터 : ", profileData);
+    //   client.send(
+    //     `/app/game/${roomId}/profile`,
+    //     {},
+    //     JSON.stringify(profileData)
+    //   );
+    // }
+
     onRegisterProfile(profileData);
+
+    //이거는 의도적으로 navigate state로 넘겼음. 건들지말것!
+    navigate("/icebreaking", {
+      state: {
+        profileData,
+      },
+    });
   };
 
   return (
