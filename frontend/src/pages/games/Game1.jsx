@@ -399,14 +399,11 @@ const Game1 = () => {
       {/* {!isIntroGuideModalOpen && !isIntroModalOpen && !isDrawingWelcomeModalOpen && !isDrawingGuideModalOpen && (
         <Game1Drawing roomId={roomId} />
       )}       */}
-      이어그리기 화면 (캔버스)
+      {/* 이어그리기 화면 (캔버스) */}
       {!isIntroGuideModalOpen &&
         !isIntroModalOpen &&
         !isDrawingWelcomeModalOpen &&
         !isDrawingGuideModalOpen && <Game1Drawing />}
-      <button onClick={() => navigate("/icebreaking/games/game1NickName")}>
-        버튼
-      </button>
     </Wrap>
   );
 };
