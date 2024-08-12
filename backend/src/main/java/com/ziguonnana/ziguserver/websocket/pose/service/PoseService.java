@@ -58,7 +58,6 @@ public class PoseService {
 	    
 	    // Set을 List로 변환
 	    List<List<Integer>> expandedList = new ArrayList<>(expandedPositions);
-	    log.info("키포인트: {}",expandedList);
 	    // PoseResult로 변환
 	    PoseResult poseResult = PoseResult.builder()
 	            .num(poseRequest.getNum())

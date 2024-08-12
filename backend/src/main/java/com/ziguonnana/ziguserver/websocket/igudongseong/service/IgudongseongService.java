@@ -124,7 +124,7 @@ public class IgudongseongService {
                 if (i != j) {
                     List<KeyPoint> otherUser = userVectors.get(j);
                     double similarity = cosineSimilarity(currentUser, otherUser);
-                    log.info("------{} 와 {} 의 유사도 : ------------",i+1,j+1);
+                    log.info("------{} 와 {} 의 유사도 : ------------",i+1,j+1,similarity);
                     if (similarity >= 0.7) {
                         similarCount++;
                     }
