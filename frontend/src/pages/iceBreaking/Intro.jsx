@@ -85,6 +85,9 @@ const Introduce = () => {
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             숏폼 페이지로 이동
           </button>
+          <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
+            게임결과
+          </button>
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
