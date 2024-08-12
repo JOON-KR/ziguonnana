@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
@@ -133,6 +134,87 @@ const ButtonText = styled.span`
   pointer-events: none; // 버튼 텍스트가 클릭되지 않도록 설정
   margin-bottom: 10px;
 `;
+// ===========================================
+// socket
+// useEffect(() => {
+//   if (client && client.connected) {
+//     // socket API 보내기
+//     console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
+//     client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
+//   } else {
+//     console.warn("send 부분에서 문제 발생");
+//   }
+// }, [client, roomId, currentUserNo]);
+// 구독 / 데이터 받아오기
+// useEffect(() => {
+//   if (client && client.connected) {
+//     // socket API
+//     const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+//       try {
+//         console.log("서버로부터 받은 메시지:", message.body);
+//         const response = JSON.parse(message.body);
+//         if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
+//           console.log("서버로부터 받은 데이터:", response.data);
+//           setCurrentUserNo(response.data.currentUserNo);
+//           setChallengeVideoUrl(response.data.challengeVideoUrl);
+//           setVideoDuration(response.data.videoDuration || 5000);
+//           setCountdown(3);
+//           setIsButtonVisible(false);
+//         } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
+//           console.log("게임 종료, 다같이 이동");
+//           navigate("/icebreaking/games/game5End");
+//         }
+//       } catch (error) {
+//         console.error("메시지 처리 중 오류 발생:", error);
+//       }
+//     });
+
+//     return () => {
+//       console.log("구독을 취소합니다.");
+//       subscription.unsubscribe();
+//     };
+//   } else {
+//     console.warn("클라이언트가 연결되지 않았거나 문제가 발생했습니다.");
+//   }
+// }, [client, roomId]);
+
+// axios
+// 이름 수정 -> 필요할떄 이름()으로 호출 
+// const startRecording = () => {
+//   if (currentUserNo === userNo && !isRecording) {
+//     setIsRecording(true);
+//     console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
+
+//     mediaRecorder.onstop = async () => {
+//       const blob = new Blob(recordedChunks.current, { type: "video/webm" });
+//       console.log("녹화된 Blob:", blob);
+
+//       const formData = new FormData();
+//       formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
+
+//       axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }).then(response => {
+//         console.log("녹화된 비디오 업로드 성공:", response.data);
+//       }).catch(error => {
+//         console.error("비디오 업로드 실패:", error);
+//       });
+
+//       setIsButtonVisible(true);
+//     };
+
+//     mediaRecorderRef.current = mediaRecorder;
+//     mediaRecorder.start();
+
+//     setTimeout(() => {
+//       mediaRecorder.stop();
+//       setIsRecording(false);
+//     }, videoDuration);
+//   }
+// };
+// ===========================================
 
 const GameRecord = () => {
   const navigate = useNavigate();
