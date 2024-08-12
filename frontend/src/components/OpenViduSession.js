@@ -22,24 +22,25 @@ const OpenViduSession = ({ token }) => {
 
   useEffect(() => {
     const initSession = async () => {
+      console.log("Initializing OpenVidu session");
+      const OV = new OpenVidu(); // OpenVidu 객체 생성
+      const session = OV.initSession(); // 세션 초기화
+
+      // 스트림 생성 이벤트 리스너 설정
+      session.on("streamCreated", (event) => {
+        const subscriber = session.subscribe(event.stream, undefined); // 스트림 구독
+        console.log(
+          `Subscribing to stream from connection ID: ${event.stream.connection.connectionId}`
+        );
+        console.log(
+          `Subscriber connection data: ${event.stream.connection.data}`
+        );
+        dispatch(addSubscriber(subscriber)); // 구독자 추가 액션 디스패치
+        console.log("Stream created and subscriber added");
+      });
+
       try {
-        const OV = new OpenVidu();
-        const session = OV.initSession();
-
-        // 스트림 생성 시 구독하고 Redux 스토어에 추가
-        session.on("streamCreated", (event) => {
-          const subscriber = session.subscribe(event.stream, undefined);
-          console.log(
-            `Subscribing to stream from connection ID: ${event.stream.connection.connectionId}`
-          );
-          console.log(
-            `Subscriber connection data: ${event.stream.connection.data}`
-          );
-          dispatch(addSubscriber(subscriber));
-          console.log("Stream created and subscriber added");
-        });
-
-        // 세션 연결 시도
+        // 세션 연결
         await session.connect(token, { userNo: userNo });
         console.log("Session connected with token:", token);
 
@@ -60,9 +61,9 @@ const OpenViduSession = ({ token }) => {
         console.log("Publisher initialized and published");
 
         // 상태 업데이트
-        dispatch(setSession(session));
-        dispatch(setPublisher(publisher));
-        dispatch(setLocalStream(publisher.stream));
+        dispatch(setSession(session)); // 세션 설정 액션 디스패치
+        dispatch(setPublisher(publisher)); // 퍼블리셔 설정 액션 디스패치
+        dispatch(setLocalStream(publisher.stream)); // 로컬 스트림 설정 액션 디스패치
       } catch (error) {
         console.error("Error initializing session:", error);
       }
@@ -77,7 +78,7 @@ const OpenViduSession = ({ token }) => {
     return () => {
       if (session) {
         console.log("Disconnecting session");
-        session.disconnect(); // 세션 연결 해제
+        // session.disconnect(); // 세션 연결 해제
         dispatch(clearSession()); // 세션 초기화 액션 디스패치
       }
     };
