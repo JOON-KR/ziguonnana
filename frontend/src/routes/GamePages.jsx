@@ -11,7 +11,8 @@ import Game3 from "../pages/games/Game3";
 import Game4 from "../pages/games/Game4";
 import Game5 from "../pages/games/Game5";
 import Game5Dance from "../pages/games/Game5Dance";
-import Game5TeamIntro from "../pages/games/Game5TeamIntro";
+import Game5TeamDance from "../pages/games/Game5TeamDance";
+import Game5End from "../pages/games/Game5End";
 import GameRecord from "../pages/games/GameRecord";
 import GameRecordDetail from "../pages/games/GameRecordDetail";
 
@@ -29,8 +30,9 @@ const GamePages = () => {
         <Route path="game3" element={<Game3 />} />
         <Route path="game4" element={<Game4 />} />
         <Route path="game5" element={<Game5 />} />
-        <Route path="Game5Dance" element={<Game5Dance />} />
-        <Route path="Game5TeamIntro" element={<Game5TeamIntro />} />
+        <Route path="game5Dance" element={<Game5Dance />} />
+        <Route path="game5TeamDance" element={<Game5TeamDance />} />
+        <Route path="game5End" element={<Game5End />} />
         <Route path="gameRecord" element={<GameRecord />} />
         <Route path="gameRecordDetail" element={<GameRecordDetail />} />
       </Routes>
