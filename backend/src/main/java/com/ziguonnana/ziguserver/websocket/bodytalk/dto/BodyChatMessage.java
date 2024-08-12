@@ -9,5 +9,6 @@ public class BodyChatMessage {
     private int senderNum;
     private String content;
     private boolean isCorrect;
+    private int round;
 
 }
