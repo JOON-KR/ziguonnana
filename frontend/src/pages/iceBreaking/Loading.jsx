@@ -46,13 +46,6 @@ const Loading = () => {
 
   const { profileData } = location.state || {};
 
-  //이 부분 수정 필요
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     navigate("/icebreaking/games", { state: { roomId } });
-  //   }, 3000);
-  //   return () => clearTimeout(timer);
-  // }, [navigate, roomId]);
   useEffect(() => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
@@ -65,7 +58,8 @@ const Loading = () => {
         parsedMessage.data == true &&
         parsedMessage.commandType == "GAME_START"
       ) {
-        navigate("/icebreaking/games");
+        navigate("/icebreaking/games/game1");
+        // navigate("/test");
       }
       // navigate("/icebreaking/games");
       // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
@@ -78,20 +72,40 @@ const Loading = () => {
     client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
 
     if (client && client.connected) {
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        console.log("방에서 받은 메시지:", parsedMessage);
+        if (
+          parsedMessage.data === true &&
+          parsedMessage.commandType === "GAME_START"
+        ) {
+          navigate("/icebreaking/intro");
+        } else if (parsedMessage.message === "질문리스트 전파\n") {
+          dispatch(setQuestionList(parsedMessage.data.question));
+          console.log(parsedMessage.data.question);
+        }
+      });
+
       console.log("소켓에 전송할 데이터 : ", profileData);
       client.send(
         `/app/game/${roomId}/profile`,
         {},
         JSON.stringify(profileData)
       );
+
+      client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
+    } else {
+      console.error("STOMP 클라이언트가 연결되어 있지 않습니다.");
     }
-  }, []);
+  }, [client, roomId, navigate, profileData, dispatch]);
 
   return (
     <PageWrap>
       <Content>
         <Loader />
       </Content>
+      <button onClick={() => navigate("/icebreaking/games/game2")}>몸말</button>
+      <button onClick={() => navigate("/icebreaking/games/gameRecord")}>결과</button>
     </PageWrap>
   );
 };

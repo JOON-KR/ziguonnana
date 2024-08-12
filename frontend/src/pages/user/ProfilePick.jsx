@@ -5,7 +5,7 @@ import profileImage1 from "../../assets/icons/p1.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import { getProfileList, createProfile } from "../../api/profile/profileAPI";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -125,8 +125,8 @@ const ProfilePick = () => {
     };
     fetchProfiles();
 
-
-   const socket = new SockJS(`${BASE_URL}/ws`);
+    // const socket = new SockJS(`${BASE_URL}/ws`);
+    const socket = new SockJS(`${TAMTAM_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,

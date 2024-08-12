@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import { useSelector, useDispatch } from "react-redux";
-import BASE_URL from "../../api/APIconfig";
-import { setDrawingData } from "../../store/drawingSlice";
+import { useSelector } from "react-redux";
 import axios from "axios";
+import BASE_URL from "../../api/APIconfig";
+import { useNavigate } from "react-router-dom";
 
 const Wrap = styled.div`
   width: 100%;
@@ -138,170 +138,252 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(8);
+  const [targetUser, setTargetUser] = useState(0);
+  const [currentUser, setCurrentUser] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [drawingResult, setDrawingResult] = useState(null);
-  const canvasRef = useRef(null);
+  const [isGameEnded, setIsGameEnded] = useState(false);
+  const [lastSentPaths, setLastSentPaths] = useState([]);
 
+  const canvasRef = useRef(null);
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
-  const drawingData = useSelector((state) => state.drawing.drawingData);
-  const dispatch = useDispatch();
-  const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+  const client = useSelector((state) => state.client.stompClient);
+  const [isStarted, setIsStarted] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {   
-    // 이어그리기 첫 키워드 전파 데이터 받아오기
-    // num(userNo와 같은 데이터만 사용하면 됨), keyword 데이터 받아오기
-    if (stompClient && stompClient.connected) {
-      console.log("Subscribing to topic:", `/topic/game/${roomId}`);
-      // 방의 메시지를 구독
-      const subscription = stompClient.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("Received message from server:", response); // 서버로부터 받은 메시지 로그
-        if (response.message.trim() === "이어그리기 첫 키워드 전파") {
-          // 데이터 받아와서 Redux 상태 업데이트
-          dispatch(setDrawingData(response.data));
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "ART_RELAY") {
+            setTargetUser(parsedMessages.data.targetUser);
+            setCurrentUser(parsedMessages.data.currentUser);
+            setKeyword(parsedMessages.data.keyword);
+            setTimeLeft(8);
+            setIsStarted(true);
+          } else if (parsedMessages.commandType === "DRAW_PREV") {
+            canvasRef.current.loadPaths(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_END") {
+            setIsGameEnded(true);
+            setCurrentUser(0);
+            canvasRef.current.clearCanvas();
+            setDrawingResult(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_CYCLE") {
+            canvasRef.current.clearCanvas();
+          }
         }
-      });
+      );
 
-      // 컴포넌트 언마운트 시 구독 취소
+      client.send(`/app/game/${roomId}/art-start`);
+
       return () => {
-        console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
         subscription.unsubscribe();
       };
-    } else {
-      console.error("Stomp client is not connected in useEffect");
     }
-  }, [dispatch, roomId, stompClient]);
-  
-  const resData = drawingData[userNo]
-  // console.log('resDatad:', resData)
-  // console.log('drawing', drawingData)
+  }, [client, roomId]);
 
-  // 타이머
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      handleSendDrawing();
-    }
-  }, [timeLeft]);
+  // useEffect(() => {
+  //   canvasRef.current.clearCanvas();
+  // }, [targetUser]);
 
-  // 응답 받아오면 캔버스 띄우기
   useEffect(() => {
-    if (drawingData[userNo] && drawingData[userNo].art) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        console.log('Loading paths:', drawingData[userNo].art);
-        canvas.clearCanvas();
-        canvas.loadPaths(JSON.parse(drawingData[userNo].art));
+    if (!isGameEnded) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => {
+          setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        if (isStarted) {
+          handleSendDrawing();
+        }
       }
     }
-  }, [drawingData, userNo]);
-
-  // 중간 그림 저장
-  const [savedDrawing, setSavedDrawing] = useState('');
+  }, [timeLeft]);
 
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
-      try {
-        // 캔버스에 그린 그림을 png 파일로 저장 <- 저장 잘되는지 모르겠음.
-        const exportImage = await currentCanvas.exportImage("png");
-        const imageBlob = await (await fetch(exportImage)).blob();
-        const formData = new FormData();
-        formData.append("file", imageBlob, "drawing.png");
+      const exportImage = await currentCanvas.exportImage("png");
+      const imageBlob = await (await fetch(exportImage)).blob();
+      const formData = new FormData();
+      formData.append("file", imageBlob, "drawing.png");
 
-        // 저장한 png 파일을 S3 서버로 전송 - multipart 형식으로
-        const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        // S3 서버에서 받아온 response data 저장
-        setSavedDrawing(response.data);
-        console.log("Drawing sent successfully:", response.data);
+      const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("S3 전송해서 받은 결과 : ", response);
 
-        // S3 서버에서 받아온 response data를 서버로 전송 (소켓)
-        // relayart 데이터 형식으로 전송
-        const relayart = {
-          art: resData.art,
-          num: userNo,
-          keyword: resData.keyword,
-        };
-        
-        const sendDrawingInterval = setInterval(() => {
-          if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/game/${roomId}/saveArt`, {}, JSON.stringify(relayart));
-            console.log("Data sent to server via socket:", relayart);
-          }
-        }, 5000); // 5초 간격으로 데이터 전송
-
-        // 응답 처리 및 반복 종료
-        const subscription = stompClient.subscribe(`/topic/game/${roomId}`, (message) => {
-          const response = JSON.parse(message.body);
-          console.log("Received repeated message from server:", response);
-          // 그림 전파 데이터 받아오기
-          if (response.message.trim() === "그림 전파") {
-            // 데이터 받아와서 Redux 상태 업데이트
-            dispatch(setDrawingData(response.data));
-          }
-          // 이어그리기 종료 데이터 받아오기
-          if (response.message.trim() === "이어그리기 종료") {
-            // 새로운 변수에 그림 저장
-            setDrawingResult(response.data);
-            console.log("Drawing result received:", response.data);
-            // 데이터 반복 전송 종료
-            clearInterval(sendDrawingInterval);
-            subscription.unsubscribe();
-          }
-
-          resData = Object.values(drawingData)[1]
-        });
-
-        return () => {
-          clearInterval(sendDrawingInterval);
-          subscription.unsubscribe();
-        };
-
-      } catch (error) {
-        console.error("Error sending drawing:", error);
+      console.log("S3에서 받은 결과 전송!");
+      if (currentUser == userNo) {
+        client.send(
+          `/app/game/${roomId}/saveArt`,
+          {},
+          JSON.stringify(response.data)
+        );
       }
     }
   };
+
+  const simplifyPath = (path, tolerance = 1.0) => {
+    if (!path || path.length <= 2) return path;
+
+    const sqTolerance = tolerance * tolerance;
+
+    const simplifyDPStep = (points, first, last, sqTolerance, simplified) => {
+      let maxSqDist = sqTolerance;
+      let index = null;
+
+      for (let i = first + last; i < last; i++) {
+        const sqDist = getSquareSegmentDistance(
+          points[i],
+          points[first],
+          points[last]
+        );
+
+        if (sqDist > maxSqDist) {
+          index = i;
+          maxSqDist = sqDist;
+        }
+      }
+
+      if (maxSqDist > sqTolerance) {
+        if (index - first > 1)
+          simplifyDPStep(points, first, index, sqTolerance, simplified);
+        simplified.push(points[index]);
+        if (last - index > 1)
+          simplifyDPStep(points, index, last, sqTolerance, simplified);
+      }
+    };
+
+    const getSquareDistance = (p1, p2) => {
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      return dx * dx + dy * dy;
+    };
+
+    const getSquareSegmentDistance = (p, p1, p2) => {
+      let x = p1.x;
+      let y = p1.y;
+      const dx = p2.x - x;
+      const dy = p2.y - y;
+
+      if (dx !== 0 || dy !== 0) {
+        const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+
+        if (t > 1) {
+          x = p2.x;
+          y = p2.y;
+        } else if (t > 0) {
+          x += dx * t;
+          y += dy * t;
+        }
+      }
+
+      const d2 = (p.x - x) ** 2 + (p.y - y) ** 2;
+
+      return d2;
+    };
+
+    const simplified = [path[0]];
+    simplifyDPStep(path, 0, path.length - 1, sqTolerance, simplified);
+    simplified.push(path[path.length - 1]);
+
+    return simplified;
+  };
+
+  const handleMouseUp = async () => {
+    console.log(`타겟 : ${targetUser}, 권한 : ${currentUser}, 나 : ${userNo}`);
+    if (canvasRef.current && currentUser == userNo) {
+      const currentPaths = await canvasRef.current.exportPaths();
+      const simplifiedPaths = currentPaths.map((path) => ({
+        ...path,
+        path: simplifyPath(path.path),
+      }));
+      const newPaths = simplifiedPaths.slice(lastSentPaths.length);
+
+      if (newPaths.length > 0) {
+        client.send(`/app/game/${roomId}/draw`, {}, JSON.stringify(newPaths));
+        setLastSentPaths(currentPaths);
+      }
+    } else {
+      console.log("캔버스레프 없음!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+  };
+
+  const colors = [
+    "#FF0000",
+    "#FF7F00",
+    "#FFFF00",
+    "#00FF00",
+    "#0000FF",
+    "#4B0082",
+    "#8B00FF",
+    "#000000",
+    "#FFFFFF",
+    "#A52A2A",
+    "#D2691E",
+    "#DAA520",
+    "#808000",
+    "#008000",
+    "#008080",
+    "#00FFFF",
+    "#4682B4",
+    "#00008B",
+    "#8A2BE2",
+    "#FF1493",
+    "#D3D3D3",
+    "#A9A9A9",
+  ];
 
   const handleColorChange = (color) => {
     setBrushColor(color);
     setIsEraser(false);
   };
-
-  const colors = [
-    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#000000", "#FFFFFF",
-    "#A52A2A", "#D2691E", "#DAA520", "#808000", "#008000", "#008080", "#00FFFF", "#4682B4", "#00008B",
-    "#8A2BE2", "#FF1493", "#D3D3D3", "#A9A9A9"
-  ];
-
   const formatTime = (time) => {
-    const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-    const seconds = (time % 60).toString().padStart(2, '0');
-    return `${minutes} : ${seconds}`;
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
-
-
   return (
     <Wrap>
       <Header>
         <ProfileInfo>
           <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
           <ProfileDetails>
-            {/* <HeaderText>키워드: {'#' + resData.keyword}</HeaderText> */}
+            {!isGameEnded ? (
+              <>
+                <h1>{targetUser}님 그리는중~~</h1>
+                <h1>{currentUser}님이 그릴 차례</h1>
+                <h1>키워드 : {keyword}</h1>
+              </>
+            ) : (
+              <h1>이어그리기 종료!</h1>
+            )}
           </ProfileDetails>
         </ProfileInfo>
-        <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+        {!isGameEnded ? (
+          <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+        ) : (
+          <button
+            onClick={() => {
+              navigate("/icebreaking/games");
+            }}
+          >
+            다른 게임들 보러가기
+          </button>
+        )}
       </Header>
-      <CanvasWrapper>
+      <CanvasWrapper onMouseUp={handleMouseUp}>
         <ReactSketchCanvas
           ref={canvasRef}
           width="970px"
@@ -309,6 +391,7 @@ const Game1Drawing = () => {
           strokeColor={isEraser ? "#FFFFFF" : brushColor}
           strokeWidth={brushRadius}
           eraserWidth={isEraser ? brushRadius : 0}
+          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
         />
         <ToolsWrapper>
           <CustomSwatchesPicker>
@@ -331,10 +414,18 @@ const Game1Drawing = () => {
               onChange={(e) => setBrushRadius(e.target.value)}
             />
           </SliderWrapper>
-          <ToolButton onClick={() => setIsEraser(false)} active={!isEraser}>
+          <ToolButton
+            onClick={() => setIsEraser(false)}
+            active={!isEraser}
+            disabled={!(userNo == currentUser)}
+          >
             펜
           </ToolButton>
-          <ToolButton onClick={() => setIsEraser(true)} active={isEraser}>
+          <ToolButton
+            onClick={() => setIsEraser(true)}
+            active={isEraser}
+            disabled={!(userNo == currentUser)}
+          >
             지우개
           </ToolButton>
           <Timer>{formatTime(timeLeft)}</Timer>
@@ -351,3 +442,5 @@ const Game1Drawing = () => {
 };
 
 export default Game1Drawing;
+
+// ("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/realyArt/b0adaf11-9e0f-4d9d-87b3-67cfb3f34ede.png");

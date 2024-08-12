@@ -158,7 +158,11 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
 
   // "입력" 버튼 클릭 시 호출되는 함수
   const handleConfirm = () => {
-    if (answers[currentQuestionIndex].trim() === "") {
+    // 현재 질문에 대한 답변이 없을 경우 기본값을 설정
+    if (
+      !answers[currentQuestionIndex] ||
+      answers[currentQuestionIndex].trim() === ""
+    ) {
       const newAnswers = [...answers];
       newAnswers[currentQuestionIndex] = defaultAnswers[currentQuestionIndex];
       setAnswers(newAnswers);

@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from "react"; // React와 관련된 훅과 기능을 불러옴
-import styled from "styled-components"; // styled-components 라이브러리로 컴포넌트 스타일링
-import { useSelector } from "react-redux"; // Redux 상태 관리를 위해 useSelector 훅 사용
-import GameInfoModal from "../../components/modals/GameInfoModal"; // 게임 정보 모달 컴포넌트 임포트
-import OpenViduSession from "../../components/OpenViduSession"; // OpenVidu 세션 컴포넌트 임포트
-import * as posenet from "@tensorflow-models/posenet"; // PoseNet 모델 임포트
-import "@tensorflow/tfjs"; // TensorFlow.js 임포트
-import gray from "../../assets/icons/gray.png"; // 이미지 임포트
-import transparentEdgeImage from "../../assets/images/transparent_edges_image.jpg"; // 투명 이미지 임포트
-import pose1 from "../../assets/images/pose1.jpg"; // 포즈 이미지 임포트
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { useSelector } from "react-redux";
+import GameInfoModal from "../../components/modals/GameInfoModal";
+import OpenViduSession from "../../components/OpenViduSession";
+import * as posenet from "@tensorflow-models/posenet";
+import "@tensorflow/tfjs";
+import gray from "../../assets/icons/gray.png";
+import transparentEdgeImage from "../../assets/images/poseline1.png";
+import pose1 from "../../assets/images/pose1.jpg";
 
-// 페이지 전체를 감싸는 styled-component
 const PageWrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -20,22 +20,19 @@ const PageWrap = styled.div`
   background-color: #f5f5f5;
 `;
 
-// 페이지 제목 스타일링
 const Title = styled.h1`
   font-size: 2rem;
   color: #333;
 `;
 
-// 비디오 캔버스 스타일링, 좌우 반전 효과 적용
 const VideoCanvas = styled.video`
   width: 640px;
   height: 480px;
   border: 1px solid #ccc;
   position: relative;
-  transform: scaleX(-1); /* 좌우 반전 */
+  transform: scaleX(-1);
 `;
 
-// 오버레이 이미지 스타일링
 const OverlayImage = styled.img`
   position: absolute;
   top: 0;
@@ -45,7 +42,6 @@ const OverlayImage = styled.img`
   opacity: 0.5;
 `;
 
-// 오버레이 텍스트 스타일링
 const OverlayText = styled.div`
   position: absolute;
   top: 50%;
@@ -58,7 +54,6 @@ const OverlayText = styled.div`
   border-radius: 5px;
 `;
 
-// 전체 콘텐츠를 감싸는 styled-component
 const Wrap = styled.div`
   width: 90%;
   height: 90vh;
@@ -68,7 +63,6 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
-// 포즈 선택 모달 스타일링, 모달 크기와 위치 조정
 const PoseSelectionModal = styled.div`
   position: fixed;
   top: 50%;
@@ -82,26 +76,23 @@ const PoseSelectionModal = styled.div`
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  width: 700px; /* 모달 크기 증가 */
+  width: 700px;
 `;
 
-// 포즈 리스트를 담는 컨테이너 스타일링
 const PoseListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
 `;
 
-// 포즈 버튼들이 한 줄에 배치되는 스타일링
 const PoseRow = styled.div`
   display: flex;
   gap: 10px;
-  justify-content: center; /* 포즈 버튼들이 중앙에 정렬되도록 설정 */
+  justify-content: center;
 `;
 
-// 개별 포즈 버튼 스타일링
 const PoseItem = styled.button`
-  width: 80px; /* 버튼 크기 증가 */
+  width: 80px;
   height: 80px;
   display: flex;
   justify-content: center;
@@ -117,7 +108,6 @@ const PoseItem = styled.button`
   }
 `;
 
-// 포즈 미리보기 모달 스타일링
 const PosePreviewModal = styled.div`
   position: fixed;
   top: 50%;
@@ -133,20 +123,18 @@ const PosePreviewModal = styled.div`
   z-index: 1000;
 `;
 
-// 포즈 이미지를 담는 컴포넌트 스타일링
 const PoseImage = styled.img`
   width: 300px;
   height: auto;
   margin-bottom: 20px;
+  cursor: pointer;
 `;
 
-// 버튼 그룹을 담는 컨테이너 스타일링
 const ButtonGroup = styled.div`
   display: flex;
   gap: 20px;
 `;
 
-// 빨간색 버튼 스타일링
 const RedButton = styled.button`
   padding: 10px 20px;
   background-color: #ff4d4f;
@@ -160,7 +148,6 @@ const RedButton = styled.button`
   }
 `;
 
-// 파란색 버튼 스타일링
 const BlueButton = styled.button`
   padding: 10px 20px;
   background-color: #1890ff;
@@ -174,7 +161,21 @@ const BlueButton = styled.button`
   }
 `;
 
-// 난이도 레이블을 담는 컴포넌트 스타일링
+const EndGameButton = styled.button`
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #ff7875;
+  }
+`;
+
 const DifficultyLabel = styled.div`
   font-size: 1.2rem;
   color: ${(props) =>
@@ -188,32 +189,33 @@ const DifficultyLabel = styled.div`
 `;
 
 const Game4 = () => {
-  // useState를 사용해 상태를 관리
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
-    useState(true); // 게임 시작 시 보여줄 모달 상태 관리
+    useState(true);
   const [isFollowPoseSelectModalOpen, setIsFollowPoseSelectModalOpen] =
-    useState(false); // 포즈 선택 모달 상태 관리
-  const [isPoseSystemModalOpen, setIsPoseSystemModalOpen] = useState(false); // 포즈 시스템 모달 상태 관리
-  const [isPoseDrawingModalOpen, setIsPoseDrawingModalOpen] = useState(false); // 포즈 드로잉 모달 상태 관리
+    useState(false);
+  const [isPoseSystemModalOpen, setIsPoseSystemModalOpen] = useState(false);
   const [isPoseSelectionModalOpen, setIsPoseSelectionModalOpen] =
-    useState(false); // 포즈 선택 모달 상태 관리
-  const [isPosePreviewModalOpen, setIsPosePreviewModalOpen] = useState(false); // 포즈 미리보기 모달 상태 관리
-  const [selectedPose, setSelectedPose] = useState(null); // 선택한 포즈 상태 관리
-  const [showOverlay, setShowOverlay] = useState(false); // 오버레이 이미지 상태 관리
-  const [showText, setShowText] = useState(false); // 오버레이 텍스트 상태 관리
-  const [round, setRound] = useState(1); // 현재 라운드 상태 관리
+    useState(false);
+  const [isPosePreviewModalOpen, setIsPosePreviewModalOpen] = useState(false);
 
-  // Redux에서 필요한 상태 가져오기
+  const [selectedPose, setSelectedPose] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [round, setRound] = useState(1);
+
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const localStream = useSelector((state) => state.room.localStream);
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const userNo = useSelector((state) => state.auth.userNo);
 
-  // video와 canvas의 ref 생성
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
-  // 서버로부터의 메시지 구독
+  const endGame = () => {
+    navigate("/icebreaking/games");
+  };
+
   useEffect(() => {
     client.subscribe(`/topic/game/${roomId}`, (message) => {
       const parsedMessage = JSON.parse(message.body);
@@ -223,14 +225,12 @@ const Game4 = () => {
         setIsFollowPoseWelcomeModalOpen(false);
         setIsFollowPoseSelectModalOpen(false);
         setIsPoseSystemModalOpen(false);
-        setIsPoseDrawingModalOpen(false);
       }
 
       console.log("키워드 타입 :", parsedMessage);
     });
   }, [client, roomId]);
 
-  // PoseNet 모델을 사용해 포즈를 추정하고 서버로 전송하는 함수
   const runPoseNet = async (videoElement) => {
     const net = await posenet.load();
     const pose = await net.estimateSinglePose(videoElement, {
@@ -251,14 +251,26 @@ const Game4 = () => {
 
     console.log("Sending pose result:", payload);
     client.send(
-      `/ws/app/game/${roomId}/pose/result`,
+      `/app/game/${roomId}/pose/${selectedPose}/result`,
       {},
       JSON.stringify(payload)
     );
   };
 
-  // 게임 시작 함수
   const startGame = () => {
+    if (selectedPose !== null) {
+      console.log("Starting game with pose:", selectedPose);
+      console.log(
+        `Data will be sent to: /app/game/${roomId}/pose/${selectedPose}`
+      );
+    }
+
+    setIsPoseSystemModalOpen(false);
+    setIsFollowPoseSelectModalOpen(false);
+    setIsFollowPoseWelcomeModalOpen(false);
+    setIsPoseSelectionModalOpen(false);
+    setIsPosePreviewModalOpen(false);
+
     client.send(`/app/game/${roomId}/start-modal/FOLLOW_POSE`);
 
     if (localStream && videoRef.current) {
@@ -275,14 +287,16 @@ const Game4 = () => {
           setShowText(false);
           setTimeout(() => {
             setShowOverlay(false);
-            setTimeout(() => {
-              runPoseNet(videoElement);
+            setTimeout(async () => {
+              await runPoseNet(videoElement);
               if (round < 6) {
                 setRound((prevRound) => prevRound + 1);
-                setIsPoseSystemModalOpen(false); // 현재 모달 닫기
-                setIsFollowPoseSelectModalOpen(true); // 다음 라운드로 넘어가며 포즈 선택 모달 열기
+                setIsFollowPoseSelectModalOpen(true);
               } else {
                 console.log("게임이 종료되었습니다.");
+                setTimeout(() => {
+                  navigate("/icebreaking/games");
+                }, 3000);
               }
             }, 1000);
           }, 4000);
@@ -291,7 +305,6 @@ const Game4 = () => {
     }
   };
 
-  // 모달창을 여는 함수들
   const openIsFollowPoseSelectModalOpen = () => {
     setIsFollowPoseWelcomeModalOpen(false);
     setIsFollowPoseSelectModalOpen(true);
@@ -310,16 +323,15 @@ const Game4 = () => {
     setIsPoseSelectionModalOpen(false);
   };
 
-  // 포즈 선택 후 서버로 전송
   const selectPose = (poseNumber) => {
     setSelectedPose(poseNumber);
     closePoseSelectionModal();
-    setIsPosePreviewModalOpen(true); // 포즈 미리보기 모달을 열어줌
+    setIsPosePreviewModalOpen(true);
   };
 
   const confirmPoseSelection = () => {
     setIsPosePreviewModalOpen(false);
-    setIsPoseSystemModalOpen(true);
+    setIsFollowPoseSelectModalOpen(true);
   };
 
   const cancelPoseSelection = () => {
@@ -330,17 +342,13 @@ const Game4 = () => {
   const sendPoseSelection = () => {
     if (selectedPose !== null) {
       const poseLoad = {
-        number: selectedPose,
+        poseType: selectedPose,
         num: userNo,
       };
 
       console.log("Sending pose selection:", poseLoad);
 
-      client.send(
-        `/ws/app/game/${roomId}/pose/number`,
-        {},
-        JSON.stringify(poseLoad)
-      );
+      client.send(`/app/game/${roomId}/pose`, {}, JSON.stringify(poseLoad));
 
       setIsPoseSystemModalOpen(true);
     }
@@ -452,7 +460,11 @@ const Game4 = () => {
       )}
       {isPosePreviewModalOpen && (
         <PosePreviewModal>
-          <PoseImage src={pose1} alt="Pose Preview" />
+          <PoseImage
+            src={pose1}
+            alt="Pose Preview"
+            onClick={confirmPoseSelection}
+          />
           <ButtonGroup>
             <RedButton onClick={confirmPoseSelection}>선택</RedButton>
             <BlueButton onClick={cancelPoseSelection}>뒤로 가기</BlueButton>
@@ -471,6 +483,7 @@ const Game4 = () => {
           )}
         </div>
         <OpenViduSession token={openViduToken} />
+        <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
       </PageWrap>
     </Wrap>
   );
