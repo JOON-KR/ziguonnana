@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,8 @@ public enum ExampleShorts {
     SECOND_SHORTS_PEOPLE5(2, 5, new ArrayList<>()),
     SECOND_SHORTS_PEOPLE6(2, 6, new ArrayList<>());
 
-    private static final String CONFIG_FILE = "./src/main/resources/shorts-config.json";
+    @Value("${exampleshorts_path}")
+    private static String CONFIG_FILE;
 
     private final int shortsId;
     private final int people;
