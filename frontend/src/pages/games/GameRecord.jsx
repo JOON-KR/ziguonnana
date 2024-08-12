@@ -8,7 +8,6 @@ import rightIcon from "../../assets/icons/right.png";
 import recordIcon from "../../assets/icons/record.png";
 import recordBtn from "../../assets/icons/aqua_btn.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
-import GameRecordDetail from "../games/GameRecordDetail"
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -38,7 +37,7 @@ const BodyContainer = styled.div`
 `;
 
 const Section = styled.div`
-  width: 80%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -51,7 +50,7 @@ const Section = styled.div`
 `;
 
 const RecordSection = styled.div`
-  width: 80%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
