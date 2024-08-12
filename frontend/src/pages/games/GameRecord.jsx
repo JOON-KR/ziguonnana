@@ -20,23 +20,35 @@ const PageWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width:100%;
+  box-sizing: border-box;
+  
 `;
 
-const Header = styled.header`
+const RecordHeader = styled.header`
   font-size: 50px;
   color: #58fff5;
   font-weight: bold;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 2px;
+  margin-bottom: 20px;
 `;
 
-const BodyContainer = styled.div`
+const SectionContainer1 = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80%;
-  height: 80vh;
+  // width: 80%;
+  // height: 80vh;
+`;
+
+const SectionContainer2 = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  // width: 80%;
+  // height: 80vh;
 `;
 
 const Section = styled.div`
@@ -48,7 +60,23 @@ const Section = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  color: white;
+`;
+
+const AvatarCardSection = styled.div`
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 10px;
+  margin-left: 60px;
+  margin-bottom: 20px;
+  // margin: 10px 10px 30px 10px;
   color: white;
 `;
 
@@ -82,8 +110,8 @@ const Slide = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 28px;
-  margin-bottom: 20px;
+  font-size: 24px;
+  margin-bottom: 6px;
 `;
 
 const RecordTitle = styled.h2`
@@ -116,6 +144,7 @@ const Text = styled.p`
   flex: 1;
   text-align: left;
   font-weight: bold;
+  color: #58fff5;
 `;
 
 const ButtonContainer = styled.div`
@@ -142,7 +171,7 @@ const GameRecord = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const userNo = useSelector((state) => state.auth.userNo);
   const client = useSelector((state) => state.client.stompClient);
-
+  const maxNo = useSelector((state) => state.room.maxNo);
   const [teamName, setTeamName] = useState(""); // 팀명
   const [bodyCount, setBodyCount] = useState(0); // 몸으로말해요 맞춘 개수
   const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
@@ -210,38 +239,47 @@ const GameRecord = () => {
 
   return (
     <PageWrap>
-      <Header>RECORD</Header>
-      <BodyContainer>
-        <Section>
-          <Title>
-            팀명 : {teamName}
-          </Title>
-        </Section>
-        <Section>
-          <Title>아바타 명함</Title>
-          {avartarCards.map((card, index) => (
-            <AvatarCard
-              key={index}
-              avatarImage={card.avatarImage}
-              nickname={card.nickname}
-              features={card.features}
-            />
-          ))}
-          {/* <Slide>
-            <IconImage src={leftIcon} alt="Left" />
-            <CardImage src={cardPic} alt="아바타 명함" />
-            <IconImage src={rightIcon} alt="Right" />
-          </Slide> */}
-        </Section>
+      <RecordHeader>RECORD</RecordHeader>
+        <SectionContainer2>
+          <SectionContainer1>
+            <Section>
+              <Title>팀명</Title>
+              <Text>{teamName}</Text>
+            </Section>
+            <Section>
+              <Title>인원수</Title>
+              <Text>{maxNo}</Text>
+            </Section>
+          </SectionContainer1>
+          <AvatarCardSection>
+            <Title>아바타 명함</Title>
+            {/* <Slide>
+              {avartarCards.map((card, index) => (
+                <AvatarCard
+                  key={index}
+                  avatarImage={card.avatarImage}
+                  nickname={card.nickname}
+                  features={card.features}
+                />
+              ))}
+            </Slide> */}
+            <Slide>
+              <IconImage src={leftIcon} alt="Left" />
+              <CardImage src={cardPic} alt="아바타 명함" />
+              <IconImage src={rightIcon} alt="Right" />
+            </Slide>
+          </AvatarCardSection>
+        </SectionContainer2>
+
 
         <RecordSection>
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>게임기록</RecordTitle>
           <GameSection>
             <Slide>
-              <GameRecordIconImage src={leftIcon} alt="Left" />
+              {/* <GameRecordIconImage src={leftIcon} alt="Left" /> */}
               <IconImage src={gameRecordIcon} alt="gameRecord" />
-              <GameRecordIconImage src={rightIcon} alt="Right" />
+              {/* <GameRecordIconImage src={rightIcon} alt="Right" /> */}
             </Slide>
             {/* 게임 이름 & 인원 */}
             <Text>몸으로 말해요  6/6</Text>
@@ -256,16 +294,15 @@ const GameRecord = () => {
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>숏폼기록</RecordTitle>
           <GameSection>
-            <Text>숏폼 기록 내용</Text>
+            <Title>숏폼 기록 내용</Title>
           </GameSection>
           <ButtonContainer onClick={handleCommunity}>
             <ButtonText>커뮤니티</ButtonText>
             <IconImage src={recordBtn} alt="gameRecordBtn" />
           </ButtonContainer>
         </RecordSection>
-      </BodyContainer>
     </PageWrap>
   );
 };
-
+// 수정전
 export default GameRecord;

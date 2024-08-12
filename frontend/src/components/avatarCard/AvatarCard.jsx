@@ -50,7 +50,7 @@ const Feature = styled.h2`
   margin-right: 10px; /* 각 키워드 간 간격 추가 */
 `;
 
-const AvatarCard = ({ avatarImage, nickname, features = [""] }) => { // 기본값을 빈 배열로 설정
+const AvatarCard = ({ avatarImage, nickname = 'nick', features = [""] }) => { // 기본값을 빈 배열로 설정
   return (
     <Wrap>
       {/* 이미지 */}

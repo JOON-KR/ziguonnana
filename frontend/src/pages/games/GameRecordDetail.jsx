@@ -13,6 +13,8 @@ const PageWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width:100%;
+  box-sizing: border-box;
 `;
 
 const Header = styled.header`
