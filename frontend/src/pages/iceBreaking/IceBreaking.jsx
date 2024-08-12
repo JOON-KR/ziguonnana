@@ -13,6 +13,7 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden; /* 스크롤 방지 */
   }
 `;
 
