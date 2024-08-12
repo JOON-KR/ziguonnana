@@ -142,7 +142,7 @@ const Game5Dance = () => {
             setShouldPlayVideo(false);
           } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
             console.log("게임 종료, 다같이 이동");
-            navigate("/icebreaking/games/game5End");
+            navigate("/icebreaking/games/game5Result");
           }
         } catch (error) {
           console.error("메시지 처리 중 오류 발생:", error);
