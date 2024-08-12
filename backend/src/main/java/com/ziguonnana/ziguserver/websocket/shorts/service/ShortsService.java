@@ -93,6 +93,8 @@ public class ShortsService {
         log.info("쇼츠 합치기 완료 : " + mergeVideoUrl);
 
         // 합치기 완료된 쇼츠 보내기
+        Room room = roomRepository.getRoom(roomId);
+        room.updateShortsResult(mergeVideoUrl);
         Response<String> response = Response.ok(CommandType.SHORTS_MERGE_COMPLETE, S3_BASEURL + mergeVideoUrl);
         simpMessagingTemplate.convertAndSend("/topic/game/" + roomId, response);
     }
