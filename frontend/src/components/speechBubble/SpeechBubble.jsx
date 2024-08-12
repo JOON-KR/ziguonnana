@@ -3,35 +3,37 @@ import styled from "styled-components";
 import sb from "../../assets/images/speechBubble.png";
 
 const Wrap = styled.div`
-  width: 412px; /* 크기를 줄임 */
-  height: 150px; /* 크기를 줄임 */
-  position: relative;
+  width: 412px;
+  height: 124px;
+  position: absolute;
+  left: 50px;
+  top: 100px;
   background-image: url(${sb});
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin-bottom: 20px; /* 말풍선과 Nana 이미지 사이의 간격 추가 */
+  // margin-bottom: 20px; /* 말풍선과 Nana 이미지 사이의 간격 추가 */
+  display: flex;
+  flex-direction: column;
+  // justify-content: flex-start; /* 상단에 배치 */
+  align-items: center;
+  padding-top: 30px;
 `;
 
 const TextBox = styled.div`
-  z-index: 2;
   width: 100%;
-  height: 80%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 0;
   text-align: center;
-  font-size: 16px; /* 글꼴 크기를 줄임 */
+  font-size: 22px;
   font-weight: 600;
   color: black;
+  // margin: 5px 0;
 `;
 
-const SpeechBubble = ({ text }) => {
+const SpeechBubble = ({ type, word }) => {
   return (
     <Wrap>
-      <TextBox>{text}</TextBox>
+      <TextBox>{type}</TextBox>
+      {word && <TextBox>{word}</TextBox>}
     </Wrap>
   );
 };
