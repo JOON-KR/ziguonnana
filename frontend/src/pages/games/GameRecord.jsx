@@ -1,6 +1,6 @@
-import React from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { resolvePath, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
 import cardPic from "../../assets/images/profileCard.png";
@@ -9,6 +9,8 @@ import rightIcon from "../../assets/icons/right.png";
 import recordIcon from "../../assets/icons/record.png";
 import recordBtn from "../../assets/icons/aqua_btn.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
+import AvatarCard from "../../components/avatarCard/AvatarCard";
+import axios from "axios";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -134,90 +136,70 @@ const ButtonText = styled.span`
   pointer-events: none; // 버튼 텍스트가 클릭되지 않도록 설정
   margin-bottom: 10px;
 `;
-// ===========================================
-// socket
-// useEffect(() => {
-//   if (client && client.connected) {
-//     // socket API 보내기
-//     console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
-//     client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
-//   } else {
-//     console.warn("send 부분에서 문제 발생");
-//   }
-// }, [client, roomId, currentUserNo]);
-// 구독 / 데이터 받아오기
-// useEffect(() => {
-//   if (client && client.connected) {
-//     // socket API
-//     const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-//       try {
-//         console.log("서버로부터 받은 메시지:", message.body);
-//         const response = JSON.parse(message.body);
-//         if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
-//           console.log("서버로부터 받은 데이터:", response.data);
-//           setCurrentUserNo(response.data.currentUserNo);
-//           setChallengeVideoUrl(response.data.challengeVideoUrl);
-//           setVideoDuration(response.data.videoDuration || 5000);
-//           setCountdown(3);
-//           setIsButtonVisible(false);
-//         } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
-//           console.log("게임 종료, 다같이 이동");
-//           navigate("/icebreaking/games/game5End");
-//         }
-//       } catch (error) {
-//         console.error("메시지 처리 중 오류 발생:", error);
-//       }
-//     });
-
-//     return () => {
-//       console.log("구독을 취소합니다.");
-//       subscription.unsubscribe();
-//     };
-//   } else {
-//     console.warn("클라이언트가 연결되지 않았거나 문제가 발생했습니다.");
-//   }
-// }, [client, roomId]);
-
-// axios
-// 이름 수정 -> 필요할떄 이름()으로 호출 
-// const startRecording = () => {
-//   if (currentUserNo === userNo && !isRecording) {
-//     setIsRecording(true);
-//     console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
-
-//     mediaRecorder.onstop = async () => {
-//       const blob = new Blob(recordedChunks.current, { type: "video/webm" });
-//       console.log("녹화된 Blob:", blob);
-
-//       const formData = new FormData();
-//       formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
-
-//       axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       }).then(response => {
-//         console.log("녹화된 비디오 업로드 성공:", response.data);
-//       }).catch(error => {
-//         console.error("비디오 업로드 실패:", error);
-//       });
-
-//       setIsButtonVisible(true);
-//     };
-
-//     mediaRecorderRef.current = mediaRecorder;
-//     mediaRecorder.start();
-
-//     setTimeout(() => {
-//       mediaRecorder.stop();
-//       setIsRecording(false);
-//     }, videoDuration);
-//   }
-// };
-// ===========================================
 
 const GameRecord = () => {
   const navigate = useNavigate();
+  const roomId = useSelector((state) => state.room.roomId);
+  const userNo = useSelector((state) => state.auth.userNo);
+  const client = useSelector((state) => state.client.stompClient);
+
+  const [teamName, setTeamName] = useState(""); // 팀명
+  const [bodyCount, setBodyCount] = useState(0); // 몸으로말해요 맞춘 개수
+  const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
+  const [igudongseongCount, setIgudongseongCount] = useState(0); // 이구동성 맞춘 개수
+  // const [poseBestList, ] // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
+  // const [shortsURL, setShortsURL] = useState(); // 숏폼 결과 url
+  const [avartarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+
+  // ===========================================
+  // socket-send
+  useEffect(() => {
+    if (client && client.connected) {
+      console.log("send:", `/app/game/${roomId}/result`);
+      client.send(`/app/game/${roomId}/result`, {}, {});
+    } else {
+      console.warn("send 문제 발생");
+    }
+  }, [client, roomId]);
+
+  // 구독 / 데이터 받아오기
+  useEffect(() => {
+    console.log("--------------------------------");
+    console.log("연결 상태 : ", client.connected);
+    console.log("--------------------------------");
+    console.log("유저 번호 :", userNo);
+
+    if (client && client.connected) {
+      // 구독
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        try {  
+          const response = JSON.parse(message.body);
+          console.log("서버로부터 받은 메시지:", response);
+          if (response.commandType === "GAME_RESULT" && response.message === "SUCCESS") {
+            console.log("서버로부터 받은 데이터:", response.data);
+            // const recordData = response.data
+            // 상태 저장
+            setTeamName(response.data.teamName);
+            console.log(response.data)
+            setAvatarCards(response.data.avatarCards);
+          } 
+        } catch (error) {
+          console.error("메시지 처리 중 오류 발생:", error);
+        }
+      });
+      console.log(`구독 성공: /topic/game/${roomId}`);
+      // 언마운트 시 구독 해제
+      return () => {
+        console.log("구독을 해제합니다.");
+        subscription.unsubscribe();
+      };
+    } else {
+      console.warn("클라이언트가 연결되지 않았거나 문제가 발생했습니다.");
+    }
+  }, [client, roomId, userNo]);
+  
+
+  // ===========================================
 
   const handleRecordDetail = () => {
     navigate("/icebreaking/games/gameRecordDetail");
@@ -231,12 +213,25 @@ const GameRecord = () => {
       <Header>RECORD</Header>
       <BodyContainer>
         <Section>
+          <Title>
+            팀명 : {teamName}
+          </Title>
+        </Section>
+        <Section>
           <Title>아바타 명함</Title>
-          <Slide>
+          {avartarCards.map((card, index) => (
+            <AvatarCard
+              key={index}
+              avatarImage={card.avatarImage}
+              nickname={card.nickname}
+              features={card.features}
+            />
+          ))}
+          {/* <Slide>
             <IconImage src={leftIcon} alt="Left" />
             <CardImage src={cardPic} alt="아바타 명함" />
             <IconImage src={rightIcon} alt="Right" />
-          </Slide>
+          </Slide> */}
         </Section>
 
         <RecordSection>
