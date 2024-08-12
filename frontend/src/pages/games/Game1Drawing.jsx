@@ -4,6 +4,7 @@ import { ReactSketchCanvas } from "react-sketch-canvas";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
+import { useNavigate } from "react-router-dom";
 
 const Wrap = styled.div`
   width: 100%;
@@ -150,6 +151,7 @@ const Game1Drawing = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const [isStarted, setIsStarted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -380,7 +382,13 @@ const Game1Drawing = () => {
         {!isGameEnded ? (
           <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
         ) : (
-          <button>다른 게임들 보러가기</button>
+          <button
+            onClick={() => {
+              navigate("/icebreaking/games");
+            }}
+          >
+            다른 게임들 보러가기
+          </button>
         )}
       </Header>
       <CanvasWrapper onMouseUp={handleMouseUp}>
