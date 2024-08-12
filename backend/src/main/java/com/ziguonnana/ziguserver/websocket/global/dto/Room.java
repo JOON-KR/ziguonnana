@@ -66,6 +66,9 @@ public class Room {
 	//아바타 명함
 	private ConcurrentMap<Integer, AvatarResult> avatarcards;
 
+	public void statusUp() {
+		this.status++;
+	}
 	public void initArt() {
 		for(int i=1;i<=people;i++) {
 			art.put(i, new ArrayList<>());

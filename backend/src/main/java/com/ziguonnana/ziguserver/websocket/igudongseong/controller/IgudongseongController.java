@@ -9,7 +9,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.SimilarRequest;
 import com.ziguonnana.ziguserver.websocket.igudongseong.service.IgudongseongService;
@@ -25,12 +24,8 @@ public class IgudongseongController {
 	
 	//   이구동성 키워드 리스트 반환
     @MessageMapping("/game/{roomId}/igudongseong")
-    @SendTo("/topic/game/{roomId}") 
-    public GameMessage<List<String>> getAnswer(@DestinationVariable("roomId") String roomId) {
-        log.info("=======이구동성 시작=======");
-        List<String> keyword =  igudongseongService.getKeyword(roomId);
-        igudongseongService.saveKeyword(keyword,roomId);
-        return GameMessage.info("이구동성 시작!", keyword);
+    public void getAnswer(@DestinationVariable("roomId") String roomId) {
+        igudongseongService.getKeyword(roomId);
     }
     
     @MessageMapping("/game/{roomId}/similar")
