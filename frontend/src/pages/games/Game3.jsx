@@ -128,7 +128,8 @@ const Game3 = () => {
               navigate("/icebreaking/games");
             }, 3000);
           }
-        } else if (parsedMessage.message === "이구동성 시작!\n") {
+        } else if (parsedMessage.commandType === "IGUDONGSEONG_START") {
+          console.log("====키워드 받아서 설정함====", parsedMessage.data);
           setKeywords(parsedMessage.data);
 
           const keyword = parsedMessage.data[round - 1];
@@ -249,10 +250,10 @@ const Game3 = () => {
       )}
       {showStartImages && (
         <>
-          <StyledSpeechBubble
-            text={
+          <SpeechBubble
+            word={
               <>
-                제시어: {currentKeyword}
+                제시어: {keywords[round]}
                 <br />
                 5초 안에 포즈를 취하세요!
               </>
@@ -262,7 +263,7 @@ const Game3 = () => {
         </>
       )}
       <PageWrap>
-        <VideoCanvas ref={videoRef} width="640" height="480" />
+        {/* <VideoCanvas ref={videoRef} width="640" height="480" /> */}
         {openViduToken && <OpenViduSession token={openViduToken} />}
         <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
       </PageWrap>
