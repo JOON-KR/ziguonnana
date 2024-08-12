@@ -47,7 +47,7 @@ const SectionContainer2 = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  // width: 80%;
+  width: 90%;
   // height: 80vh;
 `;
 
@@ -58,10 +58,10 @@ const Section = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  margin-right: 20px;
+  margin-right: 10px;
   color: white;
 `;
 
@@ -74,7 +74,7 @@ const AvatarCardSection = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 10px;
-  margin-left: 60px;
+  margin-left: 10px;
   margin-bottom: 20px;
   // margin: 10px 10px 30px 10px;
   color: white;
@@ -177,7 +177,7 @@ const GameRecord = () => {
   const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
   const [igudongseongCount, setIgudongseongCount] = useState(0); // 이구동성 맞춘 개수
   // const [poseBestList, ] // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
-  // const [shortsURL, setShortsURL] = useState(); // 숏폼 결과 url
+  const [shortsURL, setShortsURL] = useState(null); // 숏폼 결과 url
   const [avartarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   // ===========================================
@@ -209,8 +209,10 @@ const GameRecord = () => {
             // const recordData = response.data
             // 상태 저장
             setTeamName(response.data.teamName);
-            console.log(response.data)
+            console.log(response.data);
             setAvatarCards(response.data.avatarCards);
+            setBodyCount(response.data.bodyCount);
+            setShortsURL(response.data.shortsURL);
           } 
         } catch (error) {
           console.error("메시지 처리 중 오류 발생:", error);
@@ -281,8 +283,8 @@ const GameRecord = () => {
               <IconImage src={gameRecordIcon} alt="gameRecord" />
               {/* <GameRecordIconImage src={rightIcon} alt="Right" /> */}
             </Slide>
-            {/* 게임 이름 & 인원 */}
-            <Text>몸으로 말해요  6/6</Text>
+            {/* 게임 이름 & 몸말맞춘수 & 게임 인원 */}
+            <Title>몸으로 말해요  {bodyCount}/{maxNo}</Title>
           </GameSection>
           <ButtonContainer onClick={handleRecordDetail}>
             <ButtonText>게임상세</ButtonText>
@@ -294,7 +296,10 @@ const GameRecord = () => {
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>숏폼기록</RecordTitle>
           <GameSection>
-            <Title>숏폼 기록 내용</Title>
+            <Title>
+              숏폼 기록 내용
+              {shortsURL}
+            </Title>
           </GameSection>
           <ButtonContainer onClick={handleCommunity}>
             <ButtonText>커뮤니티</ButtonText>
