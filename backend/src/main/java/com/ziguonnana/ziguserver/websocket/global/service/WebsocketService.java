@@ -64,6 +64,7 @@ public class WebsocketService {
                 .vectors(vector)
                 .Igudongseong(Igudongseong)
                 .poseResult(new ArrayList<>())
+                .avatarcards(new ConcurrentHashMap<>())
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
