@@ -156,6 +156,7 @@ const Game2 = () => {
   useEffect(() => {
     if (explainerNo === userNo) {
       setIsExplainer(true);
+      setExplainerNo(userNo);
     } else {
       setIsExplainer(false);
     }
@@ -301,23 +302,27 @@ const Game2 = () => {
 
   // 타이머 로직
   useEffect(() => {
-    if (isGameStarted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-
-      return () => clearInterval(timer); // cleanup
-    } else if (timeLeft === 0) {
-      // 타이머가 0이 되면 게임 종료 로직 추가 가능
-      console.log("시간 종료");
+    if (!isGameEnded) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => {
+          setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      // } else { // 타이머 끝나면
+        // if (isStarted) {
+        //   // axios 보낼 로직
+        // }
+      }
     }
-  }, [isGameStarted, timeLeft, userNo, explainerNo]);
+  }, [timeLeft]);
 
   // 타이머 포맷
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
 
   const openBodyTalkGuideModal = () => {
@@ -368,15 +373,15 @@ const Game2 = () => {
       {/* 모달 끝나고 화면 */}
       {isGameEnded ? (
         <>
+          {/* 게임 종료 화면 */}
           <Header2>게임이 종료되었습니다.</Header2>
-          <Button onClick={() => {
-              navigate("/icebreaking/games");
-            }}
-          >
-            다른 게임들 보러가기</Button>
+          <Button onClick={() => {navigate("/icebreaking/games");}}>
+            다른 게임들 보러가기
+          </Button>
         </>
       ) : isExplainer ? (
           <>
+            {/* 출제자 화면 */}
             <HeaderContainer>
               <Header>{round} 라운드 - 출제자</Header>
               <Timer>{formatTime(timeLeft)}</Timer>
@@ -396,6 +401,7 @@ const Game2 = () => {
           </>
         ) : (
           <>
+            {/* 맞추는 사람 화면 */}
             <HeaderContainer>
               <Header>{round} 라운드 - 맞추는 사람</Header>
               <Timer>{formatTime(timeLeft)}</Timer>
@@ -425,7 +431,6 @@ const Game2 = () => {
               <Button onClick={sendMessage}>SEND</Button>
             </ChatWrap>
           </>
-        
       )}
     </Wrap>
   );
