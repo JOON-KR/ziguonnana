@@ -42,7 +42,7 @@ public class ArtController {
     
     @MessageMapping("/game/{roomId}/draw")
     @SendTo("/topic/game/{roomId}")
-    public Response<Object> draw(@DestinationVariable("roomId") String roomId, @Payload List<Draw> draw) {
+    public Response<Object> draw(@DestinationVariable("roomId") String roomId, @Payload Draw draw) {
         // DRAW_PREV 커맨드 타입과 받은 데이터를 Response로 감싸서 반환
     	log.info("이어그리기데이터{}",draw);
         return Response.ok(CommandType.DRAW_PREV, draw);
