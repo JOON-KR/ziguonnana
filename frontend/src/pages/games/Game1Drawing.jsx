@@ -300,21 +300,14 @@ const Game1Drawing = () => {
   };
 
   const handleMouseUp = async () => {
-    console.log(`타겟 : ${targetUser}, 권한 : ${currentUser}, 나 : ${userNo}`);
-    if (canvasRef.current && currentUser == userNo) {
       const currentPaths = await canvasRef.current.exportPaths();
       const simplifiedPaths = currentPaths.map((path) => ({
         ...path,
         path: simplifyPath(path.path),
       }));
-      const newPaths = simplifiedPaths.slice(lastSentPaths.length);
 
       if (newPaths.length > 0) {
-        client.send(`/app/game/${roomId}/draw`, {}, JSON.stringify(newPaths));
-        setLastSentPaths(currentPaths);
       }
-    } else {
-      console.log("캔버스레프 없음!!!!!!!!!!!!!!!!!!!!!!!");
     }
   };
 

@@ -68,6 +68,8 @@ const NextButton = styled.button`
   cursor: pointer;
 `;
 
+
+
 const Game5Dance = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const userNo = useSelector((state) => state.auth.userNo);
@@ -84,19 +86,25 @@ const Game5Dance = () => {
   const [currentUserNo, setCurrentUserNo] = useState(1);
   const [maxNo, setMaxNo] = useState(1);
   const [challengeVideoUrl, setChallengeVideoUrl] = useState("");
-  const [videoDuration, setVideoDuration] = useState(5000); 
+  const [videoDuration, setVideoDuration] = useState(5000);
   const [isRecording, setIsRecording] = useState(false);
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
 
+  const [isRecordingComplete, setIsRecordingComplete] = useState(false); // 녹화 완료 상태
+  const [isUploadComplete, setIsUploadComplete] = useState(false); // 업로드 완료 상태
+
   const navigate = useNavigate();
 
+  // 상태가 변경될 때마다 확인
   useEffect(() => {
-    console.log("userNo는: ", userNo);
-    console.log("currentUserNo는: ", currentUserNo);
-    console.log("maxNo는: ", maxNo);
-  }, [userNo, currentUserNo, maxNo]);
+    if (isRecordingComplete && isUploadComplete) {
+      console.log("녹화, 업로드 둘다 완료!!!! 다음 페이지로 이동");
+      navigate("/icebreaking/games/game5Result");
+    }
+  }, [isRecordingComplete, isUploadComplete]);
 
+  // 로컬 스트림 설정
   useEffect(() => {
     if (localStream && userVideoRef.current && currentUserNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
@@ -104,34 +112,39 @@ const Game5Dance = () => {
     }
   }, [localStream, currentUserNo, userNo]);
 
+  // 서브 스트림 설정
   useEffect(() => {
     if (subscribers.length > 0 && subscriberVideoRef.current && currentUserNo !== userNo) {
       const subscriber = subscribers.find(
-        (sub) => sub.stream.connection.data === `{"userNo":${currentUserNo}}`);
+        (sub) => sub.stream.connection.data === `{"userNo":${currentUserNo}}`
+      );
       if (subscriber) {
         subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
-        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);    
-      } 
+        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);
+      }
     }
   }, [subscribers, currentUserNo, userNo]);
 
+  // 녹화할 user의 구간 예시 영상 요청
   useEffect(() => {
     if (client && client.connected) {
-      console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
+      console.log("구간 영상 요청 send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
     } else {
-      console.warn("send 부분에서 문제 발생");
+      console.warn("구간 영상 요청 send 부분에서 문제 발생");
     }
   }, [client, roomId, currentUserNo]);
 
+  // 구독 설정 및 해제
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
         try {
-          console.log("서버로부터 받은 메시지:", message.body);
           const response = JSON.parse(message.body);
+          console.log("서버로부터 받은 메시지:", response);
+
           if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
-            console.log("서버로부터 받은 데이터:", response.data);
+            console.log("구간 영상 응답 데이터:", response.data);
             setCurrentUserNo(response.data.currentUserNo);
             setMaxNo(response.data.maxNo);
             setChallengeVideoUrl(response.data.challengeVideoUrl);
@@ -141,8 +154,8 @@ const Game5Dance = () => {
             setIsRecording(false);
             setShouldPlayVideo(false);
           } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
-            console.log("게임 종료, 다같이 이동");
-            navigate("/icebreaking/games/game5Result");
+            console.log("영상 녹화 종료 데이터:", response.data);
+            setIsRecordingComplete(true);
           }
         } catch (error) {
           console.error("메시지 처리 중 오류 발생:", error);
@@ -158,6 +171,7 @@ const Game5Dance = () => {
     }
   }, [client, roomId]);
 
+  // 카운트 내려감
   useEffect(() => {
     let interval;
     if (challengeVideoUrl && countdown > 0) {
@@ -169,10 +183,10 @@ const Game5Dance = () => {
       setShouldPlayVideo(true);
       startRecording();
     }
-
     return () => clearInterval(interval);
   }, [challengeVideoUrl, countdown, currentUserNo, userNo]);
 
+  // 녹화 시작됨
   const startRecording = () => {
     if (currentUserNo === userNo && !isRecording) {
       setIsRecording(true);
@@ -196,16 +210,19 @@ const Game5Dance = () => {
         const formData = new FormData();
         formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
 
-        axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }).then(response => {
-          console.log("녹화된 비디오 업로드 성공:", response.data);
-        }).catch(error => {
-          console.error("비디오 업로드 실패:", error);
-        });
-
+        axios
+          .post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((response) => {
+            console.log("녹화된 비디오 업로드 성공:", response.data);
+            setIsUploadComplete(true); // 업로드 완료 상태 설정
+          })
+          .catch((error) => {
+            console.error("비디오 업로드 실패:", error);
+          });
         setIsButtonVisible(true);
       };
 
@@ -219,15 +236,16 @@ const Game5Dance = () => {
     }
   };
 
+  // 다음 타자 또는 챌린지 녹화 끝내기 버튼 클릭
   const handleNextUser = () => {
     setIsButtonVisible(false);
-
     if (currentUserNo < maxNo) {
       console.log("다음 사용자로 요청을 보냅니다:", currentUserNo + 1);
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo + 1}`, {}, {});
     } else if (currentUserNo === maxNo) {
       console.log("모든 사용자가 완료되었습니다.");
-      // 게임 종료 요청을 서버로 전송
+      // 영상 녹화 종료 send
+      console.log("영상 녹화 종료 send:", `/app/game/${roomId}/shorts/end`);
       client.send(`/app/game/${roomId}/shorts/end`, {}, {});
     }
   };
@@ -239,11 +257,7 @@ const Game5Dance = () => {
       <VideoContainer>
         <VideoWrapper>
           {shouldPlayVideo && challengeVideoUrl && (
-            <ChallengeVideo
-              src={challengeVideoUrl}
-              controls={false}
-              autoPlay
-            />
+            <ChallengeVideo src={challengeVideoUrl} controls={false} autoPlay />
           )}
         </VideoWrapper>
         <VideoWrapper>
@@ -256,7 +270,7 @@ const Game5Dance = () => {
       </VideoContainer>
       {isButtonVisible && (
         <NextButton onClick={handleNextUser}>
-          다음 팀원으로
+          {currentUserNo === maxNo ? "챌린지 녹화 끝내기" : "다음 팀원으로"}
         </NextButton>
       )}
     </Container>
