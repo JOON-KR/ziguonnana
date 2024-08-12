@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // useNavigate 훅 임포트
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import GameInfoModal from "../../components/modals/GameInfoModal";
@@ -30,7 +30,7 @@ const VideoCanvas = styled.video`
   height: 480px;
   border: 1px solid #ccc;
   position: relative;
-  transform: scaleX(-1); /* 좌우 반전 */
+  transform: scaleX(-1);
 `;
 
 const OverlayImage = styled.img`
@@ -127,7 +127,7 @@ const PoseImage = styled.img`
   width: 300px;
   height: auto;
   margin-bottom: 20px;
-  cursor: pointer; /* 이미지 클릭 가능하도록 설정 */
+  cursor: pointer;
 `;
 
 const ButtonGroup = styled.div`
@@ -158,6 +158,21 @@ const BlueButton = styled.button`
 
   &:hover {
     background-color: #40a9ff;
+  }
+`;
+
+const EndGameButton = styled.button`
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #ff7875;
   }
 `;
 
@@ -195,7 +210,11 @@ const Game4 = () => {
   const userNo = useSelector((state) => state.auth.userNo);
 
   const videoRef = useRef(null);
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const navigate = useNavigate();
+
+  const endGame = () => {
+    navigate("/icebreaking/games");
+  };
 
   useEffect(() => {
     client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -268,14 +287,16 @@ const Game4 = () => {
           setShowText(false);
           setTimeout(() => {
             setShowOverlay(false);
-            setTimeout(() => {
-              runPoseNet(videoElement);
+            setTimeout(async () => {
+              await runPoseNet(videoElement);
               if (round < 6) {
                 setRound((prevRound) => prevRound + 1);
                 setIsFollowPoseSelectModalOpen(true);
               } else {
                 console.log("게임이 종료되었습니다.");
-                navigate("/icebreaking/games"); // 게임 종료 시 "games" 페이지로 이동
+                setTimeout(() => {
+                  navigate("/icebreaking/games");
+                }, 3000);
               }
             }, 1000);
           }, 4000);
@@ -462,6 +483,7 @@ const Game4 = () => {
           )}
         </div>
         <OpenViduSession token={openViduToken} />
+        <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
       </PageWrap>
     </Wrap>
   );

@@ -16,7 +16,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-// Styled components
 const PageWrap = styled.div`
   width: 100%;
   height: 100%;
@@ -49,50 +48,21 @@ const Content = styled.div`
   position: relative;
 `;
 
-const ChatWrap = styled.div`
-  /* width: 60%; */
-  position: fixed;
-  bottom: 30px;
-`;
-
 const IceBreaking = () => {
   const dispatch = useDispatch();
   const openviduToken = useSelector((state) => state.auth.openViduToken);
-  const roomId = useSelector((state) => state.room.roomId);
-  const client = useSelector((state) => state.client.stompClient);
-  const [typedText, setTypedText] = useState("");
-  // 컴포넌트 언마운트 시 세션 초기화
+
   useEffect(() => {
     return () => {
       dispatch(clearSession());
     };
   }, [dispatch]);
 
-  // const sendMessage = () => {
-  //   if (client && client.connected) {
-  //     console.log("보내는 메시지:", {
-  //       // sender: profile.name,
-  //       content: typedText,
-  //     });
-  //     client.send(
-  //       `/app/game/${roomId}/chat`,
-  //       {},
-  //       JSON.stringify({
-  //         // sender: profile.name,
-  //         content: typedText,
-  //       })
-  //     );
-  //     setTypedText("");
-  //   }
-  // };
-
   return (
     <>
       <GlobalStyle />
       <PageWrap>
-        {/* OpenViduSession 컴포넌트 렌더링 */}
         {openviduToken && <OpenViduSession token={openviduToken} />}
-        {/* VideoBox 컴포넌트 렌더링 */}
         <Frame>
           <VideoBox index={0} />
           <VideoBox index={1} />

@@ -173,6 +173,8 @@ const Game1Drawing = () => {
             setCurrentUser(0);
             canvasRef.current.clearCanvas();
             setDrawingResult(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_CYCLE") {
+            canvasRef.current.clearCanvas();
           }
         }
       );
@@ -185,19 +187,9 @@ const Game1Drawing = () => {
     }
   }, [client, roomId]);
 
-  useEffect(() => {
-    const sendDrawingAndClearCanvas = async () => {
-      const currentPaths = await canvasRef.current.exportPaths();
-      if (currentPaths && currentPaths.length > 0) {
-        await handleSendDrawing();
-      }
-      canvasRef.current.clearCanvas();
-    };
-
-    if (targetUser !== 0 && canvasRef.current) {
-      sendDrawingAndClearCanvas();
-    }
-  }, [targetUser]);
+  // useEffect(() => {
+  //   canvasRef.current.clearCanvas();
+  // }, [targetUser]);
 
   useEffect(() => {
     if (!isGameEnded) {
