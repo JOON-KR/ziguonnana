@@ -151,10 +151,12 @@ const Game2 = () => {
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
+  const [isGameEnded, setIsGameEnded] = useState(false); 
 
   useEffect(() => {
     if (explainerNo === userNo) {
       setIsExplainer(true);
+      setExplainerNo(userNo);
     } else {
       setIsExplainer(false);
     }
@@ -265,6 +267,10 @@ const Game2 = () => {
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
+    if (round === 7) {
+      // 게임 종료 로직
+      setIsGameEnded(true);
+    }
   }, [round, client, isGameStarted, roomId]);
 
   useEffect(() => {
@@ -296,23 +302,27 @@ const Game2 = () => {
 
   // 타이머 로직
   useEffect(() => {
-    if (isGameStarted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-
-      return () => clearInterval(timer); // cleanup
-    } else if (timeLeft === 0) {
-      // 타이머가 0이 되면 게임 종료 로직 추가 가능
-      console.log("시간 종료");
+    if (!isGameEnded) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => {
+          setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      // } else { // 타이머 끝나면
+        // if (isStarted) {
+        //   // axios 보낼 로직
+        // }
+      }
     }
-  }, [isGameStarted, timeLeft, userNo, explainerNo]);
+  }, [timeLeft]);
 
   // 타이머 포맷
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
 
   const openBodyTalkGuideModal = () => {
@@ -361,56 +371,66 @@ const Game2 = () => {
       )}
 
       {/* 모달 끝나고 화면 */}
-      {isExplainer ? (
+      {isGameEnded ? (
         <>
-          <HeaderContainer>
-            <Header>{round} 라운드 - 출제자</Header>
-            <Timer>{formatTime(timeLeft)}</Timer>
-          </HeaderContainer>
-          <SpeechBubble
-            type={
-              <>
-                제시어 종류 : {keywordType} <br />
-                <br />
-              </>
-            }
-            word={`제시어 : ${receivedKeyword}`}
-          />
-          <Image src={bigNana} />
-          <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
-          <h1>마이크는 꺼집니다.</h1>
+          {/* 게임 종료 화면 */}
+          <Header2>게임이 종료되었습니다.</Header2>
+          <Button onClick={() => {navigate("/icebreaking/games");}}>
+            다른 게임들 보러가기
+          </Button>
         </>
-      ) : (
-        <>
-          <HeaderContainer>
-            <Header>{round} 라운드 - 맞추는 사람</Header>
-            <Timer>{formatTime(timeLeft)}</Timer>
-          </HeaderContainer>
-          <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
-          {/* <h1>출제자 화면 출력</h1> */}
-          <VideoWrapper>
-            {explainerNo === userNo ? (
-              <UserVideo ref={userVideoRef} autoPlay muted />
-            ) : (
-              <UserVideo ref={subscriberVideoRef} autoPlay muted />
-            )}
-          </VideoWrapper>
-          <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
-          <ChatWrap>
-            <Input
-              type="text"
-              value={typedText}
-              placeholder="여기에 정답을 입력하세요."
-              onChange={(e) => setTypedText(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();
-                }
-              }}
+      ) : isExplainer ? (
+          <>
+            {/* 출제자 화면 */}
+            <HeaderContainer>
+              <Header>{round} 라운드 - 출제자</Header>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </HeaderContainer>
+            <SpeechBubble
+              type={
+                <>
+                  제시어 종류 : {keywordType} <br />
+                  <br />
+                </>
+              }
+              word={`제시어 : ${receivedKeyword}`}
             />
-            <Button onClick={sendMessage}>SEND</Button>
-          </ChatWrap>
-        </>
+            <Image src={bigNana} />
+            <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
+            <h1>마이크는 꺼집니다.</h1>
+          </>
+        ) : (
+          <>
+            {/* 맞추는 사람 화면 */}
+            <HeaderContainer>
+              <Header>{round} 라운드 - 맞추는 사람</Header>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </HeaderContainer>
+            <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
+            {/* <h1>출제자 화면 출력</h1> */}
+            <VideoWrapper>
+              {explainerNo === userNo ? (
+                <UserVideo ref={userVideoRef} autoPlay muted />
+              ) : (
+                <UserVideo ref={subscriberVideoRef} autoPlay muted />
+              )}
+            </VideoWrapper>
+            <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
+            <ChatWrap>
+              <Input
+                type="text"
+                value={typedText}
+                placeholder="여기에 정답을 입력하세요."
+                onChange={(e) => setTypedText(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+              <Button onClick={sendMessage}>SEND</Button>
+            </ChatWrap>
+          </>
       )}
     </Wrap>
   );
