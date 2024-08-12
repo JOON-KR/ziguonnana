@@ -179,8 +179,8 @@ const VideoBox = ({ index }) => {
                 )
             );
 
-            const overlayHeight = faceHeight * 2; // 오버레이 이미지의 높이 설정
-            const overlayWidth = faceWidth * 1.5; // 오버레이 이미지의 너비 설정
+            const overlayHeight = faceHeight * 3.0; // 오버레이 이미지의 높이 설정
+            const overlayWidth = faceWidth * 2.0; // 오버레이 이미지의 너비 설정
 
             const overlayX =
               noseTip.x * offscreenCanvasRef.current.width - overlayWidth / 2; // 오버레이 이미지의 X 위치 설정
