@@ -33,7 +33,7 @@ public class Room {
 	private ConcurrentMap<Integer, List<RelayArt>>art;
 	private int cycle;
 	private int count;
-	private boolean isRelay;
+	private int isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
 	// 몸으로 말해요 키워드 요청 count
@@ -85,7 +85,7 @@ public class Room {
 		cycle=0;
 	}
 	public void relayEnd() {
-		isRelay=true;
+		isRelay++;
 	}
 
 	// 몸으로 말해요 키워드 요청 관련 함수
