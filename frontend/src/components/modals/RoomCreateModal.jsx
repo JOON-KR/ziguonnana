@@ -284,4 +284,4 @@ const RoomCreateModal = ({ onClose }) => {
   );
 };
 
-export default RoomCreateModal;export default RoomCreateModal;
+export default RoomCreateModal;

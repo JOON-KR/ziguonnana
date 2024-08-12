@@ -151,10 +151,12 @@ const Game2 = () => {
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
+  const [isGameEnded, setIsGameEnded] = useState(false); 
 
   useEffect(() => {
     if (explainerNo === userNo) {
       setIsExplainer(true);
+      setExplainerNo(userNo);
     } else {
       setIsExplainer(false);
     }
@@ -264,6 +266,10 @@ const Game2 = () => {
       // isExplainer 초기화
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
+    }
+    if (round === 7) {
+      // 게임 종료 로직
+      setIsGameEnded(true);
     }
   }, [round, client, isGameStarted, roomId]);
 

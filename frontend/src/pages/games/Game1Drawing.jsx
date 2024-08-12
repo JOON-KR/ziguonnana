@@ -300,13 +300,27 @@ const Game1Drawing = () => {
   };
 
   const handleMouseUp = async () => {
+    if (canvasRef.current && currentUser === userNo) {
       const currentPaths = await canvasRef.current.exportPaths();
       const simplifiedPaths = currentPaths.map((path) => ({
         ...path,
         path: simplifyPath(path.path),
       }));
 
+      const newPaths = simplifiedPaths.filter(
+        (path, index) =>
+          index >= lastSentPaths.length ||
+          JSON.stringify(path) !== JSON.stringify(lastSentPaths[index])
+      );
+
       if (newPaths.length > 0) {
+        console.log("전송할 경로 데이터:", JSON.stringify(newPaths, null, 2)); // 전송할 데이터를 콘솔에 출력
+        client.send(
+          `/app/game/${roomId}/draw`,
+          {},
+          JSON.stringify(newPaths[newPaths.length - 1])
+        );
+        setLastSentPaths(simplifiedPaths);
       }
     }
   };
