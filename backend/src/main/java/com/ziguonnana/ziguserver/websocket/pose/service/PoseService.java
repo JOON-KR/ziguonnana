@@ -88,7 +88,7 @@ public class PoseService {
 	             totalPoints, matchingPoints, successRate);
 
 	    // 성공률이 97% 이상일 경우에만 성공으로 판단
-	    boolean isSuccess = successRate >= 97.0;
+	    boolean isSuccess = successRate >= 80.0;
 
 	    List<ConcurrentHashMap<Integer, String>> poselist = room.getPoseResult();
 	    if (poselist.size() <= room.getCycle()) {
