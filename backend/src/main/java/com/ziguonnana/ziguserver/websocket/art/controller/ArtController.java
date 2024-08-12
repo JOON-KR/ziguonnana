@@ -24,6 +24,8 @@ public class ArtController {
     private final String DEFAULT_IMAGE = "";
     @MessageMapping("/game/{roomId}/saveArt")
     public void relaySave(@DestinationVariable("roomId") String roomId, @Payload String art) {
+    	log.info("----이어그리기 그림 저장 요청: {}",art);
+  //  	if(artService.vaild(roomId))return;
         artService.save(roomId, art);
     }
     @MessageMapping("/game/{roomId}/art-start")
