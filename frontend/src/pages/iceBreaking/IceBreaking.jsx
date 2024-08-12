@@ -13,7 +13,6 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrolling */
   }
 `;
 
@@ -35,8 +34,8 @@ const Frame = styled.div`
   box-sizing: border-box;
   height: 100%;
   gap: 16px;
-  margin-left:30px;
-  margin-right:30px;
+  margin-left: 30px;
+  margin-right: 30px;
   width: 200px; /* Fixed width for Frame */
 `;
 

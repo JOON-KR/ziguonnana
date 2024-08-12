@@ -137,7 +137,7 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(8);
   const [targetUser, setTargetUser] = useState(0);
   const [currentUser, setCurrentUser] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -162,7 +162,7 @@ const Game1Drawing = () => {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(15);
+            setTimeLeft(8);
             setIsStarted(true);
           } else if (parsedMessages.commandType === "DRAW_PREV") {
             canvasRef.current.loadPaths(parsedMessages.data);
@@ -185,7 +185,10 @@ const Game1Drawing = () => {
 
   useEffect(() => {
     const sendDrawingAndClearCanvas = async () => {
-      // await handleSendDrawing();
+      const currentPaths = await canvasRef.current.exportPaths();
+      if (currentPaths && currentPaths.length > 0) {
+        await handleSendDrawing();
+      }
       canvasRef.current.clearCanvas();
     };
 
