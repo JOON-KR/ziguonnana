@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IgudongseongResult {
-	int Success;
+	int success;
 	String keyword;
 	
-	public void updateSuccess(int Success) {
-		this.Success =Success;
+	public void updateSuccess(int success) {
+		this.success = success;
 	}
 }
