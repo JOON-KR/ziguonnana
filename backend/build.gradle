@@ -44,10 +44,6 @@ dependencies {
     //ffmpeg 동영상 편집 관련 의존성
     // https://mvnrepository.com/artifact/net.bramp.ffmpeg/ffmpeg
     implementation 'net.bramp.ffmpeg:ffmpeg:0.6.2'
-	 // TwelveMonkeys ImageIO
-    implementation 'com.twelvemonkeys.imageio:imageio-core:3.8.2'
-    implementation 'com.twelvemonkeys.imageio:imageio-jpeg:3.8.2'
-    implementation 'com.twelvemonkeys.imageio:imageio-png:3.8.2'
     implementation 'com.mysql:mysql-connector-j'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5' 
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' 
