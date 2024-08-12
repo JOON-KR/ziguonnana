@@ -148,7 +148,7 @@ const Game5Result = () => {
   };
 
   const handleNext = () => {
-    navigate("/icebreaking");
+    navigate("/icebreaking/games");
   };
 
   return (
@@ -159,6 +159,12 @@ const Game5Result = () => {
           <VideoPlayer controls autoPlay onEnded={handleVideoEnd}>
             <source src={mergeVideoUrl} type="video/mp4" />
           </VideoPlayer>
+          {videoEnded && (
+            <BottomRightContainer>
+              <NextButton onClick={handleNext}>이동하기</NextButton>
+              <NextImage src={nextBtn} alt="Next" onClick={handleNext} />
+            </BottomRightContainer>
+          )}
         </>
       ) : (
         <>
@@ -176,12 +182,7 @@ const Game5Result = () => {
         </>
       )}
 
-      {videoEnded && (
-        <BottomRightContainer>
-          <NextButton onClick={handleNext}>이동하기</NextButton>
-          <NextImage src={nextBtn} alt="Next" onClick={handleNext} />
-        </BottomRightContainer>
-      )}
+      
     </Container>
   );
 };
