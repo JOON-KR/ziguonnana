@@ -59,6 +59,7 @@ const Loading = () => {
         parsedMessage.commandType == "GAME_START"
       ) {
         navigate("/icebreaking/intro");
+        // navigate("/icebreaking/games/game1");
         // navigate("/test");
       }
       // navigate("/icebreaking/games");
@@ -80,6 +81,7 @@ const Loading = () => {
           parsedMessage.commandType === "GAME_START"
         ) {
           navigate("/icebreaking/intro");
+          // navigate("/icebreaking/games/game1");
         } else if (parsedMessage.message === "질문리스트 전파\n") {
           dispatch(setQuestionList(parsedMessage.data.question));
           console.log(parsedMessage.data.question);
@@ -104,9 +106,13 @@ const Loading = () => {
       <Content>
         <Loader />
       </Content>
-      <button onClick={() => navigate("/icebreaking/games/game5")}>몸말</button>
+      <button onClick={() => navigate("/icebreaking/games/game1")}>
+        그리기
+      </button>
       <button onClick={() => navigate("/icebreaking/games/game2")}>몸말</button>
-      <button onClick={() => navigate("/icebreaking/games/gameRecord")}>결과</button>
+      <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
+        결과
+      </button>
     </PageWrap>
   );
 };
