@@ -140,6 +140,8 @@ const Games = () => {
       <PlanetName style={{ right: "10px", bottom: "95px" }}>
         숏폼 챌린지
       </PlanetName>
+
+      //
     </Wrap>
   );
 };

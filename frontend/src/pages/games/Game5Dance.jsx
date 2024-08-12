@@ -1,223 +1,265 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import BASE_URL from "../../api/APIconfig";
 import styled from "styled-components";
 
-const Wrap = styled.div`
-  width: 100%;
-  height: 100vh;
+const Container = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  padding: 20px;
+  height: 100vh;
 `;
 
-const StyledH2 = styled.h2`
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 30px;
+const Title = styled.h2`
+  font-size: 24px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+`;
+
+const Countdown = styled.div`
+  font-size: 48px;
+  color: red;
   font-weight: bold;
-  color: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: transform 0.3s;
+  margin-bottom: 20px;
 `;
 
 const VideoContainer = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 20px;
-`;
-
-const ThumbnailWrapper = styled.div`
-  width: 200px;
-  height: auto;
-  display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  background-color: #000;
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-`;
-
-const StyledVideo = styled.video`
   width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  object-fit: cover;
+  height: 70%;
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60%;
-  max-width: 300px;
-  height: auto;
-  max-height: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  position: relative;
-  width: 100%;
-  max-height: 100%;
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px;
+const VideoWrapper = styled.div`
+  width: 45%;
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
 
-const ButtonBox = styled.div`
-  display: flex;
-  justify-content: space-between;
+const ChallengeVideo = styled.video`
   width: 100%;
-  margin-top: 10px;
+  max-width: 600px;
+  height: 400px;
+  border-radius: 10px;
+  background-color: #000;
 `;
 
-const CloseButton = styled.button`
-  background: red;
-  color: #fff;
+const UserVideo = styled.video`
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 10px;
+  background-color: black;
+`;
+
+const NextButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #58FFF5;
+  color: #54595E;
   border: none;
-  padding: 10px;
   border-radius: 5px;
   cursor: pointer;
-  margin: 0 5px;
-`;
-
-const SelectButton = styled.button`
-  background: green;
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 0 5px;
-`;
-
-const TimeDisplay = styled.div`
-  margin-top: 10px;
-  font-size: 14px;
 `;
 
 const Game5Dance = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState("00:00");
-  const [duration, setDuration] = useState("00:00");
-  const [selectedVideoId, setSelectedVideoId] = useState(null);
-  const [videoSrc, setVideoSrc] = useState("");
-  const videoRef = useRef(null);
   const roomId = useSelector((state) => state.room.roomId);
+  const userNo = useSelector((state) => state.auth.userNo);
   const client = useSelector((state) => state.client.stompClient);
+  const localStream = useSelector((state) => state.room.localStream);
+  const subscribers = useSelector((state) => state.room.subscribers);
+
+  const userVideoRef = useRef(null);
+  const subscriberVideoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunks = useRef([]);
+
+  const [countdown, setCountdown] = useState(3);
+  const [currentUserNo, setCurrentUserNo] = useState(1);
+  const [maxNo, setMaxNo] = useState(1);
+  const [challengeVideoUrl, setChallengeVideoUrl] = useState("");
+  const [videoDuration, setVideoDuration] = useState(5000); 
+  const [isRecording, setIsRecording] = useState(false);
+  const [isButtonVisible, setIsButtonVisible] = useState(false);
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false);
+
   const navigate = useNavigate();
 
-  // 비디오 썸네일 클릭 시 모달 열기
-  const handleThumbnailClick = (videoId, videoUrl) => {
-    setSelectedVideoId(videoId);
-    setVideoSrc(videoUrl);
-    setIsModalOpen(true);
-  };
+  useEffect(() => {
+    console.log("userNo는: ", userNo);
+    console.log("currentUserNo는: ", currentUserNo);
+    console.log("maxNo는: ", maxNo);
+  }, [userNo, currentUserNo, maxNo]);
 
-  // 모달 닫기
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  // 비디오 선택 시 메시지 전송
-  const handleSelectVideo = () => {
-    if (client && client.connected) {
-      client.send(`/app/game/${roomId}/shorts/${selectedVideoId}`, {}, JSON.stringify({ command: "VIDEO_SELECTED" }));
-      console.log(`숏츠 선택 메시지를 전송했습니다: /app/game/${roomId}/shorts/${selectedVideoId}`);
+  useEffect(() => {
+    if (localStream && userVideoRef.current && currentUserNo === userNo) {
+      userVideoRef.current.srcObject = localStream.getMediaStream();
+      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
     }
-    setIsModalOpen(false);
-  };
+  }, [localStream, currentUserNo, userNo]);
+
+  useEffect(() => {
+    if (subscribers.length > 0 && subscriberVideoRef.current && currentUserNo !== userNo) {
+      const subscriber = subscribers.find(
+        (sub) => sub.stream.connection.data === `{"userNo":${currentUserNo}}`);
+      if (subscriber) {
+        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
+        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);    
+      } 
+    }
+  }, [subscribers, currentUserNo, userNo]);
+
+  useEffect(() => {
+    if (client && client.connected) {
+      console.log("send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
+      client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
+    } else {
+      console.warn("send 부분에서 문제 발생");
+    }
+  }, [client, roomId, currentUserNo]);
 
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("서버로부터 받은 메시지:", response);
-        if (response.commandType === "SHORTS_CHOICE" && response.message === "SUCCESS") {
-          navigate("/icebreaking/games/game5TeamDance");
+        try {
+          console.log("서버로부터 받은 메시지:", message.body);
+          const response = JSON.parse(message.body);
+          if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
+            console.log("서버로부터 받은 데이터:", response.data);
+            setCurrentUserNo(response.data.currentUserNo);
+            setMaxNo(response.data.maxNo);
+            setChallengeVideoUrl(response.data.challengeVideoUrl);
+            setVideoDuration(response.data.videoDuration || 5000);
+            setCountdown(3);
+            setIsButtonVisible(false);
+            setIsRecording(false);
+            setShouldPlayVideo(false);
+          } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
+            console.log("게임 종료, 다같이 이동");
+            navigate("/icebreaking/games/game5End");
+          }
+        } catch (error) {
+          console.error("메시지 처리 중 오류 발생:", error);
         }
       });
 
       return () => {
+        console.log("구독을 취소합니다.");
         subscription.unsubscribe();
       };
+    } else {
+      console.warn("클라이언트가 연결되지 않았거나 문제가 발생했습니다.");
     }
-  }, [client, roomId, navigate]);
+  }, [client, roomId]);
 
-  const updateTime = () => {
-    if (videoRef.current) {
-      const minutes = Math.floor(videoRef.current.currentTime / 60);
-      const seconds = Math.floor(videoRef.current.currentTime % 60);
-      setCurrentTime(
-        `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`
-      );
+  useEffect(() => {
+    let interval;
+    if (challengeVideoUrl && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      clearInterval(interval);
+      setShouldPlayVideo(true);
+      startRecording();
+    }
+
+    return () => clearInterval(interval);
+  }, [challengeVideoUrl, countdown, currentUserNo, userNo]);
+
+  const startRecording = () => {
+    if (currentUserNo === userNo && !isRecording) {
+      setIsRecording(true);
+      console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
+
+      recordedChunks.current = [];
+      const options = { mimeType: "video/webm; codecs=vp9" };
+      const mediaRecorder = new MediaRecorder(localStream.getMediaStream(), options);
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          console.log("녹화된 데이터 청크:", event.data);
+          recordedChunks.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunks.current, { type: "video/webm" });
+        console.log("녹화된 Blob:", blob);
+
+        const formData = new FormData();
+        formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
+
+        axios.post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }).then(response => {
+          console.log("녹화된 비디오 업로드 성공:", response.data);
+        }).catch(error => {
+          console.error("비디오 업로드 실패:", error);
+        });
+
+        setIsButtonVisible(true);
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+        setIsRecording(false);
+      }, videoDuration);
     }
   };
 
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      const minutes = Math.floor(videoRef.current.duration / 60);
-      const seconds = Math.floor(videoRef.current.duration % 60);
-      setDuration(
-        `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`
-      );
+  const handleNextUser = () => {
+    setIsButtonVisible(false);
+
+    if (currentUserNo < maxNo) {
+      console.log("다음 사용자로 요청을 보냅니다:", currentUserNo + 1);
+      client.send(`/app/game/${roomId}/shorts/record/${currentUserNo + 1}`, {}, {});
+    } else if (currentUserNo === maxNo) {
+      console.log("모든 사용자가 완료되었습니다.");
+      // 게임 종료 요청을 서버로 전송
+      client.send(`/app/game/${roomId}/shorts/end`, {}, {});
     }
   };
 
   return (
-    <Wrap>
-      <StyledH2>챌린지 영상 선택</StyledH2>
+    <Container>
+      <Title>{currentUserNo} 번째 팀원의 순서입니다.</Title>
+      {countdown > 0 && <Countdown>{countdown}</Countdown>}
       <VideoContainer>
-        <ThumbnailWrapper onClick={() => handleThumbnailClick(1, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4")}>
-          <StyledVideo>
-            <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4" type="video/mp4" />
-          </StyledVideo>
-        </ThumbnailWrapper>
-        <ThumbnailWrapper onClick={() => handleThumbnailClick(2, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4")}>
-          <StyledVideo>
-            <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4" type="video/mp4" />
-          </StyledVideo>
-        </ThumbnailWrapper>
+        <VideoWrapper>
+          {shouldPlayVideo && challengeVideoUrl && (
+            <ChallengeVideo
+              src={challengeVideoUrl}
+              controls={false}
+              autoPlay
+            />
+          )}
+        </VideoWrapper>
+        <VideoWrapper>
+          {currentUserNo === userNo ? (
+            <UserVideo ref={userVideoRef} autoPlay muted />
+          ) : (
+            <UserVideo ref={subscriberVideoRef} autoPlay muted />
+          )}
+        </VideoWrapper>
       </VideoContainer>
-      {isModalOpen && (
-        <Modal>
-          <ModalContent>
-            <StyledVideo
-              ref={videoRef}
-              controls
-              onTimeUpdate={updateTime}
-              onLoadedMetadata={handleLoadedMetadata}
-            >
-              <source src={videoSrc} type="video/mp4" />
-              브라우저가 동영상을 지원하지 않습니다.
-            </StyledVideo>
-            <TimeDisplay>재생 시간: {currentTime} / 전체 시간: {duration}</TimeDisplay>
-            <ButtonBox>
-              <CloseButton onClick={handleCloseModal}>닫기</CloseButton>
-              <SelectButton onClick={handleSelectVideo}>선택</SelectButton>
-            </ButtonBox>
-          </ModalContent>
-        </Modal>
+      {isButtonVisible && (
+        <NextButton onClick={handleNextUser}>
+          다음 팀원으로
+        </NextButton>
       )}
-    </Wrap>
+    </Container>
   );
 };
 
