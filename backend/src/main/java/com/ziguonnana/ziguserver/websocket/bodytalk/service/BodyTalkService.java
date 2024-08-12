@@ -90,7 +90,7 @@ public class BodyTalkService {
             bodyTalkGame.plusCorrectCnt();
             room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
         }
-        return new BodyChatMessage(bodyChatRequest.getSenderNum(), bodyChatRequest.getContent(), isCorrect);
+        return new BodyChatMessage(bodyChatRequest.getSenderNum(), bodyChatRequest.getContent(), isCorrect, room.getCycle());
     }
 
     private boolean isCorrect(String answer, String input){
