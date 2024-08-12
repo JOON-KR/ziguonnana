@@ -25,6 +25,6 @@ public class GameResultController {
         log.info("========= 게임 결과 요청 =========");
         GameResult result = gameResultService.getGameResult(roomId);
         log.info("====게임 결과 : " + result);
-        return Response.ok(CommandType.GAME_RESULT, result);    }
-
+        return Response.ok(CommandType.GAME_RESULT, result);
+    }
 }
