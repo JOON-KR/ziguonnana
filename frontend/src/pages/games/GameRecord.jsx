@@ -11,6 +11,7 @@ import recordBtn from "../../assets/icons/aqua_btn.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import axios from "axios";
+import avatarImg from "../../assets/icons/avartar.png"
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -47,7 +48,7 @@ const SectionContainer2 = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 90%;
+  width: 96%;
   // height: 80vh;
 `;
 
@@ -66,14 +67,14 @@ const Section = styled.div`
 `;
 
 const AvatarCardSection = styled.div`
-  width: 70%;
+  width: 400px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
-  padding: 10px;
+  padding: 15px;
   margin-left: 10px;
   margin-bottom: 20px;
   // margin: 10px 10px 30px 10px;
@@ -111,7 +112,7 @@ const Slide = styled.div`
 
 const Title = styled.h2`
   font-size: 24px;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 `;
 
 const RecordTitle = styled.h2`
@@ -126,7 +127,7 @@ const CardImage = styled.img`
 
 const IconImage = styled.img`
   height: 50px;
-  margin: 10px;
+  margin: 8px;
 `;
 
 const RecordIconImage = styled.img`
@@ -255,21 +256,24 @@ const GameRecord = () => {
           </SectionContainer1>
           <AvatarCardSection>
             <Title>아바타 명함</Title>
-            {/* <Slide>
-              {avartarCards.map((card, index) => (
-                <AvatarCard
-                  key={index}
-                  avatarImage={card.avatarImage}
-                  nickname={card.nickname}
-                  features={card.features}
-                />
-              ))}
-            </Slide> */}
             <Slide>
               <IconImage src={leftIcon} alt="Left" />
-              <CardImage src={cardPic} alt="아바타 명함" />
+                {/* {avartarCards.map((card, index) => ( */}
+                  <AvatarCard
+                    // key={index}
+                    // avatarImage={card.avatarImage}
+                    // nickname={card.nickname}
+                    // features={card.features}
+                    avatarImage={avatarImg}
+                    nickname={"nowag"}
+                    features={["친절한", "차분한"]}
+                  />
+                {/* ))} */}
               <IconImage src={rightIcon} alt="Right" />
             </Slide>
+            {/* <Slide>
+              <CardImage src={cardPic} alt="아바타 명함" />
+            </Slide> */}
           </AvatarCardSection>
         </SectionContainer2>
 
