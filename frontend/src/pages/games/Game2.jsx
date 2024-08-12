@@ -151,6 +151,7 @@ const Game2 = () => {
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
+  const [isGameEnded, setIsGameEnded] = useState(false); 
 
   useEffect(() => {
     if (explainerNo === userNo) {
@@ -265,6 +266,10 @@ const Game2 = () => {
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
     }
+    if (round === 7) {
+      // 게임 종료 로직
+      setIsGameEnded(true);
+    }
   }, [round, client, isGameStarted, roomId]);
 
   useEffect(() => {
@@ -361,56 +366,66 @@ const Game2 = () => {
       )}
 
       {/* 모달 끝나고 화면 */}
-      {isExplainer ? (
+      {isGameEnded ? (
         <>
-          <HeaderContainer>
-            <Header>{round} 라운드 - 출제자</Header>
-            <Timer>{formatTime(timeLeft)}</Timer>
-          </HeaderContainer>
-          <SpeechBubble
-            type={
-              <>
-                제시어 종류 : {keywordType} <br />
-                <br />
-              </>
-            }
-            word={`제시어 : ${receivedKeyword}`}
-          />
-          <Image src={bigNana} />
-          <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
-          <h1>마이크는 꺼집니다.</h1>
+          <Header2>게임이 종료되었습니다.</Header2>
+          <Button onClick={() => {
+              navigate("/icebreaking/games");
+            }}
+          >
+            다른 게임들 보러가기</Button>
         </>
-      ) : (
-        <>
-          <HeaderContainer>
-            <Header>{round} 라운드 - 맞추는 사람</Header>
-            <Timer>{formatTime(timeLeft)}</Timer>
-          </HeaderContainer>
-          <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
-          {/* <h1>출제자 화면 출력</h1> */}
-          <VideoWrapper>
-            {explainerNo === userNo ? (
-              <UserVideo ref={userVideoRef} autoPlay muted />
-            ) : (
-              <UserVideo ref={subscriberVideoRef} autoPlay muted />
-            )}
-          </VideoWrapper>
-          <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
-          <ChatWrap>
-            <Input
-              type="text"
-              value={typedText}
-              placeholder="여기에 정답을 입력하세요."
-              onChange={(e) => setTypedText(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();
-                }
-              }}
+      ) : isExplainer ? (
+          <>
+            <HeaderContainer>
+              <Header>{round} 라운드 - 출제자</Header>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </HeaderContainer>
+            <SpeechBubble
+              type={
+                <>
+                  제시어 종류 : {keywordType} <br />
+                  <br />
+                </>
+              }
+              word={`제시어 : ${receivedKeyword}`}
             />
-            <Button onClick={sendMessage}>SEND</Button>
-          </ChatWrap>
-        </>
+            <Image src={bigNana} />
+            <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
+            <h1>마이크는 꺼집니다.</h1>
+          </>
+        ) : (
+          <>
+            <HeaderContainer>
+              <Header>{round} 라운드 - 맞추는 사람</Header>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </HeaderContainer>
+            <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
+            {/* <h1>출제자 화면 출력</h1> */}
+            <VideoWrapper>
+              {explainerNo === userNo ? (
+                <UserVideo ref={userVideoRef} autoPlay muted />
+              ) : (
+                <UserVideo ref={subscriberVideoRef} autoPlay muted />
+              )}
+            </VideoWrapper>
+            <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
+            <ChatWrap>
+              <Input
+                type="text"
+                value={typedText}
+                placeholder="여기에 정답을 입력하세요."
+                onChange={(e) => setTypedText(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+              <Button onClick={sendMessage}>SEND</Button>
+            </ChatWrap>
+          </>
+        
       )}
     </Wrap>
   );
