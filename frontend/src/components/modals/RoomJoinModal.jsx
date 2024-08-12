@@ -312,7 +312,6 @@ const RoomJoinModal = ({ onClose }) => {
     if (inviteCode !== "") {
       const socket = new SockJS(`${BASE_URL}/ws`);
       // const socket = new SockJS(`${TAMTAM_URL}/ws`);
-      //
       const client = Stomp.over(socket);
 
       client.connect(
