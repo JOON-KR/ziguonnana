@@ -49,4 +49,11 @@ public class WebsocketController {
         log.info("=========" + gameType + "게임 모달 시작===========");
         return Response.ok(CommandType.GAME_MODAL_START, gameType);
     }
+    
+    @MessageMapping("/game/{roomId}/game-select")
+    @SendTo("/topic/game/{roomId}")
+    public Response<String> gameSelect(@DestinationVariable("roomId") String roomId) {
+        log.info("========= 게임 선택 이동=========");
+        return Response.ok(CommandType.NANA_MAP, "선택 화면으로 이동");
+    }
 }
