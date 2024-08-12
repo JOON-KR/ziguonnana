@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -13,7 +13,7 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden; /* 스크롤 방지 */
   }
 `;
 
@@ -36,7 +36,7 @@ const Frame = styled.div`
   gap: 16px;
   margin-left: 30px;
   margin-right: 30px;
-  width: 200px; /* Fixed width for Frame */
+  width: 200px;
 `;
 
 const Content = styled.div`

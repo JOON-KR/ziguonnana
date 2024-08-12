@@ -5,6 +5,8 @@
   "dependencies": {
     "@ffmpeg/core": "^0.12.6",
     "@ffmpeg/ffmpeg": "^0.12.10",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@reduxjs/toolkit": "^2.2.6",
     "@stomp/stompjs": "^7.0.0",
     "@tensorflow-models/posenet": "^2.2.2",
