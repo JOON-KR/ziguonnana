@@ -5,7 +5,6 @@ import { FaceMesh } from "@mediapipe/face_mesh";
 import { Camera } from "@mediapipe/camera_utils";
 import overlayImageSrc1 from "../../assets/images/your_image.png"; // 1번 사람의 가면 이미지 파일 경로
 import overlayImageSrc2 from "../../assets/images/5.png"; // 2번 사람의 가면 이미지 파일 경로
-// 여기에 나머지 이미지를 추가하세요.
 import overlayImageSrc3 from "../../assets/images/image3.png";
 import overlayImageSrc4 from "../../assets/images/image4.png";
 import overlayImageSrc5 from "../../assets/images/image5.png";
@@ -115,109 +114,148 @@ const VideoBox = ({ index }) => {
   }, [localStream, subscribers, userNo, index]); // 의존성 배열 내의 값이 변경될 때마다 이 효과가 실행됨
 
   const applyMask = () => {
+    if (isMaskApplied) {
+      setIsMaskApplied(false); // 마스크 해제 상태로 전환
+      if (canvasRef.current) {
+        const canvasCtx = canvasRef.current.getContext("2d");
+        canvasCtx.clearRect(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        ); // 캔버스 초기화
+      }
+      return;
+    }
+
     setIsMaskApplied(true); // 마스크 적용 상태를 true로 설정
 
-    if (videoRef.current) {
-      const faceMesh = new FaceMesh({
-        locateFile: (file) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-      });
+    const faceMesh = new FaceMesh({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+    });
 
-      faceMesh.setOptions({
-        maxNumFaces: 1, // 한 번에 감지할 얼굴 수 설정
-        refineLandmarks: true, // 정밀 랜드마크 사용
-        minDetectionConfidence: 0.5, // 얼굴 감지 신뢰도 설정
-        minTrackingConfidence: 0.5, // 얼굴 추적 신뢰도 설정
-      });
+    faceMesh.setOptions({
+      maxNumFaces: 1, // 한 번에 감지할 얼굴 수 설정
+      refineLandmarks: true, // 정밀 랜드마크 사용
+      minDetectionConfidence: 0.5, // 얼굴 감지 신뢰도 설정
+      minTrackingConfidence: 0.5, // 얼굴 추적 신뢰도 설정
+    });
 
-      faceMesh.onResults((results) => {
-        if (canvasRef.current && offscreenCanvasRef.current) {
-          const canvasCtx = canvasRef.current.getContext("2d"); // 메인 캔버스 컨텍스트 가져오기
-          const offscreenCanvasCtx =
-            offscreenCanvasRef.current.getContext("2d"); // 오프스크린 캔버스 컨텍스트 가져오기
+    faceMesh.onResults((results) => {
+      if (canvasRef.current && offscreenCanvasRef.current) {
+        const canvasCtx = canvasRef.current.getContext("2d"); // 메인 캔버스 컨텍스트 가져오기
+        const offscreenCanvasCtx = offscreenCanvasRef.current.getContext("2d"); // 오프스크린 캔버스 컨텍스트 가져오기
 
-          if (results.multiFaceLandmarks) {
-            for (const landmarks of results.multiFaceLandmarks) {
-              const noseTip = landmarks[1]; // 코 끝 좌표
-              const chin = landmarks[152]; // 턱 좌표
-              const leftCheek = landmarks[234]; // 왼쪽 볼 좌표
-              const rightCheek = landmarks[454]; // 오른쪽 볼 좌표
+        if (results.multiFaceLandmarks) {
+          for (const landmarks of results.multiFaceLandmarks) {
+            const noseTip = landmarks[1]; // 코 끝 좌표
+            const chin = landmarks[152]; // 턱 좌표
+            const leftCheek = landmarks[234]; // 왼쪽 볼 좌표
+            const rightCheek = landmarks[454]; // 오른쪽 볼 좌표
 
-              // 얼굴 높이 계산
-              const faceHeight = Math.sqrt(
+            // 얼굴 높이 계산
+            const faceHeight = Math.sqrt(
+              Math.pow(
+                (noseTip.x - chin.x) * offscreenCanvasRef.current.width,
+                2
+              ) +
                 Math.pow(
-                  (noseTip.x - chin.x) * offscreenCanvasRef.current.width,
+                  (noseTip.y - chin.y) * offscreenCanvasRef.current.height,
                   2
-                ) +
-                  Math.pow(
-                    (noseTip.y - chin.y) * offscreenCanvasRef.current.height,
-                    2
-                  )
-              );
+                )
+            );
 
-              // 얼굴 너비 계산
-              const faceWidth = Math.sqrt(
+            // 얼굴 너비 계산
+            const faceWidth = Math.sqrt(
+              Math.pow(
+                (leftCheek.x - rightCheek.x) * offscreenCanvasRef.current.width,
+                2
+              ) +
                 Math.pow(
-                  (leftCheek.x - rightCheek.x) *
-                    offscreenCanvasRef.current.width,
+                  (leftCheek.y - rightCheek.y) *
+                    offscreenCanvasRef.current.height,
                   2
-                ) +
-                  Math.pow(
-                    (leftCheek.y - rightCheek.y) *
-                      offscreenCanvasRef.current.height,
-                    2
-                  )
+                )
+            );
+
+            const overlayHeight = faceHeight * 3.0; // 오버레이 이미지의 높이 설정
+            const overlayWidth = faceWidth * 2.0; // 오버레이 이미지의 너비 설정
+
+            const overlayX =
+              noseTip.x * offscreenCanvasRef.current.width - overlayWidth / 2; // 오버레이 이미지의 X 위치 설정
+            const overlayY =
+              noseTip.y * offscreenCanvasRef.current.height - overlayHeight / 2; // 오버레이 이미지의 Y 위치 설정
+
+            const overlayImage = new Image(); // 이미지 객체 생성
+            overlayImage.src = overlayImageSrc; // 각 유저에 맞는 이미지 경로 설정
+            overlayImage.onload = () => {
+              offscreenCanvasCtx.clearRect(
+                0,
+                0,
+                offscreenCanvasRef.current.width,
+                offscreenCanvasRef.current.height
+              ); // 오프스크린 캔버스 초기화
+              offscreenCanvasCtx.drawImage(
+                overlayImage,
+                overlayX,
+                overlayY,
+                overlayWidth,
+                overlayHeight
+              ); // 오프스크린 캔버스에 오버레이 이미지 그리기
+
+              // 오프스크린 캔버스의 내용을 메인 캔버스로 복사
+              canvasCtx.clearRect(
+                0,
+                0,
+                canvasRef.current.width,
+                canvasRef.current.height
               );
-
-              const overlayHeight = faceHeight * 2; // 오버레이 이미지의 높이 설정
-              const overlayWidth = faceWidth * 1.5; // 오버레이 이미지의 너비 설정
-
-              const overlayX =
-                noseTip.x * offscreenCanvasRef.current.width - overlayWidth / 2; // 오버레이 이미지의 X 위치 설정
-              const overlayY =
-                noseTip.y * offscreenCanvasRef.current.height -
-                overlayHeight / 2; // 오버레이 이미지의 Y 위치 설정
-
-              const overlayImage = new Image(); // 이미지 객체 생성
-              overlayImage.src = overlayImageSrc; // 각 유저에 맞는 이미지 경로 설정
-              overlayImage.onload = () => {
-                offscreenCanvasCtx.clearRect(
-                  0,
-                  0,
-                  offscreenCanvasRef.current.width,
-                  offscreenCanvasRef.current.height
-                ); // 오프스크린 캔버스 초기화
-                offscreenCanvasCtx.drawImage(
-                  overlayImage,
-                  overlayX,
-                  overlayY,
-                  overlayWidth,
-                  overlayHeight
-                ); // 오프스크린 캔버스에 오버레이 이미지 그리기
-
-                // 오프스크린 캔버스의 내용을 메인 캔버스로 복사
-                canvasCtx.clearRect(
-                  0,
-                  0,
-                  canvasRef.current.width,
-                  canvasRef.current.height
-                );
-                canvasCtx.drawImage(offscreenCanvasRef.current, 0, 0);
-              };
-            }
+              canvasCtx.drawImage(offscreenCanvasRef.current, 0, 0);
+            };
           }
         }
-      });
+      }
+    });
 
-      const camera = new Camera(videoRef.current, {
-        onFrame: async () => {
-          await faceMesh.send({ image: videoRef.current }); // 각 프레임마다 FaceMesh 처리
-        },
-        width: 640,
-        height: 480,
-      });
+    if (videoRef.current) {
+      // 로컬 스트림일 경우
+      if (
+        localStream &&
+        JSON.parse(localStream.connection.data).userNo === userNo
+      ) {
+        console.log(`Applying FaceMesh to local stream for user ${userNo}`); // 로컬 스트림에 적용 로그
+        const camera = new Camera(videoRef.current, {
+          onFrame: async () => {
+            await faceMesh.send({ image: videoRef.current }); // 각 프레임마다 FaceMesh 처리
+          },
+          width: 640,
+          height: 480,
+        });
 
-      camera.start(); // 카메라 시작
+        camera.start(); // 카메라 시작
+      } else {
+        // 구독자 스트림일 경우
+        const subscriber = subscribers.find((sub) => {
+          return JSON.parse(sub.stream.connection.data).userNo === userNo;
+        });
+        if (subscriber && videoRef.current) {
+          console.log(
+            `Applying FaceMesh to subscriber stream for user ${userNo}`
+          ); // 구독자 스트림에 적용 로그
+          subscriber.addVideoElement(videoRef.current); // 구독자 스트림을 비디오 요소에 할당
+
+          const camera = new Camera(videoRef.current, {
+            onFrame: async () => {
+              await faceMesh.send({ image: videoRef.current }); // 각 프레임마다 FaceMesh 처리
+            },
+            width: 640,
+            height: 480,
+          });
+
+          camera.start(); // 카메라 시작
+        }
+      }
     }
   };
 
@@ -238,12 +276,16 @@ const VideoBox = ({ index }) => {
   return (
     <Box>
       <Video ref={videoRef} autoPlay muted />
-      <Canvas ref={canvasRef} /> {/* 메인 캔버스 */}
+      <Canvas
+        ref={canvasRef}
+        style={{ display: isMaskApplied ? "block" : "none" }}
+      />{" "}
+      {/* 메인 캔버스, 마스크 상태에 따라 표시/숨김 */}
       <canvas ref={offscreenCanvasRef} style={{ display: "none" }} />{" "}
       {/* 오프스크린 캔버스 */}
       <NameTag>{userNickname}</NameTag>
-      <MaskButton onClick={applyMask} disabled={isMaskApplied}>
-        {isMaskApplied ? "Mask Applied" : "Apply Mask"}
+      <MaskButton onClick={applyMask}>
+        {isMaskApplied ? "Remove Mask" : "Apply Mask"}
       </MaskButton>
     </Box>
   );
