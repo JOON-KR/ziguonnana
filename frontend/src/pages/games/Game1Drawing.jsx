@@ -4,6 +4,7 @@ import { ReactSketchCanvas } from "react-sketch-canvas";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
+import { useNavigate } from "react-router-dom";
 
 const Wrap = styled.div`
   width: 100%;
@@ -137,7 +138,7 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(8);
   const [targetUser, setTargetUser] = useState(0);
   const [currentUser, setCurrentUser] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -150,6 +151,7 @@ const Game1Drawing = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const [isStarted, setIsStarted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -162,7 +164,7 @@ const Game1Drawing = () => {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(15);
+            setTimeLeft(8);
             setIsStarted(true);
           } else if (parsedMessages.commandType === "DRAW_PREV") {
             canvasRef.current.loadPaths(parsedMessages.data);
@@ -171,6 +173,8 @@ const Game1Drawing = () => {
             setCurrentUser(0);
             canvasRef.current.clearCanvas();
             setDrawingResult(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_CYCLE") {
+            canvasRef.current.clearCanvas();
           }
         }
       );
@@ -183,16 +187,9 @@ const Game1Drawing = () => {
     }
   }, [client, roomId]);
 
-  useEffect(() => {
-    const sendDrawingAndClearCanvas = async () => {
-      // await handleSendDrawing();
-      canvasRef.current.clearCanvas();
-    };
-
-    if (targetUser !== 0 && canvasRef.current) {
-      sendDrawingAndClearCanvas();
-    }
-  }, [targetUser]);
+  // useEffect(() => {
+  //   canvasRef.current.clearCanvas();
+  // }, [targetUser]);
 
   useEffect(() => {
     if (!isGameEnded) {
@@ -377,7 +374,13 @@ const Game1Drawing = () => {
         {!isGameEnded ? (
           <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
         ) : (
-          <button>다른 게임들 보러가기</button>
+          <button
+            onClick={() => {
+              navigate("/icebreaking/games");
+            }}
+          >
+            다른 게임들 보러가기
+          </button>
         )}
       </Header>
       <CanvasWrapper onMouseUp={handleMouseUp}>
