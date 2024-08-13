@@ -69,6 +69,7 @@ const ImageInput = styled.input`
 `;
 
 const NameWrapper = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -200,7 +201,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap onClick={(e) => e.stopPropagation()}>
-        <Title>프로필에 등록할 정보를 입력하세요.</Title>
+        <Title>👩‍🏫 프로필 정보를 입력해주세요.</Title>
         <ProfileWrapper>
           {/* <ProfileImageWrapper
             onClick={() => document.getElementById("imageInput").click()}

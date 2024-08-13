@@ -17,12 +17,10 @@ import nextBtn from "../../assets/icons/next_btn.png";
 import GameEndModal from "../../components/modals/GameEndModal";
 
 const Wrap = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;  /* 요소를 세로로 중앙 정렬 */
-  align-items: center;  /* 요소를 가로로 중앙 정렬 */
-  width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  width: 819px;
+  height: 348px;
+  background-image: url(${pickPlanet});
+  /* background-size: cover; */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -62,7 +60,7 @@ const DoneButton = styled.button`
   font-size: 18px;
   color: white;
   border: none;
-  border-radius: 25px;
+  border-radius: 5px;
   cursor: pointer;
    background-color: transparent; /* 배경을 투명하게 설정 */
 `;
@@ -85,6 +83,7 @@ const Games = () => {
 
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
+  const [subscribed, setSubscribed] = useState(false);
   const dispatch = useDispatch();
 
   const [isEndModalOpen, setIsEndModalOpen] = useState(false); // 모달 상태 관리
@@ -98,35 +97,27 @@ const Games = () => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    if (client && client.connected) {
-      const subscription = client.subscribe(
-        `/topic/game/${roomId}`,
-        (message) => {
-          const parsedMessage = JSON.parse(message.body);
-          // console.log("게임 종류 선택 메시지:", parsedMessage);
-          console.log("게임 종류 응답 메시지 :", parsedMessage.data);
-          dispatch(setMessage(parsedMessage.data));
+    if (client && client.connected && !subscribed) {
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        // console.log("게임 종류 선택 메시지:", parsedMessage);
+        console.log("게임 종류 응답 메시지 :", parsedMessage.data);
+        dispatch(setMessage(parsedMessage.data));
 
-          const gameType = parsedMessage.data;
-          if (gameType === "BODY_TALK") {
-            navigate("/icebreaking/games/game2");
-          } else if (gameType === "SAME_POSE") {
-            navigate("/icebreaking/games/game3");
-          } else if (gameType === "FOLLOW_POSE") {
-            navigate("/icebreaking/games/game4");
-          } else if (gameType === "SHORTS") {
-            navigate("/icebreaking/games/game5");
-          }
+        const gameType = parsedMessage.data;
+        if (gameType === "BODY_TALK") {
+          navigate("/icebreaking/games/game2");
+        } else if (gameType === "SAME_POSE") {
+          navigate("/icebreaking/games/game3");
+        } else if (gameType === "FOLLOW_POSE") {
+          navigate("/icebreaking/games/game4");
+        } else if (gameType === "SHORTS") {
+          navigate("/icebreaking/games/game5");
         }
-      );
-
-      return () => {
-        if (subscription) {
-          subscription.unsubscribe();
-        }
-      };
+      });
+      setSubscribed(true);
     }
-  }, [client, roomId]);
+  }, [client, roomId, subscribed]);
 
   useEffect(() => {
     console.log(game1Status);

@@ -8,15 +8,14 @@ import icebreakingBgm from "../../assets/audios/icebreaking.mp3";
 
 const Wrap = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
   text-align: center;
   width: 100%;
-  height: 100vh;
-  background-color: black;
-  padding: 20px 0;
-  box-sizing: border-box;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
 `;
 

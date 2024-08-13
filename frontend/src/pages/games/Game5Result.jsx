@@ -117,13 +117,18 @@ const Game5Result = () => {
   // 숏폼 합치기 요청 send
   useEffect(() => {
     if (client && client.connected) {
-      console.log("send 보냄");
-      client.send(`/app/game/${roomId}/shorts/merge`, {}, {});
+      console.log("send 직전 딜레이 3초");
+      const time = setTimeout(() => {
+        client.send(`/app/game/${roomId}/shorts/merge`, {}, {});
+        console.log("send 요청이 전송되었습니다.");
+      }, 3000);
+  
+      return () => clearTimeout(time);
     } else {
       console.log("send 부분에서 문제가 발생함");
     }
   }, [client, roomId]);
-
+  
   // 숏폼 합치기 응답 받기
   useEffect(() => {
     if (client && client.connected) {
