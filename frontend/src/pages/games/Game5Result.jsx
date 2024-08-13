@@ -161,7 +161,7 @@ const Game5Result = () => {
 
   return (
     <Container>
-      <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
+      
       {mergeVideoUrl ? (
         <>
           <Header textLength={message.length}>우리의 숏폼이 완성되었습니다!</Header>
@@ -179,11 +179,13 @@ const Game5Result = () => {
         <>
           {showClear1 ? (
             <>
+              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear1} alt="이미지1" />
             </>
           ) : (
             <>
+              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear2} alt="이미지2" />
             </>
