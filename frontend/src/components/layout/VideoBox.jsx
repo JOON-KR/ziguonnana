@@ -87,7 +87,7 @@ const VideoBox = ({ index }) => {
 
   const userNo = index + 1; // 인덱스를 기반으로 유저 번호 계산
   const userNickname =
-    nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름"; // 유저 번호에 해당하는 닉네임 찾기
+    nicknameList.find((item) => item.num === userNo)?.nickname || ""; // 유저 번호에 해당하는 닉네임 찾기
 
   // userNo에 따라 다른 이미지를 선택
   const overlayImageSrc = overlayImageList[userNo - 1];
@@ -294,7 +294,7 @@ const VideoBox = ({ index }) => {
       />
       <canvas ref={offscreenCanvasRef} style={{ display: "none" }} />{" "}
       {/* 오프스크린 캔버스 숨김 */}
-      <NameTag>{userNickname}</NameTag> {/* 닉네임 태그 */}
+      {userNickname && <NameTag>{userNickname}</NameTag>} {/* 닉네임 태그 */}
       <MaskButton onClick={applyMask}>
         {isMaskApplied ? "Remove Mask" : "Apply Mask"}{" "}
         {/* 마스크 상태에 따라 버튼 텍스트 변경 */}
