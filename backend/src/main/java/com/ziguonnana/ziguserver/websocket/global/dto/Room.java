@@ -36,17 +36,6 @@ public class Room {
 	private int isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
-	// 게임 클리어 관리
-	// 이어그리기
-	private boolean game1;
-	// 몸으로 말해요
-	private boolean game2;
-	// 이구동성
-	private boolean game3;
-	// 포즈맞추기
-	private boolean game4;
-	// 챌린지
-	private boolean game5;
 
 	// 몸으로 말해요 키워드 요청 count
 	private int bodyTalkKeywordCnt;
