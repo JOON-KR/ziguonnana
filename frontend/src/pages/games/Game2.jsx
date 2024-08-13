@@ -236,11 +236,11 @@ const Game2 = () => {
         }
         if (
           parsedMessage.commandType == "CHAT" &&
-          parsedMessage.data.correct == true
+          parsedMessage.data.isCorrect == true
         ) {
           setKeywordType("");
           setReceivedKeyword("");
-          setRound(parsedMessage.round);
+          setRound(parsedMessage.data.round);
           setIsExplainer(false);
         }
         if (parsedMessage.commandType == "GAME_MODAL_START") {
