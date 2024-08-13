@@ -2,10 +2,10 @@ package com.ziguonnana.ziguserver.websocket.art.service;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +20,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.core.sync.RequestBody;
+
 import com.ziguonnana.ziguserver.websocket.art.dto.ArtResponse;
 import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
@@ -27,13 +34,9 @@ import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Player;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
+import com.ziguonnana.ziguserver.websocket.nickname.dto.Nickname;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @RequiredArgsConstructor
 @Service
@@ -168,7 +171,7 @@ public class ArtService {
         ConcurrentMap<Integer, List<RelayArt>> map = room.getArt();
         int people = room.getPeople();
         ConcurrentMap<Integer, AvatarResult> cards = new ConcurrentHashMap<>();
-
+        ConcurrentMap<Integer, Player>players = room.getPlayers();
         for (int i = 1; i <= people; i++) {
             List<RelayArt> tmp = map.get(i);
 
@@ -185,7 +188,8 @@ public class ArtService {
 
                 AvatarResult card = AvatarResult.builder()
                         .avatarImage(newImageUrl) // 새로 생성한 이미지 URL 사용
-                        .feature(features)
+                        .features(features)
+                        .nickname(players.get(i).getNickname())
                         .build();
                 cards.put(i, card);
             }
@@ -197,11 +201,12 @@ public class ArtService {
 
     public String cropAndMakeBackgroundTransparent(String imageKey, String roomId, int playerId) {
         try {
-        	log.info("s3이미지 경로:{}",imageKey);
-        	// 따옴표가 있는 경우 제거
-        	if (imageKey.startsWith("\"") && imageKey.endsWith("\"")) {
-        	    imageKey = imageKey.substring(1, imageKey.length() - 1);
-        	}
+            log.info("s3이미지 경로:{}", imageKey);
+            
+            // 따옴표가 있는 경우 제거
+            if (imageKey.startsWith("\"") && imageKey.endsWith("\"")) {
+                imageKey = imageKey.substring(1, imageKey.length() - 1);
+            }
 
             if (imageKey.startsWith("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/")) {
                 imageKey = imageKey.replace("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/", "");
@@ -239,17 +244,14 @@ public class ArtService {
 
             g2d.dispose();
 
-            // 새로운 파일 경로 생성
-            String outputPath = "C:/tmp/" + roomId + "_" + playerId + "_AVATAR.png";
-            ImageIO.write(newImage, "png", new File(outputPath));
+            // S3에 업로드하기 위한 ByteArrayOutputStream 생성
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ImageIO.write(newImage, "png", os);
+            InputStream is = new ByteArrayInputStream(os.toByteArray());
 
             // S3에 업로드
-            File file = new File(outputPath);
             String key = roomId + "/" + playerId + "_AVATAR.png";
-            s3Client.putObject(PutObjectRequest.builder().bucket(bucket).key(key).build(), file.toPath());
-
-            // 임시 파일 삭제
-            //Files.deleteIfExists(file.toPath());
+            s3Client.putObject(PutObjectRequest.builder().bucket(bucket).key(key).build(), RequestBody.fromInputStream(is, os.size()));
 
             // S3 URL 반환
             return "https://" + bucket + ".s3.amazonaws.com/" + key;
