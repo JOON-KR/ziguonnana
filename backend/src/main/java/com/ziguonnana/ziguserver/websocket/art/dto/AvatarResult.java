@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AvatarResult {
 	private String avatarImage;
-	private List<String>feature;
+	private List<String>features;
 	private String nickname;
 }

@@ -1,8 +1,19 @@
 package com.ziguonnana.ziguserver.domain.member.controller;
+import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.ziguonnana.ziguserver.domain.member.dto.EmailAuth;
 import com.ziguonnana.ziguserver.domain.member.dto.LoginRequest;
@@ -19,9 +30,13 @@ import com.ziguonnana.ziguserver.security.dto.CustomUserInfo;
 import com.ziguonnana.ziguserver.security.dto.TokenResponse;
 import com.ziguonnana.ziguserver.security.util.JwtUtil;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Slf4j
 @RestController
@@ -95,10 +110,28 @@ public class MemberController {
     }
 
     @GetMapping("/login/kakao/callback")
-    public ResponseEntity<ResponseDto<TokenResponse>> loginKakaoCallback(@RequestParam("code") String code) {
+    public ResponseEntity<Void> loginKakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
         TokenResponse tokenResponse = memberService.kakaoLogin(code);
-        return ResponseEntity.status(200).body(ResponseDto.success(tokenResponse));
+
+        // 쿠키에 토큰을 저장
+        Cookie authCookie = new Cookie("accessToken", tokenResponse.accessToken());
+        Cookie refreshCookie = new Cookie("refreshToken", tokenResponse.refreshToken());
+        authCookie.setHttpOnly(true); // XSS 방지
+        authCookie.setSecure(true); // HTTPS에서만 전송
+        authCookie.setPath("/"); // 모든 경로에서 쿠키 접근 가능
+        authCookie.setMaxAge(60); // 1분 동안 유효
+        refreshCookie.setHttpOnly(true); // XSS 방지
+        refreshCookie.setSecure(true); // HTTPS에서만 전송
+        refreshCookie.setPath("/"); // 모든 경로에서 쿠키 접근 가능
+        refreshCookie.setMaxAge(60); // 1분 동안 유효
+
+        response.addCookie(authCookie);
+        response.addCookie(refreshCookie);
+
+        // 클라이언트의 특정 URL로 리디렉트
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/KakaoLogin")).build();
     }
+
     
     @GetMapping("/password/{email}")
     public ResponseEntity<ResponseDto<String>> findPassword(@PathVariable("email")String email){

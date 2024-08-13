@@ -10,8 +10,10 @@ import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
+import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResponse;
 import com.ziguonnana.ziguserver.websocket.result.dto.GameResult;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,6 +53,7 @@ public class Room {
 	// 라운드별 결과
 	// key : 몇 번 포즈타입, value : 닉네임
 	private List<ConcurrentHashMap<Integer, String>> poseResult;
+	private List<ConcurrentHashMap<Integer, PoseResponse>> posetmp;
 	// 게임 결과 계산용 벡터 저장
 	private ConcurrentMap<Integer, List<KeyPoint>> vectors;
 	// 이구동성 게임결과 저장용
