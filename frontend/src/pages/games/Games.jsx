@@ -103,11 +103,7 @@ const Games = () => {
     <Wrap>
       {/* 아바타 행성 */}
       {!game1Status ? (
-        <Planet
-          onClick={() => handleGameSelect("AVATAR")}
-          src={frozen_blue}
-          style={{ left: "50px", bottom: "90px" }}
-        />
+        <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
       ) : (
         <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
       )}

@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { setGame2Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   display: flex;
@@ -44,6 +45,7 @@ const Game2Result = () => {
   const client = useSelector((state) => state.client.stompClient);
   const roomId = useSelector((state) => state.room.roomId);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -52,7 +54,8 @@ const Game2Result = () => {
         (message) => {
           const parsedMessages = JSON.parse(message.body);
 
-          if (parsedMessages.commandType === "GAME_MODAL_START") {
+          if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame2Finish());
             navigate("/icebreaking/games");
           }
         }
@@ -74,7 +77,7 @@ const Game2Result = () => {
         <ResultDetail>소요된 시간: {durationTime}초</ResultDetail>
         <button
           onClick={() => {
-            client.send(`/app/game/{roomId}/start-modal/BODY_TALK`);
+            client.send(`/app/game/${roomId}/game-select`);
           }}
         >
           games로 이동
