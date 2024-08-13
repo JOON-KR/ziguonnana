@@ -7,6 +7,7 @@ import Game1Nickname from "../pages/games/Game1Nickname";
 import Game1Result from "../pages/games/Game1Result";
 import Game1Avata from "../pages/games/Game1Avata";
 import Game2 from "../pages/games/Game2";
+import Game2Result from "../pages/games/Game2Result";
 import Game3 from "../pages/games/Game3";
 import Game4 from "../pages/games/Game4";
 import Game5 from "../pages/games/Game5";
@@ -26,6 +27,7 @@ const GamePages = () => {
         <Route path="game1Result" element={<Game1Result />} />
         <Route path="game1Avata" element={<Game1Avata />} />
         <Route path="game2" element={<Game2 />} />
+        <Route path="game2Result" element={<Game2Result />} />
         <Route path="game3" element={<Game3 />} />
         <Route path="game4" element={<Game4 />} />
         <Route path="game5" element={<Game5 />} />
