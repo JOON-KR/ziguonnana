@@ -21,8 +21,9 @@ const Wrap = styled.div`
 
 const BubbleWrap = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative; /* 자식 요소의 absolute 포지셔닝을 위해 */
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  align-items: flex-start; /* 상단 정렬 */
   width: 100%;
 `;
 
