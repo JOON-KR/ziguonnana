@@ -46,6 +46,7 @@ public class AnswerService {
 		rooms.put(roomId, room);
 		room.countUp();
 		if (room.getCount() == room.getPeople()) {
+			log.info("자기소개 문답 people수만큼 people: " + room.getCount());
 			room.countInit();
 			room.cycleInit();
 			nextGame(roomId);

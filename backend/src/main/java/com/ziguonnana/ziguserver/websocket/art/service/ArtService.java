@@ -51,6 +51,7 @@ public class ArtService {
     public void spreadKeyword(String roomId) {
         Room room = roomRepository.getRoom(roomId);
         createRandomKeyword(room);
+        log.info("spreadKeword 전파");
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_START, true));
     }
 
