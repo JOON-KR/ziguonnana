@@ -30,7 +30,7 @@ function App() {
         </Route>
         <Route path="/create-room" element={<RoomCreateModal />} />
         <Route path="/pose" element={<PosePage />} />
-        <Route path="/kakao-login" element={<KakaoLogin />} />
+        <Route path="/KakaoLogin" element={<KakaoLogin />} />
       </Routes>
     </div>
   );

@@ -164,7 +164,6 @@ const Game1Drawing = () => {
   const client = useSelector((state) => state.client.stompClient);
   const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
-  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
   const dispatch = useDispatch();
 
   useEffect(() => {
