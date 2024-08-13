@@ -1,7 +1,5 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.service;
 
-import com.ziguonnana.ziguserver.exception.BodyTalkException;
-import com.ziguonnana.ziguserver.exception.ErrorCode;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.*;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
@@ -40,8 +38,8 @@ public class BodyTalkService {
             room.getBodyTalkGame().startGame();
         }
 
-        // 시간 종료 - 게임종료 & 라운드 종료 - 게임종료
-        if(room.getBodyTalkGame().calculateDurationTime() > END_TIME || room.getCycle()+1 > ROUND){
+        //  라운드 종료 - 게임종료
+        if(room.getCycle()+1 > ROUND){
             BodyTalkResult result = gameEnd(room.getBodyTalkGame());
             Response response = Response.ok(CommandType.BODYGAME_RESULT, result);
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
