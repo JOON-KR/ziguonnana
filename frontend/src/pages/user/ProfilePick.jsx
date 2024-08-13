@@ -86,6 +86,24 @@ const HeaderText = styled.h4`
   cursor: pointer;
 `;
 
+// 복사 버튼 스타일 설정
+const CopyButton = styled.button`
+  font-size: 16px;
+  font-weight: bold;
+  padding: 8px 12px;
+  margin-left: 13px;
+  // margin-top: 10px;
+  background-color: #00ffff;
+  color: #54595E;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #00cccc;
+  }
+`;
+
 const ProfilePick = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -190,6 +208,14 @@ const ProfilePick = () => {
     // });
   };
 
+  const handleCopyRoomId = () => {
+    navigator.clipboard.writeText(roomId).then(() => {
+      alert("방 참여 코드가 복사되었습니다.");
+    }).catch(err => {
+      console.error('방 참여 코드 복사 실패:', err);
+    });
+  };
+
   return (
     <Wrap>
       {isProfileRegisterModalOpen && (
@@ -207,7 +233,10 @@ const ProfilePick = () => {
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
-      <SubTitle>방 참여 코드 : {roomId}</SubTitle>
+      <SubTitle>
+        방 참여 코드 : {roomId}
+        <CopyButton onClick={handleCopyRoomId}>복사</CopyButton>
+      </SubTitle>
 
       <ProfilesContainer>
         {isLoggedIn &&
