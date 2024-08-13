@@ -73,7 +73,7 @@ const IceBreaking = () => {
         </Content>
         <Frame>
           <VideoBox index={3} />
-          <VideoBox index={4} username={"nowag"} />
+          <VideoBox index={4} />
           <VideoBox index={5} />
         </Frame>
       </PageWrap>
