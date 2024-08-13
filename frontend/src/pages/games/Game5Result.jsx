@@ -5,6 +5,7 @@ import styled from "styled-components";
 import clear1 from "../../assets/images/clear1.png";
 import clear2 from "../../assets/images/clear2.png";
 import nextBtn from "../../assets/icons/next_btn.png";
+import backgroundMusic from "../../assets/audios/icebreaking.mp3";
 
 const VideoPlayer = styled.video`
   width: 100%;
@@ -67,10 +68,9 @@ const Container = styled.div`
   width: 100%;
 `;
 
-const BottomRightContainer = styled.div`
+const BottomContainer = styled.div`
   position: fixed;
   bottom: 20px;
-  right: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -100,6 +100,7 @@ const Game5Result = () => {
   const [videoEnded, setVideoEnded] = useState(false); // 비디오 재생 완료 상태
   const message = "숏폼이 완성되기까지 최소 1분 소요됩니다.";
   const navigate = useNavigate();
+  const audioRef = useRef(null); // 오디오 참조
 
   // clear 이미지 띄우기
   useEffect(() => {
@@ -151,8 +152,16 @@ const Game5Result = () => {
     navigate("/icebreaking/games");
   };
 
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때 오디오를 자동으로 재생
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  }, []);
+
   return (
     <Container>
+      
       {mergeVideoUrl ? (
         <>
           <Header textLength={message.length}>우리의 숏폼이 완성되었습니다!</Header>
@@ -160,29 +169,29 @@ const Game5Result = () => {
             <source src={mergeVideoUrl} type="video/mp4" />
           </VideoPlayer>
           {videoEnded && (
-            <BottomRightContainer>
+            <BottomContainer>
               <NextButton onClick={handleNext}>이동하기</NextButton>
               <NextImage src={nextBtn} alt="Next" onClick={handleNext} />
-            </BottomRightContainer>
+            </BottomContainer>
           )}
         </>
       ) : (
         <>
           {showClear1 ? (
             <>
+              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear1} alt="이미지1" />
             </>
           ) : (
             <>
+              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear2} alt="이미지2" />
             </>
           )}
         </>
       )}
-
-      
     </Container>
   );
 };
