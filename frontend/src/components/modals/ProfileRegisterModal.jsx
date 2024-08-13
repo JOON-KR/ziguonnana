@@ -175,10 +175,10 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
           //   );
           // }
           
-    dispatch(setNicknameList(
-      [...nicknameList, {"nickname": name, "num": userNo}]
-    ));
-    console.log("nicknameList: ",nicknameList)
+    // dispatch(setNicknameList(
+    //   [...nicknameList, {"nickname": name, "num": userNo}]
+    // ));
+    // console.log("nicknameList: ",nicknameList)
 
     onRegisterProfile(profileData);
 
