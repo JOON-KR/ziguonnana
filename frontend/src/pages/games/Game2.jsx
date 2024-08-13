@@ -158,7 +158,6 @@ const Game2 = () => {
   const dispatch = useDispatch();
   const [isEnded, setIsEnded] = useState(false);
 
-
   useEffect(() => {
     if (explainerNo === userNo) {
       setIsExplainer(true);
@@ -268,7 +267,6 @@ const Game2 = () => {
         //   setRound(parsedMessage.data.round);
         // }
 
-
         // 서버에서 결과가 도착하면 처리
         if (parsedMessage.commandType === "BODYGAME_RESULT") {
           setResultData(parsedMessage.data);
@@ -296,7 +294,7 @@ const Game2 = () => {
     if (round === 7) {
       // 게임 종료 로직
       setIsGameEnded(true);
-    } 
+    }
   }, [round, client, isGameStarted, roomId]);
 
   useEffect(() => {
@@ -307,7 +305,7 @@ const Game2 = () => {
       console.log("로컬 스트림이 설정되지 않았습니다.");
     }
   }, [localStream, explainerNo, userNo]);
-  
+
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -329,8 +327,6 @@ const Game2 = () => {
       }
     }
   }, [subscribers, explainerNo, userNo]);
-  
-  
 
   // 타이머 로직
   useEffect(() => {
