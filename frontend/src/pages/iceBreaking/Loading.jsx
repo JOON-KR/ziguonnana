@@ -52,24 +52,27 @@ const Loading = () => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
 
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log("방에서 받은 메시지:", parsedMessage);
-      if (
-        parsedMessage.data == true &&
-        parsedMessage.commandType == "GAME_START"
-      ) {
-        navigate("/icebreaking/intro");
-        // navigate("/icebreaking/games/game1");
-        // navigate("/test");
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        console.log("방에서 받은 메시지:", parsedMessage);
+        if (
+          parsedMessage.data == true &&
+          parsedMessage.commandType == "GAME_START"
+        ) {
+          navigate("/icebreaking/intro");
+          // navigate("/icebreaking/games/game1");
+          // navigate("/test");
+        }
+        // navigate("/icebreaking/games");
+        // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+        else if (parsedMessage.message == "질문리스트 전파\n") {
+          dispatch(setQuestionList(parsedMessage.data.question));
+          console.log(parsedMessage.data.question);
+        }
       }
-      // navigate("/icebreaking/games");
-      // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-      else if (parsedMessage.message == "질문리스트 전파\n") {
-        dispatch(setQuestionList(parsedMessage.data.question));
-        console.log(parsedMessage.data.question);
-      }
-    });
+    );
 
     client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
 
@@ -78,8 +81,8 @@ const Loading = () => {
         const parsedMessage = JSON.parse(message.body);
         console.log("방에서 받은 메시지:", parsedMessage);
         if (parsedMessage.commandType === "PROFILE_CREATE") {
-          console.log("nicknameList: ", parsedMessage.data)
-          dispatch(setNicknameList(parsedMessage.data))
+          console.log("nicknameList: ", parsedMessage.data);
+          dispatch(setNicknameList(parsedMessage.data));
         }
         if (
           parsedMessage.data === true &&
@@ -104,6 +107,9 @@ const Loading = () => {
     } else {
       console.error("STOMP 클라이언트가 연결되어 있지 않습니다.");
     }
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [client, roomId, navigate, profileData, dispatch]);
 
   return (

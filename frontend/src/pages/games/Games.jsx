@@ -50,14 +50,13 @@ const Games = () => {
 
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
-  const [subscribed, setSubscribed] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    if (client && client.connected && !subscribed) {
+    if (client && client.connected) {
       const subscription = client.subscribe(
         `/topic/game/${roomId}`,
         (message) => {
@@ -78,14 +77,14 @@ const Games = () => {
           }
         }
       );
-      setSubscribed(true);
+
       return () => {
         if (subscription) {
           subscription.unsubscribe();
         }
       };
     }
-  }, [client, roomId, subscribed]);
+  }, [client, roomId]);
 
   useEffect(() => {
     console.log(game1Status);

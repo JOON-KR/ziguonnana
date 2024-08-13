@@ -37,33 +37,39 @@ const Game1 = () => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
     if (client && client.connected) {
-      client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const parsedMessage = JSON.parse(message.body);
-        // console.log("게임 종류 선택 메시지:", parsedMessage);
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          // console.log("게임 종류 선택 메시지:", parsedMessage);
 
-        const cmd = parsedMessage.commandType;
-        const data = parsedMessage.data;
+          const cmd = parsedMessage.commandType;
+          const data = parsedMessage.data;
 
-        console.log("닫기 요청 데이터1 ", parsedMessage);
-        console.log("닫기 요청 데이터2 ", data);
+          console.log("닫기 요청 데이터1 ", parsedMessage);
+          console.log("닫기 요청 데이터2 ", data);
 
-        if (data == "SAME_POSE") {
-          setIsDrawingWelcomeModalOpen(false);
-          setIsDrawingGuideModalOpen(false);
-        } else if (cmd == "GAME_MODAL_START") {
-          // setIsIntroGuideModalOpen(false);
-          openIntroModal();
+          if (data == "SAME_POSE") {
+            setIsDrawingWelcomeModalOpen(false);
+            setIsDrawingGuideModalOpen(false);
+          } else if (cmd == "GAME_MODAL_START") {
+            // setIsIntroGuideModalOpen(false);
+            openIntroModal();
+          }
+          if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
+            // 데이터 받아와서 Redux 상태 업데이트
+            dispatch(setDrawingData(data));
+            // art 데이터 캔버스에 그리기
+            navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
+            //모달 닫기
+            setIsDrawingWelcomeModalOpen(false);
+            setIsDrawingGuideModalOpen(false);
+          }
         }
-        if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
-          // 데이터 받아와서 Redux 상태 업데이트
-          dispatch(setDrawingData(data));
-          // art 데이터 캔버스에 그리기
-          navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
-          //모달 닫기
-          setIsDrawingWelcomeModalOpen(false);
-          setIsDrawingGuideModalOpen(false);
-        }
-      });
+      );
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, [client, roomId]);
 
