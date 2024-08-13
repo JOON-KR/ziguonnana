@@ -17,6 +17,7 @@ import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.pose.dto.PoseRequest;
+import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResponse;
 import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResult;
 import com.ziguonnana.ziguserver.websocket.pose.dto.PoseSelect;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
@@ -89,33 +90,40 @@ public class PoseService {
 	    // 성공률이 97% 이상일 경우에만 성공으로 판단
 	    boolean isSuccess = successRate >= 80.0;
 
-	    List<ConcurrentHashMap<Integer, String>> poselist = room.getPoseResult();
+	    List<ConcurrentHashMap<Integer, PoseResponse>> poselist = room.getPosetmp();
+	    List<ConcurrentHashMap<Integer, String>> savelist= room.getPoseResult();
+	    
 	    if (poselist.size() <= room.getCycle()) {
 	        poselist.add(new ConcurrentHashMap<>());
 	    }
-	    ConcurrentHashMap<Integer, String> currentCycle = poselist.get(room.getCycle());
-
+	    ConcurrentHashMap<Integer, String> save = savelist.get(room.getCycle());
+	    ConcurrentHashMap<Integer, PoseResponse> pose = poselist.get(room.getCycle());
+	    PoseResponse res = PoseResponse.builder()
+	    		.message(isSuccess ? "성공" : "실패")
+	    		.percent((int)successRate)
+	    		.build();
 	    // 결과 저장
-	    currentCycle.put(request.getNum(), isSuccess ? "성공" : "실패");
-	    log.info("포즈 계산 결과 전송: userNo={}, result={}", request.getNum(), isSuccess ? "성공" : "실패");
+	    pose.put(request.getNum(), res);
+	    save.put(request.getNum(), isSuccess ? "성공" : "실패");
+	    log.info("포즈 계산 결과 전송: userNo={}, result={}", request.getNum(), pose);
 
 	    // 한 사이클에 모두가 저장이 되었다면
-	    if (currentCycle.size() == room.getPeople()) {
+	    if (save.size() == room.getPeople()) {
 	        log.info("포즈 계산 {}번째 사이클 완료", room.getCycle());
 	        room.cycleUp();
 	        // 결과 전송
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
-	                Response.ok(CommandType.POSE_RESULT, currentCycle));
+	                Response.ok(CommandType.POSE_RESULT, pose));
 	    }
 
 	    // 6번 하고나면
 	    if (room.getCycle() >= 6) {
 	        log.info("포즈 종료", room.getCycle());
-	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, currentCycle));
+	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, true));
 	        room.cycleInit();
 	    }
 
-	    log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, currentCycle);
+	    log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, pose);
 	}
 
 
