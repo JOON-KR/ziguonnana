@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LoadingPlayerInfo {
-    private String name;
-    private int userNo;
+    private String nickname;
+    private int num;
 }
