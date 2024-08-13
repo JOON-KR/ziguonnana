@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
@@ -9,6 +9,7 @@ import "@tensorflow/tfjs";
 import gray from "../../assets/icons/gray.png";
 import transparentEdgeImage from "../../assets/images/poseline1.png";
 import pose1 from "../../assets/images/pose1.jpg";
+import { setGame4Finish } from "../../store/resultSlice";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -211,6 +212,7 @@ const Game4 = () => {
 
   const videoRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const endGame = () => {
     navigate("/icebreaking/games");
@@ -290,6 +292,7 @@ const Game4 = () => {
             setTimeout(async () => {
               await runPoseNet(videoElement);
               if (round < 6) {
+                dispatch(setGame4Finish());
                 setRound((prevRound) => prevRound + 1);
                 setIsFollowPoseSelectModalOpen(true);
               } else {

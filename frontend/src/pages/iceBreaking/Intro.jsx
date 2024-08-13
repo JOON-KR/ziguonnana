@@ -54,16 +54,19 @@ const Introduce = () => {
 
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const parsedMessage = JSON.parse(message.body);
-        const cmd = parsedMessage.commandType;
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          const cmd = parsedMessage.commandType;
 
-        if (cmd === "GAME_MODAL_START") {
-          skipIntro();
+          if (cmd === "GAME_MODAL_START") {
+            skipIntro();
+          }
+
+          console.log("키워드 타입 :", parsedMessage);
         }
-
-        console.log("키워드 타입 :", parsedMessage);
-      });
+      );
 
       return () => {
         if (subscription) {
@@ -97,6 +100,7 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
+          <button onClick={() => navigate("/icebreaking/games")}>games</button>
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
           </button>
