@@ -64,7 +64,7 @@ const Introduce = () => {
           if (cmd === "GAME_MODAL_START") {
             skipIntro();
           } else if (parsedMessage.commandType === "NANA_MAP") {
-            navigate("/icebreaking/games");
+            navigate("/icebreaking/games/game1");
           }
 
           console.log("키워드 타입 :", parsedMessage);
