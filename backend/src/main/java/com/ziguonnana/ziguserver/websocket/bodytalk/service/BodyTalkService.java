@@ -100,4 +100,13 @@ public class BodyTalkService {
     }
 
 
+    public BodyTalkResult timeOver(String roomId) {
+        Room room = roomRepository.getRoom(roomId);
+        room.cycleInit(); //사이클(라운드) 초기화
+        room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
+        return BodyTalkResult.builder()
+                .correctCnt(room.getBodyTalkGame().getCorrectCnt())
+                .durationTime(END_TIME)
+                .build();
+    }
 }

@@ -1,6 +1,7 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.controller;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatMessage;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatRequest;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkResult;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.bodytalk.service.BodyTalkService;
 import com.ziguonnana.ziguserver.websocket.global.dto.Response;
@@ -42,4 +43,12 @@ public class BodyTalkController {
         return Response.ok(CommandType.CHAT, bodyChatMessage);
     }
 
+    // 4분 지난 후 게임 종료 요청
+    @MessageMapping("/game/{roomId}/bodyTalk/timeover")
+    @SendTo("/topic/game/{roomId}")
+    public Response<BodyTalkResult> sendTimeOver(@DestinationVariable("roomId") String roomId) {
+        log.info("몸으로 말해요 타임 오버 요청");
+        BodyTalkResult result = bodyTalkService.timeOver(roomId);
+        return Response.ok(CommandType.BODYGAME_RESULT, result);
+    }
 }
