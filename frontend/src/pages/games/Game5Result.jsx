@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import clear1 from "../../assets/images/clear1.png";
 import clear2 from "../../assets/images/clear2.png";
 import nextBtn from "../../assets/icons/next_btn.png";
 import backgroundMusic from "../../assets/audios/icebreaking.mp3";
+import { setGame5Finish } from "../../store/resultSlice";
 
 const VideoPlayer = styled.video`
   width: 100%;
@@ -102,6 +103,7 @@ const Game5Result = () => {
   const message = "숏폼이 완성되기까지 최소 1분 소요됩니다.";
   const navigate = useNavigate();
   const audioRef = useRef(null); // 오디오 참조
+  const dispatch = useDispatch();
 
   // clear 이미지 띄우기
   useEffect(() => {
@@ -147,6 +149,7 @@ const Game5Result = () => {
             response.message === "SUCCESS"
           ) {
             console.log("합친 영상 가져오기 완료");
+            dispatch(setGame5Finish());
             setMergeVideoUrl(response.data);
           }
         }
