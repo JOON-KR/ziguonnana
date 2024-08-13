@@ -132,12 +132,12 @@ const Game1 = () => {
       {isDrawingWelcomeModalOpen && (
         <GameInfoModal
           planetImg={blue}
-          // RedBtnText={"게임 시작"}
-          // // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          // RedBtnFn={() => {
-          //   console.log("닫기 요청");
-          //   client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          // }}
+          RedBtnText={"게임 시작"}
+          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={() =>
             // client.send(`/app/game/${roomId}/start-modal/SAME_POSE`)
@@ -149,12 +149,12 @@ const Game1 = () => {
       )}
       {isDrawingGuideModalOpen && (
         <GameModal
-          // RedBtnText={"게임 시작"}
-          // // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          // RedBtnFn={() => {
-          //   console.log("닫기 요청");
-          //   client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          // }}
+          RedBtnText={"게임 시작"}
+          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
+          RedBtnFn={() => {
+            console.log("닫기 요청");
+            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
+          }}
           modalText={
             <>
               주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
