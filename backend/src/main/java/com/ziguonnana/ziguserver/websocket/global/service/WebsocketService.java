@@ -1,10 +1,12 @@
 package com.ziguonnana.ziguserver.websocket.global.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ziguonnana.ziguserver.websocket.global.dto.*;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,6 @@ import com.ziguonnana.ziguserver.exception.RoomException;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.answer.service.AnswerService;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
-import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
-import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameMessage;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameProfile;
-import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
-import com.ziguonnana.ziguserver.websocket.global.dto.KeyPoint;
-import com.ziguonnana.ziguserver.websocket.global.dto.Player;
-import com.ziguonnana.ziguserver.websocket.global.dto.Response;
-import com.ziguonnana.ziguserver.websocket.global.dto.Room;
-import com.ziguonnana.ziguserver.websocket.global.dto.SessionInfo;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
 
@@ -88,12 +80,27 @@ public class WebsocketService {
         room.countUp();
         log.info("room people:" + room.getPeople());
         log.info("room count:" + room.getCount());
+
+        // 현재 방에 있는 모든 사람들 프로필 이름 broadcast
+        sendProfile(room);
+
         // count가 people과 같아지면 게임 시작
         if (room.getCount() == room.getPeople()) {
         	room.countInit();
             startGame(room);
         }
         log.info("프로필 생성 :: roomId : {}, player : {}, profile : {}", roomId, room.toString(), profile.toString());
+    }
+
+    private void sendProfile(Room room){
+        Collection<Player> players = room.getPlayers().values();
+        List<LoadingPlayerInfo> loadingPlayerInfos = new ArrayList<>();
+        for(Player p : players) {
+            loadingPlayerInfos.add(new LoadingPlayerInfo(p.getProfile().getName(), p.getNum()));
+        }
+        Response<List<LoadingPlayerInfo>> response = Response.ok(CommandType.PROFILE_CREATE, loadingPlayerInfos);
+        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" ,response);
+
     }
 
     public Room getRoom(String roomId) {
