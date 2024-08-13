@@ -7,10 +7,11 @@ import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import red from "../../assets/icons/red.png";
 import honaldu from "../../assets/images/igudong_ex_img.png";
 import bigNana from "../../assets/images/bigNana.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
 import OpenViduSession from "../../components/OpenViduSession";
+import { setGame3Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   width: 90%;
@@ -102,6 +103,7 @@ const Game3 = () => {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [showStartImages, setShowStartImages] = useState(false);
   const [currentKeyword, setCurrentKeyword] = useState("");
+  const dispatch = useDispatch();
 
   const endGame = () => {
     navigate("/icebreaking/games/game2");
@@ -116,6 +118,7 @@ const Game3 = () => {
         if (parsedMessage.commandType === "IGUDONGSEONG_CYCLE") {
           if (round < 6) {
             setRound((prevRound) => prevRound + 1);
+            dispatch(setGame3Finish());
             const nextKeyword = keywords[round];
             setCurrentKeyword(nextKeyword);
             setShowStartImages(true);
