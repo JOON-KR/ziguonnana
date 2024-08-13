@@ -4,8 +4,9 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import ProfileNana from "../../assets/icons/ProfileNana.png";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setNicknameList } from "../../store/nicknameSlice";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -134,6 +135,9 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const client = useSelector((state) => state.client.stompClient);
   const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const nicknameList = useSelector((state) => state.nickname.nicknameList)
+
 
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
@@ -152,24 +156,29 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
       feature: [hashTag1, hashTag2, hashTag3],
       name: name,
     };
-
+    
     console.log("연결 상태 : ", client.connected);
-
+    
     // client.subscribe(`/topic/game/${roomId}`, (message) => {
-    //   const parsedMessage = JSON.parse(message.body);
-    //   console.log("방에서 받은 메시지:", parsedMessage);
-    //   if(parsedMessage.data == true)
-    //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-    // });
-
-    // if (client && client.connected) {
-    //   console.log("소켓에 전송할 데이터 : ", profileData);
-    //   client.send(
-    //     `/app/game/${roomId}/profile`,
-    //     {},
-    //     JSON.stringify(profileData)
-    //   );
-    // }
+      //   const parsedMessage = JSON.parse(message.body);
+      //   console.log("방에서 받은 메시지:", parsedMessage);
+      //   if(parsedMessage.data == true)
+      //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      // });
+      
+      // if (client && client.connected) {
+        //   console.log("소켓에 전송할 데이터 : ", profileData);
+        //   client.send(
+          //     `/app/game/${roomId}/profile`,
+          //     {},
+          //     JSON.stringify(profileData)
+          //   );
+          // }
+          
+    dispatch(setNicknameList(
+      [...nicknameList, {"nickname": name, "num": userNo}]
+    ));
+    console.log("nicknameList: ",nicknameList)
 
     onRegisterProfile(profileData);
 
