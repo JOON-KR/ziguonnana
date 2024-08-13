@@ -156,6 +156,8 @@ const Game2 = () => {
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
+<<<<<<< HEAD
+=======
   const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
@@ -169,6 +171,7 @@ const Game2 = () => {
     console.log("explainerNo: ", explainerNo);
     console.log("isExplainer:", isExplainer);
   }, [userNo, explainerNo, client, roomId, subscribed]);
+>>>>>>> develop-front
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -191,6 +194,12 @@ const Game2 = () => {
   };
   //최초 1회 실행
   useEffect(() => {
+    if (explainerNo === userNo) {
+      setIsExplainer(true);
+      setExplainerNo(userNo);
+    } else {
+      setIsExplainer(false);
+    }
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
@@ -281,7 +290,6 @@ const Game2 = () => {
       setSubscribed(true);
     }
   }, [client, roomId, userNo, subscribed, explainerNo]);
-
   //라운드 변경시 실행
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
