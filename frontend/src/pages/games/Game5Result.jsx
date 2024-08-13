@@ -33,8 +33,9 @@ const Header = styled.h1`
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
-  border-right: 3px solid #58FFF5;
-  animation: typing 10s steps(${(props) => props.textLength}, end) infinite, blink-caret 0.75s step-end infinite;
+  border-right: 3px solid #58fff5;
+  animation: typing 10s steps(${(props) => props.textLength}, end) infinite,
+    blink-caret 0.75s step-end infinite;
 
   @keyframes typing {
     0% {
@@ -54,7 +55,7 @@ const Header = styled.h1`
       border-color: transparent;
     }
     50% {
-      border-color: #58FFF5;
+      border-color: #58fff5;
     }
   }
 `;
@@ -79,8 +80,8 @@ const BottomContainer = styled.div`
 const NextButton = styled.button`
   padding: 10px 20px;
   font-size: 18px;
-  background-color: #58FFF5;
-  color: #54595E;
+  background-color: #58fff5;
+  color: #54595e;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -124,22 +125,33 @@ const Game5Result = () => {
   // 숏폼 합치기 응답 받기
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("서버로부터 받은 메시지:", response);
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const response = JSON.parse(message.body);
+          console.log("서버로부터 받은 메시지:", response);
 
-        // SHORTS_MERGE 응답
-        if (response.commandType === "SHORTS_MERGE" && response.message === "SUCCESS") {
-          console.log("숏폼 합치기 완료");
-        }
+          // SHORTS_MERGE 응답
+          if (
+            response.commandType === "SHORTS_MERGE" &&
+            response.message === "SUCCESS"
+          ) {
+            console.log("숏폼 합치기 완료");
+          } else if (response.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
 
-        // SHORTS_MERGE_COMPLETE 응답
-        if (response.commandType === "SHORTS_MERGE_COMPLETE" && response.message === "SUCCESS") {
-          console.log("합친 영상 가져오기 완료");
-          setMergeVideoUrl(response.data);
+          // SHORTS_MERGE_COMPLETE 응답
+          if (
+            response.commandType === "SHORTS_MERGE_COMPLETE" &&
+            response.message === "SUCCESS"
+          ) {
+            console.log("합친 영상 가져오기 완료");
+            setMergeVideoUrl(response.data);
+          }
         }
-      });
-      
+      );
+
       return () => subscription.unsubscribe();
     }
   }, [client, roomId]);
@@ -149,7 +161,8 @@ const Game5Result = () => {
   };
 
   const handleNext = () => {
-    navigate("/icebreaking/games");
+    // navigate("/icebreaking/games");
+    client.send(`/app/game/${roomId}/game-select`);
   };
 
   useEffect(() => {
@@ -161,10 +174,11 @@ const Game5Result = () => {
 
   return (
     <Container>
-      
       {mergeVideoUrl ? (
         <>
-          <Header textLength={message.length}>우리의 숏폼이 완성되었습니다!</Header>
+          <Header textLength={message.length}>
+            우리의 숏폼이 완성되었습니다!
+          </Header>
           <VideoPlayer controls autoPlay onEnded={handleVideoEnd}>
             <source src={mergeVideoUrl} type="video/mp4" />
           </VideoPlayer>
@@ -179,13 +193,15 @@ const Game5Result = () => {
         <>
           {showClear1 ? (
             <>
-              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
+              <audio ref={audioRef} src={backgroundMusic} loop />{" "}
+              {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear1} alt="이미지1" />
             </>
           ) : (
             <>
-              <audio ref={audioRef} src={backgroundMusic} loop /> {/* 배경 음악 */}
+              <audio ref={audioRef} src={backgroundMusic} loop />{" "}
+              {/* 배경 음악 */}
               <Header textLength={message.length}>{message}</Header>
               <ImageDisplay src={clear2} alt="이미지2" />
             </>
