@@ -80,7 +80,14 @@ const Label = styled.label`
   font-size: 16px;
   font-weight: bold;
   color: #54595e;
-  margin-bottom: 5px;
+`;
+
+const Text = styled.p`
+  margin-left: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #54595e;
 `;
 
 const InputField = styled.input`
@@ -217,6 +224,10 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
           </NameWrapper>
         </ProfileWrapper>
         <HashTagWrapper>
+          <Text>
+            자신을 나타낼 수 있는 키워드를 작성해주세요. <br />
+            ex) mbti, 취미, 닮은 연예인 등
+          </Text>
           <LabelInputWrapper>
             <Label>해시태그1</Label>
             <InputField
