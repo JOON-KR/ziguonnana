@@ -55,6 +55,7 @@ const UserVideo = styled.video`
   height: auto;
   border-radius: 10px;
   background-color: black;
+  transform: scaleX(-1); /* 좌우 반전 */
 `;
 
 const NextButton = styled.button`
