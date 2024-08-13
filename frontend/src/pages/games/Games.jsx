@@ -42,6 +42,12 @@ const PlanetName = styled.p`
 const Games = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const game1Status = useSelector((state) => state.result.isGame1Finished);
+  const game2Status = useSelector((state) => state.result.isGame1Finished);
+  const game3Status = useSelector((state) => state.result.isGame1Finished);
+  const game4Status = useSelector((state) => state.result.isGame1Finished);
+  const game5Status = useSelector((state) => state.result.isGame1Finished);
+
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
   const [subscribed, setSubscribed] = useState(false);
@@ -88,59 +94,104 @@ const Games = () => {
   return (
     <Wrap>
       {/* 아바타 행성 */}
-      <Planet
-        onClick={() => handleGameSelect("AVATAR")}
-        src={blue}
-        style={{ left: "50px", bottom: "90px" }}
-      />
+      {game1Status ? (
+        <Planet
+          onClick={() => handleGameSelect("AVATAR")}
+          src={frozen_blue}
+          style={{ left: "50px", bottom: "90px" }}
+        />
+      ) : (
+        <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
+      )}
+
       <PlanetName style={{ left: "83px", bottom: "75px" }}>아바타</PlanetName>
       {/* 몸으로 말해요 행성 */}
-      <Planet
-        onClick={() => handleGameSelect("BODY_TALK")}
-        src={orange}
-        style={{ left: "200px", top: "20px" }}
-      />
+      {game2Status ? (
+        <Planet
+          onClick={() => handleGameSelect("BODY_TALK")}
+          src={frozen_orange}
+          style={{ left: "200px", top: "20px" }}
+        />
+      ) : (
+        <Planet src={orange} style={{ left: "200px", top: "20px" }} />
+      )}
+
       <PlanetName style={{ left: "200px", top: "0px" }}>
         몸으로 말해요
       </PlanetName>
       {/* 이구동성 행성 */}
-      <Planet
-        onClick={() => handleGameSelect("SAME_POSE")}
-        src={red}
-        style={{
-          left: "375px",
-          bottom: "80px",
-          width: "106px",
-          height: "120px",
-        }}
-      />
+
+      {game3Status ? (
+        <Planet
+          onClick={() => handleGameSelect("SAME_POSE")}
+          src={frozen_red}
+          style={{
+            left: "375px",
+            bottom: "80px",
+            width: "106px",
+            height: "120px",
+          }}
+        />
+      ) : (
+        <Planet
+          src={red}
+          style={{
+            left: "375px",
+            bottom: "80px",
+            width: "106px",
+            height: "120px",
+          }}
+        />
+      )}
+
       <PlanetName style={{ left: "397px", bottom: "65px" }}>
         이구동성
       </PlanetName>
       {/* 포즈 따라하기 행성 */}
-      <Planet
-        onClick={() => handleGameSelect("FOLLOW_POSE")}
-        src={gray}
-        style={{ right: "190px", top: "15px", height: "120px" }}
-      />
+      {game4Status ? (
+        <Planet
+          onClick={() => handleGameSelect("FOLLOW_POSE")}
+          src={frozen_gray}
+          style={{ right: "190px", top: "15px", height: "120px" }}
+        />
+      ) : (
+        <Planet
+          src={gray}
+          style={{ right: "190px", top: "15px", height: "120px" }}
+        />
+      )}
+
       <PlanetName style={{ right: "205px", top: "4px" }}>
         포즈 따라하기
       </PlanetName>
       {/* 숏폼 챌린지 행성 */}
-      <Planet
-        onClick={() => handleGameSelect("SHORTS")}
-        src={earth}
-        style={{
-          right: "-20px",
-          bottom: "100px",
-          width: "130px",
-          height: "110px",
-        }}
-      />
+      {game5Status ? (
+        <Planet
+          onClick={() => handleGameSelect("SHORTS")}
+          src={frozen_earth}
+          style={{
+            right: "-20px",
+            bottom: "100px",
+            width: "130px",
+            height: "110px",
+          }}
+        />
+      ) : (
+        <Planet
+          onClick={() => handleGameSelect("SHORTS")}
+          src={earth}
+          style={{
+            right: "-20px",
+            bottom: "100px",
+            width: "130px",
+            height: "110px",
+          }}
+        />
+      )}
+
       <PlanetName style={{ right: "10px", bottom: "95px" }}>
         숏폼 챌린지
       </PlanetName>
-      
     </Wrap>
   );
 };

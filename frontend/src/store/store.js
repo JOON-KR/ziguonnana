@@ -6,6 +6,7 @@ import nicknameSlice from "./nicknameSlice";
 import drawingSlice from "./drawingSlice";
 import questionSlice from "./questionSlice";
 import messageSlice from "./messageSlice";
+import { resultSlice } from "./resultSlice";
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     drawing: drawingSlice.reducer,
     question: questionSlice.reducer,
     message: messageSlice.reducer,
+    result: resultSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

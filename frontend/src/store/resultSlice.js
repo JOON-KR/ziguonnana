@@ -4,11 +4,11 @@ import { createSlice } from "@reduxjs/toolkit";
 export const resultSlice = createSlice({
   name: "result",
   initialState: {
-    isGame1Finished, // 로그인 상태
-    isGame2Finished, // 로그인 상태
-    isGame3Finished, // 로그인 상태
-    isGame4Finished, // 로그인 상태
-    isGame5Finished, // 로그인 상태
+    isGame1Finished: false, // 로그인 상태
+    isGame2Finished: false, // 로그인 상태
+    isGame3Finished: false, // 로그인 상태
+    isGame4Finished: false, // 로그인 상태
+    isGame5Finished: false, // 로그인 상태
   },
 
   // 상태 수정 함수들
@@ -16,16 +16,16 @@ export const resultSlice = createSlice({
     setGame1Finish: (state) => {
       state.isGame1Finished = true;
     },
-    setGame1Finish: (state) => {
+    setGame2Finish: (state) => {
       state.isGame1Finished = true;
     },
-    setGame1Finish: (state) => {
+    setGame3Finish: (state) => {
       state.isGame1Finished = true;
     },
-    setGame1Finish: (state) => {
+    setGame4Finish: (state) => {
       state.isGame1Finished = true;
     },
-    setGame1Finish: (state) => {
+    setGame5Finish: (state) => {
       state.isGame1Finished = true;
     },
   },
@@ -33,11 +33,11 @@ export const resultSlice = createSlice({
 
 // 액션 생성자 내보내기
 export const {
-  setLoggedIn,
-  setLoggedOut,
-  setUserNo,
-  setMemberId,
-  setOpenViduToken,
+  setGame1Finish,
+  setGame2Finish,
+  setGame3Finish,
+  setGame4Finish,
+  setGame5Finish,
 } = authSlice.actions;
 
 export default authSlice;
