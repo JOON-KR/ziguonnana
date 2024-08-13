@@ -48,7 +48,10 @@ public class S3Util {
         S3Resource resource;
         try (InputStream inputStream = file.getInputStream()) {
             resource = s3Operations.upload(BUCKET, key, inputStream,
-                    ObjectMetadata.builder().contentType(file.getContentType()).build());
+                    ObjectMetadata.builder()
+                            .contentType("video/webm")
+                            .contentDisposition("inline")
+                            .build());
         }
 
         log.debug("splitedVideo url : " + resource.getURL());
