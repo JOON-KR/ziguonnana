@@ -156,8 +156,6 @@ const Game2 = () => {
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
-<<<<<<< HEAD
-=======
   const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
@@ -171,7 +169,6 @@ const Game2 = () => {
     console.log("explainerNo: ", explainerNo);
     console.log("isExplainer:", isExplainer);
   }, [userNo, explainerNo, client, roomId, subscribed]);
->>>>>>> develop-front
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
