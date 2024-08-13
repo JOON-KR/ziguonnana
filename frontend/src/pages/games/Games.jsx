@@ -83,6 +83,7 @@ const Games = () => {
 
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
+  const [subscribed, setSubscribed] = useState(false);
   const dispatch = useDispatch();
 
   const [isEndModalOpen, setIsEndModalOpen] = useState(false); // 모달 상태 관리
@@ -96,35 +97,27 @@ const Games = () => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    if (client && client.connected) {
-      const subscription = client.subscribe(
-        `/topic/game/${roomId}`,
-        (message) => {
-          const parsedMessage = JSON.parse(message.body);
-          // console.log("게임 종류 선택 메시지:", parsedMessage);
-          console.log("게임 종류 응답 메시지 :", parsedMessage.data);
-          dispatch(setMessage(parsedMessage.data));
+    if (client && client.connected && !subscribed) {
+      client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        // console.log("게임 종류 선택 메시지:", parsedMessage);
+        console.log("게임 종류 응답 메시지 :", parsedMessage.data);
+        dispatch(setMessage(parsedMessage.data));
 
-          const gameType = parsedMessage.data;
-          if (gameType === "BODY_TALK") {
-            navigate("/icebreaking/games/game2");
-          } else if (gameType === "SAME_POSE") {
-            navigate("/icebreaking/games/game3");
-          } else if (gameType === "FOLLOW_POSE") {
-            navigate("/icebreaking/games/game4");
-          } else if (gameType === "SHORTS") {
-            navigate("/icebreaking/games/game5");
-          }
+        const gameType = parsedMessage.data;
+        if (gameType === "BODY_TALK") {
+          navigate("/icebreaking/games/game2");
+        } else if (gameType === "SAME_POSE") {
+          navigate("/icebreaking/games/game3");
+        } else if (gameType === "FOLLOW_POSE") {
+          navigate("/icebreaking/games/game4");
+        } else if (gameType === "SHORTS") {
+          navigate("/icebreaking/games/game5");
         }
-      );
-
-      return () => {
-        if (subscription) {
-          subscription.unsubscribe();
-        }
-      };
+      });
+      setSubscribed(true);
     }
-  }, [client, roomId]);
+  }, [client, roomId, subscribed]);
 
   useEffect(() => {
     console.log(game1Status);
