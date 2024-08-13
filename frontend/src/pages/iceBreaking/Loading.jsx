@@ -106,6 +106,7 @@ const Loading = () => {
       <Content>
         <Loader />
       </Content>
+      <button onClick={() => navigate("/icebreaking/games")}>games로</button>
       <button onClick={() => navigate("/icebreaking/games/game1")}>
         그리기
       </button>

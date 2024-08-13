@@ -3,11 +3,12 @@ import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
 import orange from "../../assets/icons/orange.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/icons/game2nana.png";
 import OpenViduSession from "../../components/OpenViduSession";
+import { setGame1Finish, setGame2Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   width: 100%;
@@ -152,6 +153,7 @@ const Game2 = () => {
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
   const [isGameEnded, setIsGameEnded] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (explainerNo === userNo) {
@@ -336,6 +338,14 @@ const Game2 = () => {
 
   return (
     <Wrap>
+      <button
+        onClick={() => {
+          dispatch(setGame2Finish());
+          navigate("/icebreaking/games");
+        }}
+      >
+        결과 스킵
+      </button>
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
           planetImg={orange}

@@ -17,16 +17,16 @@ export const resultSlice = createSlice({
       state.isGame1Finished = true;
     },
     setGame2Finish: (state) => {
-      state.isGame1Finished = true;
+      state.isGame2Finished = true;
     },
     setGame3Finish: (state) => {
-      state.isGame1Finished = true;
+      state.isGame3Finished = true;
     },
     setGame4Finish: (state) => {
-      state.isGame1Finished = true;
+      state.isGame4Finished = true;
     },
     setGame5Finish: (state) => {
-      state.isGame1Finished = true;
+      state.isGame5Finished = true;
     },
   },
 });

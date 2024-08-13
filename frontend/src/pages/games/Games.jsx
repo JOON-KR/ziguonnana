@@ -11,7 +11,7 @@ import red from "../../assets/icons/red.png";
 import frozen_red from "../../assets/icons/frozen_red.png";
 import gray from "../../assets/icons/gray.png";
 import frozen_gray from "../../assets/icons/frozen_gray.png";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useFetcher } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../store/messageSlice";
 import nextBtn from "../../assets/icons/next_btn.png";
@@ -53,8 +53,8 @@ const BottomContainer = styled.div`
 const DoneButton = styled.button`
   padding: 10px 20px;
   font-size: 18px;
-  background-color: #58FFF5;
-  color: #54595E;
+  background-color: #58fff5;
+  color: #54595e;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -66,12 +66,15 @@ const NextImage = styled.img`
   cursor: pointer;
 `;
 
-
-
-
 const Games = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const game1Status = useSelector((state) => state.result.isGame1Finished);
+  const game2Status = useSelector((state) => state.result.isGame2Finished);
+  const game3Status = useSelector((state) => state.result.isGame3Finished);
+  const game4Status = useSelector((state) => state.result.isGame4Finished);
+  const game5Status = useSelector((state) => state.result.isGame5Finished);
+
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
   const [subscribed, setSubscribed] = useState(false);
