@@ -273,7 +273,7 @@ const Game2 = () => {
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
       console.log("키워드 요청요청요청")
     }
-    if (round === 7) {
+    if (round === 6) {
       // 게임 종료 로직
       setIsGameEnded(true);
     }
