@@ -143,7 +143,7 @@ const Game1Nickname = () => {
   return (
     <Wrap>
       <BubbleWrap>
-        <SpeechBubble text={text} />
+        <SpeechBubble type={text} />
       </BubbleWrap>
       <NanaImg src={Nana} />
       <ButtonWrap>
