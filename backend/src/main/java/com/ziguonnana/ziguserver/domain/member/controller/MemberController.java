@@ -129,7 +129,7 @@ public class MemberController {
         response.addCookie(refreshCookie);
 
         // 클라이언트의 특정 URL로 리디렉트
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/")).build();
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/KakaoLogin")).build();
     }
 
     

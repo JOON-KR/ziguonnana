@@ -118,6 +118,8 @@ public class PoseService {
 	        log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, pose);
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
 	                Response.ok(CommandType.POSE_RESULT, pose));
+	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
+	        		Response.ok(CommandType.POSE_ROUND, room.getCycle()));
 	    }
 
 	    // 6번 하고나면
