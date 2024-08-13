@@ -171,8 +171,8 @@ public class S3Util {
                 int green = (pixel >> 8) & 0xff;
                 int blue = pixel & 0xff;
 
-                // 만약 픽셀이 투명하지 않고 색상이 있다면 해당 좌표를 포지션으로 저장
-                if (red != 255 || green != 255 || blue != 255) {
+                // 검은색 픽셀만 해당 좌표를 포지션으로 저장 (검은색은 RGB 모두 0)
+                if (red == 0 && green == 0 && blue == 0) {
                     points.add(new Position(x, y));
                 }
             }
@@ -180,6 +180,7 @@ public class S3Util {
 
         return points;
     }
+
 
     private File createTempFile(List<Position> points) throws IOException {
         File tempFile = File.createTempFile("pose_points", ".txt");
