@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import pickPlanet from "../../assets/images/pickPlanet.png";
 import styled from "styled-components";
 import blue from "../../assets/icons/blue.png";
-import frozen_blue from "../../assets/icons/frozen_blue.png";
 import earth from "../../assets/icons/earth.png";
 import frozen_earth from "../../assets/icons/frozen_earth.png";
 import orange from "../../assets/icons/orange.png";
@@ -14,6 +13,8 @@ import frozen_gray from "../../assets/icons/frozen_gray.png";
 import { useNavigate, useLocation, useFetcher } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../store/messageSlice";
+import nextBtn from "../../assets/icons/next_btn.png";
+import GameEndModal from "../../components/modals/GameEndModal";
 
 const Wrap = styled.div`
   width: 819px;
@@ -23,6 +24,12 @@ const Wrap = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+`;
+
+
+
+const Title = styled.h2`
+  font-size: 35px;
 `;
 
 const Planet = styled.img`
@@ -39,6 +46,32 @@ const PlanetName = styled.p`
   font-weight: bold;
 `;
 
+const BottomContainer = styled.div`
+  position: fixed;
+  bottom: 20px;
+  right: 300px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const DoneButton = styled.button`
+  padding: 10px 20px;
+  font-size: 18px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+   background-color: transparent; /* 배경을 투명하게 설정 */
+`;
+
+const NextImage = styled.img`
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+`;
+
+
 const Games = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
@@ -51,6 +84,13 @@ const Games = () => {
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [isEndModalOpen, setIsEndModalOpen] = useState(false); // 모달 상태 관리
+
+  const closeEndModal = () => {
+    setIsEndModalOpen(false);
+  };
+
 
   useEffect(() => {
     console.log("--------------------------------");
@@ -106,14 +146,14 @@ const Games = () => {
     setGameName(name);
   };
 
+  const handleNext = () => {
+    setIsEndModalOpen(true); // 버튼 클릭 시 모달 열기
+  };
+
   return (
     <Wrap>
       {/* 아바타 행성 */}
-      {!game1Status ? (
-        <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
-      ) : (
-        <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
-      )}
+      <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
 
       <PlanetName style={{ left: "83px", bottom: "75px" }}>아바타</PlanetName>
       {/* 몸으로 말해요 행성 */}
@@ -138,9 +178,7 @@ const Games = () => {
           src={frozen_red}
           style={{
             left: "375px",
-            bottom: "80px",
-            width: "106px",
-            height: "120px",
+            bottom: "80px"
           }}
         />
       ) : (
@@ -203,6 +241,14 @@ const Games = () => {
       <PlanetName style={{ right: "10px", bottom: "95px" }}>
         숏폼 챌린지
       </PlanetName>
+
+      <BottomContainer>
+        <DoneButton onClick={handleNext}>게임 끝내기</DoneButton>
+        <NextImage src={nextBtn} alt="Next" onClick={handleNext} />
+      </BottomContainer>
+
+      {isEndModalOpen && <GameEndModal onClose={closeEndModal} />}
+
     </Wrap>
   );
 };
