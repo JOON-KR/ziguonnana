@@ -1,6 +1,8 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { setGame2Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   display: flex;
@@ -40,6 +42,32 @@ const ResultDetail = styled.p`
 const Game2Result = () => {
   const location = useLocation();
   const { correctCnt, durationTime } = location.state;
+  const client = useSelector((state) => state.client.stompClient);
+  const roomId = useSelector((state) => state.room.roomId);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame2Finish());
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+
+      client.send(`/app/game/${roomId}/art-start`);
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId]);
 
   return (
     <Wrap>
@@ -47,6 +75,13 @@ const Game2Result = () => {
         <ResultText>게임 결과</ResultText>
         <ResultDetail>맞춘 개수: {correctCnt}</ResultDetail>
         <ResultDetail>소요된 시간: {durationTime}초</ResultDetail>
+        <button
+          onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        >
+          games로 이동
+        </button>
       </ResultContainer>
     </Wrap>
   );

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/icons/game2nana.png";
 import OpenViduSession from "../../components/OpenViduSession";
-import { setGame1Finish, setGame2Finish } from "../../store/resultSlice";
+import { setGame2Finish } from "../../store/resultSlice";
 import { log } from "@tensorflow/tfjs";
 
 const Wrap = styled.div`
@@ -156,6 +156,22 @@ const Game2 = () => {
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
+<<<<<<< HEAD
+=======
+  const [isEnded, setIsEnded] = useState(false);
+
+  useEffect(() => {
+    if (explainerNo === userNo) {
+      setIsExplainer(true);
+      setExplainerNo(userNo);
+    } else {
+      setIsExplainer(false);
+    }
+    console.log("userNo: ", userNo);
+    console.log("explainerNo: ", explainerNo);
+    console.log("isExplainer:", isExplainer);
+  }, [userNo, explainerNo, client, roomId, subscribed]);
+>>>>>>> develop-front
 
   // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
 
@@ -213,6 +229,12 @@ const Game2 = () => {
         ) {
           setDurationTime(parsedMessage.data.durationTime);
           console.log("진행 시간 : ", parsedMessage.data.durationTime);
+          dispatch(setGame2Finish());
+          setIsEnded(true);
+
+          setTimeout(() => {
+            navigate("/games");
+          }, 3000);
         }
       });
 
@@ -254,7 +276,6 @@ const Game2 = () => {
         //   setRound(parsedMessage.data.round);
         // }
 
-
         // 서버에서 결과가 도착하면 처리
         if (parsedMessage.commandType === "BODYGAME_RESULT") {
           setResultData(parsedMessage.data);
@@ -276,12 +297,12 @@ const Game2 = () => {
       // isExplainer 초기화
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
-      console.log("키워드 요청요청요청")
+      console.log("키워드 요청요청요청");
     }
     if (round === 7) {
       // 게임 종료 로직
       setIsGameEnded(true);
-    } 
+    }
   }, [round, client, isGameStarted, roomId]);
 
   useEffect(() => {
@@ -292,7 +313,7 @@ const Game2 = () => {
       console.log("로컬 스트림이 설정되지 않았습니다.");
     }
   }, [localStream, explainerNo, userNo]);
-  
+
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -314,8 +335,6 @@ const Game2 = () => {
       }
     }
   }, [subscribers, explainerNo, userNo]);
-  
-  
 
   // 타이머 로직
   useEffect(() => {
@@ -438,6 +457,12 @@ const Game2 = () => {
           <HeaderContainer>
             <Header>{round + 1} 라운드 - 맞추는 사람</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
+
+            {isEnded && (
+              <h1 style={{ fontSize: "50px" }}>
+                게임 종료, 3초 뒤 이동합니다.{" "}
+              </h1>
+            )}
           </HeaderContainer>
           <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
           {/* <h1>출제자 화면 출력</h1> */}

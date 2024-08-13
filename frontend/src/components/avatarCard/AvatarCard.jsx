@@ -7,13 +7,14 @@ const Wrap = styled.div`
   align-items: center;
   background-color: #e5faff;
   border-radius: 12px;
-  padding: 10px;
+  padding: 20px;
   width: 300px;
   height: 110px;
   background-image: url(${pc});
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  margin: 30px;
 `;
 
 const TextWrap = styled.div`
@@ -48,18 +49,19 @@ const Feature = styled.h2`
   margin-right: 10px; /* 각 키워드 간 간격 추가 */
 `;
 
-const AvatarCard = ({ avatarImage, nickname, features = [""] }) => { // 기본값을 빈 배열로 설정
+const AvatarCard = ({ avatarImage, nickname, features = [] }) => { // 기본값을 빈 배열로 설정
+
   return (
     <Wrap>
       {/* 이미지 */}
-      <Image src={avatarImage} alt="avatar" />
+      <Image src={avatarImage} />
       <TextWrap>
         {/* 닉네임 */}
         <Nickname>{nickname}</Nickname>
         {/* 키워드 리스트 */}
         <Features>
           {features.map((feature, index) => (
-            <Feature key={index}># {feature}</Feature> // 각 키워드를 해시태그로 출력
+            <Feature key={index}>#{feature}</Feature> // 각 키워드를 해시태그로 출력
           ))}
         </Features>
       </TextWrap>

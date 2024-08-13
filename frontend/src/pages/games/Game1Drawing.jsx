@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
+import AvatarCard from "../../components/avatarCard/AvatarCard";
+import { setGame1Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   width: 100%;
@@ -29,6 +31,11 @@ const Header = styled.div`
 const HeaderText = styled.h1`
   margin: 7px;
   color: black;
+  font-size: 27px;
+`;
+
+const Text = styled.h1`
+  margin: 12px;
   font-size: 27px;
 `;
 
@@ -152,6 +159,8 @@ const Game1Drawing = () => {
   const client = useSelector((state) => state.client.stompClient);
   const [isStarted, setIsStarted] = useState(false);
   const navigate = useNavigate();
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -160,6 +169,11 @@ const Game1Drawing = () => {
         (message) => {
           const parsedMessages = JSON.parse(message.body);
 
+          if (parsedMessages.commandType === "AVATAR_CARD") {
+            // AvatarCard
+            setAvatarCards(parsedMessages.data[userNo]);
+            console.log(parsedMessages.data[userNo]);
+          }
           if (parsedMessages.commandType === "ART_RELAY") {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
@@ -175,6 +189,9 @@ const Game1Drawing = () => {
             setDrawingResult(parsedMessages.data);
           } else if (parsedMessages.commandType === "ART_CYCLE") {
             canvasRef.current.clearCanvas();
+          } else if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame1Finish());
+            navigate("/icebreaking/games");
           }
         }
       );
@@ -363,87 +380,100 @@ const Game1Drawing = () => {
   };
   return (
     <Wrap>
-      <Header>
-        <ProfileInfo>
-          <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-          <ProfileDetails>
-            {!isGameEnded ? (
-              <>
-                <h1>{targetUser}님 그리는중~~</h1>
-                <h1>{currentUser}님이 그릴 차례</h1>
-                <h1>키워드 : {keyword}</h1>
-              </>
-            ) : (
-              <h1>이어그리기 종료!</h1>
-            )}
-          </ProfileDetails>
-        </ProfileInfo>
-        {!isGameEnded ? (
-          <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-        ) : (
+      {isGameEnded ? (
+        <>
+          <Text>이어그리기가 종료되었습니다.</Text>
+          <h1>당신의 아바타 명함이 제작되었습니다 :)</h1>
+          <AvatarCard
+            avatarImage={avatarCards.avatarImage}
+            nickname={avatarCards.nickname}
+            features={avatarCards.features}
+          />
           <button
             onClick={() => {
-              navigate("/icebreaking/games");
+              client.send(`/app/game/${roomId}/game-select`);
             }}
           >
             다른 게임들 보러가기
           </button>
-        )}
-      </Header>
-      <CanvasWrapper onMouseUp={handleMouseUp}>
-        <ReactSketchCanvas
-          ref={canvasRef}
-          width="970px"
-          height="600px"
-          strokeColor={isEraser ? "#FFFFFF" : brushColor}
-          strokeWidth={brushRadius}
-          eraserWidth={isEraser ? brushRadius : 0}
-          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
-        />
-        <ToolsWrapper>
-          <CustomSwatchesPicker>
-            {colors.map((color) => (
-              <ColorSquare
-                key={color}
-                color={color}
-                selected={brushColor === color}
-                onClick={() => handleColorChange(color)}
+          {/* gameRecord에서 가져오기 */}
+          {/* <ButtonContainer onClick={handleRecordDetail}>
+            <ButtonText>게임상세</ButtonText>
+            <IconImage src={recordBtn} alt="gameRecordBtn" />
+          </ButtonContainer> */}
+        </>
+      ) : (
+        <>
+          <Header>
+            <ProfileInfo>
+              <ProfileImage
+                src="path/to/profile-image.png"
+                alt="프로필 이미지"
               />
-            ))}
-          </CustomSwatchesPicker>
-          <SliderWrapper>
-            <SliderLabel>펜 굵기</SliderLabel>
-            <Slider
-              type="range"
-              min="1"
-              max="20"
-              value={brushRadius}
-              onChange={(e) => setBrushRadius(e.target.value)}
+              <ProfileDetails>
+                <h1>{targetUser}님 그리는중~~</h1>
+                <h1>{currentUser}님이 그릴 차례</h1>
+                <h1>키워드 : {keyword}</h1>
+              </ProfileDetails>
+            </ProfileInfo>
+            <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
+          </Header>
+          <CanvasWrapper onMouseUp={handleMouseUp}>
+            <ReactSketchCanvas
+              ref={canvasRef}
+              width="970px"
+              height="600px"
+              strokeColor={isEraser ? "#FFFFFF" : brushColor}
+              strokeWidth={brushRadius}
+              eraserWidth={isEraser ? brushRadius : 0}
+              style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
             />
-          </SliderWrapper>
-          <ToolButton
-            onClick={() => setIsEraser(false)}
-            active={!isEraser}
-            disabled={!(userNo == currentUser)}
-          >
-            펜
-          </ToolButton>
-          <ToolButton
-            onClick={() => setIsEraser(true)}
-            active={isEraser}
-            disabled={!(userNo == currentUser)}
-          >
-            지우개
-          </ToolButton>
-          <Timer>{formatTime(timeLeft)}</Timer>
-        </ToolsWrapper>
-      </CanvasWrapper>
-      {drawingResult && (
+            <ToolsWrapper>
+              <CustomSwatchesPicker>
+                {colors.map((color) => (
+                  <ColorSquare
+                    key={color}
+                    color={color}
+                    selected={brushColor === color}
+                    onClick={() => handleColorChange(color)}
+                  />
+                ))}
+              </CustomSwatchesPicker>
+              <SliderWrapper>
+                <SliderLabel>펜 굵기</SliderLabel>
+                <Slider
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={brushRadius}
+                  onChange={(e) => setBrushRadius(e.target.value)}
+                />
+              </SliderWrapper>
+              <ToolButton
+                onClick={() => setIsEraser(false)}
+                active={!isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                펜
+              </ToolButton>
+              <ToolButton
+                onClick={() => setIsEraser(true)}
+                active={isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                지우개
+              </ToolButton>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </ToolsWrapper>
+          </CanvasWrapper>
+        </>
+      )}
+      {/* {drawingResult && (
         <div>
-          <h2>이어그리기 종료 결과</h2>
+          <Text>이어그리기 종료 결과</Text>
           <img src={drawingResult} alt="Drawing Result" />
         </div>
-      )}
+      )} */}
     </Wrap>
   );
 };

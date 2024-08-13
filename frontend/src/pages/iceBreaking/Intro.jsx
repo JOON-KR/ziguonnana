@@ -51,20 +51,25 @@ const Introduce = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const audioRef = useRef(null); // 오디오를 참조하기 위한 useRef
-  const [gameName, setGameName] = useState(""); 
+  const [gameName, setGameName] = useState("");
 
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const parsedMessage = JSON.parse(message.body);
-        const cmd = parsedMessage.commandType;
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          const cmd = parsedMessage.commandType;
 
-        if (cmd === "GAME_MODAL_START") {
-          skipIntro();
+          if (cmd === "GAME_MODAL_START") {
+            skipIntro();
+          } else if (parsedMessage.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games/game1");
+          }
+
+          console.log("키워드 타입 :", parsedMessage);
         }
-
-        console.log("키워드 타입 :", parsedMessage);
-      });
+      );
 
       return () => {
         if (subscription) {
@@ -92,13 +97,13 @@ const Introduce = () => {
     return () => clearTimeout(timer);
   }, []);
 
-    //한번만 보내야됨
-    useEffect(() => {
-      if (gameName !== "") {
-        client.send(`/app/game/${roomId}/game-start/${gameName}`);
-        console.log(`게임 선택 메시지 전송: ${gameName}`);
-      }
-    }, [gameName, client, roomId]);
+  //한번만 보내야됨
+  useEffect(() => {
+    if (gameName !== "") {
+      client.send(`/app/game/${roomId}/game-start/${gameName}`);
+      console.log(`게임 선택 메시지 전송: ${gameName}`);
+    }
+  }, [gameName, client, roomId]);
 
   const handleGameSelect = (name) => {
     setGameName(name);
@@ -135,7 +140,7 @@ const Introduce = () => {
           src={firstGame}
           onClick={() => {
             // handleGameSelect("AVATAR");
-            navigate("/icebreaking/games/game1Nickname");
+            client.send(`/app/game/${roomId}/game-select`);
           }}
           alt="First Game"
         />
