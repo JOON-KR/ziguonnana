@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
-import Game1Avata from "../games/Game1Avata"
+import AvatarCard from "../../components/avatarCard/AvatarCard";
 
 const Wrap = styled.div`
   width: 100%;
@@ -158,6 +158,7 @@ const Game1Drawing = () => {
   const client = useSelector((state) => state.client.stompClient);
   const [isStarted, setIsStarted] = useState(false);
   const navigate = useNavigate();
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   useEffect(() => {
     if (client && client.connected) {
@@ -165,7 +166,12 @@ const Game1Drawing = () => {
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessages = JSON.parse(message.body);
-
+          
+          if (parsedMessages.commandType === "AVATAR_CARD") {
+            // AvatarCard
+            setAvatarCards(parsedMessages.data[userNo]);
+            console.log(parsedMessages.data[userNo])
+          }
           if (parsedMessages.commandType === "ART_RELAY") {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
@@ -372,6 +378,12 @@ const Game1Drawing = () => {
       {isGameEnded ? (
         <>
           <Text>이어그리기가 종료되었습니다.</Text>
+          <h1>당신의 아바타 명함이 제작되었습니다 :)</h1>
+            <AvatarCard
+              avatarImage={avatarCards.avatarImage}
+              nickname={avatarCards.nickname}
+              features={avatarCards.features}
+            />
           <button
             onClick={() => {
               navigate("/icebreaking/games");
@@ -379,6 +391,11 @@ const Game1Drawing = () => {
           >
             다른 게임들 보러가기
           </button>
+          {/* gameRecord에서 가져오기 */}
+          {/* <ButtonContainer onClick={handleRecordDetail}>
+            <ButtonText>게임상세</ButtonText>
+            <IconImage src={recordBtn} alt="gameRecordBtn" />
+          </ButtonContainer> */}
         </>
       ) : (
         <>
@@ -443,12 +460,12 @@ const Game1Drawing = () => {
           </CanvasWrapper>
         </>
       )}
-      {drawingResult && (
+      {/* {drawingResult && (
         <div>
           <Text>이어그리기 종료 결과</Text>
           <img src={drawingResult} alt="Drawing Result" />
         </div>
-      )}
+      )} */}
     </Wrap>
   );
 };
