@@ -9,7 +9,6 @@ import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import axiosInstance from "../../api/axiosInstance";
 
 // 전체 래퍼 스타일 설정
 const Wrap = styled.div`
@@ -34,6 +33,14 @@ const ProfileWrap = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
+  margin: 0 40px;
+`;
+
+// 버튼 래퍼 스타일 설정
+const ButtonWrap = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
   margin: 0 40px;
 `;
 
@@ -91,8 +98,8 @@ const CopyButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   padding: 8px 12px;
-  margin-left: 13px;
-  // margin-top: 10px;
+  margin-left: 18px;
+  margin-bottom: 14px;
   background-color: #00ffff;
   color: #54595E;
   border: none;
@@ -105,27 +112,15 @@ const CopyButton = styled.button`
 `;
 
 const ProfilePick = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  // const { roomId, openviduToken } = location.state || {};
   const userNo = useSelector((state) => state.auth.userNo);
-  const memberId = useSelector((state) => state.memberId);
-  const openviduToken = useSelector((state) => state.auth.openViduToken);
   const roomId = useSelector((state) => state.room.roomId);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const client = useSelector((state) => state.client.stompClient);
-
-  // console.log("ProfilePick: Room ID:", roomId);
-  // console.log("ProfilePick: OpenVidu Token:", openviduToken);
-
-  const token = localStorage.getItem("accessToken");
 
   const [profiles, setProfiles] = useState([]);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
     useState(false);
   const [gameProfile, setGameProfile] = useState(null);
 
-  const hasMountedRef = useRef(false);
   const stompClientRef = useRef(null);
 
   useEffect(() => {
@@ -233,10 +228,12 @@ const ProfilePick = () => {
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
-      <SubTitle>
-        방 참여 코드 : {roomId}
+      <ButtonWrap>
+        <SubTitle>
+          방 참여 코드 : {roomId}
+        </SubTitle>
         <CopyButton onClick={handleCopyRoomId}>복사</CopyButton>
-      </SubTitle>
+      </ButtonWrap>
 
       <ProfilesContainer>
         {isLoggedIn &&
