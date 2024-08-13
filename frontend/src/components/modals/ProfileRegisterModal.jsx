@@ -202,7 +202,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
       <ModalWrap onClick={(e) => e.stopPropagation()}>
         <Title>프로필에 등록할 정보를 입력하세요.</Title>
         <ProfileWrapper>
-          <ProfileImageWrapper
+          {/* <ProfileImageWrapper
             onClick={() => document.getElementById("imageInput").click()}
           >
             <ProfileImage src={profileImage} alt="Profile" />
@@ -212,7 +212,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
               accept="image/*"
               onChange={handleImageChange}
             />
-          </ProfileImageWrapper>
+          </ProfileImageWrapper> */}
           <NameWrapper>
             <Label>이름</Label>
             <InputField
