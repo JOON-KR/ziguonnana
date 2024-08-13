@@ -47,9 +47,11 @@ public class AnswerService {
 		room.countUp();
 		if (room.getCount() == room.getPeople()) {
 			log.info("자기소개 문답 people수만큼 people: " + room.getCount());
+			messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_START, true));
 			room.countInit();
 			room.cycleInit();
-			nextGame(roomId);
+			log.info("ART_START 전송 " );
+//			nextGame(roomId);
 		}
 		log.info("player 정보 업데이트 player : " + player);
 		log.info("자기소개 답변 업데이트 room : " + rooms);
