@@ -154,7 +154,9 @@ const Game2 = () => {
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
   const [isGameEnded, setIsGameEnded] = useState(false);
+  const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
+
 
   useEffect(() => {
     if (explainerNo === userNo) {
@@ -258,8 +260,19 @@ const Game2 = () => {
         //   setIsExplainer(false);
         //   setRound(parsedMessage.data.round);
         // }
-      });
 
+
+        // 서버에서 결과가 도착하면 처리
+        if (parsedMessage.commandType === "BODYGAME_RESULT") {
+          setResultData(parsedMessage.data);
+          navigate("/icebreaking/games/game2result", {
+            state: {
+              correctCnt: parsedMessage.data.correctCnt,
+              durationTime: parsedMessage.data.durationTime,
+            },
+          });
+        }
+      });
       setSubscribed(true);
     }
   }, [client, roomId, userNo, subscribed, explainerNo]);
@@ -276,16 +289,18 @@ const Game2 = () => {
     if (round === 7) {
       // 게임 종료 로직
       setIsGameEnded(true);
-    }
+    } 
   }, [round, client, isGameStarted, roomId]);
 
   useEffect(() => {
     if (localStream && userVideoRef.current && explainerNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+    } else {
+      console.log("로컬 스트림이 설정되지 않았습니다.");
     }
   }, [localStream, explainerNo, userNo]);
-
+  
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -302,25 +317,27 @@ const Game2 = () => {
           "서브스크립션 스트림이 비디오 요소에 설정되었습니다.",
           subscriber.stream
         );
+      } else {
+        console.log("적절한 구독자를 찾을 수 없습니다.");
       }
     }
   }, [subscribers, explainerNo, userNo]);
+  
+  
 
   // 타이머 로직
   useEffect(() => {
-    if (!isGameEnded) {
-      if (timeLeft > 0) {
-        const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
-        // } else { // 타이머 끝나면
-        // if (isStarted) {
-        //   // axios 보낼 로직
-        // }
+    if (!isGameEnded && timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0) {
+      if (client && client.connected) {
+        client.send(`/app/game/${roomId}/bodyTalk/timeover`, {}, {});
       }
     }
-  }, [timeLeft]);
+  }, [timeLeft, client, roomId, isGameEnded]);
 
   // 타이머 포맷
   const formatTime = (time) => {
@@ -413,7 +430,13 @@ const Game2 = () => {
             }
             word={`제시어 : ${receivedKeyword}`}
           />
-          <Image src={bigNana} />
+          <VideoWrapper>
+            {explainerNo === userNo ? (
+              <UserVideo ref={userVideoRef} autoPlay muted />
+            ) : (
+              <UserVideo ref={subscriberVideoRef} autoPlay muted />
+            )}
+          </VideoWrapper>
           <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
           <h1>마이크는 꺼집니다.</h1>
         </>
