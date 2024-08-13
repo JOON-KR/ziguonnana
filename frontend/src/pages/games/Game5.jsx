@@ -137,39 +137,55 @@ const Game5 = () => {
     setIsModalOpen(false);
   };
 
-
   //모달 닫는 요청
   const handleRedBtnClick = () => {
     if (client && client.connected) {
-      client.send(`/app/game/${roomId}/start-modal/SHORTS`, {}, JSON.stringify({ command: "GAME_MODAL_START" }));
-      console.log(`GAME_MODAL_START 메시지를 전송했습니다: /app/game/${roomId}/start-modal/SHORTS`);
+      client.send(
+        `/app/game/${roomId}/start-modal/SHORTS`,
+        {},
+        JSON.stringify({ command: "GAME_MODAL_START" })
+      );
+      console.log(
+        `GAME_MODAL_START 메시지를 전송했습니다: /app/game/${roomId}/start-modal/SHORTS`
+      );
     }
   };
 
   // 모달 닫는 응답
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("서버로부터 받은 메시지:", response);
-  
-        if (response.commandType === "GAME_MODAL_START" && response.data === "SHORTS") {
-          setIsGuideModalOpen(false);
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const response = JSON.parse(message.body);
+          console.log("서버로부터 받은 메시지:", response);
+
+          if (
+            response.commandType === "GAME_MODAL_START" &&
+            response.data === "SHORTS"
+          ) {
+            setIsGuideModalOpen(false);
+          }
         }
-      });
-  
+      );
+
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [client, roomId, navigate]);
-  
-  
+
   // 비디오 선택 시 메시지 전송
   const handleSelectVideo = () => {
     if (client && client.connected) {
-      client.send(`/app/game/${roomId}/shorts/${selectedVideoId}`, {}, JSON.stringify({ command: "VIDEO_SELECTED" }));
-      console.log(`숏츠 선택 메시지를 전송했습니다: /app/game/${roomId}/shorts/${selectedVideoId}`);
+      client.send(
+        `/app/game/${roomId}/shorts/${selectedVideoId}`,
+        {},
+        JSON.stringify({ command: "VIDEO_SELECTED" })
+      );
+      console.log(
+        `숏츠 선택 메시지를 전송했습니다: /app/game/${roomId}/shorts/${selectedVideoId}`
+      );
     }
     setIsModalOpen(false);
   };
@@ -177,20 +193,25 @@ const Game5 = () => {
   // 비디오 선택 응답
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const response = JSON.parse(message.body);
-        console.log("서버로부터 받은 메시지:", response);
-        if (response.commandType === "SHORTS_CHOICE" && response.message === "SUCCESS") {
-          navigate("/icebreaking/games/game5Dance");
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const response = JSON.parse(message.body);
+          console.log("서버로부터 받은 메시지:", response);
+          if (
+            response.commandType === "SHORTS_CHOICE" &&
+            response.message === "SUCCESS"
+          ) {
+            navigate("/icebreaking/games/game5Dance");
+          }
         }
-      });
+      );
 
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [client, roomId, navigate]);
-
 
   const updateTime = () => {
     if (videoRef.current) {
@@ -224,11 +245,12 @@ const Game5 = () => {
           planetWidth="180px"
           RedBtnText={"댄스 챌린지"}
           RedBtnFn={handleRedBtnClick}
-          modalText={<>
-            숏폼 챌린지에 오신걸 환영합니다 ! <br />
-            챌린지 영상을 한 가지 선택 후, <br />
-            릴레이로 영상을 완성해봅시다!
-          </>
+          modalText={
+            <>
+              숏폼 챌린지에 오신걸 환영합니다 ! <br />
+              챌린지 영상을 한 가지 선택 후, <br />
+              릴레이로 영상을 완성해봅시다!
+            </>
           }
         />
       )}
@@ -236,14 +258,34 @@ const Game5 = () => {
         <>
           <StyledH2>챌린지 영상 선택</StyledH2>
           <VideoContainer>
-            <ThumbnailWrapper onClick={() => handleThumbnailClick(1, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4")}>
+            <ThumbnailWrapper
+              onClick={() =>
+                handleThumbnailClick(
+                  1,
+                  "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4"
+                )
+              }
+            >
               <StyledVideo>
-                <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4" type="video/mp4" />
+                <source
+                  src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/1/d569de89-1489-41e4-9801-006f8ee93b41.mp4"
+                  type="video/mp4"
+                />
               </StyledVideo>
             </ThumbnailWrapper>
-            <ThumbnailWrapper onClick={() => handleThumbnailClick(2, "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4")}>
+            <ThumbnailWrapper
+              onClick={() =>
+                handleThumbnailClick(
+                  2,
+                  "https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4"
+                )
+              }
+            >
               <StyledVideo>
-                <source src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4" type="video/mp4" />
+                <source
+                  src="https://ziguonnana.s3.ap-northeast-2.amazonaws.com/exampleShorts/2/ef2c8d08-b9b1-4abd-8967-21601d5ebf9f.mp4"
+                  type="video/mp4"
+                />
               </StyledVideo>
             </ThumbnailWrapper>
           </VideoContainer>
@@ -261,7 +303,9 @@ const Game5 = () => {
               <source src={videoSrc} type="video/mp4" />
               브라우저가 동영상을 지원하지 않습니다.
             </StyledVideo>
-            <TimeDisplay>재생 시간: {currentTime} / 전체 시간: {duration}</TimeDisplay>
+            <TimeDisplay>
+              재생 시간: {currentTime} / 전체 시간: {duration}
+            </TimeDisplay>
             <ButtonBox>
               <CloseButton onClick={handleCloseModal}>닫기</CloseButton>
               <SelectButton onClick={handleSelectVideo}>선택</SelectButton>
