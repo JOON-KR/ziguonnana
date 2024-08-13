@@ -6,12 +6,16 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import earth from "../../assets/icons/earth.png";
 
 const Wrap = styled.div`
-  width: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 `;
 
 const StyledH2 = styled.h2`

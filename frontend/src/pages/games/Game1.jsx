@@ -1,187 +1,518 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
-import GameModal from "../../components/modals/GameModal";
-import GameInfoModal from "../../components/modals/GameInfoModal";
-import IntroductionGuideModal from "../../components/modals/IntroductionGuideModal";
-import IntroductionModal from "../../components/modals/IntroductionModal";
-import blue from "../../assets/icons/blue.png";
+import { ReactSketchCanvas } from "react-sketch-canvas";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { setDrawingData } from "../../store/drawingSlice";
-import Game1Drawing from "./Game1Drawing";
+import AvatarCard from "../../components/avatarCard/AvatarCard";
+import { setGame1Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
-  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
+  width: 100%;
+  height: 100vh;  /* Use entire viewport height */
+  padding: 20px; /* Add padding if needed */
+  box-sizing: border-box;
+`;
+
+const Header = styled.div`
+  width: 100%; /* Full width */
+  padding: 10px;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center the content */
+  align-items: center;
+  box-sizing: border-box;
+`;
+
+const Text = styled.h1`
+  margin: 12px;
+  font-size: 27px;
   text-align: center;
 `;
 
-// 자기소개 문답 모달 & 이어그리기 페이지 (Drawing)
-const Game1 = () => {
-  const [isIntroGuideModalOpen, setIsIntroGuideModalOpen] = useState(true); // IntroductionWelcomeModal 상태
-  const [isIntroModalOpen, setIsIntroModalOpen] = useState(false); // IntroductionModal 상태
-  const [isDrawingWelcomeModalOpen, setIsDrawingWelcomeModalOpen] =
-    useState(false); // DrawingWelcomeModal 상태
-  const [isDrawingGuideModalOpen, setIsDrawingGuideModalOpen] = useState(false); // DrawingGuideModal 상태
-  const [error, setError] = useState(""); // 에러 메시지 상태
+const DrawingText = styled.h1`
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 24px;
+  text-align: center;
+`;
+
+const HighlightText = styled.span`
+  font-size: 24px;
+  color: #10D7CB;
+`;
+
+const InfoBox = styled.div`
+  margin-bottom: 12px;
+`;
+
+const CanvasWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 80%;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ToolsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* Adjust spacing between tools */
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+`;
+
+const ToolButton = styled.button`
+  background-color: ${(props) => (props.active ? "#58fff5" : "#ccc")};
+  font-size: 19px;
+  font-weight: bold;
+  color: #54595E;
+  width: 80px;
+  height: 40px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  margin-top: 20px;
+`;
+
+const SliderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 10px;
+`;
+
+const SliderLabel = styled.label`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: black;
+`;
+
+const Slider = styled.input`
+  width: 100px;
+`;
+
+const Timer = styled.div`
+  width: 200px;
+  height: 50px;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  background: #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  flex-direction: row;
+`;
+
+const ProfileDetails = styled.div`
+  text-align: center;
+`;
+
+const CustomSwatchesPicker = styled.div`
+  display: grid;
+  grid-template-columns: repeat(11, 24px);
+  grid-gap: 4px;
+  margin: 10px 20px;
+`;
+
+const ColorSquare = styled.div`
+  width: 24px;
+  height: 24px;
+  background-color: ${(props) => props.color};
+  cursor: pointer;
+  border: ${(props) => (props.selected ? "2px solid #000" : "none")};
+`;
+
+const AvatarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin-top: 150px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const AvatarTitle = styled.h1`
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: white;
+`;
+
+const Game1Drawing = () => {
+  const [brushColor, setBrushColor] = useState("#000000");
+  const [brushRadius, setBrushRadius] = useState(5);
+  const [isEraser, setIsEraser] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(8);
+  const [targetUser, setTargetUser] = useState(0);
+  const [currentUser, setCurrentUser] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [drawingResult, setDrawingResult] = useState(null);
+  const [isGameEnded, setIsGameEnded] = useState(false);
+  const [lastSentPaths, setLastSentPaths] = useState([]);
+  const [isStarted, setIsStarted] = useState(false);
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+
+  const canvasRef = useRef(null);
+  const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("--------------------------------");
-    console.log("연결 상태 : ", client.connected);
-    console.log("--------------------------------");
     if (client && client.connected) {
       const subscription = client.subscribe(
         `/topic/game/${roomId}`,
         (message) => {
-          const parsedMessage = JSON.parse(message.body);
-          // console.log("게임 종류 선택 메시지:", parsedMessage);
+          const parsedMessages = JSON.parse(message.body);
 
-          const cmd = parsedMessage.commandType;
-          const data = parsedMessage.data;
-
-          console.log("닫기 요청 데이터1 ", parsedMessage);
-          console.log("닫기 요청 데이터2 ", data);
-
-          if (data == "SAME_POSE") {
-            setIsDrawingWelcomeModalOpen(false);
-            setIsDrawingGuideModalOpen(false);
-          } else if (cmd == "GAME_MODAL_START") {
-            // setIsIntroGuideModalOpen(false);
-            openIntroModal();
+          if (parsedMessages.commandType === "AVATAR_CARD") {
+            // AvatarCard
+            setAvatarCards(parsedMessages.data[userNo]);
+            console.log(parsedMessages.data[userNo]);
           }
-          if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
-            // 데이터 받아와서 Redux 상태 업데이트
-            dispatch(setDrawingData(data));
-            // art 데이터 캔버스에 그리기
-            navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
-            //모달 닫기
-            setIsDrawingWelcomeModalOpen(false);
-            setIsDrawingGuideModalOpen(false);
+          if (parsedMessages.commandType === "ART_RELAY") {
+            setTargetUser(parsedMessages.data.targetUser);
+            setCurrentUser(parsedMessages.data.currentUser);
+            setKeyword(parsedMessages.data.keyword);
+            setTimeLeft(8);
+            setIsStarted(true);
+          } else if (parsedMessages.commandType === "DRAW_PREV") {
+            canvasRef.current.loadPaths(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_END") {
+            setIsGameEnded(true);
+            setCurrentUser(0);
+            canvasRef.current.clearCanvas();
+            setDrawingResult(parsedMessages.data);
+          } else if (parsedMessages.commandType === "ART_CYCLE") {
+            canvasRef.current.clearCanvas();
+          } else if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame1Finish());
+            navigate("/icebreaking/games");
           }
         }
       );
+
+      client.send(`/app/game/${roomId}/art-start`);
+
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [client, roomId]);
 
-  // IntroductionGuideModal 닫고 IntroductionModal 열기
-  const openIntroModal = () => {
-    console.log("Opening Introduction Modal");
-    setIsIntroGuideModalOpen(false);
-    setIsIntroModalOpen(true);
+  // useEffect(() => {
+  //   canvasRef.current.clearCanvas();
+  // }, [targetUser]);
+
+  useEffect(() => {
+    if (!isGameEnded) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => {
+          setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        if (isStarted) {
+          handleSendDrawing();
+        }
+      }
+    }
+  }, [timeLeft]);
+
+  const handleSendDrawing = async () => {
+    const currentCanvas = canvasRef.current;
+    if (currentCanvas) {
+      const exportImage = await currentCanvas.exportImage("png");
+      const imageBlob = await (await fetch(exportImage)).blob();
+      const formData = new FormData();
+      formData.append("file", imageBlob, "drawing.png");
+
+      const response = await axios.post(`${BASE_URL}/api/v1/file`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("S3 전송해서 받은 결과 : ", response);
+
+      console.log("S3에서 받은 결과 전송!");
+      if (currentUser == userNo) {
+        client.send(
+          `/app/game/${roomId}/saveArt`,
+          {},
+          JSON.stringify(response.data)
+        );
+      }
+    }
   };
 
-  const closeIntroGuideModal = () => {
-    console.log("Closing Introduction Guide Modal");
-    setIsIntroGuideModalOpen(false);
+  const simplifyPath = (path, tolerance = 1.0) => {
+    if (!path || path.length <= 2) return path;
+
+    const sqTolerance = tolerance * tolerance;
+
+    const simplifyDPStep = (points, first, last, sqTolerance, simplified) => {
+      let maxSqDist = sqTolerance;
+      let index = null;
+
+      for (let i = first + last; i < last; i++) {
+        const sqDist = getSquareSegmentDistance(
+          points[i],
+          points[first],
+          points[last]
+        );
+
+        if (sqDist > maxSqDist) {
+          index = i;
+          maxSqDist = sqDist;
+        }
+      }
+
+      if (maxSqDist > sqTolerance) {
+        if (index - first > 1)
+          simplifyDPStep(points, first, index, sqTolerance, simplified);
+        simplified.push(points[index]);
+        if (last - index > 1)
+          simplifyDPStep(points, index, last, sqTolerance, simplified);
+      }
+    };
+
+    const getSquareDistance = (p1, p2) => {
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      return dx * dx + dy * dy;
+    };
+
+    const getSquareSegmentDistance = (p, p1, p2) => {
+      let x = p1.x;
+      let y = p1.y;
+      const dx = p2.x - x;
+      const dy = p2.y - y;
+
+      if (dx !== 0 || dy !== 0) {
+        const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+
+        if (t > 1) {
+          x = p2.x;
+          y = p2.y;
+        } else if (t > 0) {
+          x += dx * t;
+          y += dy * t;
+        }
+      }
+
+      const d2 = (p.x - x) ** 2 + (p.y - y) ** 2;
+
+      return d2;
+    };
+
+    const simplified = [path[0]];
+    simplifyDPStep(path, 0, path.length - 1, sqTolerance, simplified);
+    simplified.push(path[path.length - 1]);
+
+    return simplified;
   };
 
-  const closeIntroModal = () => {
-    console.log("Closing Introduction Modal");
-    setIsIntroModalOpen(false);
-    setIsDrawingWelcomeModalOpen(true); // 자기소개 종료 후 DrawingWelcomeModal 열기
+  const handleMouseUp = async () => {
+    if (canvasRef.current && currentUser === userNo) {
+      const currentPaths = await canvasRef.current.exportPaths();
+      const simplifiedPaths = currentPaths.map((path) => ({
+        ...path,
+        path: simplifyPath(path.path),
+      }));
+
+      const newPaths = simplifiedPaths.filter(
+        (path, index) =>
+          index >= lastSentPaths.length ||
+          JSON.stringify(path) !== JSON.stringify(lastSentPaths[index])
+      );
+
+      if (newPaths.length > 0) {
+        console.log("전송할 경로 데이터:", JSON.stringify(newPaths, null, 2)); // 전송할 데이터를 콘솔에 출력
+        client.send(
+          `/app/game/${roomId}/draw`,
+          {},
+          JSON.stringify(newPaths[newPaths.length - 1])
+        );
+        setLastSentPaths(simplifiedPaths);
+      }
+    }
   };
 
-  const openDrawingWelcomeModal = () => {
-    console.log("Opening Drawing Welcome Modal");
-    setIsIntroModalOpen(false);
-    setIsDrawingWelcomeModalOpen(true);
-  };
+  const colors = [
+    "#FF0000",
+    "#FF7F00",
+    "#FFFF00",
+    "#00FF00",
+    "#0000FF",
+    "#4B0082",
+    "#8B00FF",
+    "#000000",
+    "#FFFFFF",
+    "#A52A2A",
+    "#D2691E",
+    "#DAA520",
+    "#808000",
+    "#008000",
+    "#008080",
+    "#00FFFF",
+    "#4682B4",
+    "#00008B",
+    "#8A2BE2",
+    "#FF1493",
+    "#D3D3D3",
+    "#A9A9A9",
+  ];
 
-  const closeDrawingWelcomeModal = () => {
-    console.log("Closing Drawing Welcome Modal");
-    setIsDrawingWelcomeModalOpen(false);
+  const handleColorChange = (color) => {
+    setBrushColor(color);
+    setIsEraser(false);
   };
-
-  const closeDrawingGuideModal = () => {
-    console.log("Closing Drawing Guide Modal");
-    setIsDrawingGuideModalOpen(false);
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
-
-  // DrawingWelcomeModal 닫고 DrawingGuideModal 열기
-  const openDrawingGuideModal = () => {
-    console.log("Opening Drawing Guide Modal");
-    setIsDrawingWelcomeModalOpen(false);
-    setIsDrawingGuideModalOpen(true);
-  };
-
   return (
     <Wrap>
-      {error && <div style={{ color: "red" }}>{error}</div>}{" "}
-      {/* 에러 메시지 표시 */}
-      {/* 자기소개 가이드 모달 */}
-      {isIntroGuideModalOpen && (
-        <IntroductionGuideModal
-          // onClose={closeIntroGuideModal}
-          onConfirm={() =>
-            client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
-          }
-        />
+      {isGameEnded ? (
+        <AvatarContainer>
+          <AvatarTitle>아바타 명함이 제작되었습니다 🧚‍♀️</AvatarTitle>
+          <AvatarCard
+            avatarImage={avatarCards.avatarImage}
+            nickname={avatarCards.nickname}
+            features={avatarCards.features}
+          />
+          <ToolButton
+            onClick={() => {
+              client.send(`/app/game/${roomId}/game-select`);
+            }}
+            active={true}
+          >
+            이동
+          </ToolButton>
+        </AvatarContainer>
+      ) : (
+        <>
+          <Header>
+            <ProfileInfo>
+              <ProfileDetails>
+                <InfoBox>
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === targetUser
+                        )?.nickname
+                      }
+                    </HighlightText>
+                    님을 그려주세요.
+                  </DrawingText>
+                  <br />
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === currentUser
+                        )?.nickname                  
+                      }
+                    </HighlightText>
+                    님 차례.
+                  </DrawingText>
+                </InfoBox>
+                <DrawingText>
+                  키워드 : # {keyword} <br />
+                </DrawingText>
+              </ProfileDetails>
+            </ProfileInfo>
+          </Header>
+          <CanvasWrapper onMouseUp={handleMouseUp}>
+            <ReactSketchCanvas
+              ref={canvasRef}
+              width="970px"
+              height="600px"
+              strokeColor={isEraser ? "#FFFFFF" : brushColor}
+              strokeWidth={brushRadius}
+              eraserWidth={isEraser ? brushRadius : 0}
+              style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
+            />
+            <ToolsWrapper>
+              <CustomSwatchesPicker>
+                {colors.map((color) => (
+                  <ColorSquare
+                    key={color}
+                    color={color}
+                    selected={brushColor === color}
+                    onClick={() => handleColorChange(color)}
+                  />
+                ))}
+              </CustomSwatchesPicker>
+              <SliderWrapper>
+                <SliderLabel>펜 굵기</SliderLabel>
+                <Slider
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={brushRadius}
+                  onChange={(e) => setBrushRadius(e.target.value)}
+                />
+              </SliderWrapper>
+              <ToolButton
+                onClick={() => setIsEraser(false)}
+                active={!isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                펜
+              </ToolButton>
+              <ToolButton
+                onClick={() => setIsEraser(true)}
+                active={isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                지우개
+              </ToolButton>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </ToolsWrapper>
+          </CanvasWrapper>
+        </>
       )}
-      {/* 자기소개 모달 */}
-      {isIntroModalOpen && (
-        <IntroductionModal
-          onClose={closeIntroModal}
-          onConfirm={openDrawingWelcomeModal}
-        />
-      )}
-      {/* 이어그리기 행성 입장 */}
-      {isDrawingWelcomeModalOpen && (
-        <GameInfoModal
-          planetImg={blue}
-          RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={() => {
-            console.log("닫기 요청");
-            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          }}
-          BlueBtnText={"게임 설명"}
-          BlueBtnFn={() =>
-            // client.send(`/app/game/${roomId}/start-modal/SAME_POSE`)
-            openDrawingGuideModal()
-          }
-          modalText={"이어그리기 게임에 오신걸 환영합니다 !"}
-          // onClose={closeDrawingWelcomeModal}
-        />
-      )}
-      {isDrawingGuideModalOpen && (
-        <GameModal
-          RedBtnText={"게임 시작"}
-          // {/* 게임시작 버튼 누르면 모달 닫고 페이지에서 진행 */}
-          RedBtnFn={() => {
-            console.log("닫기 요청");
-            client.send(`/app/game/${roomId}/start-modal/SAME_POSE`);
-          }}
-          modalText={
-            <>
-              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
-              <br />
-              제한시간은 20초입니다. <br /> 잠시만 기다려주세요.
-            </>
-          }
-          // onClose={closeDrawingGuideModal}
-        />
-      )}
-      {/* 이어그리기 화면 이동 <= 수정수정 필요 : 응답데이터 오고 3초 후 Game1Drawing open */}
-      {!isIntroGuideModalOpen &&
-        !isIntroModalOpen &&
-        !isDrawingWelcomeModalOpen &&
-        !isDrawingGuideModalOpen && <Game1Drawing roomId={roomId} />}
-      {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>
-        버튼
-      </button>
+      {/* {drawingResult && (
+        <div>
+          <Text>이어그리기 종료 결과</Text>
+          <img src={drawingResult} alt="Drawing Result" />
+        </div>
+      )} */}
     </Wrap>
   );
 };
 
-export default Game1;
+export default Game1Drawing;

@@ -300,7 +300,7 @@ const Game5Dance = () => {
       </VideoContainer>
       {isButtonVisible && (
         <NextButton onClick={handleNextUser}>
-          {currentUserNo === maxNo ? "챌린지 녹화 끝내기" : "다음 팀원으로"}
+          {currentUserNo === maxNo ? "챌린지 녹화 끝내기. 잠시만 기다려주세요." : "다음 팀원으로"}
         </NextButton>
       )}
     </Container>

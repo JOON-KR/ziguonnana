@@ -9,21 +9,23 @@ import AvatarCard from "../../components/avatarCard/AvatarCard";
 import { setGame1Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
-  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
-  text-align: center;
+  width: 100%;
+  height: 100vh;  /* Use entire viewport height */
+  padding: 20px; /* Add padding if needed */
+  box-sizing: border-box;
 `;
 
 const Header = styled.div`
-  width: 90%;
+  width: 100%; /* Full width */
   padding: 10px;
   background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center; /* Center the content */
   align-items: center;
   box-sizing: border-box;
 `;
@@ -50,8 +52,8 @@ const InfoBox = styled.div`
 
 const CanvasWrapper = styled.div`
   position: relative;
-  width: 90%;
-  height: 600px;
+  width: 100%;
+  height: 80%;
   border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
@@ -61,7 +63,7 @@ const CanvasWrapper = styled.div`
 const ToolsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between; /* Adjust spacing between tools */
   align-items: center;
   width: 100%;
   padding: 10px;
@@ -110,7 +112,6 @@ const Timer = styled.div`
   background: #ccc;
   padding: 5px;
   border-radius: 5px;
-  margin: 0 20px 0 100px;
   display: flex;
   justify-content: center;
   align-items: center;
