@@ -8,15 +8,15 @@ import { useNavigate } from "react-router-dom";
 
 // 스타일드 컴포넌트 정의
 const Wrap = styled.div`
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: center;  /* 요소를 세로로 중앙 정렬 */
+  align-items: center;  /* 요소를 가로로 중앙 정렬 */
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  padding-top: 20px; /* 상단 패딩 추가 */
 `;
 
 const BubbleWrap = styled.div`
@@ -143,7 +143,7 @@ const Game1Nickname = () => {
   return (
     <Wrap>
       <BubbleWrap>
-        <SpeechBubble text={text} />
+        <SpeechBubble type={text} />
       </BubbleWrap>
       <NanaImg src={Nana} />
       <ButtonWrap>

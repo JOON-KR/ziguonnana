@@ -55,20 +55,19 @@ const UserVideo = styled.video`
   height: auto;
   border-radius: 10px;
   background-color: black;
+  transform: scaleX(-1); /* 좌우 반전 */
 `;
 
 const NextButton = styled.button`
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 18px;
-  background-color: #58FFF5;
-  color: #54595E;
+  background-color: #58fff5;
+  color: #54595e;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 `;
-
-
 
 const Game5Dance = () => {
   const roomId = useSelector((state) => state.room.roomId);
@@ -114,13 +113,21 @@ const Game5Dance = () => {
 
   // 서브 스트림 설정
   useEffect(() => {
-    if (subscribers.length > 0 && subscriberVideoRef.current && currentUserNo !== userNo) {
+    if (
+      subscribers.length > 0 &&
+      subscriberVideoRef.current &&
+      currentUserNo !== userNo
+    ) {
       const subscriber = subscribers.find(
         (sub) => sub.stream.connection.data === `{"userNo":${currentUserNo}}`
       );
       if (subscriber) {
-        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
-        console.log("서브스크립션 스트림이 비디오 요소에 설정되었습니다.", subscriber.stream);
+        subscriberVideoRef.current.srcObject =
+          subscriber.stream.getMediaStream();
+        console.log(
+          "서브스크립션 스트림이 비디오 요소에 설정되었습니다.",
+          subscriber.stream
+        );
       }
     }
   }, [subscribers, currentUserNo, userNo]);
@@ -128,7 +135,10 @@ const Game5Dance = () => {
   // 녹화할 user의 구간 예시 영상 요청
   useEffect(() => {
     if (client && client.connected) {
-      console.log("구간 영상 요청 send:", `/app/game/${roomId}/shorts/record/${currentUserNo}`);
+      console.log(
+        "구간 영상 요청 send:",
+        `/app/game/${roomId}/shorts/record/${currentUserNo}`
+      );
       client.send(`/app/game/${roomId}/shorts/record/${currentUserNo}`, {}, {});
     } else {
       console.warn("구간 영상 요청 send 부분에서 문제 발생");
@@ -138,29 +148,38 @@ const Game5Dance = () => {
   // 구독 설정 및 해제
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        try {
-          const response = JSON.parse(message.body);
-          console.log("서버로부터 받은 메시지:", response);
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          try {
+            const response = JSON.parse(message.body);
+            console.log("서버로부터 받은 메시지:", response);
 
-          if (response.commandType === "SHORTS_SPLITED" && response.message === "SUCCESS") {
-            console.log("구간 영상 응답 데이터:", response.data);
-            setCurrentUserNo(response.data.currentUserNo);
-            setMaxNo(response.data.maxNo);
-            setChallengeVideoUrl(response.data.challengeVideoUrl);
-            setVideoDuration(response.data.videoDuration || 5000);
-            setCountdown(3);
-            setIsButtonVisible(false);
-            setIsRecording(false);
-            setShouldPlayVideo(false);
-          } else if (response.commandType === "SHORTS_RECORD_END" && response.message === "SUCCESS") {
-            console.log("영상 녹화 종료 데이터:", response.data);
-            setIsRecordingComplete(true);
+            if (
+              response.commandType === "SHORTS_SPLITED" &&
+              response.message === "SUCCESS"
+            ) {
+              console.log("구간 영상 응답 데이터:", response.data);
+              setCurrentUserNo(response.data.currentUserNo);
+              setMaxNo(response.data.maxNo);
+              setChallengeVideoUrl(response.data.challengeVideoUrl);
+              setVideoDuration(response.data.videoDuration || 5000);
+              setCountdown(3);
+              setIsButtonVisible(false);
+              setIsRecording(false);
+              setShouldPlayVideo(false);
+            } else if (
+              response.commandType === "SHORTS_RECORD_END" &&
+              response.message === "SUCCESS"
+            ) {
+              console.log("영상 녹화 종료 데이터:", response.data);
+              setIsRecordingComplete(true);
+            }
+          } catch (error) {
+            console.error("메시지 처리 중 오류 발생:", error);
           }
-        } catch (error) {
-          console.error("메시지 처리 중 오류 발생:", error);
         }
-      });
+      );
 
       return () => {
         console.log("구독을 취소합니다.");
@@ -194,7 +213,10 @@ const Game5Dance = () => {
 
       recordedChunks.current = [];
       const options = { mimeType: "video/webm; codecs=vp9" };
-      const mediaRecorder = new MediaRecorder(localStream.getMediaStream(), options);
+      const mediaRecorder = new MediaRecorder(
+        localStream.getMediaStream(),
+        options
+      );
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -211,11 +233,15 @@ const Game5Dance = () => {
         formData.append("file", blob, `${roomId}_user_${currentUserNo}.webm`);
 
         axios
-          .post(`${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
+          .post(
+            `${BASE_URL}/api/v1/video/${roomId}/member/${currentUserNo}`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          )
           .then((response) => {
             console.log("녹화된 비디오 업로드 성공:", response.data);
             setIsUploadComplete(true); // 업로드 완료 상태 설정
@@ -241,7 +267,11 @@ const Game5Dance = () => {
     setIsButtonVisible(false);
     if (currentUserNo < maxNo) {
       console.log("다음 사용자로 요청을 보냅니다:", currentUserNo + 1);
-      client.send(`/app/game/${roomId}/shorts/record/${currentUserNo + 1}`, {}, {});
+      client.send(
+        `/app/game/${roomId}/shorts/record/${currentUserNo + 1}`,
+        {},
+        {}
+      );
     } else if (currentUserNo === maxNo) {
       console.log("모든 사용자가 완료되었습니다.");
       // 영상 녹화 종료 send
@@ -270,7 +300,7 @@ const Game5Dance = () => {
       </VideoContainer>
       {isButtonVisible && (
         <NextButton onClick={handleNextUser}>
-          {currentUserNo === maxNo ? "챌린지 녹화 끝내기" : "다음 팀원으로"}
+          {currentUserNo === maxNo ? "챌린지 녹화 끝내기. 잠시만 기다려주세요." : "다음 팀원으로"}
         </NextButton>
       )}
     </Container>

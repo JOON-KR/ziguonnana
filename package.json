@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^4.20.0",
     "ffmpeg": "^0.0.4",

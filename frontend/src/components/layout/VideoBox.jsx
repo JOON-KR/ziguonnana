@@ -44,7 +44,11 @@ const VideoBox = ({ index }) => {
 
   const userNo = index + 1; // 인덱스를 기반으로 유저 번호 계산
   const userNickname =
+<<<<<<< HEAD
     nicknameList.find((item) => item.num === userNo)?.nickname || "사용자 이름"; // 유저 번호에 해당하는 닉네임 찾기
+=======
+    nicknameList.find((item) => item.num === userNo)?.nickname || ""; // 유저 번호에 해당하는 닉네임 찾기
+>>>>>>> develop-front
 
   useEffect(() => {
     let assigned = false;
@@ -70,7 +74,11 @@ const VideoBox = ({ index }) => {
   return (
     <Box>
       <Video ref={videoRef} autoPlay muted />
+<<<<<<< HEAD
       <NameTag>{userNickname}</NameTag> {/* 닉네임 태그 */}
+=======
+      {userNickname && <NameTag>{userNickname}</NameTag>} {/* 닉네임 태그 */}
+>>>>>>> develop-front
     </Box>
   );
 };

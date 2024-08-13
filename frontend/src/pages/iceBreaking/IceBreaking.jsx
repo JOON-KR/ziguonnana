@@ -16,6 +16,11 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+const Wrap = styled.div`
+  
+`;
+
+
 const PageWrap = styled.div`
   width: 100%;
   height: 100%;

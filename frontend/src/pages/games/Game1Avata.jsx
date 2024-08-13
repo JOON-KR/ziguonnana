@@ -10,7 +10,7 @@ const ProfileCardContainer = styled.div`
   align-items: center;
   justify-content: center;
   position: relative; 
-  width: 700px;
+  width: 100%;
   height: auto;
 `;
 

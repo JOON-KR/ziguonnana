@@ -5,11 +5,17 @@ import styled from "styled-components";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble"; // SpeechBubble 컴포넌트 가져오기
 import red from "../../assets/icons/red.png";
 import honaldu from "../../assets/images/igudong_ex_img.png";
+<<<<<<< HEAD
 import bigNana from "../../assets/images/bigNana.png"; // 캐릭터 이미지
 import { useSelector } from "react-redux";
+=======
+import bigNana from "../../assets/images/bigNana.png";
+import { useDispatch, useSelector } from "react-redux";
+>>>>>>> develop-front
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
 import OpenViduSession from "../../components/OpenViduSession";
+import { setGame3Finish } from "../../store/resultSlice";
 
 // 메인 화면을 감싸는 컨테이너 스타일 정의
 const Wrap = styled.div`
@@ -73,6 +79,7 @@ const Game3 = () => {
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const userNo = useSelector((state) => state.auth.userNo);
 
+  const [result, setResult] = useState("");
   const [keywords, setKeywords] = useState([]);
   const [round, setRound] = useState(1);
   const videoRef = useRef(null);
@@ -89,6 +96,7 @@ const Game3 = () => {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [showStartImages, setShowStartImages] = useState(false);
   const [currentKeyword, setCurrentKeyword] = useState("");
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const subscription = client.subscribe(
@@ -97,6 +105,7 @@ const Game3 = () => {
         const parsedMessage = JSON.parse(message.body);
 
         if (parsedMessage.commandType === "IGUDONGSEONG_CYCLE") {
+<<<<<<< HEAD
           console.log("다음 라운드 시작================");
           setRound((prevRound) => prevRound + 1);
           const nextKeyword = keywords[round];
@@ -109,6 +118,28 @@ const Game3 = () => {
           }, 5000);
         } else if (parsedMessage.message === "이구동성 시작!\n") {
           console.log("이구동성 키워드 수신:", parsedMessage.data);
+=======
+          if (round < 6) {
+            setRound((prevRound) => prevRound + 1);
+            dispatch(setGame3Finish());
+            const nextKeyword = keywords[round];
+            setCurrentKeyword(nextKeyword);
+            setShowStartImages(true);
+
+            setResult(parsedMessage.data);
+
+            setTimeout(() => {
+              setShowStartImages(false);
+              setIsGameStarted(true);
+            }, 5000);
+          } else {
+            setTimeout(() => {
+              navigate("/icebreaking/games");
+            }, 3000);
+          }
+        } else if (parsedMessage.commandType === "IGUDONGSEONG_START") {
+          console.log("====키워드 받아서 설정함====", parsedMessage.data);
+>>>>>>> develop-front
           setKeywords(parsedMessage.data);
 
           const keyword = parsedMessage.data[round - 1];
@@ -122,9 +153,22 @@ const Game3 = () => {
           parsedMessage.message === "성공!\n" ||
           parsedMessage.message === "실패!\n"
         ) {
+<<<<<<< HEAD
           console.log(`결과 수신: ${parsedMessage.message}`);
           // 결과에 따라 다음 라운드로 이동
           client.send(`/app/game/${roomId}/igudongseong-cycle`);
+=======
+          setTimeout(() => {
+            if (round < 6) {
+              console.log("다음 라운드 시작까지 3초 대기중...");
+              client.send(`/app/game/${roomId}/igudongseong-cycle`);
+            } else {
+              setTimeout(() => {
+                navigate("/icebreaking/games/game4");
+              }, 3000);
+            }
+          }, 3000);
+>>>>>>> develop-front
         }
       }
     );
@@ -184,6 +228,7 @@ const Game3 = () => {
 
   return (
     <Wrap>
+      <h1>{round}</h1>
       {isIgudongseongWelcomeModalOpen && (
         <GameInfoModal
           planetImg={red}
@@ -195,7 +240,7 @@ const Game3 = () => {
       )}
       {isIgudongseongGuideModalOpen && (
         <GameModal
-          exImg={honaldu}
+          xImg={honaldu}
           RedBtnText={"다음"}
           RedBtnFn={() => setIsIgudongseongSecondGuideModalOpen(true)}
           modalText={
@@ -222,15 +267,8 @@ const Game3 = () => {
       )}
       {showStartImages && (
         <>
-          <StyledSpeechBubble
-            text={
-              <>
-                제시어: {currentKeyword}
-                <br />
-                5초 안에 포즈를 취하세요!
-              </>
-            }
-          />
+          <SpeechBubble word={keywords[round - 1]} />
+          <h1>{keywords}</h1>
           <BigNana src={bigNana} alt="캐릭터" />
         </>
       )}
@@ -243,3 +281,9 @@ const Game3 = () => {
 };
 
 export default Game3;
+
+// <>
+//   제시어: {keywords[round]}
+//   <br />
+//   5초 안에 포즈를 취하세요!
+// </>

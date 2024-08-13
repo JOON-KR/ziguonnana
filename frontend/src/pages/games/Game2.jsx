@@ -3,11 +3,13 @@ import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
 import orange from "../../assets/icons/orange.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/icons/game2nana.png";
 import OpenViduSession from "../../components/OpenViduSession";
+import { setGame2Finish } from "../../store/resultSlice";
+import { log } from "@tensorflow/tfjs";
 
 const Wrap = styled.div`
   width: 100%;
@@ -140,7 +142,7 @@ const Game2 = () => {
   const mediaRecorderRef = useRef(null);
   // const explainerNo = useSelector((state) => state.bodytalk.explainerNo);
 
-  const [round, setRound] = useState(1);
+  const [round, setRound] = useState(0);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
   const [receivedKeyword, setReceivedKeyword] = useState("");
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -151,21 +153,10 @@ const Game2 = () => {
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
   const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
-  const [isGameEnded, setIsGameEnded] = useState(false); 
-
-  useEffect(() => {
-    if (explainerNo === userNo) {
-      setIsExplainer(true);
-      setExplainerNo(userNo);
-    } else {
-      setIsExplainer(false);
-    }
-    console.log("userNo: ", userNo);
-    console.log("explainerNo: ", explainerNo);
-    console.log("isExplainer:", isExplainer);
-  }, [userNo, explainerNo, client, roomId, subscribed]);
-
-  // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
+  const [isGameEnded, setIsGameEnded] = useState(false);
+  const [resultData, setResultData] = useState(null); // 결과 데이터 저장
+  const dispatch = useDispatch();
+  const [isEnded, setIsEnded] = useState(false);
 
   const sendMessage = () => {
     if (client && client.connected) {
@@ -184,12 +175,35 @@ const Game2 = () => {
       setTypedText("");
     }
   };
-  //최초 1회 실행
+
+  //출제자 or 맞추는 사람 확인, 상태 설정
   useEffect(() => {
+    if (explainerNo === userNo) {
+      setIsExplainer(true);
+      setExplainerNo(userNo);
+    } else {
+      setIsExplainer(false);
+    }
+    console.log("userNo: ", userNo);
+    console.log("explainerNo: ", explainerNo);
+    console.log("isExplainer:", isExplainer);
+  }, [userNo, explainerNo, client, roomId, subscribed]);
+
+  useEffect(() => {
+    if (explainerNo === userNo) {
+      setIsExplainer(true);
+      setExplainerNo(userNo);
+    } else {
+      setIsExplainer(false);
+    }
+
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    console.log("유저 번호 :", userNo);
+    console.log("초기 라운드 : ", round);
+    console.log("userNo: ", userNo);
+    console.log("explainerNo: ", explainerNo);
+    console.log("isExplainer:", isExplainer);
 
     if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
@@ -214,6 +228,12 @@ const Game2 = () => {
         ) {
           setDurationTime(parsedMessage.data.durationTime);
           console.log("진행 시간 : ", parsedMessage.data.durationTime);
+          dispatch(setGame2Finish());
+          setIsEnded(true);
+
+          setTimeout(() => {
+            navigate("/games");
+          }, 3000);
         }
       });
 
@@ -240,7 +260,8 @@ const Game2 = () => {
         ) {
           setKeywordType("");
           setReceivedKeyword("");
-          setRound((prev) => prev + 1);
+          setRound(parsedMessage.data.round);
+          console.log("서버에서 받은 라운드:" + parsedMessage.data.round);
           setIsExplainer(false);
         }
         if (parsedMessage.commandType == "GAME_MODAL_START") {
@@ -248,24 +269,35 @@ const Game2 = () => {
           setIsBodyTalkWelcomeModalOpen(false);
           client.send(`/app/game/${roomId}/bodyTalk/keyword`);
         }
-        //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
-        if (parsedMessage.data.isCorrect === true) {
-          setIsExplainer(false);
-          setRound((prevRound) => prevRound + 1);
+        // //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
+        // if (parsedMessage.data.isCorrect === true) {
+        //   setIsExplainer(false);
+        //   setRound(parsedMessage.data.round);
+        // }
+
+        // 서버에서 결과가 도착하면 처리
+        if (parsedMessage.commandType === "BODYGAME_RESULT") {
+          setResultData(parsedMessage.data);
+          navigate("/icebreaking/games/game2result", {
+            state: {
+              correctCnt: parsedMessage.data.correctCnt,
+              durationTime: parsedMessage.data.durationTime,
+            },
+          });
         }
       });
-
       setSubscribed(true);
     }
   }, [client, roomId, userNo, subscribed, explainerNo]);
-
-  //라운드 변경시 실행
+  
+  //라운드가 변경될 때 마다 실행됨. 게임의 상태가 변경될때 필요한 작업 처리
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
     if (client && client.connected && isGameStarted) {
       // isExplainer 초기화
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
+      console.log("키워드 요청요청요청");
     }
     if (round === 7) {
       // 게임 종료 로직
@@ -273,13 +305,17 @@ const Game2 = () => {
     }
   }, [round, client, isGameStarted, roomId]);
 
+  //로컬 스트림
   useEffect(() => {
     if (localStream && userVideoRef.current && explainerNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+    } else {
+      console.log("로컬 스트림이 설정되지 않았습니다.");
     }
   }, [localStream, explainerNo, userNo]);
 
+  //구독자 스트림
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -296,25 +332,25 @@ const Game2 = () => {
           "서브스크립션 스트림이 비디오 요소에 설정되었습니다.",
           subscriber.stream
         );
+      } else {
+        console.log("적절한 구독자를 찾을 수 없습니다.");
       }
     }
   }, [subscribers, explainerNo, userNo]);
 
   // 타이머 로직
   useEffect(() => {
-    if (!isGameEnded) {
-      if (timeLeft > 0) {
-        const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
-      // } else { // 타이머 끝나면
-        // if (isStarted) {
-        //   // axios 보낼 로직
-        // }
+    if (!isGameEnded && timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0) {
+      if (client && client.connected) {
+        client.send(`/app/game/${roomId}/bodyTalk/timeover`, {}, {});
       }
     }
-  }, [timeLeft]);
+  }, [timeLeft, client, roomId, isGameEnded]);
 
   // 타이머 포맷
   const formatTime = (time) => {
@@ -336,6 +372,17 @@ const Game2 = () => {
 
   return (
     <Wrap>
+      {/* 임시버튼 */}
+      <button
+        onClick={() => {
+          dispatch(setGame2Finish());
+          navigate("/icebreaking/games");
+        }}
+      >
+        결과 스킵
+      </button>
+
+      {/* 환영 모달 */}
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
           planetImg={orange}
@@ -375,62 +422,78 @@ const Game2 = () => {
         <>
           {/* 게임 종료 화면 */}
           <Header2>게임이 종료되었습니다.</Header2>
-          <Button onClick={() => {navigate("/icebreaking/games");}}>
+          <Button
+            onClick={() => {
+              navigate("/icebreaking/games");
+            }}
+          >
             다른 게임들 보러가기
           </Button>
         </>
       ) : isExplainer ? (
-          <>
-            {/* 출제자 화면 */}
-            <HeaderContainer>
-              <Header>{round} 라운드 - 출제자</Header>
-              <Timer>{formatTime(timeLeft)}</Timer>
-            </HeaderContainer>
-            <SpeechBubble
-              type={
-                <>
-                  제시어 종류 : {keywordType} <br />
-                  <br />
-                </>
-              }
-              word={`제시어 : ${receivedKeyword}`}
+        <>
+          {/* 출제자 화면 */}
+          <HeaderContainer>
+            <Header>{round + 1} 라운드 - 출제자</Header>
+            <Timer>{formatTime(timeLeft)}</Timer>
+          </HeaderContainer>
+          <SpeechBubble
+            type={
+              <>
+                제시어 종류 : {keywordType} <br />
+                <br />
+              </>
+            }
+            word={`제시어 : ${receivedKeyword}`}
+          />
+          <VideoWrapper>
+            {explainerNo === userNo ? (
+              <UserVideo ref={userVideoRef} autoPlay muted />
+            ) : (
+              <UserVideo ref={subscriberVideoRef} autoPlay muted />
+            )}
+          </VideoWrapper>
+          <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
+          <h1>마이크는 꺼집니다.</h1>
+        </>
+      ) : (
+        <>
+          {/* 맞추는 사람 화면 */}
+          <HeaderContainer>
+            <Header>{round + 1} 라운드 - 맞추는 사람</Header>
+            <Timer>{formatTime(timeLeft)}</Timer>
+
+            {isEnded && (
+              <h1 style={{ fontSize: "50px" }}>
+                게임 종료, 3초 뒤 이동합니다.{" "}
+              </h1>
+            )}
+          </HeaderContainer>
+          <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
+          {/* <h1>출제자 화면 출력</h1> */}
+          <VideoWrapper>
+            {explainerNo === userNo ? (
+              <UserVideo ref={userVideoRef} autoPlay muted />
+            ) : (
+              <UserVideo ref={subscriberVideoRef} autoPlay muted />
+            )}
+          </VideoWrapper>
+          <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
+          <ChatWrap>
+            <Input
+              type="text"
+              value={typedText}
+              placeholder="여기에 정답을 입력하세요."
+              onChange={(e) => setTypedText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();
+                }
+              }}
             />
-            <Image src={bigNana} />
-            <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
-            <h1>마이크는 꺼집니다.</h1>
-          </>
-        ) : (
-          <>
-            {/* 맞추는 사람 화면 */}
-            <HeaderContainer>
-              <Header>{round} 라운드 - 맞추는 사람</Header>
-              <Timer>{formatTime(timeLeft)}</Timer>
-            </HeaderContainer>
-            <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
-            {/* <h1>출제자 화면 출력</h1> */}
-            <VideoWrapper>
-              {explainerNo === userNo ? (
-                <UserVideo ref={userVideoRef} autoPlay muted />
-              ) : (
-                <UserVideo ref={subscriberVideoRef} autoPlay muted />
-              )}
-            </VideoWrapper>
-            <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
-            <ChatWrap>
-              <Input
-                type="text"
-                value={typedText}
-                placeholder="여기에 정답을 입력하세요."
-                onChange={(e) => setTypedText(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage();
-                  }
-                }}
-              />
-              <Button onClick={sendMessage}>SEND</Button>
-            </ChatWrap>
-          </>
+            <Button onClick={sendMessage}>SEND</Button>
+          </ChatWrap>
+        </>
       )}
     </Wrap>
   );

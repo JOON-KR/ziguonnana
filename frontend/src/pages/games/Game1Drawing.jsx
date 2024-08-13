@@ -1,41 +1,61 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
+import AvatarCard from "../../components/avatarCard/AvatarCard";
+import { setGame1Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
-  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
-  text-align: center;
+  width: 100%;
+  height: 100vh;  /* Use entire viewport height */
+  padding: 20px; /* Add padding if needed */
+  box-sizing: border-box;
 `;
 
 const Header = styled.div`
-  width: 90%;
+  width: 100%; /* Full width */
   padding: 10px;
   background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center; /* Center the content */
   align-items: center;
   box-sizing: border-box;
 `;
 
-const HeaderText = styled.h1`
-  margin: 7px;
-  color: black;
+const Text = styled.h1`
+  margin: 12px;
   font-size: 27px;
+  text-align: center;
+`;
+
+const DrawingText = styled.h1`
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 24px;
+  text-align: center;
+`;
+
+const HighlightText = styled.span`
+  font-size: 24px;
+  color: #10D7CB;
+`;
+
+const InfoBox = styled.div`
+  margin-bottom: 12px;
 `;
 
 const CanvasWrapper = styled.div`
   position: relative;
-  width: 90%;
-  height: 600px;
+  width: 100%;
+  height: 80%;
   border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
@@ -45,7 +65,7 @@ const CanvasWrapper = styled.div`
 const ToolsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between; /* Adjust spacing between tools */
   align-items: center;
   width: 100%;
   padding: 10px;
@@ -94,7 +114,6 @@ const Timer = styled.div`
   background: #ccc;
   padding: 5px;
   border-radius: 5px;
-  margin: 0 20px 0 100px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,14 +128,8 @@ const ProfileInfo = styled.div`
   flex-direction: row;
 `;
 
-const ProfileImage = styled.img`
-  width: 60px;
-  height: 60px;
-  margin-right: 10px;
-`;
-
 const ProfileDetails = styled.div`
-  text-align: left;
+  text-align: center;
 `;
 
 const CustomSwatchesPicker = styled.div`
@@ -134,6 +147,21 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
+const AvatarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin-top: 150px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const AvatarTitle = styled.h1`
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: white;
+`;
 const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
@@ -145,13 +173,16 @@ const Game1Drawing = () => {
   const [drawingResult, setDrawingResult] = useState(null);
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [lastSentPaths, setLastSentPaths] = useState([]);
+  const [isStarted, setIsStarted] = useState(false);
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   const canvasRef = useRef(null);
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
-  const [isStarted, setIsStarted] = useState(false);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -160,6 +191,11 @@ const Game1Drawing = () => {
         (message) => {
           const parsedMessages = JSON.parse(message.body);
 
+          if (parsedMessages.commandType === "AVATAR_CARD") {
+            // AvatarCard
+            setAvatarCards(parsedMessages.data[userNo]);
+            console.log(parsedMessages.data[userNo]);
+          }
           if (parsedMessages.commandType === "ART_RELAY") {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
@@ -175,6 +211,9 @@ const Game1Drawing = () => {
             setDrawingResult(parsedMessages.data);
           } else if (parsedMessages.commandType === "ART_CYCLE") {
             canvasRef.current.clearCanvas();
+          } else if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame1Finish());
+            navigate("/icebreaking/games");
           }
         }
       );
@@ -363,87 +402,113 @@ const Game1Drawing = () => {
   };
   return (
     <Wrap>
-      <Header>
-        <ProfileInfo>
-          <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
-          <ProfileDetails>
-            {!isGameEnded ? (
-              <>
-                <h1>{targetUser}님 그리는중~~</h1>
-                <h1>{currentUser}님이 그릴 차례</h1>
-                <h1>키워드 : {keyword}</h1>
-              </>
-            ) : (
-              <h1>이어그리기 종료!</h1>
-            )}
-          </ProfileDetails>
-        </ProfileInfo>
-        {!isGameEnded ? (
-          <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-        ) : (
-          <button
+      {isGameEnded ? (
+        <AvatarContainer>
+          <AvatarTitle>아바타 명함이 제작되었습니다 🧚‍♀️</AvatarTitle>
+          <AvatarCard
+            avatarImage={avatarCards.avatarImage}
+            nickname={avatarCards.nickname}
+            features={avatarCards.features}
+          />
+          <ToolButton
             onClick={() => {
-              navigate("/icebreaking/games");
+              client.send(`/app/game/${roomId}/game-select`);
             }}
+            active={true}
           >
             다른 게임들 보러가기
-          </button>
-        )}
-      </Header>
-      <CanvasWrapper onMouseUp={handleMouseUp}>
-        <ReactSketchCanvas
-          ref={canvasRef}
-          width="970px"
-          height="600px"
-          strokeColor={isEraser ? "#FFFFFF" : brushColor}
-          strokeWidth={brushRadius}
-          eraserWidth={isEraser ? brushRadius : 0}
-          style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
-        />
-        <ToolsWrapper>
-          <CustomSwatchesPicker>
-            {colors.map((color) => (
-              <ColorSquare
-                key={color}
-                color={color}
-                selected={brushColor === color}
-                onClick={() => handleColorChange(color)}
-              />
-            ))}
-          </CustomSwatchesPicker>
-          <SliderWrapper>
-            <SliderLabel>펜 굵기</SliderLabel>
-            <Slider
-              type="range"
-              min="1"
-              max="20"
-              value={brushRadius}
-              onChange={(e) => setBrushRadius(e.target.value)}
+          </ToolButton>
+        </AvatarContainer>
+      ) : (
+        <>
+          <Header>
+            <ProfileInfo>
+              <ProfileDetails>
+                <InfoBox>
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === targetUser
+                        )?.nickname
+                      }
+                    </HighlightText>
+                    님을 그려주세요.
+                  </DrawingText>
+                  <br />
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === currentUser
+                        )?.nickname                  
+                      }
+                    </HighlightText>
+                    님 차례.
+                  </DrawingText>
+                </InfoBox>
+                <DrawingText>
+                  키워드 : # {keyword} <br />
+                </DrawingText>
+              </ProfileDetails>
+            </ProfileInfo>
+          </Header>
+          <CanvasWrapper onMouseUp={handleMouseUp}>
+            <ReactSketchCanvas
+              ref={canvasRef}
+              width="970px"
+              height="600px"
+              strokeColor={isEraser ? "#FFFFFF" : brushColor}
+              strokeWidth={brushRadius}
+              eraserWidth={isEraser ? brushRadius : 0}
+              style={{ pointerEvents: userNo == currentUser ? "auto" : "none" }}
             />
-          </SliderWrapper>
-          <ToolButton
-            onClick={() => setIsEraser(false)}
-            active={!isEraser}
-            disabled={!(userNo == currentUser)}
-          >
-            펜
-          </ToolButton>
-          <ToolButton
-            onClick={() => setIsEraser(true)}
-            active={isEraser}
-            disabled={!(userNo == currentUser)}
-          >
-            지우개
-          </ToolButton>
-          <Timer>{formatTime(timeLeft)}</Timer>
-        </ToolsWrapper>
-      </CanvasWrapper>
-      {drawingResult && (
+            <ToolsWrapper>
+              <CustomSwatchesPicker>
+                {colors.map((color) => (
+                  <ColorSquare
+                    key={color}
+                    color={color}
+                    selected={brushColor === color}
+                    onClick={() => handleColorChange(color)}
+                  />
+                ))}
+              </CustomSwatchesPicker>
+              <SliderWrapper>
+                <SliderLabel>펜 굵기</SliderLabel>
+                <Slider
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={brushRadius}
+                  onChange={(e) => setBrushRadius(e.target.value)}
+                />
+              </SliderWrapper>
+              <ToolButton
+                onClick={() => setIsEraser(false)}
+                active={!isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                펜
+              </ToolButton>
+              <ToolButton
+                onClick={() => setIsEraser(true)}
+                active={isEraser}
+                disabled={!(userNo == currentUser)}
+              >
+                지우개
+              </ToolButton>
+              <Timer>{formatTime(timeLeft)}</Timer>
+            </ToolsWrapper>
+          </CanvasWrapper>
+        </>
+      )}
+      {/* {drawingResult && (
         <div>
-          <h2>이어그리기 종료 결과</h2>
+          <Text>이어그리기 종료 결과</Text>
           <img src={drawingResult} alt="Drawing Result" />
         </div>
-      )}
+      )} */}
     </Wrap>
   );
 };

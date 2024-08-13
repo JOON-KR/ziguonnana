@@ -12,18 +12,15 @@ import gameRecordIcon from "../../assets/icons/game_record.png";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import axios from "axios";
 import avatarImg from "../../assets/icons/avartar.png"
+import homeIcon from "../../assets/icons/home.png"; 
 
 const PageWrap = styled.div`
-  background-image: url(${mypage_bg});
   background-size: cover;
   background-position: center;
   padding: 20px 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width:100%;
-  box-sizing: border-box;
-  
 `;
 
 const RecordHeader = styled.header`
@@ -167,6 +164,16 @@ const ButtonText = styled.span`
   margin-bottom: 10px;
 `;
 
+const HomeIcon = styled.img`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  margin-left: 180px;
+  `;
+
 const GameRecord = () => {
   const navigate = useNavigate();
   const roomId = useSelector((state) => state.room.roomId);
@@ -177,9 +184,9 @@ const GameRecord = () => {
   const [bodyCount, setBodyCount] = useState(0); // 몸으로말해요 맞춘 개수
   const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
   const [igudongseongCount, setIgudongseongCount] = useState(0); // 이구동성 맞춘 개수
-  // const [poseBestList, ] // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
+  const [poseBestList, setPoseBestList] = useState("") // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
   const [shortsURL, setShortsURL] = useState(null); // 숏폼 결과 url
-  const [avartarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   // ===========================================
   // socket-send
@@ -234,14 +241,33 @@ const GameRecord = () => {
   // ===========================================
 
   const handleRecordDetail = () => {
-    navigate("/icebreaking/games/gameRecordDetail");
+    navigate(
+      "/icebreaking/games/gameRecordDetail",
+      {
+        state:
+          {
+            teamName: teamName,  // 팀명
+            bodyCount: bodyCount,  // 몸으로말해요 맞춘 개수
+            bodyDuration: bodyDuration,  // 몸으로말해요 걸린시간(초)
+            igudongseongCount: igudongseongCount,  // 이구동성 맞춘 개수
+            poseBestList: poseBestList,  // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
+            shortsURL: shortsURL,  // 숏폼 결과 url
+            avatarCards: avatarCards,  // 아바타명함(이미지, 특징, 닉네임)
+          }
+      }
+    );
   };
   const handleCommunity = () => {
     navigate("/user/community");
   };
 
+  const handleHomeClick = () => {
+    navigate("/"); // 홈 아이콘 클릭 시 첫 번째 페이지로 이동
+  };
+
   return (
     <PageWrap>
+      <HomeIcon src={homeIcon} alt="Home" onClick={handleHomeClick} />
       <RecordHeader>RECORD</RecordHeader>
         <SectionContainer2>
           <SectionContainer1>
@@ -258,17 +284,17 @@ const GameRecord = () => {
             <Title>아바타 명함</Title>
             <Slide>
               <IconImage src={leftIcon} alt="Left" />
-                {/* {avartarCards.map((card, index) => ( */}
+                {avatarCards.map((card, index) => (
                   <AvatarCard
-                    // key={index}
-                    // avatarImage={card.avatarImage}
-                    // nickname={card.nickname}
-                    // features={card.features}
-                    avatarImage={avatarImg}
-                    nickname={"nowag"}
-                    features={["친절한", "차분한"]}
+                    key={index}
+                    avatarImage={card.avatarImage}
+                    nickname={card.nickname}
+                    features={card.features}
+                    // avatarImage={avatarImg}
+                    // nickname={"nowag"}
+                    // features={["친절한", "차분한"]}
                   />
-                {/* ))} */}
+                ))} 
               <IconImage src={rightIcon} alt="Right" />
             </Slide>
             {/* <Slide>
