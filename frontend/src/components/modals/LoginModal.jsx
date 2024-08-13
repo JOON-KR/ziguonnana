@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 // 소셜 로그인 아이콘
 import GoogleIcon from "../../assets/icons/google.png";
