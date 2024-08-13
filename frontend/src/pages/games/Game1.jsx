@@ -11,12 +11,16 @@ import { setDrawingData } from "../../store/drawingSlice";
 import Game1Drawing from "./Game1Drawing";
 
 const Wrap = styled.div`
-  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 `;
 
 // 자기소개 문답 모달 & 이어그리기 페이지 (Drawing)
@@ -163,9 +167,9 @@ const Game1 = () => {
           }}
           modalText={
             <>
-              주어지는 이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
+              이미지와 특징을 바탕으로 <br /> 아바타를 그려주세요.{" "}
               <br />
-              제한시간은 20초입니다. <br /> 잠시만 기다려주세요.
+              제한시간은 20초입니다. <br />
             </>
           }
           // onClose={closeDrawingGuideModal}

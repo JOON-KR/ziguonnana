@@ -17,10 +17,12 @@ import nextBtn from "../../assets/icons/next_btn.png";
 import GameEndModal from "../../components/modals/GameEndModal";
 
 const Wrap = styled.div`
-  width: 819px;
-  height: 348px;
-  background-image: url(${pickPlanet});
-  /* background-size: cover; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* 요소를 세로로 중앙 정렬 */
+  align-items: center;  /* 요소를 가로로 중앙 정렬 */
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -60,7 +62,7 @@ const DoneButton = styled.button`
   font-size: 18px;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
    background-color: transparent; /* 배경을 투명하게 설정 */
 `;
