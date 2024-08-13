@@ -45,9 +45,9 @@ public class PoseService {
 	            int y = (int) keyPoint.getPosition().getY();
 	            
 	            // 각 포인트에 대해 반지름 5인 원 안의 모든 포인트를 추가
-	            for (int dx = -20; dx <= 20; dx++) {
-	                for (int dy = -20; dy <= 20; dy++) {
-	                    if (dx * dx + dy * dy <= 400) { // 원 안에 있는지 확인 (반지름이 5이므로 5^2 = 25)
+	            for (int dx = -30; dx <= 30; dx++) {
+	                for (int dy = -30; dy <= 30; dy++) {
+	                    if (dx * dx + dy * dy <= 900) { // 원 안에 있는지 확인 (반지름이 5이므로 5^2 = 25)
 	                        expandedPositions.add(List.of(x + dx, y + dy));
 	                    }
 	                }
