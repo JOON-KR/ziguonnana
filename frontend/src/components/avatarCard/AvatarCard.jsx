@@ -45,8 +45,6 @@ const Feature = styled.h2`
   margin-right: 12px; /* 각 키워드 간 간격을 더 크게 설정 */
 `;
 
-
-
 const Features = styled.div`
   margin-top: 15px;
 `;
