@@ -1,18 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import GameModal from "../../components/modals/GameModal";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import styled from "styled-components";
-import SpeechBubble from "../../components/speechBubble/SpeechBubble";
+import SpeechBubble from "../../components/speechBubble/SpeechBubble"; // SpeechBubble 컴포넌트 가져오기
 import red from "../../assets/icons/red.png";
 import honaldu from "../../assets/images/igudong_ex_img.png";
+<<<<<<< HEAD
+import bigNana from "../../assets/images/bigNana.png"; // 캐릭터 이미지
+import { useSelector } from "react-redux";
+=======
 import bigNana from "../../assets/images/bigNana.png";
 import { useDispatch, useSelector } from "react-redux";
+>>>>>>> develop-front
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
 import OpenViduSession from "../../components/OpenViduSession";
 import { setGame3Finish } from "../../store/resultSlice";
 
+// 메인 화면을 감싸는 컨테이너 스타일 정의
 const Wrap = styled.div`
   width: 90%;
   height: 90vh;
@@ -22,6 +27,7 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
+// 페이지 전체를 감싸는 컨테이너 스타일 정의
 const PageWrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -29,16 +35,18 @@ const PageWrap = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: relative; /* 모달을 위한 상대적 위치 지정 */
 `;
 
+// 비디오 캔버스 스타일 정의
 const VideoCanvas = styled.video`
   width: 640px;
   height: 480px;
   border: 1px solid #ccc;
-  z-index: 1;
+  z-index: 1; /* 비디오를 가장 아래 레이어로 배치 */
 `;
 
+// 캐릭터 이미지를 조정하여 말풍선보다 100px 아래에 배치하고 크기를 키움
 const BigNana = styled.img`
   position: absolute;
   width: 200px;
@@ -46,40 +54,25 @@ const BigNana = styled.img`
   top: 420px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 3;
+  z-index: 3; /* 캐릭터를 비디오 위에 오버레이 */
 `;
 
+// 말풍선의 크기를 조정
 const StyledSpeechBubble = styled(SpeechBubble)`
   width: 450px;
   height: 180px;
   margin-top: 200px;
-  z-index: 2;
+  z-index: 2; /* 말풍선을 비디오 위에 오버레이 */
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.8); /* 반투명 배경 */
   padding: 20px;
   border-radius: 10px;
 `;
 
-const EndGameButton = styled.button`
-  padding: 10px 20px;
-  background-color: #ff4d4f;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-  font-size: 16px;
-
-  &:hover {
-    background-color: #ff7875;
-  }
-`;
-
 const Game3 = () => {
-  const navigate = useNavigate();
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const localStream = useSelector((state) => state.room.localStream);
@@ -105,17 +98,27 @@ const Game3 = () => {
   const [currentKeyword, setCurrentKeyword] = useState("");
   const dispatch = useDispatch();
 
-  const endGame = () => {
-    navigate("/icebreaking/games/game2");
-  };
-
   useEffect(() => {
-    let subscription;
-    if (client && roomId) {
-      subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
         const parsedMessage = JSON.parse(message.body);
 
         if (parsedMessage.commandType === "IGUDONGSEONG_CYCLE") {
+<<<<<<< HEAD
+          console.log("다음 라운드 시작================");
+          setRound((prevRound) => prevRound + 1);
+          const nextKeyword = keywords[round];
+          setCurrentKeyword(nextKeyword);
+          setShowStartImages(true);
+
+          setTimeout(() => {
+            setShowStartImages(false);
+            setIsGameStarted(true);
+          }, 5000);
+        } else if (parsedMessage.message === "이구동성 시작!\n") {
+          console.log("이구동성 키워드 수신:", parsedMessage.data);
+=======
           if (round < 6) {
             setRound((prevRound) => prevRound + 1);
             dispatch(setGame3Finish());
@@ -136,10 +139,12 @@ const Game3 = () => {
           }
         } else if (parsedMessage.commandType === "IGUDONGSEONG_START") {
           console.log("====키워드 받아서 설정함====", parsedMessage.data);
+>>>>>>> develop-front
           setKeywords(parsedMessage.data);
 
           const keyword = parsedMessage.data[round - 1];
           setCurrentKeyword(keyword);
+          console.log("현재 제시어:", keyword);
 
           setTimeout(() => {
             setShowStartImages(true);
@@ -148,6 +153,11 @@ const Game3 = () => {
           parsedMessage.message === "성공!\n" ||
           parsedMessage.message === "실패!\n"
         ) {
+<<<<<<< HEAD
+          console.log(`결과 수신: ${parsedMessage.message}`);
+          // 결과에 따라 다음 라운드로 이동
+          client.send(`/app/game/${roomId}/igudongseong-cycle`);
+=======
           setTimeout(() => {
             if (round < 6) {
               console.log("다음 라운드 시작까지 3초 대기중...");
@@ -158,17 +168,15 @@ const Game3 = () => {
               }, 3000);
             }
           }, 3000);
+>>>>>>> develop-front
         }
-      });
-    }
+      }
+    );
 
     return () => {
-      // 여기에서 세션을 끊지 않도록 설정 (필요에 따라 주석 처리 가능)
-      if (subscription) {
-        subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
-  }, [client, roomId, round, keywords, navigate]);
+  }, [client, roomId, round, keywords]);
 
   useEffect(() => {
     if (isGameStarted) {
@@ -184,6 +192,7 @@ const Game3 = () => {
           num: userNo,
           keypoints: pose.keypoints,
         };
+        console.log("전송 메시지 : ", data);
         client.send(`/app/game/${roomId}/similar`, {}, JSON.stringify(data));
       };
 
@@ -197,7 +206,7 @@ const Game3 = () => {
         }, 3000);
       }
     }
-  }, [localStream, videoRef, round, isGameStarted, client, roomId, userNo]);
+  }, [localStream, videoRef, round, isGameStarted]);
 
   const startGameSequence = () => {
     client.send(`/app/game/${roomId}/igudongseong`);
@@ -266,7 +275,6 @@ const Game3 = () => {
       <PageWrap>
         <VideoCanvas ref={videoRef} width="640" height="480" />
         {openViduToken && <OpenViduSession token={openViduToken} />}
-        <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
       </PageWrap>
     </Wrap>
   );

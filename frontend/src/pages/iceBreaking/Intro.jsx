@@ -114,6 +114,17 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
+<<<<<<< HEAD
+          <button onClick={() => navigate("/icebreaking/games/game4")}>
+            숏폼 페이지로 이동
+          </button>
+          <button onClick={() => navigate("/icebreaking/games/game3")}>
+            몸말
+          </button>
+          <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
+            결과
+          </button>
+=======
           <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
@@ -124,6 +135,7 @@ const Introduce = () => {
           <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
             결과
           </button>
+>>>>>>> develop-front
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
