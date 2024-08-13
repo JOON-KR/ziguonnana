@@ -6,9 +6,10 @@ const Wrap = styled.div`
   display: flex;
   align-items: center;
   background-color: #e5faff;
-  border-radius: 15px;
-  padding: 20px;
-  width: 400px;
+  border-radius: 12px;
+  padding: 10px;
+  width: 300px;
+  height: 110px;
   background-image: url(${pc});
   background-size: cover;
   background-position: center;
@@ -16,19 +17,16 @@ const Wrap = styled.div`
 `;
 
 const TextWrap = styled.div`
-  margin-left: 20px;
+  margin-left: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 `;
 
 const Image = styled.img`
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  background-color: white;
+  width: 110px;
+  height: 100px;
   padding: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const Nickname = styled.h1`
@@ -39,7 +37,7 @@ const Nickname = styled.h1`
 `;
 
 const Features = styled.div`
-  margin-top: 5px;
+  margin-top: 15px;
 `;
 
 const Feature = styled.h2`

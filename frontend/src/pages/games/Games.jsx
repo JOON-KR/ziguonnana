@@ -72,6 +72,12 @@ const NextImage = styled.img`
 const Games = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const game1Status = useSelector((state) => state.result.isGame1Finished);
+  const game2Status = useSelector((state) => state.result.isGame1Finished);
+  const game3Status = useSelector((state) => state.result.isGame1Finished);
+  const game4Status = useSelector((state) => state.result.isGame1Finished);
+  const game5Status = useSelector((state) => state.result.isGame1Finished);
+
   const [gameName, setGameName] = useState("");
   const navigate = useNavigate();
   const [subscribed, setSubscribed] = useState(false);

@@ -11,6 +11,7 @@ import recordBtn from "../../assets/icons/aqua_btn.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import axios from "axios";
+import avatarImg from "../../assets/icons/avartar.png"
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -20,23 +21,35 @@ const PageWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width:100%;
+  box-sizing: border-box;
+  
 `;
 
-const Header = styled.header`
+const RecordHeader = styled.header`
   font-size: 50px;
   color: #58fff5;
   font-weight: bold;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 2px;
+  margin-bottom: 20px;
 `;
 
-const BodyContainer = styled.div`
+const SectionContainer1 = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80%;
-  height: 80vh;
+  // width: 80%;
+  // height: 80vh;
+`;
+
+const SectionContainer2 = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 96%;
+  // height: 80vh;
 `;
 
 const Section = styled.div`
@@ -46,9 +59,25 @@ const Section = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  border-radius: 16px;
   padding: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  color: white;
+`;
+
+const AvatarCardSection = styled.div`
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  margin-left: 10px;
+  margin-bottom: 20px;
+  // margin: 10px 10px 30px 10px;
   color: white;
 `;
 
@@ -82,8 +111,8 @@ const Slide = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 28px;
-  margin-bottom: 20px;
+  font-size: 24px;
+  margin-bottom: 12px;
 `;
 
 const RecordTitle = styled.h2`
@@ -98,7 +127,7 @@ const CardImage = styled.img`
 
 const IconImage = styled.img`
   height: 50px;
-  margin: 10px;
+  margin: 8px;
 `;
 
 const RecordIconImage = styled.img`
@@ -116,6 +145,7 @@ const Text = styled.p`
   flex: 1;
   text-align: left;
   font-weight: bold;
+  color: #58fff5;
 `;
 
 const ButtonContainer = styled.div`
@@ -142,13 +172,13 @@ const GameRecord = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const userNo = useSelector((state) => state.auth.userNo);
   const client = useSelector((state) => state.client.stompClient);
-
+  const maxNo = useSelector((state) => state.room.maxNo);
   const [teamName, setTeamName] = useState(""); // 팀명
   const [bodyCount, setBodyCount] = useState(0); // 몸으로말해요 맞춘 개수
   const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
   const [igudongseongCount, setIgudongseongCount] = useState(0); // 이구동성 맞춘 개수
   // const [poseBestList, ] // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
-  // const [shortsURL, setShortsURL] = useState(); // 숏폼 결과 url
+  const [shortsURL, setShortsURL] = useState(null); // 숏폼 결과 url
   const [avartarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   // ===========================================
@@ -180,8 +210,10 @@ const GameRecord = () => {
             // const recordData = response.data
             // 상태 저장
             setTeamName(response.data.teamName);
-            console.log(response.data)
+            console.log(response.data);
             setAvatarCards(response.data.avatarCards);
+            setBodyCount(response.data.bodyCount);
+            setShortsURL(response.data.shortsURL);
           } 
         } catch (error) {
           console.error("메시지 처리 중 오류 발생:", error);
@@ -210,41 +242,53 @@ const GameRecord = () => {
 
   return (
     <PageWrap>
-      <Header>RECORD</Header>
-      <BodyContainer>
-        <Section>
-          <Title>
-            팀명 : {teamName}
-          </Title>
-        </Section>
-        <Section>
-          <Title>아바타 명함</Title>
-          {avartarCards.map((card, index) => (
-            <AvatarCard
-              key={index}
-              avatarImage={card.avatarImage}
-              nickname={card.nickname}
-              features={card.features}
-            />
-          ))}
-          {/* <Slide>
-            <IconImage src={leftIcon} alt="Left" />
-            <CardImage src={cardPic} alt="아바타 명함" />
-            <IconImage src={rightIcon} alt="Right" />
-          </Slide> */}
-        </Section>
+      <RecordHeader>RECORD</RecordHeader>
+        <SectionContainer2>
+          <SectionContainer1>
+            <Section>
+              <Title>팀명</Title>
+              <Text>{teamName}</Text>
+            </Section>
+            <Section>
+              <Title>인원수</Title>
+              <Text>{maxNo}</Text>
+            </Section>
+          </SectionContainer1>
+          <AvatarCardSection>
+            <Title>아바타 명함</Title>
+            <Slide>
+              <IconImage src={leftIcon} alt="Left" />
+                {/* {avartarCards.map((card, index) => ( */}
+                  <AvatarCard
+                    // key={index}
+                    // avatarImage={card.avatarImage}
+                    // nickname={card.nickname}
+                    // features={card.features}
+                    avatarImage={avatarImg}
+                    nickname={"nowag"}
+                    features={["친절한", "차분한"]}
+                  />
+                {/* ))} */}
+              <IconImage src={rightIcon} alt="Right" />
+            </Slide>
+            {/* <Slide>
+              <CardImage src={cardPic} alt="아바타 명함" />
+            </Slide> */}
+          </AvatarCardSection>
+        </SectionContainer2>
+
 
         <RecordSection>
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>게임기록</RecordTitle>
           <GameSection>
             <Slide>
-              <GameRecordIconImage src={leftIcon} alt="Left" />
+              {/* <GameRecordIconImage src={leftIcon} alt="Left" /> */}
               <IconImage src={gameRecordIcon} alt="gameRecord" />
-              <GameRecordIconImage src={rightIcon} alt="Right" />
+              {/* <GameRecordIconImage src={rightIcon} alt="Right" /> */}
             </Slide>
-            {/* 게임 이름 & 인원 */}
-            <Text>몸으로 말해요  6/6</Text>
+            {/* 게임 이름 & 몸말맞춘수 & 게임 인원 */}
+            <Title>몸으로 말해요  {bodyCount}/{maxNo}</Title>
           </GameSection>
           <ButtonContainer onClick={handleRecordDetail}>
             <ButtonText>게임상세</ButtonText>
@@ -256,16 +300,18 @@ const GameRecord = () => {
           <RecordIconImage src={recordIcon} alt="gameRecord" />
           <RecordTitle>숏폼기록</RecordTitle>
           <GameSection>
-            <Text>숏폼 기록 내용</Text>
+            <Title>
+              숏폼 기록 내용
+              {shortsURL}
+            </Title>
           </GameSection>
           <ButtonContainer onClick={handleCommunity}>
             <ButtonText>커뮤니티</ButtonText>
             <IconImage src={recordBtn} alt="gameRecordBtn" />
           </ButtonContainer>
         </RecordSection>
-      </BodyContainer>
     </PageWrap>
   );
 };
-
+// 수정전
 export default GameRecord;

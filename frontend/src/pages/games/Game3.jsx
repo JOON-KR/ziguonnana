@@ -85,6 +85,7 @@ const Game3 = () => {
   const openViduToken = useSelector((state) => state.auth.openViduToken);
   const userNo = useSelector((state) => state.auth.userNo);
 
+  const [result, setResult] = useState("");
   const [keywords, setKeywords] = useState([]);
   const [round, setRound] = useState(1);
   const videoRef = useRef(null);
@@ -119,6 +120,8 @@ const Game3 = () => {
             setCurrentKeyword(nextKeyword);
             setShowStartImages(true);
 
+            setResult(parsedMessage.data);
+
             setTimeout(() => {
               setShowStartImages(false);
               setIsGameStarted(true);
@@ -128,7 +131,8 @@ const Game3 = () => {
               navigate("/icebreaking/games");
             }, 3000);
           }
-        } else if (parsedMessage.message === "이구동성 시작!\n") {
+        } else if (parsedMessage.commandType === "IGUDONGSEONG_START") {
+          console.log("====키워드 받아서 설정함====", parsedMessage.data);
           setKeywords(parsedMessage.data);
 
           const keyword = parsedMessage.data[round - 1];
@@ -143,6 +147,7 @@ const Game3 = () => {
         ) {
           setTimeout(() => {
             if (round < 6) {
+              console.log("다음 라운드 시작까지 3초 대기중...");
               client.send(`/app/game/${roomId}/igudongseong-cycle`);
             } else {
               setTimeout(() => {
@@ -211,6 +216,7 @@ const Game3 = () => {
 
   return (
     <Wrap>
+      <h1>{round}</h1>
       {isIgudongseongWelcomeModalOpen && (
         <GameInfoModal
           planetImg={red}
@@ -222,7 +228,7 @@ const Game3 = () => {
       )}
       {isIgudongseongGuideModalOpen && (
         <GameModal
-          exImg={honaldu}
+          xImg={honaldu}
           RedBtnText={"다음"}
           RedBtnFn={() => setIsIgudongseongSecondGuideModalOpen(true)}
           modalText={
@@ -249,15 +255,8 @@ const Game3 = () => {
       )}
       {showStartImages && (
         <>
-          <StyledSpeechBubble
-            text={
-              <>
-                제시어: {currentKeyword}
-                <br />
-                5초 안에 포즈를 취하세요!
-              </>
-            }
-          />
+          <SpeechBubble word={keywords[round - 1]} />
+          <h1>{keywords}</h1>
           <BigNana src={bigNana} alt="캐릭터" />
         </>
       )}
@@ -271,3 +270,9 @@ const Game3 = () => {
 };
 
 export default Game3;
+
+// <>
+//   제시어: {keywords[round]}
+//   <br />
+//   5초 안에 포즈를 취하세요!
+// </>
