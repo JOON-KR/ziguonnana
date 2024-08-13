@@ -131,6 +131,7 @@ public class ArtService {
             // 이어그리기 끝나면
             if (room.getCycle() == people) {
                 endRelay(roomId);
+                return;
             }
             // 사이클만 끝나면
             messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_CYCLE, true));
