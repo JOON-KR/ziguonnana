@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 훅을 사용
 import styled from "styled-components";
 import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
@@ -130,20 +131,53 @@ const LoginModal = ({
   onFindPasswordClick,
   AquaBtnFn,
   onGoogleLogin,
-  onKakaoLogin,
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // useNavigate 훅을 사용하여 페이지 리디렉션 처리
 
+  // Kakao 로그인 URL
+  const handleKakaoLogin = () => {
+    const kakaoLoginUrl =
+      "https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=https://i11b303.p.ssafy.io/api/v1/member/login/kakao/callback&response_type=code";
+    window.location.href = kakaoLoginUrl;
+    // navigate(kakaoLoginUrl);
+  };
+
+  // const code = new URL(window.location.href).searchParams.get("code");
+
+  // const fetchTokens = async (code) => {
+  //   try {
+  //     const response = await fetch(`http://localhost:8081/api/v1/member/login/kakao/callback?code=${code}`);
+  //     const data = await response.json();
+  
+  //     if (data.code === "status(201)") {
+  //       const { accessToken, refreshToken } = data.data;
+  
+  //       localStorage.setItem("kakao_access_token", accessToken);
+  //       localStorage.setItem("kakao_refresh_token", refreshToken);
+  
+  //       navigate("/"); // 홈 페이지로 리디렉션
+  //     } else {
+  //       console.error("Error fetching tokens:", data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+  
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const code = urlParams.get("code");
+  
+  //   if (code) {
+  //     fetchTokens(code);
+  //   }
+  // }, [navigate]);
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     AquaBtnFn(email, password);
-  };
-
-  //url 연결
-  const handleKakaoLogin = () => {
-    const kakaoLoginUrl = 'https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=https://i11b303.p.ssafy.io/api/v1/member/login/kakao/callback&response_type=code';
-    window.location.href = kakaoLoginUrl;
   };
 
   return (

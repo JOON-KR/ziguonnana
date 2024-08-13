@@ -28,15 +28,24 @@ const Header = styled.div`
   box-sizing: border-box;
 `;
 
-const HeaderText = styled.h1`
-  margin: 7px;
-  color: black;
-  font-size: 27px;
-`;
-
 const Text = styled.h1`
   margin: 12px;
   font-size: 27px;
+`;
+
+const DrawingText = styled.h1`
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 24px;
+`;
+
+const HighlightText = styled.span`
+  font-size: 24px;
+  color: #10D7CB;
+`;
+
+const InfoBox = styled.div`
+  margin-bottom: 12px;
 `;
 
 const CanvasWrapper = styled.div`
@@ -114,16 +123,10 @@ const ProfileInfo = styled.div`
   font-size: 24px;
   font-weight: bold;
   flex-direction: row;
-`;
-
-const ProfileImage = styled.img`
-  width: 60px;
-  height: 60px;
-  margin-right: 10px;
-`;
-
-const ProfileDetails = styled.div`
-  text-align: left;
+  `;
+  
+  const ProfileDetails = styled.div`
+  text-align: center;
 `;
 
 const CustomSwatchesPicker = styled.div`
@@ -152,14 +155,15 @@ const Game1Drawing = () => {
   const [drawingResult, setDrawingResult] = useState(null);
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [lastSentPaths, setLastSentPaths] = useState([]);
+  const [isStarted, setIsStarted] = useState(false);
+  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
   const canvasRef = useRef(null);
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
-  const [isStarted, setIsStarted] = useState(false);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
-  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -396,7 +400,7 @@ const Game1Drawing = () => {
           >
             다른 게임들 보러가기
           </button>
-          {/* gameRecord에서 가져오기 */}
+          {/* gameRecord에서 가져오기 - 버튼 css */}
           {/* <ButtonContainer onClick={handleRecordDetail}>
             <ButtonText>게임상세</ButtonText>
             <IconImage src={recordBtn} alt="gameRecordBtn" />
@@ -406,18 +410,36 @@ const Game1Drawing = () => {
         <>
           <Header>
             <ProfileInfo>
-              <ProfileImage
-                src="path/to/profile-image.png"
-                alt="프로필 이미지"
-              />
               <ProfileDetails>
-                <h1>{targetUser}님 그리는중~~</h1>
-                <h1>{currentUser}님이 그릴 차례</h1>
-                <h1>키워드 : {keyword}</h1>
+                <InfoBox>
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === targetUser
+                        )?.nickname
+                      }
+                    </HighlightText>
+                    님을 그려주세요.
+                  </DrawingText>
+                  <br />
+                  <DrawingText>
+                    <HighlightText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === currentUser
+                        )?.nickname                  
+                      }
+                    </HighlightText>
+                    님 차례.
+                  </DrawingText>
+                </InfoBox>
+                <DrawingText>
+                  키워드 : # {keyword} <br />
+                </DrawingText>
               </ProfileDetails>
             </ProfileInfo>
-            <HeaderText>주어진 정보를 활용하여 아바타를 그려주세요!</HeaderText>
-          </Header>
+-          </Header>
           <CanvasWrapper onMouseUp={handleMouseUp}>
             <ReactSketchCanvas
               ref={canvasRef}

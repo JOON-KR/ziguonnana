@@ -12,6 +12,7 @@ import GameRecord from "./pages/games/GameRecord";
 import RoomCreateModal from "./components/modals/RoomCreateModal";
 import TestPage from "./pages/TestPage";
 import PosePage from "./pages/PosePage";
+import KakaoLogin from "./pages/KakaoLogin";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         </Route>
         <Route path="/create-room" element={<RoomCreateModal />} />
         <Route path="/pose" element={<PosePage />} />
+        <Route path="/KakaoLogin" element={<KakaoLogin />} />
       </Routes>
     </div>
   );
