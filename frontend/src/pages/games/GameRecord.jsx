@@ -12,18 +12,15 @@ import gameRecordIcon from "../../assets/icons/game_record.png";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import axios from "axios";
 import avatarImg from "../../assets/icons/avartar.png"
+import homeIcon from "../../assets/icons/home.png"; 
 
 const PageWrap = styled.div`
-  background-image: url(${mypage_bg});
   background-size: cover;
   background-position: center;
   padding: 20px 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width:100%;
-  box-sizing: border-box;
-  
 `;
 
 const RecordHeader = styled.header`
@@ -167,6 +164,16 @@ const ButtonText = styled.span`
   margin-bottom: 10px;
 `;
 
+const HomeIcon = styled.img`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  margin-left: 180px;
+  `;
+
 const GameRecord = () => {
   const navigate = useNavigate();
   const roomId = useSelector((state) => state.room.roomId);
@@ -240,8 +247,13 @@ const GameRecord = () => {
     navigate("/user/community");
   };
 
+  const handleHomeClick = () => {
+    navigate("/"); // 홈 아이콘 클릭 시 첫 번째 페이지로 이동
+  };
+
   return (
     <PageWrap>
+      <HomeIcon src={homeIcon} alt="Home" onClick={handleHomeClick} />
       <RecordHeader>RECORD</RecordHeader>
         <SectionContainer2>
           <SectionContainer1>

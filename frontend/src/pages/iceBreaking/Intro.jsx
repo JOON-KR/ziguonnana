@@ -110,6 +110,9 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
+          <button onClick={() => navigate("/icebreaking/games")}>
+            나나맵
+          </button>
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
           </button>

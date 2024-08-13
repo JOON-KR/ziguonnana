@@ -26,6 +26,12 @@ const Wrap = styled.div`
   position: relative;
 `;
 
+
+
+const Title = styled.h2`
+  font-size: 35px;
+`;
+
 const Planet = styled.img`
   position: absolute;
   width: 115px;
@@ -43,7 +49,7 @@ const PlanetName = styled.p`
 const BottomContainer = styled.div`
   position: fixed;
   bottom: 20px;
-  right: 150px;
+  right: 300px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -56,6 +62,7 @@ const DoneButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+   background-color: transparent; /* 배경을 투명하게 설정 */
 `;
 
 const NextImage = styled.img`

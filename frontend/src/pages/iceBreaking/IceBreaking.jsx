@@ -16,6 +16,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+
 const PageWrap = styled.div`
   width: 100%;
   height: 100%;
