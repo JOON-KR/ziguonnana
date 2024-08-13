@@ -157,9 +157,9 @@ public class ArtService {
         messagingTemplate.convertAndSend("/topic/game/" + roomId, endResponse);
         log.info("그림 그리기 결과 :: roomId : {}, art : {} ", roomId, endResponse.getData());
         // 아바타 결과 반환
+        spreadAvatarCard(roomId);
         room.cycleInit();
         room.countInit();
-        spreadAvatarCard(roomId);
     }
 
     // 아바타 명함 전송
