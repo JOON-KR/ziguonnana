@@ -9,6 +9,7 @@ import SpeechBubble from "../../components/speechBubble/SpeechBubble";
 import bigNana from "../../assets/icons/game2nana.png";
 import OpenViduSession from "../../components/OpenViduSession";
 import { setGame1Finish, setGame2Finish } from "../../store/resultSlice";
+import { log } from "@tensorflow/tfjs";
 
 const Wrap = styled.div`
   width: 100%;
@@ -141,7 +142,7 @@ const Game2 = () => {
   const mediaRecorderRef = useRef(null);
   // const explainerNo = useSelector((state) => state.bodytalk.explainerNo);
 
-  const [round, setRound] = useState(1);
+  const [round, setRound] = useState(0);
   const [keywordType, setKeywordType] = useState(""); //제시어의 분류 : 동물, 악기 등등
   const [receivedKeyword, setReceivedKeyword] = useState("");
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -192,6 +193,7 @@ const Game2 = () => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
     console.log("유저 번호 :", userNo);
+    console.log("초기 라운드 : ", round);
 
     if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
@@ -238,11 +240,12 @@ const Game2 = () => {
         }
         if (
           parsedMessage.commandType == "CHAT" &&
-          parsedMessage.data.isCorrect == true
+          parsedMessage.data.correct == true
         ) {
           setKeywordType("");
           setReceivedKeyword("");
           setRound(parsedMessage.data.round);
+          console.log("서버에서 받은 라운드:" + parsedMessage.data.round);
           setIsExplainer(false);
         }
         if (parsedMessage.commandType == "GAME_MODAL_START") {
@@ -250,11 +253,11 @@ const Game2 = () => {
           setIsBodyTalkWelcomeModalOpen(false);
           client.send(`/app/game/${roomId}/bodyTalk/keyword`);
         }
-        //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
-        if (parsedMessage.data.isCorrect === true) {
-          setIsExplainer(false);
-          setRound((prevRound) => prevRound + 1);
-        }
+        // //서버에서 응답 받는데 채팅친게 정답이면 다음 라운드로
+        // if (parsedMessage.data.isCorrect === true) {
+        //   setIsExplainer(false);
+        //   setRound(parsedMessage.data.round);
+        // }
       });
 
       setSubscribed(true);
@@ -268,6 +271,7 @@ const Game2 = () => {
       // isExplainer 초기화
       // setIsExplainer(false);
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
+      console.log("키워드 요청요청요청")
     }
     if (round === 7) {
       // 게임 종료 로직
@@ -397,7 +401,7 @@ const Game2 = () => {
         <>
           {/* 출제자 화면 */}
           <HeaderContainer>
-            <Header>{round} 라운드 - 출제자</Header>
+            <Header>{round + 1} 라운드 - 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
           <SpeechBubble
@@ -417,7 +421,7 @@ const Game2 = () => {
         <>
           {/* 맞추는 사람 화면 */}
           <HeaderContainer>
-            <Header>{round} 라운드 - 맞추는 사람</Header>
+            <Header>{round + 1} 라운드 - 맞추는 사람</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
           <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
