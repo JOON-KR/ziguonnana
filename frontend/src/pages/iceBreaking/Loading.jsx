@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Loader from "../../components/common/Loader";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuestionList } from "../../store/questionSlice";
+import { setNicknameList } from "../../store/nicknameSlice";
 
 const PageWrap = styled.div`
   width: 100%;
@@ -76,6 +77,10 @@ const Loading = () => {
       client.subscribe(`/topic/game/${roomId}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
         console.log("방에서 받은 메시지:", parsedMessage);
+        if (parsedMessage.commandType === "PROFILE_CREATE") {
+          console.log("nicknameList: ", parsedMessage.data)
+          dispatch(setNicknameList(parsedMessage.data))
+        }
         if (
           parsedMessage.data === true &&
           parsedMessage.commandType === "GAME_START"

@@ -51,6 +51,7 @@ const Introduce = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const audioRef = useRef(null); // 오디오를 참조하기 위한 useRef
+  const [gameName, setGameName] = useState(""); 
 
   useEffect(() => {
     if (client && client.connected) {
@@ -91,6 +92,18 @@ const Introduce = () => {
     return () => clearTimeout(timer);
   }, []);
 
+    //한번만 보내야됨
+    useEffect(() => {
+      if (gameName !== "") {
+        client.send(`/app/game/${roomId}/game-start/${gameName}`);
+        console.log(`게임 선택 메시지 전송: ${gameName}`);
+      }
+    }, [gameName, client, roomId]);
+
+  const handleGameSelect = (name) => {
+    setGameName(name);
+  };
+
   return (
     <Wrap>
       <audio ref={audioRef} src={icebreakingBgm} loop /> {/* 배경 음악 */}
@@ -118,6 +131,7 @@ const Introduce = () => {
         <Image
           src={firstGame}
           onClick={() => {
+            // handleGameSelect("AVATAR");
             navigate("/icebreaking/games/game1Nickname");
           }}
           alt="First Game"
