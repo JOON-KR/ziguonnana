@@ -3,8 +3,8 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { FaceMesh } from "@mediapipe/face_mesh";
 import { Camera } from "@mediapipe/camera_utils";
-import overlayImageSrc1 from "../../assets/images/your_image.png"; // 1번 사람의 가면 이미지 파일 경로
-import overlayImageSrc2 from "../../assets/images/5.png"; // 2번 사람의 가면 이미지 파일 경로
+import overlayImageSrc1 from "../../assets/images/your_image.png";
+import overlayImageSrc2 from "../../assets/images/5.png";
 import overlayImageSrc3 from "../../assets/images/image3.png";
 import overlayImageSrc4 from "../../assets/images/image4.png";
 import overlayImageSrc5 from "../../assets/images/image5.png";
@@ -12,12 +12,12 @@ import overlayImageSrc6 from "../../assets/images/image6.png";
 
 // 이미지 경로들을 배열로 관리
 const overlayImageList = [
-  overlayImageSrc1, // 1번 사용자 이미지
-  overlayImageSrc2, // 2번 사용자 이미지
-  overlayImageSrc3, // 3번 사용자 이미지
-  overlayImageSrc4, // 4번 사용자 이미지
-  overlayImageSrc5, // 5번 사용자 이미지
-  overlayImageSrc6, // 6번 사용자 이미지
+  overlayImageSrc1,
+  overlayImageSrc2,
+  overlayImageSrc3,
+  overlayImageSrc4,
+  overlayImageSrc5,
+  overlayImageSrc6,
 ];
 
 // 스타일링된 컴포넌트 정의
@@ -115,7 +115,8 @@ const VideoBox = ({ index }) => {
 
   const applyMask = () => {
     if (isMaskApplied) {
-      setIsMaskApplied(false); // 마스크 해제 상태로 전환
+      // 마스크를 제거하는 로직
+      setIsMaskApplied(false);
       if (canvasRef.current) {
         const canvasCtx = canvasRef.current.getContext("2d");
         canvasCtx.clearRect(
@@ -128,7 +129,7 @@ const VideoBox = ({ index }) => {
       return;
     }
 
-    setIsMaskApplied(true); // 마스크 적용 상태를 true로 설정
+    setIsMaskApplied(true); // 마스크 적용 상태로 전환
 
     const faceMesh = new FaceMesh({
       locateFile: (file) =>
@@ -136,7 +137,7 @@ const VideoBox = ({ index }) => {
     });
 
     faceMesh.setOptions({
-      maxNumFaces: 1, // 한 번에 감지할 얼굴 수 설정
+      maxNumFaces: 6, // 최대 6명의 얼굴을 감지하도록 설정
       refineLandmarks: true, // 정밀 랜드마크 사용
       minDetectionConfidence: 0.5, // 얼굴 감지 신뢰도 설정
       minTrackingConfidence: 0.5, // 얼굴 추적 신뢰도 설정
@@ -148,6 +149,9 @@ const VideoBox = ({ index }) => {
         const offscreenCanvasCtx = offscreenCanvasRef.current.getContext("2d"); // 오프스크린 캔버스 컨텍스트 가져오기
 
         if (results.multiFaceLandmarks) {
+          console.log(
+            `Number of faces detected: ${results.multiFaceLandmarks.length}`
+          );
           for (const landmarks of results.multiFaceLandmarks) {
             const noseTip = landmarks[1]; // 코 끝 좌표
             const chin = landmarks[152]; // 턱 좌표
@@ -179,8 +183,8 @@ const VideoBox = ({ index }) => {
                 )
             );
 
-            const overlayHeight = faceHeight * 3.0; // 오버레이 이미지의 높이 설정
-            const overlayWidth = faceWidth * 2.0; // 오버레이 이미지의 너비 설정
+            const overlayHeight = faceHeight * 2; // 오버레이 이미지의 높이 설정
+            const overlayWidth = faceWidth * 1.5; // 오버레이 이미지의 너비 설정
 
             const overlayX =
               noseTip.x * offscreenCanvasRef.current.width - overlayWidth / 2; // 오버레이 이미지의 X 위치 설정
@@ -214,46 +218,54 @@ const VideoBox = ({ index }) => {
               canvasCtx.drawImage(offscreenCanvasRef.current, 0, 0);
             };
           }
+        } else {
+          console.log("No faces detected.");
         }
       }
     });
 
     if (videoRef.current) {
-      // 로컬 스트림일 경우
-      if (
-        localStream &&
-        JSON.parse(localStream.connection.data).userNo === userNo
-      ) {
-        console.log(`Applying FaceMesh to local stream for user ${userNo}`); // 로컬 스트림에 적용 로그
+      const localUserNo =
+        localStream && JSON.parse(localStream.connection.data).userNo;
+      if (localUserNo === userNo) {
+        // 로컬 스트림에 FaceMesh 적용
+        console.log(`Applying FaceMesh to local stream for user ${userNo}`);
         const camera = new Camera(videoRef.current, {
           onFrame: async () => {
-            await faceMesh.send({ image: videoRef.current }); // 각 프레임마다 FaceMesh 처리
+            await faceMesh.send({ image: videoRef.current });
           },
           width: 640,
           height: 480,
         });
-
-        camera.start(); // 카메라 시작
+        camera.start();
       } else {
-        // 구독자 스트림일 경우
-        const subscriber = subscribers.find((sub) => {
-          return JSON.parse(sub.stream.connection.data).userNo === userNo;
-        });
-        if (subscriber && videoRef.current) {
-          console.log(
-            `Applying FaceMesh to subscriber stream for user ${userNo}`
-          ); // 구독자 스트림에 적용 로그
-          subscriber.addVideoElement(videoRef.current); // 구독자 스트림을 비디오 요소에 할당
+        // 구독자 스트림에 FaceMesh 적용
+        console.log(
+          `Applying FaceMesh to subscriber stream for user ${userNo}`
+        );
+        const subscriber = subscribers.find(
+          (sub) => JSON.parse(sub.stream.connection.data).userNo === userNo
+        );
+        if (subscriber) {
+          const videoElement = document.createElement("video"); // 구독자 비디오 요소 생성
+          videoElement.style.display = "none"; // 비디오 요소 숨김
+          document.body.appendChild(videoElement); // 문서에 추가
+          subscriber.addVideoElement(videoElement); // 구독자 스트림을 비디오 요소에 할당
 
-          const camera = new Camera(videoRef.current, {
+          const camera = new Camera(videoElement, {
             onFrame: async () => {
-              await faceMesh.send({ image: videoRef.current }); // 각 프레임마다 FaceMesh 처리
+              await faceMesh.send({ image: videoElement });
             },
             width: 640,
             height: 480,
           });
+          camera.start();
 
-          camera.start(); // 카메라 시작
+          videoElement.addEventListener("loadeddata", () => {
+            videoRef.current.srcObject = videoElement.srcObject; // FaceMesh 결과를 로컬 비디오 요소에 복사
+            videoElement.remove(); // 비디오 요소 제거, FaceMesh 결과만 표시
+            console.log("FaceMesh applied to subscriber video stream.");
+          });
         }
       }
     }
@@ -278,14 +290,14 @@ const VideoBox = ({ index }) => {
       <Video ref={videoRef} autoPlay muted />
       <Canvas
         ref={canvasRef}
-        style={{ display: isMaskApplied ? "block" : "none" }}
-      />{" "}
-      {/* 메인 캔버스, 마스크 상태에 따라 표시/숨김 */}
+        style={{ display: isMaskApplied ? "block" : "none" }} // 마스크가 적용되었을 때만 캔버스를 표시
+      />
       <canvas ref={offscreenCanvasRef} style={{ display: "none" }} />{" "}
-      {/* 오프스크린 캔버스 */}
-      <NameTag>{userNickname}</NameTag>
+      {/* 오프스크린 캔버스 숨김 */}
+      <NameTag>{userNickname}</NameTag> {/* 닉네임 태그 */}
       <MaskButton onClick={applyMask}>
-        {isMaskApplied ? "Remove Mask" : "Apply Mask"}
+        {isMaskApplied ? "Remove Mask" : "Apply Mask"}{" "}
+        {/* 마스크 상태에 따라 버튼 텍스트 변경 */}
       </MaskButton>
     </Box>
   );
