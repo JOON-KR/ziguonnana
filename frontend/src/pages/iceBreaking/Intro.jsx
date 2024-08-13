@@ -63,7 +63,7 @@ const Introduce = () => {
           if (cmd === "GAME_MODAL_START") {
             skipIntro();
           } else if (parsedMessage.commandType === "NANA_MAP") {
-            navigate("/icebreaking/games/game1");
+            navigate("/icebreaking/games/game1Nickname");
           }
 
           console.log("키워드 타입 :", parsedMessage);
@@ -114,9 +114,7 @@ const Introduce = () => {
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
-          <button onClick={() => navigate("/icebreaking/games")}>
-            나나맵
-          </button>
+          <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
           </button>
