@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
+import { setGame1Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   width: 100%;
@@ -159,6 +160,7 @@ const Game1Drawing = () => {
   const [isStarted, setIsStarted] = useState(false);
   const navigate = useNavigate();
   const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (client && client.connected) {
@@ -166,11 +168,11 @@ const Game1Drawing = () => {
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessages = JSON.parse(message.body);
-          
+
           if (parsedMessages.commandType === "AVATAR_CARD") {
             // AvatarCard
             setAvatarCards(parsedMessages.data[userNo]);
-            console.log(parsedMessages.data[userNo])
+            console.log(parsedMessages.data[userNo]);
           }
           if (parsedMessages.commandType === "ART_RELAY") {
             setTargetUser(parsedMessages.data.targetUser);
@@ -187,6 +189,9 @@ const Game1Drawing = () => {
             setDrawingResult(parsedMessages.data);
           } else if (parsedMessages.commandType === "ART_CYCLE") {
             canvasRef.current.clearCanvas();
+          } else if (parsedMessages.commandType === "NANA_MAP") {
+            dispatch(setGame1Finish());
+            navigate("/icebreaking/games");
           }
         }
       );
@@ -379,14 +384,14 @@ const Game1Drawing = () => {
         <>
           <Text>이어그리기가 종료되었습니다.</Text>
           <h1>당신의 아바타 명함이 제작되었습니다 :)</h1>
-            <AvatarCard
-              avatarImage={avatarCards.avatarImage}
-              nickname={avatarCards.nickname}
-              features={avatarCards.features}
-            />
+          <AvatarCard
+            avatarImage={avatarCards.avatarImage}
+            nickname={avatarCards.nickname}
+            features={avatarCards.features}
+          />
           <button
             onClick={() => {
-              navigate("/icebreaking/games");
+              client.send(`/app/game/${roomId}/game-select`);
             }}
           >
             다른 게임들 보러가기
@@ -399,9 +404,12 @@ const Game1Drawing = () => {
         </>
       ) : (
         <>
-          <Header>    
+          <Header>
             <ProfileInfo>
-              <ProfileImage src="path/to/profile-image.png" alt="프로필 이미지" />
+              <ProfileImage
+                src="path/to/profile-image.png"
+                alt="프로필 이미지"
+              />
               <ProfileDetails>
                 <h1>{targetUser}님 그리는중~~</h1>
                 <h1>{currentUser}님이 그릴 차례</h1>
