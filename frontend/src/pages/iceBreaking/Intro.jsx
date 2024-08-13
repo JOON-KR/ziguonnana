@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import introGif from "../../assets/gifs/gameIntro.gif";
 import firstGame from "../../assets/images/firstGame.png";
 import { useSelector } from "react-redux";
+import icebreakingBgm from "../../assets/audios/icebreaking.mp3";
 
 const Wrap = styled.div`
   display: flex;
@@ -12,17 +13,17 @@ const Wrap = styled.div`
   flex-direction: column;
   text-align: center;
   width: 100%;
-  height: 100vh; /* Fullscreen */
+  height: 100vh;
   background-color: black;
-  padding: 20px 0; /* Add top and bottom padding for spacing */
+  padding: 20px 0;
   box-sizing: border-box;
-  position: relative; /* For positioning the skip button */
+  position: relative;
 `;
 
 const Image = styled.img`
   max-width: 100%;
-  max-height: calc(100vh - 40px); /* Adjust to fit within the padding */
-  object-fit: contain; /* Keep aspect ratio while fitting within the container */
+  max-height: calc(100vh - 40px);
+  object-fit: contain;
 `;
 
 const SkipButton = styled.button`
@@ -49,19 +50,27 @@ const Introduce = () => {
   const navigate = useNavigate();
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const audioRef = useRef(null); // 오디오를 참조하기 위한 useRef
 
   useEffect(() => {
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        const cmd = parsedMessage.commandType;
 
-      const cmd = parsedMessage.commandType;
+        if (cmd === "GAME_MODAL_START") {
+          skipIntro();
+        }
 
-      if (cmd == "GAME_MODAL_START") {
-        skipIntro();
-      }
+        console.log("키워드 타입 :", parsedMessage);
+      });
 
-      console.log("키워드 타입 :", parsedMessage);
-    });
+      return () => {
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+      };
+    }
   }, [client, roomId]);
 
   const skipIntro = () => {
@@ -74,17 +83,20 @@ const Introduce = () => {
       setIsStoryFinished(true);
     }, gifDuration);
 
-    return () => clearTimeout(timer); // Cleanup on unmount
+    // 오디오 자동 재생
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <Wrap>
+      <audio ref={audioRef} src={icebreakingBgm} loop /> {/* 배경 음악 */}
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
-          <button onClick={() => navigate("/icebreaking/games")}>
-            게임스로
-          </button>
           <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
           </button>
