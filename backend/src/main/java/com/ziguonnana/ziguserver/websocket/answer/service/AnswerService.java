@@ -80,6 +80,9 @@ public class AnswerService {
 	
 	private void nextGame(String roomId) {
 		// 결과 전송
+		Room room = roomRepository.getRoom(roomId);
+		room.countInit();
+		room.cycleInit();
 		artService.spreadKeyword(roomId);
 	}
 }
