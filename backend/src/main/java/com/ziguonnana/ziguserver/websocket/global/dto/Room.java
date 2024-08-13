@@ -36,6 +36,10 @@ public class Room {
 	private int isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 	// 몸으로 말해요 키워드 요청 count
 	private int bodyTalkKeywordCnt;
 	// 이어그리기
