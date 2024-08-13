@@ -212,6 +212,9 @@ const Home = () => {
     checkToken();
   }, []);
 
+  // 쿠키에 accessToken이 있는지 검증
+  // 로컬스토리지에 토큰 저장
+  // 
   return (
     <HomeWrap>
       {error && <div style={{ color: "red" }}>{error}</div>}
