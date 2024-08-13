@@ -17,6 +17,7 @@
     "axios": "^1.7.2",
     "ffmpeg.js": "^4.2.9003",
     "file-saver": "^2.0.5",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "openvidu-browser": "^2.30.0",
