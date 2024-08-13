@@ -94,7 +94,7 @@ const Games = () => {
   return (
     <Wrap>
       {/* 아바타 행성 */}
-      {game1Status ? (
+      {!game1Status ? (
         <Planet
           onClick={() => handleGameSelect("AVATAR")}
           src={frozen_blue}
@@ -106,7 +106,7 @@ const Games = () => {
 
       <PlanetName style={{ left: "83px", bottom: "75px" }}>아바타</PlanetName>
       {/* 몸으로 말해요 행성 */}
-      {game2Status ? (
+      {!game2Status ? (
         <Planet
           onClick={() => handleGameSelect("BODY_TALK")}
           src={frozen_orange}
@@ -121,7 +121,7 @@ const Games = () => {
       </PlanetName>
       {/* 이구동성 행성 */}
 
-      {game3Status ? (
+      {!game3Status ? (
         <Planet
           onClick={() => handleGameSelect("SAME_POSE")}
           src={frozen_red}
@@ -148,7 +148,7 @@ const Games = () => {
         이구동성
       </PlanetName>
       {/* 포즈 따라하기 행성 */}
-      {game4Status ? (
+      {!game4Status ? (
         <Planet
           onClick={() => handleGameSelect("FOLLOW_POSE")}
           src={frozen_gray}
@@ -165,7 +165,7 @@ const Games = () => {
         포즈 따라하기
       </PlanetName>
       {/* 숏폼 챌린지 행성 */}
-      {game5Status ? (
+      {!game5Status ? (
         <Planet
           onClick={() => handleGameSelect("SHORTS")}
           src={frozen_earth}
