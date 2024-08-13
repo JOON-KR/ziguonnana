@@ -137,6 +137,34 @@ const Game5 = () => {
     setIsModalOpen(false);
   };
 
+
+  //모달 닫는 요청
+  const handleRedBtnClick = () => {
+    if (client && client.connected) {
+      client.send(`/app/game/${roomId}/start-modal/SHORTS`, {}, JSON.stringify({ command: "GAME_MODAL_START" }));
+      console.log(`GAME_MODAL_START 메시지를 전송했습니다: /app/game/${roomId}/start-modal/SHORTS`);
+    }
+  };
+
+  // 모달 닫는 응답
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
+        const response = JSON.parse(message.body);
+        console.log("서버로부터 받은 메시지:", response);
+  
+        if (response.commandType === "GAME_MODAL_START" && response.data === "SHORTS") {
+          setIsGuideModalOpen(false);
+        }
+      });
+  
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate]);
+  
+  
   // 비디오 선택 시 메시지 전송
   const handleSelectVideo = () => {
     if (client && client.connected) {
@@ -146,6 +174,7 @@ const Game5 = () => {
     setIsModalOpen(false);
   };
 
+  // 비디오 선택 응답
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
@@ -161,6 +190,7 @@ const Game5 = () => {
       };
     }
   }, [client, roomId, navigate]);
+
 
   const updateTime = () => {
     if (videoRef.current) {
@@ -193,9 +223,7 @@ const Game5 = () => {
           planetImg={earth}
           planetWidth="180px"
           RedBtnText={"댄스 챌린지"}
-          RedBtnFn={() => {
-            setIsGuideModalOpen(false);
-          }}
+          RedBtnFn={handleRedBtnClick}
           modalText={<>
             숏폼 챌린지에 오신걸 환영합니다 ! <br />
             챌린지 영상을 한 가지 선택 후, <br />
