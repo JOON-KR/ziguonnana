@@ -96,6 +96,9 @@ public class PoseService {
 	    if (poselist.size() <= room.getCycle()) {
 	        poselist.add(new ConcurrentHashMap<>());
 	    }
+	    if (savelist.size() <= room.getCycle()) {
+	    	savelist.add(new ConcurrentHashMap<>());
+	    }
 	    ConcurrentHashMap<Integer, String> save = savelist.get(room.getCycle());
 	    ConcurrentHashMap<Integer, PoseResponse> pose = poselist.get(room.getCycle());
 	    PoseResponse res = PoseResponse.builder()
@@ -105,13 +108,14 @@ public class PoseService {
 	    // 결과 저장
 	    pose.put(request.getNum(), res);
 	    save.put(request.getNum(), isSuccess ? "성공" : "실패");
-	    log.info("포즈 계산 결과 전송: userNo={}, result={}", request.getNum(), pose);
 
+	    log.info("포즈 개별결과 전송: userNo={}, result={}", request.getNum(), pose);
 	    // 한 사이클에 모두가 저장이 되었다면
 	    if (save.size() == room.getPeople()) {
-	        log.info("포즈 계산 {}번째 사이클 완료", room.getCycle());
 	        room.cycleUp();
+	        log.info("포즈 계산 {}번째 사이클 완료", room.getCycle());
 	        // 결과 전송
+	        log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, pose);
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
 	                Response.ok(CommandType.POSE_RESULT, pose));
 	    }
@@ -121,9 +125,9 @@ public class PoseService {
 	        log.info("포즈 종료", room.getCycle());
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, true));
 	        room.cycleInit();
+	        room.countInit();
 	    }
 
-	    log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, pose);
 	}
 
 
