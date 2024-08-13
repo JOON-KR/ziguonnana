@@ -99,7 +99,7 @@ public class WebsocketService {
             loadingPlayerInfos.add(new LoadingPlayerInfo(p.getProfile().getName(), p.getNum()));
         }
         Response<List<LoadingPlayerInfo>> response = Response.ok(CommandType.PROFILE_CREATE, loadingPlayerInfos);
-        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" ,response);
+        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() ,response);
 
     }
 
