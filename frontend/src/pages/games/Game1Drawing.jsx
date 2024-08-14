@@ -33,12 +33,14 @@ const Header = styled.div`
 const Text = styled.h1`
   margin: 12px;
   font-size: 27px;
+  text-align: center;
 `;
 
 const DrawingText = styled.h1`
   display: inline-block;
   margin-bottom: 12px;
   font-size: 24px;
+  text-align: center;
 `;
 
 const HighlightText = styled.span`
@@ -124,9 +126,9 @@ const ProfileInfo = styled.div`
   font-size: 24px;
   font-weight: bold;
   flex-direction: row;
-  `;
-  
-  const ProfileDetails = styled.div`
+`;
+
+const ProfileDetails = styled.div`
   text-align: center;
 `;
 
@@ -145,6 +147,21 @@ const ColorSquare = styled.div`
   border: ${(props) => (props.selected ? "2px solid #000" : "none")};
 `;
 
+const AvatarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin-top: 150px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const AvatarTitle = styled.h1`
+  font-size: 30px;
+  margin-bottom: 20px;
+  color: white;
+`;
 const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
@@ -386,27 +403,22 @@ const Game1Drawing = () => {
   return (
     <Wrap>
       {isGameEnded ? (
-        <>
-          <Text>이어그리기가 종료되었습니다.</Text>
-          <h1>당신의 아바타 명함이 제작되었습니다 :)</h1>
+        <AvatarContainer>
+          <AvatarTitle>아바타 명함이 제작되었습니다 🧚‍♀️</AvatarTitle>
           <AvatarCard
             avatarImage={avatarCards.avatarImage}
             nickname={avatarCards.nickname}
             features={avatarCards.features}
           />
-          <button
+          <ToolButton
             onClick={() => {
               client.send(`/app/game/${roomId}/game-select`);
             }}
+            active={true}
           >
             다른 게임들 보러가기
-          </button>
-          {/* gameRecord에서 가져오기 - 버튼 css */}
-          {/* <ButtonContainer onClick={handleRecordDetail}>
-            <ButtonText>게임상세</ButtonText>
-            <IconImage src={recordBtn} alt="gameRecordBtn" />
-          </ButtonContainer> */}
-        </>
+          </ToolButton>
+        </AvatarContainer>
       ) : (
         <>
           <Header>
@@ -440,7 +452,7 @@ const Game1Drawing = () => {
                 </DrawingText>
               </ProfileDetails>
             </ProfileInfo>
--          </Header>
+          </Header>
           <CanvasWrapper onMouseUp={handleMouseUp}>
             <ReactSketchCanvas
               ref={canvasRef}

@@ -6,15 +6,14 @@ import IntroductionGuideModal from "../../components/modals/IntroductionGuideMod
 import IntroductionModal from "../../components/modals/IntroductionModal";
 
 const Wrap = styled.div`
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
-  justify-content: center;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
+  width: 100%;
+  height: 100vh;  /* Use entire viewport height */
+  padding: 20px; /* Add padding if needed */
+  box-sizing: border-box;
 `;
 
 const ButtonWrap = styled.div`

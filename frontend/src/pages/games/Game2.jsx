@@ -158,20 +158,6 @@ const Game2 = () => {
   const dispatch = useDispatch();
   const [isEnded, setIsEnded] = useState(false);
 
-  useEffect(() => {
-    if (explainerNo === userNo) {
-      setIsExplainer(true);
-      setExplainerNo(userNo);
-    } else {
-      setIsExplainer(false);
-    }
-    console.log("userNo: ", userNo);
-    console.log("explainerNo: ", explainerNo);
-    console.log("isExplainer:", isExplainer);
-  }, [userNo, explainerNo, client, roomId, subscribed]);
-
-  // isBodyTalkWelcomeModalOpen 닫고 isBodyTalkGuideModalOpen 열기
-
   const sendMessage = () => {
     if (client && client.connected) {
       console.log("보내는 메시지:", {
@@ -189,7 +175,23 @@ const Game2 = () => {
       setTypedText("");
     }
   };
-  //최초 1회 실행
+
+  useEffect(() => {
+    if (explainerNo === userNo) {
+        setIsExplainer(true);
+        console.log("출제자 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
+    } else {
+        setIsExplainer(false);
+        console.log("맞추는 사람 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
+    }
+  }, [userNo, explainerNo]);
+
+  // isExplainer 상태가 변경된 이후에 로그를 찍는 훅
+  useEffect(() => {
+      console.log("isExplainer 상태 변경됨: ", isExplainer);
+  }, [isExplainer]);
+
+
   useEffect(() => {
     if (explainerNo === userNo) {
       setIsExplainer(true);
@@ -197,11 +199,13 @@ const Game2 = () => {
     } else {
       setIsExplainer(false);
     }
+
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
-    console.log("유저 번호 :", userNo);
     console.log("초기 라운드 : ", round);
+    console.log("userNo: ", userNo);
+    console.log("explainerNo: ", explainerNo);
 
     if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
@@ -287,7 +291,8 @@ const Game2 = () => {
       setSubscribed(true);
     }
   }, [client, roomId, userNo, subscribed, explainerNo]);
-  //라운드 변경시 실행
+  
+  //라운드가 변경될 때 마다 실행됨. 게임의 상태가 변경될때 필요한 작업 처리
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
     if (client && client.connected && isGameStarted) {
@@ -299,10 +304,16 @@ const Game2 = () => {
     if (round === 7) {
       // 게임 종료 로직
       setIsGameEnded(true);
+    } else {
+      // 새로운 라운드로 출제자 초기화
+      setIsExplainer(false);
     }
   }, [round, client, isGameStarted, roomId]);
 
-  useEffect(() => {
+
+
+   //로컬 스트림
+   useEffect(() => {
     if (localStream && userVideoRef.current && explainerNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
@@ -311,6 +322,7 @@ const Game2 = () => {
     }
   }, [localStream, explainerNo, userNo]);
 
+  //구독자 스트림
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -367,6 +379,7 @@ const Game2 = () => {
 
   return (
     <Wrap>
+      {/* 임시버튼 */}
       <button
         onClick={() => {
           dispatch(setGame2Finish());
@@ -375,6 +388,8 @@ const Game2 = () => {
       >
         결과 스킵
       </button>
+
+      {/* 환영 모달 */}
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
           planetImg={orange}
