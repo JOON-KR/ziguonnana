@@ -184,4 +184,7 @@ public class Room {
 	public void clearUsedKeywords() {
 		usedKeywords.clear(); // 게임 종료 시 초기화할 수 있도록 메서드 추가
 	}
+	public void updateAvatar( ConcurrentMap<Integer, AvatarResult> avatarcards) {
+		this.avatarcards = avatarcards;
+	}
 }

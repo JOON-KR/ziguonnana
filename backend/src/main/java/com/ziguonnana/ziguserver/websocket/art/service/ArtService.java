@@ -195,6 +195,7 @@ public class ArtService {
                 cards.put(i, card);
             }
         }
+        room.updateAvatar(cards);
         Response<ConcurrentMap<Integer, AvatarResult>> cardMessage = Response.ok(CommandType.AVATAR_CARD, cards);
         messagingTemplate.convertAndSend("/topic/game/" + roomId, cardMessage);
         log.info("아바타 명함 :: roomId : {}, avatarCard : {} ", roomId, cardMessage);
