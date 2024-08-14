@@ -27,4 +27,12 @@ public class GameResultController {
         log.info("====게임 결과 : " + result);
         return Response.ok(CommandType.GAME_RESULT, result);
     }
+    @MessageMapping("/game/{roomId}/meeting")
+    @SendTo("/topic/game/{roomId}")
+    public Response<String> getFirstMeeting(@DestinationVariable("roomId") String roomId) {
+    	log.info("========= 게임 결과 요청 =========");
+    	String url = gameResultService.processAndUploadAvatarImage(roomId);
+    	log.info("====단체사진 결과 : " + url);
+    	return Response.ok(CommandType.MEETING_IMAGE, url);
+    }
 }
