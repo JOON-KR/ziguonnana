@@ -14,7 +14,7 @@ const Wrap = styled.div`
   justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
   width: 100%;
-  height: 100vh;  /* Use entire viewport height */
+  height: 100vh; /* Use entire viewport height */
   padding: 20px; /* Add padding if needed */
   box-sizing: border-box;
 `;
@@ -45,7 +45,11 @@ const DrawingText = styled.h1`
 
 const HighlightText = styled.span`
   font-size: 24px;
-  color: #10D7CB;
+  color: #10d7cb;
+`;
+const Drawer = styled.span`
+  font-size: 24px;
+  color: #ed251edb;
 `;
 
 const InfoBox = styled.div`
@@ -437,13 +441,13 @@ const Game1Drawing = () => {
                   </DrawingText>
                   <br />
                   <DrawingText>
-                    <HighlightText>
+                    <Drawer>
                       {
                         nicknameList.find(
                           (nicknameItem) => nicknameItem.num === currentUser
-                        )?.nickname                  
+                        )?.nickname
                       }
-                    </HighlightText>
+                    </Drawer>
                     님 차례.
                   </DrawingText>
                 </InfoBox>
