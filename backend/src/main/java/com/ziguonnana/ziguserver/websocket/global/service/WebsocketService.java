@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.ziguonnana.ziguserver.websocket.global.dto.*;
 import com.ziguonnana.ziguserver.websocket.shorts.dto.Shorts;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.ziguonnana.ziguserver.exception.RoomException;
 import com.ziguonnana.ziguserver.exception.RoomNotFoundException;
 import com.ziguonnana.ziguserver.websocket.answer.service.AnswerService;
+import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
@@ -173,4 +175,10 @@ public class WebsocketService {
     public List<Room> getAllRooms() {
         return new ArrayList<>(roomRepository.getAllRooms().values());
     }
+
+	public List<AvatarResult> getAvatar(String roomId) {
+		Room room = roomRepository.getRoom(roomId);
+		List<AvatarResult> avatarcards = room.getAvatarcards();
+		return avatarcards;
+	}
 }

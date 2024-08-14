@@ -148,7 +148,7 @@ public class Room {
 	}
 
 	// 아바타 카드 결과
-	private List<AvatarResult> getAvatarcards() {
+	public List<AvatarResult> getAvatarcards() {
 		Collection<AvatarResult> values = avatarcards.values();
 		return new ArrayList<>(values);
 	}

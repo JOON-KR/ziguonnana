@@ -1,16 +1,23 @@
 package com.ziguonnana.ziguserver.websocket.global.controller;
 
-import com.ziguonnana.ziguserver.websocket.global.dto.*;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
+import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
+import com.ziguonnana.ziguserver.websocket.global.dto.CreateRequest;
+import com.ziguonnana.ziguserver.websocket.global.dto.GameProfileRequest;
+import com.ziguonnana.ziguserver.websocket.global.dto.GameType;
+import com.ziguonnana.ziguserver.websocket.global.dto.Response;
 import com.ziguonnana.ziguserver.websocket.global.service.WebsocketService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Controller
@@ -49,11 +56,25 @@ public class WebsocketController {
         log.info("=========" + gameType + "게임 모달 시작===========");
         return Response.ok(CommandType.GAME_MODAL_START, gameType);
     }
+    //게임끝 모달삭제용
+    @MessageMapping("/game/{roomId}/end-modal")
+    @SendTo("/topic/game/{roomId}")
+    public Response<String> deleteModal(@DestinationVariable("roomId") String roomId){
+    	log.info("=========모달 삭제===========");
+    	return Response.ok(CommandType.GAME_MODAL_END, "모달 삭제");
+    }
     
     @MessageMapping("/game/{roomId}/game-select")
     @SendTo("/topic/game/{roomId}")
     public Response<String> gameSelect(@DestinationVariable("roomId") String roomId) {
         log.info("========= 게임 선택 이동=========");
         return Response.ok(CommandType.NANA_MAP, "선택 화면으로 이동");
+    }
+    @MessageMapping("/game/{roomId}/get-avatar")
+    @SendTo("/topic/game/{roomId}")
+    public Response<List<AvatarResult>> getAvatar(@DestinationVariable("roomId") String roomId) {
+    	log.info("========= 게임 선택 이동=========");
+    	List<AvatarResult> avatarcards = websocketService.getAvatar(roomId);
+    	return Response.ok(CommandType.AVATAR_IMAGE, avatarcards);
     }
 }
