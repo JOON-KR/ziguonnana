@@ -24,7 +24,7 @@ public class LikeController {
 	
 	@PostMapping
 	public ResponseEntity<ResponseDto<LikeResponse>> likeArticle(@RequestBody LikeRequest likeRequest){
-		LikeResponse response = likeService.likeArticle(likeRequest);
+		LikeResponse response = likeService.likeArticle(likeRequest.getArticleId());
 		return ResponseEntity.ok().body(ResponseDto.success(response));
 	}
 }
