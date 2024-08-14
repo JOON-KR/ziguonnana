@@ -9,7 +9,8 @@ public enum GameType {
     BODY_TALK("몸으로 말해요"),
     SAME_POSE("일심동체"),
     FOLLOW_POSE("포즈따라하기"),
-    SHORTS("숏폼 챌린지");
-
+    SHORTS("숏폼 챌린지"),
+    END("게임 종료");
+	
     private final String gameName;
 }
