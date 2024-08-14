@@ -17,24 +17,45 @@ const Wrap = styled.div`
   background-repeat: no-repeat;
   position: relative;
 `;
-
 const StyledH2 = styled.h2`
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 30px;
+  margin-bottom: 50px;
+  padding: 20px 40px;
+  font-size: 36px;
   font-weight: bold;
   color: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  /* background: linear-gradient(135deg, #468682, #82cec9); */
+  border-radius: 15px;
+  box-shadow: 0px 6px 15px rgba(122, 244, 224, 0.3);
   text-align: center;
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
 `;
+
+
+// const StyledH2 = styled.h2`
+//   margin-top: 50px;
+//   margin-bottom: 50px;
+//   padding: 10px 20px;
+//   font-size: 30px;
+//   font-weight: bold;
+//   color: #fff;
+//   border-radius: 10px;
+//   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+//   text-align: center;
+//   transition: transform 0.3s;
+// `;
 
 const VideoContainer = styled.div`
   display: flex;
   justify-content: center;
   gap: 20px;
+  & > div {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  & > div:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+  }
 `;
 
 const ThumbnailWrapper = styled.div`
@@ -261,7 +282,7 @@ const Game5 = () => {
       )}
       {!isGuideModalOpen && (
         <>
-          <StyledH2>챌린지할 영상을 선택해주세요. 💃🏼</StyledH2>
+          <StyledH2>챌린지할 영상을 <br />💃🏼 선택해주세요. 💃🏼</StyledH2>
           <VideoContainer>
             <ThumbnailWrapper
               onClick={() =>
