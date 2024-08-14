@@ -5,19 +5,16 @@ import sb from "../../assets/images/speechBubble.png";
 const Wrap = styled.div`
   width: 412px;
   height: 124px;
-  position: absolute;
-  left: 50px;
-  top: 100px;
   background-image: url(${sb});
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  // margin-bottom: 20px; /* 말풍선과 Nana 이미지 사이의 간격 추가 */
   display: flex;
   flex-direction: column;
-  // justify-content: flex-start; /* 상단에 배치 */
   align-items: center;
-  padding-top: 30px;
+  justify-content: ${({ hasWord }) => (hasWord ? 'flex-start' : 'center')}; /* word가 없을 때 중앙 정렬 */
+  padding-top: ${({ hasWord }) => (hasWord ? '30px' : '0')}; /* word가 없을 때 패딩 제거 */
+  padding-bottom: ${({ hasWord }) => (hasWord ? '0' : '30px')}; /* word가 없을 때 패딩 제거 */
 `;
 
 const TextBox = styled.div`
@@ -26,7 +23,8 @@ const TextBox = styled.div`
   font-size: 22px;
   font-weight: 600;
   color: black;
-  // margin: 5px 0;
+  margin-top: 3px;
+  margin-bottom: 8px;
 `;
 
 const SpeechBubble = ({ type, word }) => {
