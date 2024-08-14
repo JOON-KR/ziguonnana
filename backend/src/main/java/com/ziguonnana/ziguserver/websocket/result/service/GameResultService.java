@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.ziguonnana.ziguserver.domain.records.entity.AvatarCard;
 import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.global.dto.Room;
 import com.ziguonnana.ziguserver.websocket.repository.RoomRepository;
@@ -59,20 +58,27 @@ public class GameResultService {
 
     public String processAndUploadAvatarImage(String roomId) {
         try {
-        	Room room = roomRepository.getRoom(roomId);
-        	List<AvatarResult> avatarCards = room.makeGameResult().getAvatarCards();
+            Room room = roomRepository.getRoom(roomId);
+            List<AvatarResult> avatarCards = room.makeGameResult().getAvatarCards();
+
             // 원본 이미지 로드
             BufferedImage baseImage = ImageIO.read(new URL(s3BaseURL + "RESULT/49047748-c5e9-4576-8261-655e96bc1c27.png"));
+            BufferedImage combinedImage = new BufferedImage(baseImage.getWidth(), baseImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            // 원본 이미지를 복사하여 새로운 이미지 생성
+            Graphics2D g2d = combinedImage.createGraphics();
+            g2d.drawImage(baseImage, 0, 0, null);
+            g2d.dispose();
 
             // 아바타 이미지를 하나씩 덮어씌우기
             for (int i = 0; i < avatarCards.size() && i < COORDINATES.length; i++) {
                 AvatarResult avatarResult = avatarCards.get(i);
                 BufferedImage overlayImage = ImageIO.read(new URL(avatarResult.getAvatarImage()));
-                overlayImage(baseImage, overlayImage, i + 1);
+                overlayImage(combinedImage, overlayImage, i + 1);
             }
 
             // 최종 이미지를 S3에 업로드하고 URL 반환
-            return uploadToS3(baseImage);
+            return uploadToS3(combinedImage);
 
         } catch (IOException e) {
             e.printStackTrace();
