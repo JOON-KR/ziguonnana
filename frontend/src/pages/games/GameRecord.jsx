@@ -199,6 +199,15 @@ const GameRecord = () => {
     }
   }, [client, roomId]);
 
+  useEffect(() => {
+    if (client && client.connected) {
+      console.log("send:", `/app/game/${roomId}/meeting`);
+      client.send(`/app/game/${roomId}/meeting`, {}, {});
+    } else {
+      console.warn("send 문제 발생");
+    }
+  }, [client, roomId]);
+
   // 구독 / 데이터 받아오기
   useEffect(() => {
     console.log("--------------------------------");

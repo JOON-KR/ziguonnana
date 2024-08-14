@@ -708,7 +708,7 @@ const Game4 = () => {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 fontSize: "3rem",
-                color: "white",
+                color: "#FF0000",
               }}
             >
               {countdown}

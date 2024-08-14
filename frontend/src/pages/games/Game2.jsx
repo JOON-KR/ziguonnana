@@ -13,13 +13,15 @@ import { log } from "@tensorflow/tfjs";
 import btnIcon from "../../assets/icons/aqua_btn.png";
 
 const Wrap = styled.div`
-  width: 100vh;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  text-align: center;
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
 `;
 
@@ -28,51 +30,56 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  margin-left: 100px;
+  margin-bottom: 20px;
+  padding: 0 20px;
 `;
 
 const Header = styled.h1`
-  color: #ff007a;
-  font-size: 28px;
-  // margin-top: 30px;
-  // margin-bottom: 100px;
+  color: #ffffff;
+  text-decoration-line: underline;
+	text-decoration-thickness: 5px;
+  text-decoration-color: #58fff5;
+  font-size: 40px;
 `;
 
 const Header2 = styled.h1`
   color: white;
-  font-size: 24px;
-  margin-bottom: 20px;
+  font-size: 2vw;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  line-height: 1.2;
+  text-align: center;
 `;
 
 const BubbleWrap = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
   width: 100%;
   margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ChatWrap = styled.div`
-  width: 60%;
+  width: 100%;
   position: fixed;
-  bottom: 30px;
+  bottom: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
+  padding: 0 20px;
 `;
 
 const Input = styled.input`
-  width: 45%;
+  width: 30%;
   padding: 10px;
-  font-size: 16px;
+  font-size: 1.2vw;
   border: 2px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
   outline: none;
   transition: border-color 0.3s ease-in-out;
+  margin-bottom: 20px;
 
   &:focus {
     border-color: #ff6b6b;
@@ -81,12 +88,14 @@ const Input = styled.input`
 
 const Button = styled.button`
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 1.2vw;
   font-weight: bold;
   background-color: #58fff5;
   color: #54595e;
   border: none;
   border-radius: 5px;
+  margin-bottom: 20px;
+
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
 
@@ -97,61 +106,51 @@ const Button = styled.button`
 
 const ButtonContainer = styled.div`
   position: relative;
-  margin-top: 10px;
+  margin-top: 20px;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
 `;
 
 const ButtonText = styled.p`
   position: absolute;
   top: 28%;
-  left: 20%;
+  left: 25%;
   color: white;
-  font-size: 19px;
+  font-size: 1.5vw;
   font-weight: bold;
-  pointer-events: none; /* 버튼 텍스트가 클릭되지 않도록 설정 */
+  pointer-events: none;
 `;
 
 const IconImage = styled.img`
-  width: 160px;
-`;
-
-const Image = styled.img`
-  max-width: 300px;
-  height: auto;
-  // margin: 35px 0;
-  margin-left: 140px;
-  margin-top: 50px;
-  margin-bottom: 20px;
+  width: 10vw;
 `;
 
 const UserVideo = styled.video`
-  width: 90%;
+  width: 80%;
   max-width: 600px;
   height: auto;
   border-radius: 6px;
   background-color: black;
-  margin: 5px 0;
+  margin-top: 40px;
+  margin-bottom: 40px;
 `;
 
 const VideoWrapper = styled.div`
-  width: 70%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
 `;
 
 const Timer = styled.div`
-  position: absolute;
-  font-size: 38px;
-  color: #58fff5;
+  font-size: 2.5vw;
+  color: #ff4545;
   font-weight: bold;
-  // background-color: white;
-  margin-left: 320px;
-  padding-left: 130px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
 `;
+
 
 // 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
@@ -183,7 +182,7 @@ const Game2 = () => {
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
-  const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
+  const [timeLeft, setTimeLeft] = useState(2400); // 4분 = 240초
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
@@ -425,7 +424,7 @@ const Game2 = () => {
           planetImg={orange}
           BlueBtnText={"게임 설명"}
           BlueBtnFn={openBodyTalkGuideModal}
-          modalText={"몸으로말해요 게임에 오신걸 환영합니다 !"}
+          modalText={"몸으로말해요에 오신걸 환영합니다 !"}
           onClose={() => setIsBodyTalkWelcomeModalOpen(false)}
         />
       )}
@@ -443,7 +442,7 @@ const Game2 = () => {
           }}
           modalText={
             <>
-              한 명은 제시어를 몸으로 표현하고, <br /> 나머지는 제시어를 맞추면
+              한 명은 제시어를 <span style={{ color: "#58FFF5" }}>몸으로 표현</span>하고, <br /> 나머지는 제시어를 <span style={{ color: "#58FFF5" }}>맞추면 </span>
               됩니다. <br />
               제한 시간은 4분입니다.
             </>
@@ -472,9 +471,10 @@ const Game2 = () => {
         <>
           {/* 출제자 화면 */}
           <HeaderContainer>
-            <Header>{round + 1} 라운드 - 출제자</Header>
+            <Header>{round + 1} 라운드 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
+          <Header2>제시어를 몸으로 표현해주세요! <br /> 마이크는 꺼집니다.</Header2>
           <BubbleWrap>
             <SpeechBubble
               type={
@@ -492,14 +492,13 @@ const Game2 = () => {
               <UserVideo ref={subscriberVideoRef} autoPlay muted />
             )}
           </VideoWrapper>
-          <Header2>당신은 제시어를 몸으로 표현해야 합니다!</Header2>
-          <h1>마이크는 꺼집니다.</h1>
+          
         </>
       ) : (
         <>
           {/* 맞추는 사람 화면 */}
           <HeaderContainer>
-            <Header>{round + 1} 라운드 - 맞추는 사람</Header>
+            <Header>{round + 1} 라운드</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
 
             {isEnded && (
@@ -508,9 +507,10 @@ const Game2 = () => {
               </h1>
             )}
           </HeaderContainer>
-          <BubbleWrap>
-            <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
-          </BubbleWrap>
+          <Header2>화면을 보고 제시어를 맞춰보세요 ! <br />
+          현재 제시어 종류는 <span style={{ color: "#58FFF5" }}>{keywordType} </span> 입니다.
+          </Header2>
+          {/* <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} /> */}
           {/* <h1>출제자 화면 출력</h1> */}
           <VideoWrapper>
             {explainerNo === userNo ? (
@@ -519,7 +519,7 @@ const Game2 = () => {
               <UserVideo ref={subscriberVideoRef} autoPlay muted />
             )}
           </VideoWrapper>
-          <Header2>출제자 화면을 보고 제시어를 맞춰보세요 !</Header2>
+          
           <ChatWrap>
             <Input
               type="text"
@@ -532,11 +532,11 @@ const Game2 = () => {
                 }
               }}
             />
-            <Button onClick={sendMessage}>SEND</Button>
+            <Button onClick={sendMessage}>Enter</Button>
           </ChatWrap>
         </>
       )}
-      {/* 임시버튼 */}
+      {/* 임시버튼
       <button
         onClick={() => {
           dispatch(setGame2Finish());
@@ -544,7 +544,7 @@ const Game2 = () => {
         }}
       >
         결과 스킵
-      </button>
+      </button> */}
     </Wrap>
   );
 };
