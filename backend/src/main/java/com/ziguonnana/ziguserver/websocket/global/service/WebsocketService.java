@@ -159,11 +159,8 @@ public class WebsocketService {
 
         Room room = Optional.ofNullable(roomRepository.getRoom(roomId))
                 .orElseThrow(() -> new RoomException("Room not found: " + roomId));
-
-        room.getPlayers().remove(memberId);
-        if (room.getPlayers().isEmpty()) {
-            roomRepository.removeRoom(roomId);
-        }
+        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.DESTROY_ROOM, true));
+        roomRepository.removeRoom(roomId);
     }
 
     public List<Room> getAllRooms() {
