@@ -13,7 +13,7 @@ const Wrap = styled.div`
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100vh; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
