@@ -176,18 +176,21 @@ const Game2 = () => {
     }
   };
 
-  //출제자 or 맞추는 사람 확인, 상태 설정
   useEffect(() => {
     if (explainerNo === userNo) {
-      setIsExplainer(true);
-      setExplainerNo(userNo);
+        setIsExplainer(true);
+        console.log("출제자 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
     } else {
-      setIsExplainer(false);
+        setIsExplainer(false);
+        console.log("맞추는 사람 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
     }
-    console.log("userNo: ", userNo);
-    console.log("explainerNo: ", explainerNo);
-    console.log("isExplainer:", isExplainer);
-  }, [userNo, explainerNo, client, roomId, subscribed]);
+  }, [userNo, explainerNo]);
+
+  // isExplainer 상태가 변경된 이후에 로그를 찍는 훅
+  useEffect(() => {
+      console.log("isExplainer 상태 변경됨: ", isExplainer);
+  }, [isExplainer]);
+
 
   useEffect(() => {
     if (explainerNo === userNo) {
@@ -203,7 +206,6 @@ const Game2 = () => {
     console.log("초기 라운드 : ", round);
     console.log("userNo: ", userNo);
     console.log("explainerNo: ", explainerNo);
-    console.log("isExplainer:", isExplainer);
 
     if (client && client.connected && !subscribed) {
       //멤버아이디로 구독 - 몸으로 표현하는사람은 이거를 통해 받음
@@ -302,11 +304,16 @@ const Game2 = () => {
     if (round === 7) {
       // 게임 종료 로직
       setIsGameEnded(true);
+    } else {
+      // 새로운 라운드로 출제자 초기화
+      setIsExplainer(false);
     }
   }, [round, client, isGameStarted, roomId]);
 
-  //로컬 스트림
-  useEffect(() => {
+
+
+   //로컬 스트림
+   useEffect(() => {
     if (localStream && userVideoRef.current && explainerNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
