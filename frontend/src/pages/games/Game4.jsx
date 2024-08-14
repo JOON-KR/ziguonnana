@@ -264,6 +264,8 @@ const Game4 = () => {
   const [round, setRound] = useState(1); // 현재 라운드 상태
   const [gameStarted, setGameStarted] = useState(false); // 게임 시작 여부 체크
   const [currentSelectedPose, setCurrentSelectedPose] = useState(null); // 임시 포즈 선택을 위한 상태
+  const [roundResult, setRoundResult] = useState("");
+  const [roundPercentage, setRoundPercentage] = useState(0);
 
   const roomId = useSelector((state) => state.room.roomId); // 룸 ID 상태
   const client = useSelector((state) => state.client.stompClient); // STOMP 클라이언트 상태
@@ -343,8 +345,12 @@ const Game4 = () => {
         const cmd = parsedMessage.commandType;
 
         console.log("Parsed command:", cmd);
-
-        if (cmd === "POSE_TYPE") {
+        console.log(parsedMessage);
+        if (parsedMessage.commandType == "POSE_RESULT") {
+          console.log(parsedMessage.data[userNo].message, "결과도착했다!!!!!!");
+          setRoundResult(parsedMessage.data[userNo].message);
+          setRoundPercentage(parsedMessage.data[userNo].percent);
+        } else if (cmd === "POSE_TYPE") {
           // POSE_TYPE 메시지를 받으면 selectedPose를 업데이트
           console.log("Received POSE_TYPE command, setting selected pose...");
           const receivedPose = parsedMessage.data; // 서버로부터 받은 포즈 정보
@@ -474,13 +480,13 @@ const Game4 = () => {
                     setShowText(false);
                     setShowOverlay(false);
 
-                    if (round < 2) {
+                    if (round < 3) {
                       setRound((prevRound) => prevRound + 1);
                       setIsFollowPoseSelectModalOpen(true);
                     } else {
                       setTimeout(() => {
                         dispatch(setGame4Finish());
-                        navigate("/icebreaking/games");
+                        // navigate("/icebreaking/games");
                       }, 3000);
                     }
                     setGameStarted(false);
@@ -578,6 +584,12 @@ const Game4 = () => {
           modalText={
             selectedPose !== null ? (
               <>
+                <h1 style={{ fontSize: "50px", marginBottom: "10px" }}>
+                  {roundResult}
+                </h1>
+                <h1 style={{ fontSize: "50px", marginBottom: "10px" }}>
+                  {roundPercentage}
+                </h1>
                 이제 다음 라운드 포즈를 <br />
                 <span style={{ color: "#58FFF5" }}>방장</span>이 골라주세요.
               </>
