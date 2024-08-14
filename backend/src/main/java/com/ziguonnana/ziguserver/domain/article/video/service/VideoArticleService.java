@@ -3,6 +3,7 @@ package com.ziguonnana.ziguserver.domain.article.video.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,18 +31,19 @@ public class VideoArticleService {
     private final VideoArticleRepository videoArticleRepository;
     private final MemberRepository memberRepository;
     private final VideoRepository videoRepository;
-
+    private final PasswordEncoder encoder;
+    
     public VideoArticleResponse createArticle(VideoArticleRequest articleRequest) {
         Long memberId = TokenInfo.getMemberId();
         Member member = getMember(memberId);
         Video video = getVideo(articleRequest.getVideoId());
 
         VideoArticle videoArticle = VideoArticle.builder()
-                .member(member)
                 .video(video)
                 .title(articleRequest.getTitle())
                 .likeCount(0)
                 .viewCount(0)
+                .password(encoder.encode(articleRequest.getPassword()))
                 .isDelete(false)
                 .build();
 
@@ -50,11 +52,10 @@ public class VideoArticleService {
     }
 
     public VideoArticleResponse updateArticle(VideoArticleRequest articleRequest) {
-        Long memberId = TokenInfo.getMemberId();
         VideoArticle videoArticle = findArticleById(articleRequest.getArticleId());
-
-        if (!videoArticle.getMember().getId().equals(memberId)) {
-            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
+        String encodedPassword = encoder.encode(articleRequest.getPassword());
+        if (!videoArticle.getPassword().equals(encodedPassword)) {
+            throw new ArticleNotFoundException("비밀번호가 일치하지 않습니다.");
         }
 
         Video video = getVideo(articleRequest.getVideoId());
@@ -69,9 +70,9 @@ public class VideoArticleService {
         Long memberId = TokenInfo.getMemberId();
         VideoArticle videoArticle = findArticleById(articleId);
 
-        if (!videoArticle.getMember().getId().equals(memberId)) {
-            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
-        }
+//        if (!videoArticle.getMember().getId().equals(memberId)) {
+//            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
+//        }
 
         videoArticle.delete();
         videoArticleRepository.save(videoArticle);

@@ -117,7 +117,7 @@ public class WebsocketService {
     public void join(String roomId,  String memberId) {
         Room room = getRoom(roomId);
         if(room.getIsStart() >= room.getPeople()) {
-        	messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, GameMessage.info("방이 가득 찼습니다.",true));
+        	messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, Response.ok(CommandType.ROOM_IS_FULL, "방이 가득 찼습니다."));
         	return;
         }
         room.start();

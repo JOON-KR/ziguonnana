@@ -20,7 +20,6 @@ public class VideoArticleResponse {
                 .id(videoArticle.getId())
                 .title(videoArticle.getTitle())
                 .videoId(videoArticle.getVideo().getId())
-                .memberId(videoArticle.getMember().getId())
                 .isDelete(videoArticle.getIsDelete())
                 .likeCount(videoArticle.getLikeCount())
                 .viewCount(videoArticle.getViewCount())
