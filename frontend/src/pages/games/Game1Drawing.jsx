@@ -436,7 +436,7 @@ const Game1Drawing = () => {
           <ButtonContainer
             onClick={() => {
               client.send(`/app/game/${roomId}/game-select`);
-              navigate("/icebreaking/games/gameRecord");
+              // navigate("/icebreaking/games/gameRecord");
             }}
           >
             <ButtonText>

@@ -260,7 +260,7 @@ const Game2 = () => {
           setExplainerNo(userNo);
           console.log("userNo: ", userNo);
           console.log("explainerNo: ", explainerNo);
-          setKeywordType(parsedMessage.data.type);
+          setKeywordType(parsedMessage.data.keywordType);
           console.log(parsedMessage.data.type);
           console.log(keywordType);
           setReceivedKeyword(parsedMessage.data.word);
@@ -288,9 +288,10 @@ const Game2 = () => {
 
         if (
           parsedMessage.commandType == "KEYWORD_TYPE" &&
-          parsedMessage.data !== "요청 불가"
+          parsedMessage.data.keywordType !== "요청 불가"
         ) {
-          setKeywordType(parsedMessage.data);
+          setKeywordType(parsedMessage.data.keywordType);
+          setExplainerNo(parsedMessage.data.explanierNum);
         }
         // 출제자이면,
         if (parsedMessage.commandType === "BODYGAME_EXPLANIER") {
@@ -351,17 +352,30 @@ const Game2 = () => {
     }
   }, [round, client, isGameStarted, roomId]);
 
-  //로컬 스트림
+  //로컬 스트림 설정
+  // 로컬 스트림 설정
   useEffect(() => {
-    if (localStream && userVideoRef.current && explainerNo === userNo) {
-      userVideoRef.current.srcObject = localStream.getMediaStream();
-      console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
-    } else {
-      console.log("로컬 스트림이 설정되지 않았습니다.");
+    if (explainerNo === userNo) {
+      // 출제자인 경우
+      if (localStream && userVideoRef.current) {
+        userVideoRef.current.srcObject = localStream.getMediaStream();
+        console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+      } else if (!localStream) {
+        console.log("로컬 스트림이 아직 준비되지 않았습니다.");
+      }
     }
   }, [localStream, explainerNo, userNo]);
-
-  //구독자 스트림
+  // useEffect(() => {
+  //   if (localStream && userVideoRef.current && explainerNo === userNo) {
+  //     userVideoRef.current.srcObject = localStream.getMediaStream();
+  //     console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
+  //   } else if (explainerNo === userNo && !localStream) {
+  //     console.log("로컬 스트림이 없으나 출제자입니다.");
+  //     userVideoRef.current.srcObject = null; // 스트림이 없을 경우 비디오 요소를 비웁니다.
+  //   }
+  // }, [localStream, explainerNo, userNo]);
+  
+  //서브 스트림
   useEffect(() => {
     if (
       subscribers.length > 0 &&
@@ -369,21 +383,25 @@ const Game2 = () => {
       explainerNo !== userNo
     ) {
       const subscriber = subscribers.find(
-        (sub) => sub.stream.connection.data === `{"userNo":${explainerNo}}`
+        (sub) => JSON.parse(sub.stream.connection.data).userNo === explainerNo
       );
       if (subscriber) {
-        subscriberVideoRef.current.srcObject =
-          subscriber.stream.getMediaStream();
+        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
         console.log(
           "서브스크립션 스트림이 비디오 요소에 설정되었습니다.",
           subscriber.stream
         );
       } else {
         console.log("적절한 구독자를 찾을 수 없습니다.");
+        subscriberVideoRef.current.srcObject = null; 
       }
+    } else if (explainerNo !== userNo && subscribers.length === 0) {
+      console.log("구독자 스트림이 없거나 찾을 수 없습니다.");
+      subscriberVideoRef.current.srcObject = null; 
     }
   }, [subscribers, explainerNo, userNo]);
-
+  
+  
   // 타이머 로직
   useEffect(() => {
     if (!isGameEnded && timeLeft > 0) {
