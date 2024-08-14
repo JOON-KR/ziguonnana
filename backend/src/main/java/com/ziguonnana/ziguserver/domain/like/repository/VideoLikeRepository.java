@@ -9,5 +9,6 @@ import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 import com.ziguonnana.ziguserver.domain.member.entity.Member;
 
 public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
-    Optional<VideoLike> findByVideoArticleAndMember(VideoArticle videoArticle, Member member);
+//    Optional<VideoLike> findByVideoArticleAndMember(VideoArticle videoArticle, Member member);
+    Optional<VideoLike> findByVideoArticleIdAndIpAddress(Long videoArticleId, String ipAddress);
 }

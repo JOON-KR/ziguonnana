@@ -28,9 +28,7 @@ public class VideoLike {
     @JoinColumn(name = "article_id", nullable = false)
     private VideoArticle videoArticle;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private String ipAddress;
     
     private Long videoId;
 }
