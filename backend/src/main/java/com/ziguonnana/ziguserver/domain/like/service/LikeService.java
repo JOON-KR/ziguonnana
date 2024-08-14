@@ -46,7 +46,7 @@ public class LikeService {
                     videoLikeRepository.delete(existingLike);
                     videoArticle.decreaseLikeCount(); // 좋아요 감소
                     videoArticleRepository.save(videoArticle); // 업데이트된 likeCount 저장
-                    return "좋아요 취소";
+                    return "좋아요 취소 : "+ipAddress;
                 })
                 .orElseGet(() -> {
                     VideoLike videoLike = VideoLike.builder()
@@ -56,7 +56,7 @@ public class LikeService {
                     videoLikeRepository.save(videoLike);
                     videoArticle.increaseLikeCount(); // 좋아요 증가
                     videoArticleRepository.save(videoArticle); // 업데이트된 likeCount 저장
-                    return "좋아요";
+                    return "좋아요 : "+ipAddress;
                 });
     }
 
