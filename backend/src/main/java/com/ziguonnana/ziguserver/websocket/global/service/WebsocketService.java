@@ -58,6 +58,7 @@ public class WebsocketService {
                 .poseResult(new ArrayList<>())
                 .avatarcards(new ConcurrentHashMap<>())
                 .posetmp(new ArrayList<>())
+                .isStart(1)
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
@@ -115,7 +116,11 @@ public class WebsocketService {
 
     public void join(String roomId,  String memberId) {
         Room room = getRoom(roomId);
-
+        if(room.getIsStart() >= room.getPeople()) {
+        	messagingTemplate.convertAndSend("/topic/game/" + roomId + "/" + memberId, GameMessage.info("방이 가득 찼습니다.",true));
+        	return;
+        }
+        room.start();
         Player player = Player.builder()
                 .memberId(memberId)
                 .role("user")

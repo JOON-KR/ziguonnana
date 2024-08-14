@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Room {
 	// key: 클라이언트의 "num" value : Player
 	private ConcurrentMap<Integer, Player> players;
+	private int isStart;
 	private int people;
 	private int status;
 	private int pose;
@@ -163,5 +164,9 @@ public class Room {
 	}
 	public void updatePoseResult(PoseResponse pose) {
 		this.poseResponse = pose;
+	}
+
+	public void start() {
+		this.isStart++;
 	}
 }
