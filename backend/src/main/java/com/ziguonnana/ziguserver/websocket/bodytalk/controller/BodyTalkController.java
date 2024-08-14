@@ -1,6 +1,7 @@
 package com.ziguonnana.ziguserver.websocket.bodytalk.controller;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatMessage;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyChatRequest;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkKeywordResponse;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkResult;
 import com.ziguonnana.ziguserver.websocket.global.dto.CommandType;
 import com.ziguonnana.ziguserver.websocket.bodytalk.service.BodyTalkService;
@@ -27,11 +28,11 @@ public class BodyTalkController {
     // 다른 방 참가자들에게 키워드 타입만 전달
     @MessageMapping("/game/{roomId}/bodyTalk/keyword")
     @SendTo("/topic/game/{roomId}")
-    public Response<String> sendKeyword(@DestinationVariable("roomId") String roomId) {
+    public Response<BodyTalkKeywordResponse> sendKeyword(@DestinationVariable("roomId") String roomId) {
         log.info("========= 몸으로 말해요 게임 키워드 전달 =========");
-        String type = bodyTalkService.decideKeywordExplanier(roomId);
-        if(type.equals("요청 불가")) log.info("=====요청 여러번 들어옴====");
-        return Response.ok(CommandType.KEYWORD_TYPE, type);
+        BodyTalkKeywordResponse response = bodyTalkService.decideKeywordExplanier(roomId);
+        if(response.getKeywordType().equals("요청 불가")) log.info("=====요청 여러번 들어옴====");
+        return Response.ok(CommandType.KEYWORD_TYPE, response);
     }
 
     //정답 맞추는 채팅
