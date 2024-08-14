@@ -10,7 +10,7 @@ import red from "../../assets/icons/red.png";
 import frozen_red from "../../assets/icons/frozen_red.png";
 import gray from "../../assets/icons/gray.png";
 import frozen_gray from "../../assets/icons/frozen_gray.png";
-import Nana from "../../assets/icons/nana.png";  
+import Nana from "../../assets/icons/nana.png";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../store/messageSlice";
@@ -96,7 +96,10 @@ const Games = () => {
         dispatch(setMessage(parsedMessage.data));
 
         // 모달 열기 응답 처리
-        if (parsedMessage.commandType === "GAME_MODAL_START" && parsedMessage.data === "END") {
+
+        //  if (parsedMessage.commandType === "GAME_RESULT_MODAL &&
+        //     parsedMessage.data === "END")
+        if (parsedMessage.commandType === "GAME_RESULT_MODAL") {
           setIsEndModalOpen(true); // 모든 클라이언트에서 모달을 엽니다
         }
 
@@ -128,14 +131,14 @@ const Games = () => {
 
   const handleNext = () => {
     //모달 열기 전송
-    client.send(`/app/game/${roomId}/start-modal/END`, {});
+    client.send(`/app/game/${roomId}/start-modal/result`, {});
     // setIsEndModalOpen(true); // 버튼 클릭 시 모달 열기
   };
 
   return (
     <Container>
       <Title>NANA’S ICE-BREAKING MAP</Title>
-      
+
       <Wrap>
         <Planet src={blue} style={{ left: "50px", bottom: "90px" }} />
         <PlanetName style={{ left: "83px", bottom: "75px" }}>아바타</PlanetName>
@@ -159,7 +162,7 @@ const Games = () => {
             src={frozen_red}
             style={{
               left: "375px",
-              bottom: "80px"
+              bottom: "80px",
             }}
           />
         ) : (
@@ -204,14 +207,14 @@ const Games = () => {
             height: "110px",
           }}
         />
-        <NanaImage 
+        <NanaImage
           onClick={handleNext}
-          src={Nana} 
-          style={{ 
-            right: "1px", 
-            bottom: "130px" 
-          }} 
-        /> 
+          src={Nana}
+          style={{
+            right: "1px",
+            bottom: "130px",
+          }}
+        />
         <PlanetName style={{ right: "10px", bottom: "95px" }}>
           게임 끝내기
         </PlanetName>
