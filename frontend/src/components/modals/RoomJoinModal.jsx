@@ -142,6 +142,10 @@ const RoomJoinModal = ({ onClose }) => {
                   num: parsedMessage.data.num,
                 }));
               }
+              if (parsedMessage.commandType == "ROOM_IS_FULL") {
+                console.log("가득참~~~");
+                navigate("/");
+              }
             }
           );
 
