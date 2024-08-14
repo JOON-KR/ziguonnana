@@ -39,10 +39,8 @@ public class VideoArticle {
     private Integer likeCount;
     private Integer viewCount;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
+    private String password;
+    
     @PrePersist
     protected void onCreate() {
         if (this.regDate == null) {

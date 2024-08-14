@@ -3,6 +3,7 @@ package com.ziguonnana.ziguserver.domain.article.video.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,12 +13,8 @@ import com.ziguonnana.ziguserver.domain.article.video.entity.Video;
 import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 import com.ziguonnana.ziguserver.domain.article.video.repository.VideoArticleRepository;
 import com.ziguonnana.ziguserver.domain.article.video.repository.VideoRepository;
-import com.ziguonnana.ziguserver.domain.member.entity.Member;
-import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
 import com.ziguonnana.ziguserver.exception.ArticleNotFoundException;
 import com.ziguonnana.ziguserver.exception.VideoNotFoundException;
-import com.ziguonnana.ziguserver.global.TokenInfo;
-import com.ziguonnana.ziguserver.security.exception.MemberNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,20 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class VideoArticleService {
     private final VideoArticleRepository videoArticleRepository;
-    private final MemberRepository memberRepository;
     private final VideoRepository videoRepository;
-
+    private final PasswordEncoder encoder;
+    
     public VideoArticleResponse createArticle(VideoArticleRequest articleRequest) {
-        Long memberId = TokenInfo.getMemberId();
-        Member member = getMember(memberId);
         Video video = getVideo(articleRequest.getVideoId());
-
         VideoArticle videoArticle = VideoArticle.builder()
-                .member(member)
                 .video(video)
                 .title(articleRequest.getTitle())
                 .likeCount(0)
                 .viewCount(0)
+                .password(encoder.encode(articleRequest.getPassword()))
                 .isDelete(false)
                 .build();
 
@@ -50,11 +44,10 @@ public class VideoArticleService {
     }
 
     public VideoArticleResponse updateArticle(VideoArticleRequest articleRequest) {
-        Long memberId = TokenInfo.getMemberId();
         VideoArticle videoArticle = findArticleById(articleRequest.getArticleId());
-
-        if (!videoArticle.getMember().getId().equals(memberId)) {
-            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
+        String encodedPassword = encoder.encode(articleRequest.getPassword());
+        if (!videoArticle.getPassword().equals(encodedPassword)) {
+            throw new ArticleNotFoundException("비밀번호가 일치하지 않습니다.");
         }
 
         Video video = getVideo(articleRequest.getVideoId());
@@ -66,11 +59,10 @@ public class VideoArticleService {
     }
 
     public void deleteArticle(Long articleId) {
-        Long memberId = TokenInfo.getMemberId();
         VideoArticle videoArticle = findArticleById(articleId);
-
-        if (!videoArticle.getMember().getId().equals(memberId)) {
-            throw new ArticleNotFoundException("작성자가 일치하지 않습니다.");
+        String encodedPassword = encoder.encode(videoArticle.getPassword());
+        if (!videoArticle.getPassword().equals(encodedPassword)) {
+            throw new ArticleNotFoundException("비밀번호가 일치하지 않습니다.");
         }
 
         videoArticle.delete();
@@ -94,10 +86,6 @@ public class VideoArticleService {
     private VideoArticle findArticleById(Long articleId) {
         return videoArticleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticleNotFoundException("비디오 아티클을 찾을 수 없습니다."));
-    }
-
-    private Member getMember(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
     }
 
     private Video getVideo(Long videoId) {
