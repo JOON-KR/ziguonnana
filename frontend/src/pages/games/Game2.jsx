@@ -10,27 +10,27 @@ import bigNana from "../../assets/icons/game2nana.png";
 import OpenViduSession from "../../components/OpenViduSession";
 import { setGame2Finish } from "../../store/resultSlice";
 import { log } from "@tensorflow/tfjs";
+import btnIcon from "../../assets/icons/aqua_btn.png";
 
 const Wrap = styled.div`
-  width: 100%;
-  height: auto;
+  width: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  position: relative;
 `;
 
 const HeaderContainer = styled.div`
   width: 100%;
   display: flex;
-  justify-content: row;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 30px;
-  margin-bottom: 100px;
-  // margin-right: 190px;
-  margin-left: 170px;
-  // padding: 0 130px; /* 좌우에 패딩 추가 */
+  margin-top: 20px;
+  margin-bottom: 10px;
+  margin-left: 100px;
 `;
 
 const Header = styled.h1`
@@ -44,6 +44,14 @@ const Header2 = styled.h1`
   color: white;
   font-size: 24px;
   margin-bottom: 20px;
+`;
+
+const BubbleWrap = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
 `;
 
 const ChatWrap = styled.div`
@@ -87,6 +95,26 @@ const Button = styled.button`
   }
 `;
 
+const ButtonContainer = styled.div`
+  position: relative;
+  margin-top: 10px;
+  cursor: pointer;
+`;
+
+const ButtonText = styled.p`
+  position: absolute;
+  top: 28%;
+  left: 20%;
+  color: white;
+  font-size: 19px;
+  font-weight: bold;
+  pointer-events: none; /* 버튼 텍스트가 클릭되지 않도록 설정 */
+`;
+
+const IconImage = styled.img`
+  width: 160px;
+`;
+
 const Image = styled.img`
   max-width: 300px;
   height: auto;
@@ -97,27 +125,30 @@ const Image = styled.img`
 `;
 
 const UserVideo = styled.video`
-  width: 100%;
+  width: 90%;
   max-width: 600px;
   height: auto;
   border-radius: 6px;
   background-color: black;
-  margin: 20px 0;
+  margin: 5px 0;
 `;
 
 const VideoWrapper = styled.div`
-  width: 75%;
+  width: 70%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 10px;
 `;
 
 const Timer = styled.div`
+  position: absolute;
   font-size: 38px;
   color: #58fff5;
   font-weight: bold;
   // background-color: white;
-  padding-left: 120px;
+  margin-left: 320px;
+  padding-left: 130px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 `;
@@ -379,16 +410,6 @@ const Game2 = () => {
 
   return (
     <Wrap>
-      {/* 임시버튼 */}
-      <button
-        onClick={() => {
-          dispatch(setGame2Finish());
-          navigate("/icebreaking/games");
-        }}
-      >
-        결과 스킵
-      </button>
-
       {/* 환영 모달 */}
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
@@ -429,13 +450,16 @@ const Game2 = () => {
         <>
           {/* 게임 종료 화면 */}
           <Header2>게임이 종료되었습니다.</Header2>
-          <Button
+          <ButtonContainer
             onClick={() => {
-              navigate("/icebreaking/games");
+              client.send(`/app/game/${roomId}/game-select`);
             }}
           >
-            다른 게임들 보러가기
-          </Button>
+            <ButtonText>
+                게임 더보기
+            </ButtonText>
+            <IconImage src={btnIcon} alt="gamesBtn" />
+          </ButtonContainer>
         </>
       ) : isExplainer ? (
         <>
@@ -444,15 +468,16 @@ const Game2 = () => {
             <Header>{round + 1} 라운드 - 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
-          <SpeechBubble
-            type={
-              <>
-                제시어 종류 : {keywordType} <br />
-                <br />
-              </>
-            }
-            word={`제시어 : ${receivedKeyword}`}
-          />
+          <BubbleWrap>
+            <SpeechBubble
+              type={
+                <>
+                  제시어 종류 : {keywordType} <br />
+                </>
+              }
+              word={`제시어 : ${receivedKeyword}`}
+            />
+          </BubbleWrap>
           <VideoWrapper>
             {explainerNo === userNo ? (
               <UserVideo ref={userVideoRef} autoPlay muted />
@@ -476,7 +501,9 @@ const Game2 = () => {
               </h1>
             )}
           </HeaderContainer>
-          <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
+          <BubbleWrap>
+            <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} />
+          </BubbleWrap>
           {/* <h1>출제자 화면 출력</h1> */}
           <VideoWrapper>
             {explainerNo === userNo ? (
@@ -502,6 +529,15 @@ const Game2 = () => {
           </ChatWrap>
         </>
       )}
+      {/* 임시버튼 */}
+      <button
+        onClick={() => {
+          dispatch(setGame2Finish());
+          navigate("/icebreaking/games");
+        }}
+      >
+        결과 스킵
+      </button>
     </Wrap>
   );
 };

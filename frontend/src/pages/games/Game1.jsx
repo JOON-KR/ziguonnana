@@ -32,6 +32,8 @@ const Game1 = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  let startable = false;
+
   useEffect(() => {
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
@@ -41,30 +43,48 @@ const Game1 = () => {
         `/topic/game/${roomId}`,
         (message) => {
           const parsedMessage = JSON.parse(message.body);
+
+          console.log(startable);
           // console.log("게임 종류 선택 메시지:", parsedMessage);
 
-          const cmd = parsedMessage.commandType;
-          const data = parsedMessage.data;
+          // {
+          //   "message": "SUCCESS",
+          //   "commandType": "ART_START",
+          //   "data": true
+          // }
 
-          console.log("닫기 요청 데이터1 ", parsedMessage);
-          console.log("닫기 요청 데이터2 ", data);
+          // {
+          //   "message": "SUCCESS",
+          //   "commandType": "GAME_MODAL_START",
+          //   "data": "SAME_POSE"
+          // }
 
-          if (data == "SAME_POSE") {
+          console.log("소켓에서 받은 메시지  ", parsedMessage);
+
+          if (parsedMessage.commandType == "ART_START") {
+            startable = true;
+            console.log("스타터블 트루됨!!!!!!!!!!!!");
+          }
+
+          if (parsedMessage.data == "SAME_POSE" && startable) {
+            console.log("3=============");
             setIsDrawingWelcomeModalOpen(false);
             setIsDrawingGuideModalOpen(false);
-          } else if (cmd == "GAME_MODAL_START") {
+            setIsIntroGuideModalOpen(false);
+            setIsIntroModalOpen(false);
+          } else if (parsedMessage.commandType == "GAME_MODAL_START") {
             // setIsIntroGuideModalOpen(false);
             openIntroModal();
           }
-          if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
-            // 데이터 받아와서 Redux 상태 업데이트
-            dispatch(setDrawingData(data));
-            // art 데이터 캔버스에 그리기
-            navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
-            //모달 닫기
-            setIsDrawingWelcomeModalOpen(false);
-            setIsDrawingGuideModalOpen(false);
-          }
+          // if (parsedMessage.message.trim() === "이어그리기 첫 키워드 전파") {
+          //   // 데이터 받아와서 Redux 상태 업데이트
+          //   dispatch(setDrawingData(data));
+          //   // art 데이터 캔버스에 그리기
+          //   navigate(`/icebreaking/games/game1Drawing`); // Game1Drawing 페이지로 이동
+          //   //모달 닫기
+          //   setIsDrawingWelcomeModalOpen(false);
+          //   setIsDrawingGuideModalOpen(false);
+          // }
         }
       );
       return () => {
@@ -175,11 +195,9 @@ const Game1 = () => {
       {!isIntroGuideModalOpen &&
         !isIntroModalOpen &&
         !isDrawingWelcomeModalOpen &&
-        !isDrawingGuideModalOpen && <Game1Drawing roomId={roomId} />}
-      {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>
-        버튼
-      </button>
+        !isDrawingGuideModalOpen && 
+        <Game1Drawing roomId={roomId} />
+      }
     </Wrap>
   );
 };
