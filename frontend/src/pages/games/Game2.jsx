@@ -189,6 +189,8 @@ const Game2 = () => {
   const dispatch = useDispatch();
   const [isEnded, setIsEnded] = useState(false);
 
+  const [targetUser, setTargetUser] = useState(0);
+
   const sendMessage = () => {
     if (client && client.connected) {
       console.log("보내는 메시지:", {
@@ -209,19 +211,28 @@ const Game2 = () => {
 
   useEffect(() => {
     if (explainerNo === userNo) {
-        setIsExplainer(true);
-        console.log("출제자 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
+      setIsExplainer(true);
+      console.log(
+        "출제자 설정: userNo = ",
+        userNo,
+        "explainerNo = ",
+        explainerNo
+      );
     } else {
-        setIsExplainer(false);
-        console.log("맞추는 사람 설정: userNo = ", userNo, "explainerNo = ", explainerNo);
+      setIsExplainer(false);
+      console.log(
+        "맞추는 사람 설정: userNo = ",
+        userNo,
+        "explainerNo = ",
+        explainerNo
+      );
     }
   }, [userNo, explainerNo]);
 
   // isExplainer 상태가 변경된 이후에 로그를 찍는 훅
   useEffect(() => {
-      console.log("isExplainer 상태 변경됨: ", isExplainer);
+    console.log("isExplainer 상태 변경됨: ", isExplainer);
   }, [isExplainer]);
-
 
   useEffect(() => {
     if (explainerNo === userNo) {
@@ -322,7 +333,7 @@ const Game2 = () => {
       setSubscribed(true);
     }
   }, [client, roomId, userNo, subscribed, explainerNo]);
-  
+
   //라운드가 변경될 때 마다 실행됨. 게임의 상태가 변경될때 필요한 작업 처리
   useEffect(() => {
     // 정답을 맞추면 다음 턴으로 이동 ⇒ 키워드 요청 api 호출
@@ -341,10 +352,8 @@ const Game2 = () => {
     }
   }, [round, client, isGameStarted, roomId]);
 
-
-
-   //로컬 스트림
-   useEffect(() => {
+  //로컬 스트림
+  useEffect(() => {
     if (localStream && userVideoRef.current && explainerNo === userNo) {
       userVideoRef.current.srcObject = localStream.getMediaStream();
       console.log("로컬 스트림이 비디오 요소에 설정되었습니다.", localStream);
@@ -455,9 +464,7 @@ const Game2 = () => {
               client.send(`/app/game/${roomId}/game-select`);
             }}
           >
-            <ButtonText>
-                게임 더보기
-            </ButtonText>
+            <ButtonText>게임 더보기</ButtonText>
             <IconImage src={btnIcon} alt="gamesBtn" />
           </ButtonContainer>
         </>
