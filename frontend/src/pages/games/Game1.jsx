@@ -195,11 +195,9 @@ const Game1 = () => {
       {!isIntroGuideModalOpen &&
         !isIntroModalOpen &&
         !isDrawingWelcomeModalOpen &&
-        !isDrawingGuideModalOpen && <Game1Drawing roomId={roomId} />}
-      {/* 결과화면 재생이 끝난 후 버튼 표시 */}
-      <button onClick={() => navigate("/icebreaking/games/game1Avata")}>
-        버튼
-      </button>
+        !isDrawingGuideModalOpen && 
+        <Game1Drawing roomId={roomId} />
+      }
     </Wrap>
   );
 };

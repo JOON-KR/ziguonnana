@@ -7,6 +7,7 @@ import BASE_URL from "../../api/APIconfig";
 import { useNavigate } from "react-router-dom";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import { setGame1Finish } from "../../store/resultSlice";
+import btnIcon from "../../assets/icons/aqua_btn.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -14,14 +15,14 @@ const Wrap = styled.div`
   justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
   width: 100%;
-  height: 100vh; /* Use entire viewport height */
+  height: 100vh;  /* Use entire viewport height */
   padding: 20px; /* Add padding if needed */
   box-sizing: border-box;
 `;
 
 const Header = styled.div`
   width: 100%; /* Full width */
-  padding: 10px;
+  padding: 8px 10px;
   background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
@@ -30,37 +31,33 @@ const Header = styled.div`
   box-sizing: border-box;
 `;
 
-const Text = styled.h1`
-  margin: 12px;
-  font-size: 27px;
-  text-align: center;
-`;
-
 const DrawingText = styled.h1`
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  margin-top: 2px;
   font-size: 24px;
   text-align: center;
 `;
 
-const HighlightText = styled.span`
-  font-size: 24px;
-  color: #10d7cb;
+const MintText = styled.span`
+  font-size: 25px;
+  color: #10D7CB;
 `;
-const Drawer = styled.span`
-  font-size: 24px;
-  color: #ed251edb;
+
+const PinkText = styled.span`
+  font-size: 25px;
+  color: #FF00C7;
 `;
 
 const InfoBox = styled.div`
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 `;
 
 const CanvasWrapper = styled.div`
   position: relative;
   width: 100%;
-  height: 80%;
-  border: 1px solid #ccc;
+  height: 82%;
+  // border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,6 +131,7 @@ const ProfileInfo = styled.div`
 
 const ProfileDetails = styled.div`
   text-align: center;
+  padding-top: 5px;
 `;
 
 const CustomSwatchesPicker = styled.div`
@@ -166,11 +164,32 @@ const AvatarTitle = styled.h1`
   margin-bottom: 20px;
   color: white;
 `;
+
+const ButtonContainer = styled.div`
+  position: relative;
+  margin-top: 10px;
+  cursor: pointer;
+`;
+
+const ButtonText = styled.p`
+  position: absolute;
+  top: 28%;
+  left: 20%;
+  color: white;
+  font-size: 19px;
+  font-weight: bold;
+  pointer-events: none; /* 버튼 텍스트가 클릭되지 않도록 설정 */
+`;
+
+const IconImage = styled.img`
+  width: 160px;
+`;
+
 const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(8);
+  const [timeLeft, setTimeLeft] = useState(10);
   const [targetUser, setTargetUser] = useState(0);
   const [currentUser, setCurrentUser] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -204,7 +223,7 @@ const Game1Drawing = () => {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(8);
+            setTimeLeft(10);
             setIsStarted(true);
           } else if (parsedMessages.commandType === "DRAW_PREV") {
             canvasRef.current.loadPaths(parsedMessages.data);
@@ -414,14 +433,16 @@ const Game1Drawing = () => {
             nickname={avatarCards.nickname}
             features={avatarCards.features}
           />
-          <ToolButton
+          <ButtonContainer
             onClick={() => {
               client.send(`/app/game/${roomId}/game-select`);
             }}
-            active={true}
           >
-            다른 게임들 보러가기
-          </ToolButton>
+            <ButtonText>
+                게임 더보기
+            </ButtonText>
+            <IconImage src={btnIcon} alt="gamesBtn" />
+          </ButtonContainer>
         </AvatarContainer>
       ) : (
         <>
@@ -430,25 +451,25 @@ const Game1Drawing = () => {
               <ProfileDetails>
                 <InfoBox>
                   <DrawingText>
-                    <HighlightText>
+                    <MintText>
+                      {
+                        nicknameList.find(
+                          (nicknameItem) => nicknameItem.num === currentUser
+                        )?.nickname                  
+                      }
+                    </MintText>
+                    님,
+                  </DrawingText>
+                  <br />
+                  <DrawingText>
+                    <PinkText>
                       {
                         nicknameList.find(
                           (nicknameItem) => nicknameItem.num === targetUser
                         )?.nickname
                       }
-                    </HighlightText>
+                    </PinkText>
                     님을 그려주세요.
-                  </DrawingText>
-                  <br />
-                  <DrawingText>
-                    <Drawer>
-                      {
-                        nicknameList.find(
-                          (nicknameItem) => nicknameItem.num === currentUser
-                        )?.nickname
-                      }
-                    </Drawer>
-                    님 차례.
                   </DrawingText>
                 </InfoBox>
                 <DrawingText>
