@@ -134,7 +134,14 @@ const RoomJoinModal = ({ onClose }) => {
             (message) => {
               const parsedMessage = JSON.parse(message.body);
               console.log("개별 구독 받은 메시지:", parsedMessage);
-              if (parsedMessage.data && parsedMessage.data.num !== undefined) {
+
+              if (parsedMessage.commandType == "ROOM_IS_FULL") {
+                alert("방이 가득찼습니다");
+                navigate("/");
+              } else if (
+                parsedMessage.data &&
+                parsedMessage.data.num !== undefined
+              ) {
                 dispatch(setUserNo(parsedMessage.data.num));
                 console.log("유저 번호 :", parsedMessage.data.num);
                 setSessionInfo((prevSessionInfo) => ({
