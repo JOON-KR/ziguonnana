@@ -243,8 +243,9 @@ const Game5 = () => {
 
   return (
     <Wrap>
-      {isGuideModalOpen && (
+      {isGuideModalOpen && (       
         <GameInfoModal
+          onClose={() => setIsGuideModalOpen(false)}
           planetImg={earth}
           planetWidth="180px"
           RedBtnText={"댄스 챌린지"}
