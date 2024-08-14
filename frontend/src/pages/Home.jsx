@@ -43,6 +43,7 @@ const Header = styled.div`
 const HeaderText = styled.h4`
   font-size: 28px;
   padding: 0 23px;
+  margin-right: 200px;
   color: white;
   cursor: pointer;
 `;
@@ -229,30 +230,6 @@ const Home = () => {
       )}
       {isRoomJoinModalOpen && <RoomJoinModal onClose={closeRoomJoinModal} />}
       <Header>
-        {/* 테스트 용입니다 */}
-        <HeaderText onClick={() => navigate("/MyPage")}>
-            마이페이지
-          </HeaderText>
-        <HeaderText
-          onClick={() => {
-            if (isLoggedIn) {
-              handleLogout();
-            } else {
-              setIsLoginModalOpen(true);
-            }
-          }}
-        >
-          {isLoggedIn ? "로그아웃" : "로그인"}
-        </HeaderText>
-        {isLoggedIn ? (
-          <HeaderText onClick={() => navigate("/MyPage")}>
-            마이페이지
-          </HeaderText>
-        ) : (
-          <HeaderText onClick={() => setIsSignUpModalOpen(true)}>
-            회원가입
-          </HeaderText>
-        )}
         <HeaderText
           onClick={() => {
             navigate("/user/community");

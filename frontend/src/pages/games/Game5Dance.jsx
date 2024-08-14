@@ -212,7 +212,7 @@ const Game5Dance = () => {
       console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
 
       recordedChunks.current = [];
-      const options = { mimeType: "video/webm; codecs=vp9" };
+      const options = { mimeType: "video/webm" };
       const mediaRecorder = new MediaRecorder(
         localStream.getMediaStream(),
         options
@@ -300,7 +300,7 @@ const Game5Dance = () => {
       </VideoContainer>
       {isButtonVisible && (
         <NextButton onClick={handleNextUser}>
-          {currentUserNo === maxNo ? "챌린지 녹화 끝내기. 잠시만 기다려주세요." : "다음 팀원으로"}
+          {currentUserNo === maxNo ? "녹화 끝내기" : "다음 팀원으로"}
         </NextButton>
       )}
     </Container>
