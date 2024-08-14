@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
@@ -54,6 +54,7 @@ import transparentEdgeImage19 from "../../assets/images/poseline19.png";
 import transparentEdgeImage20 from "../../assets/images/poseline20.png";
 import transparentEdgeImage21 from "../../assets/images/poseline21.png";
 import transparentEdgeImage22 from "../../assets/images/poseline22.png";
+import { setGame4Finish } from "../../store/resultSlice";
 
 // 스타일 컴포넌트 정의
 const PageWrap = styled.div`
@@ -260,6 +261,7 @@ const Game4 = () => {
   const [countdown, setCountdown] = useState(null); // 카운트다운 상태 추가
   const videoRef = useRef(null); // 비디오 참조
   const navigate = useNavigate(); // 페이지 이동을 위한 네비게이트
+  const dispatch = useDispatch();
   const [showPoseImage, setShowPoseImage] = useState(false); // 포즈 이미지 표시 상태 추가
 
   const poseImages = [
@@ -313,6 +315,7 @@ const Game4 = () => {
   ];
 
   const endGame = () => {
+    dispatch(setGame4Finish());
     navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
   };
 
@@ -459,7 +462,7 @@ const Game4 = () => {
                     setShowText(false);
                     setShowOverlay(false);
 
-                    if (round < 6) {
+                    if (round < 2) {
                       setRound((prevRound) => prevRound + 1);
                       setIsFollowPoseSelectModalOpen(true);
                     } else {
