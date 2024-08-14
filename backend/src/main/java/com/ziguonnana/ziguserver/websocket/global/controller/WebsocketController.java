@@ -77,4 +77,12 @@ public class WebsocketController {
     	List<AvatarResult> avatarcards = websocketService.getAvatar(roomId);
     	return Response.ok(CommandType.AVATAR_IMAGE, avatarcards);
     }
+
+    // 게임 결과 모달 띄우기
+    @MessageMapping("/game/{roomId}/start-modal/result")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> getResultModal(@DestinationVariable("roomId") String roomId){
+        log.info("=========게임 결과 모달 시작===========");
+        return Response.ok(CommandType.GAME_RESULT_MODAL, true);
+    }
 }
