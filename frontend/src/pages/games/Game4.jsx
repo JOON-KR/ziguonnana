@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
@@ -54,8 +54,10 @@ import transparentEdgeImage19 from "../../assets/images/poseline19.png";
 import transparentEdgeImage20 from "../../assets/images/poseline20.png";
 import transparentEdgeImage21 from "../../assets/images/poseline21.png";
 import transparentEdgeImage22 from "../../assets/images/poseline22.png";
+import { setGame4Finish } from "../../store/resultSlice";
 
 // 스타일 컴포넌트 정의
+
 const PageWrap = styled.div`
   width: 100%;
   height: 100vh;
@@ -63,18 +65,19 @@ const PageWrap = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
 `;
 
 const Title = styled.h1`
-  font-size: 2rem;
-  color: #333;
+  margin-top: 20px;
+  font-size: 50px;
+  color: #ffffff;
 `;
 
 const VideoCanvas = styled.video`
   width: 640px;
   height: 480px;
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc; */
   position: relative;
   transform: scaleX(-1);
 `;
@@ -97,16 +100,26 @@ const OverlayText = styled.div`
   font-size: 1.5rem;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 15px;
 `;
 
 const Wrap = styled.div`
-  width: 90%;
-  height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  /* width: 90%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; */
 `;
 
 const PoseSelectionModal = styled.div`
@@ -143,14 +156,14 @@ const PoseItem = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${(props) => (props.selected ? "#007bff" : "#e0e0e0")};
+  background-color: ${(props) => (props.selected ? "#FF6259" : "#e0e0e0")};
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #58FFF5;
   }
 `;
 
@@ -196,7 +209,7 @@ const RedButton = styled.button`
 
 const BlueButton = styled.button`
   padding: 10px 20px;
-  background-color: #1890ff;
+  background-color: #7FA3FF;
   color: white;
   border: none;
   border-radius: 5px;
@@ -228,7 +241,7 @@ const DifficultyLabel = styled.div`
     props.level === "상"
       ? "#ff4d4f"
       : props.level === "중"
-      ? "#ffec3d"
+      ? "#f3db00"
       : "#52c41a"};
   text-align: center;
   margin-bottom: 5px;
@@ -260,6 +273,7 @@ const Game4 = () => {
   const [countdown, setCountdown] = useState(null); // 카운트다운 상태 추가
   const videoRef = useRef(null); // 비디오 참조
   const navigate = useNavigate(); // 페이지 이동을 위한 네비게이트
+  const dispatch = useDispatch();
   const [showPoseImage, setShowPoseImage] = useState(false); // 포즈 이미지 표시 상태 추가
 
   const poseImages = [
@@ -313,6 +327,7 @@ const Game4 = () => {
   ];
 
   const endGame = () => {
+    dispatch(setGame4Finish());
     navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
   };
 
@@ -459,7 +474,7 @@ const Game4 = () => {
                     setShowText(false);
                     setShowOverlay(false);
 
-                    if (round < 6) {
+                    if (round < 2) {
                       setRound((prevRound) => prevRound + 1);
                       setIsFollowPoseSelectModalOpen(true);
                     } else {
@@ -536,7 +551,7 @@ const Game4 = () => {
 
   return (
     <Wrap>
-      <h1>ROUND : {round} / 6</h1>
+      <Title>ROUND : {round} / 3</Title>
       {/* 게임 환영 모달 */}
       {isFollowPoseWelcomeModalOpen && (
         <GameInfoModal
@@ -562,15 +577,14 @@ const Game4 = () => {
           modalText={
             selectedPose !== null ? (
               <>
-                {selectedPose}번 포즈를 선택하셨습니다. <br />
-                이제 선택 완료 버튼을 눌러주세요.
+                이제 다음 라운드 포즈를 <br />
+                <span style={{ color: "#58FFF5" }}>방장</span>이 골라주세요.
               </>
             ) : (
               <>
-                여러분이 따라해야 할 포즈가 <br /> 난이도와 함께 제공됩니다.{" "}
-                <br />
-                방 생성자는 따라할 포즈를 선택하시고 <br />
-                가운데 화면에 틀 안에서 나오는 <br /> 포즈를 따라하세요.
+                난이도별로 제공되는 포즈를 <br /> 
+                <span style={{ color: "#58FFF5" }}>방장</span>이 선택해주세요. <br />
+                나머지 팀원들은 <span style={{ color: "#58FFF5" }}>잠시</span> 기다려주세요.
               </>
             )
           }
@@ -652,7 +666,7 @@ const Game4 = () => {
         </PosePreviewModal>
       )}
       <PageWrap>
-        <Title>포즈 페이지</Title>
+        {/* <Title>포즈 페이지</Title> */}
         <div style={{ position: "relative" }}>
           <VideoCanvas ref={videoRef} width="640" height="480" />
 
@@ -689,7 +703,7 @@ const Game4 = () => {
 
           {showText && (
             <OverlayText>
-              화면에 나온 선에 맞춰 포즈를 따라해 주세요
+              가이드라인에 맞춰 포즈를 따라해 주세요
             </OverlayText>
           )}
         </div>
