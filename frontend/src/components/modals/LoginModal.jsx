@@ -141,7 +141,6 @@ const LoginModal = ({
     const kakaoLoginUrl =
       "https://kauth.kakao.com/oauth/authorize?client_id=87083d235499273750821a7297a50305&redirect_uri=https://i11b303.p.ssafy.io/api/v1/member/login/kakao/callback&response_type=code";
     window.location.href = kakaoLoginUrl;
-    // navigate(kakaoLoginUrl);
   };
 
   // const code = new URL(window.location.href).searchParams.get("code");
