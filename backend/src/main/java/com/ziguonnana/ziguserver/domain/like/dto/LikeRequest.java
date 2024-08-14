@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LikeRequest {
 	private Long articleId;
-	private String type; //아바타 또는 비디오
 }
