@@ -50,6 +50,7 @@ public class Room {
 	// 포즈맞추기
 	private int poseRequestCnt;
 	// 포즈맞추기 결과 저장용
+	private PoseResponse poseResponse;
 	// 라운드별 결과
 	// key : 몇 번 포즈타입, value : 닉네임
 	private List<ConcurrentHashMap<Integer, String>> poseResult;
@@ -137,8 +138,9 @@ public class Room {
 				.bodyCount(this.bodyTalkGame.getCorrectCnt()) // 몸으로 말해요 결과
 				.bodyDuration(this.bodyTalkGame.getDurationTime()) // 몸으로 말해요 결과
 				.igudongseongCount(getIgudongseongResult()) // 이구동성 결과
-//				.poseBestList()//포즈 맞추기 결과
+				.poseBest(this.poseResponse)//포즈 맞추기 결과
 				.shortsURL(this.shortsResult) // 숏츠 결과
+				.people(this.people)
 				.build();
 	}
 
@@ -158,5 +160,8 @@ public class Room {
 			}
 		}
 		return resultCnt;
+	}
+	public void updatePoseResult(PoseResponse pose) {
+		this.poseResponse = pose;
 	}
 }

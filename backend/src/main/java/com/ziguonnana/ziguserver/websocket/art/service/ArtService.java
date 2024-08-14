@@ -181,7 +181,7 @@ public class ArtService {
                 List<String> answer = room.getPlayers().get(i).getAnswer();
                 List<String> features = new ArrayList<>();
                 for (int j = 0; j < 3; j++) {
-                    features.add(answer.get(i));
+                    features.add(answer.get(j));
                 }
 
                 // 기존 이미지를 가운데 부분만 남기고 나머지 영역을 투명하게 변경
