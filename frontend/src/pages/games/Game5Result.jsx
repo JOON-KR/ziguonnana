@@ -100,7 +100,7 @@ const Game5Result = () => {
   const [mergeVideoUrl, setMergeVideoUrl] = useState("");
   const [showClear1, setShowClear1] = useState(true);
   const [videoEnded, setVideoEnded] = useState(false); // 비디오 재생 완료 상태
-  const message = "숏폼이 완성되기까지 최소 1분 소요됩니다.";
+  const message = "숏폼이 완성될 동안 👻아바타👻를 씌워보세요!   ";
   const navigate = useNavigate();
   const audioRef = useRef(null); // 오디오 참조
   const dispatch = useDispatch();
