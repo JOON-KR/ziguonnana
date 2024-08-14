@@ -118,19 +118,19 @@ public class PoseService {
 	        log.info("포즈 계산 전체결과 전송: roomId={}, result={}", roomId, pose);
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
 	                Response.ok(CommandType.POSE_RESULT, pose));
+	        if (room.getCycle() >= 3) {
+	        	log.info("포즈 종료", room.getCycle());
+	        	PoseResponse result = getBest(room);
+	        	room.updatePoseResult(result);
+	        	messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, result));
+	        	room.cycleInit();
+	        	room.countInit();
+	        }else {
 	        messagingTemplate.convertAndSend("/topic/game/" + roomId,
 	        		Response.ok(CommandType.POSE_ROUND, room.getCycle()));
+	        }
 	    }
 
-	    // 6번 하고나면
-	    if (room.getCycle() >= 3) {
-	        log.info("포즈 종료", room.getCycle());
-	        PoseResponse result = getBest(room);
-	        room.updatePoseResult(result);
-	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, result));
-	        room.cycleInit();
-	        room.countInit();
-	    }
 
 	}
 	private PoseResponse getBest(Room room) {
