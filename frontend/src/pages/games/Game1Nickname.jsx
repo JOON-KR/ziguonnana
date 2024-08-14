@@ -34,7 +34,7 @@ const ButtonWrap = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  // margin-top: 10px;
+  margin-top: 400px;
   gap: 20px;
   flex-wrap: wrap;
 `;
@@ -67,6 +67,7 @@ const NanaImg = styled.img`
   height: auto;
   margin-top: 80px;
   margin-left: 250px;
+  position: absolute;
 `;
 
 const SelectedStyleText = styled.div`

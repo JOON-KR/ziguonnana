@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { setGame2Finish } from "../../store/resultSlice";
+import btnIcon from "../../assets/icons/aqua_btn.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -37,6 +38,26 @@ const ResultDetail = styled.p`
   color: #ff6b6b;
   margin: 10px 0;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+`;
+
+const ButtonContainer = styled.div`
+  position: relative;
+  margin-top: 10px;
+  cursor: pointer;
+`;
+
+const ButtonText = styled.p`
+  position: absolute;
+  top: 28%;
+  left: 20%;
+  color: white;
+  font-size: 19px;
+  font-weight: bold;
+  pointer-events: none; /* 버튼 텍스트가 클릭되지 않도록 설정 */
+`;
+
+const IconImage = styled.img`
+  width: 160px;
 `;
 
 const Game2Result = () => {
@@ -75,13 +96,16 @@ const Game2Result = () => {
         <ResultText>게임 결과</ResultText>
         <ResultDetail>맞춘 개수: {correctCnt}</ResultDetail>
         <ResultDetail>소요된 시간: {durationTime}초</ResultDetail>
-        <button
-          onClick={() => {
-            client.send(`/app/game/${roomId}/game-select`);
-          }}
-        >
-          games로 이동
-        </button>
+        <ButtonContainer
+            onClick={() => {
+              client.send(`/app/game/${roomId}/game-select`);
+            }}
+          >
+            <ButtonText>
+                게임 더보기
+            </ButtonText>
+            <IconImage src={btnIcon} alt="gamesBtn" />
+          </ButtonContainer>
       </ResultContainer>
     </Wrap>
   );
