@@ -254,14 +254,14 @@ const Game5 = () => {
             <>
               숏폼 챌린지에 오신걸 환영합니다 ! <br />
               챌린지 영상을 한 가지 선택 후, <br />
-              릴레이로 영상을 완성해봅시다!
+              <span style={{ color: "#58FFF5" }}>릴레이</span>로 영상을 완성해봅시다!
             </>
           }
         />
       )}
       {!isGuideModalOpen && (
         <>
-          <StyledH2>챌린지 영상 선택</StyledH2>
+          <StyledH2>챌린지할 영상을 선택해주세요. 💃🏼</StyledH2>
           <VideoContainer>
             <ThumbnailWrapper
               onClick={() =>
