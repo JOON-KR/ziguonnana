@@ -3,12 +3,14 @@ package com.ziguonnana.ziguserver.websocket.global.dto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
 import com.ziguonnana.ziguserver.websocket.art.dto.RelayArt;
 import com.ziguonnana.ziguserver.websocket.bodytalk.dto.BodyTalkGame;
+import com.ziguonnana.ziguserver.websocket.bodytalk.dto.Keyword;
 import com.ziguonnana.ziguserver.websocket.igudongseong.dto.IgudongseongResult;
 import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResponse;
 import com.ziguonnana.ziguserver.websocket.result.dto.GameResult;
@@ -39,7 +41,8 @@ public class Room {
 	private int isRelay;
 	private String roomId;
 	private BodyTalkGame bodyTalkGame;
-
+	// 몸으로 말해요 키워드 중복체크
+	private Set<Keyword> usedKeywords;
 	// 몸으로 말해요 키워드 요청 count
 	private int bodyTalkKeywordCnt;
 	// 이어그리기
@@ -139,10 +142,9 @@ public class Room {
 				.bodyCount(this.bodyTalkGame.getCorrectCnt()) // 몸으로 말해요 결과
 				.bodyDuration(this.bodyTalkGame.getDurationTime()) // 몸으로 말해요 결과
 				.igudongseongCount(getIgudongseongResult()) // 이구동성 결과
-				.poseBest(this.poseResponse)//포즈 맞추기 결과
+				.poseBest(this.poseResponse)// 포즈 맞추기 결과
 				.shortsURL(this.shortsResult) // 숏츠 결과
-				.people(this.people)
-				.build();
+				.people(this.people).build();
 	}
 
 	// 아바타 카드 결과
@@ -162,11 +164,24 @@ public class Room {
 		}
 		return resultCnt;
 	}
+
 	public void updatePoseResult(PoseResponse pose) {
 		this.poseResponse = pose;
 	}
 
 	public void start() {
 		this.isStart++;
+	}
+
+	public boolean addKeyword(Keyword keyword) {
+		return usedKeywords.add(keyword); // 중복이면 false 반환, 아니면 true 반환
+	}
+
+	public boolean isKeywordUsed(Keyword keyword) {
+		return usedKeywords.contains(keyword);
+	}
+
+	public void clearUsedKeywords() {
+		usedKeywords.clear(); // 게임 종료 시 초기화할 수 있도록 메서드 추가
 	}
 }

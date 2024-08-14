@@ -45,6 +45,7 @@ public class BodyTalkService {
             simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), response);
             room.cycleInit(); //사이클(라운드) 초기화
             room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
+            room.clearUsedKeywords();
             return "게임종료";
         }
         int people = room.getPeople();
@@ -54,7 +55,7 @@ public class BodyTalkService {
         log.info("현재 라운드 : " + room.getCycle());
 
         // 키워드 저장
-        Keyword keyword = randomKeyword();
+        Keyword keyword = randomKeyword(room);
         room.getBodyTalkGame().changeKeyword(keyword);
         Response response  = Response.ok(CommandType.BODYGAME_EXPLANIER, keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
@@ -72,9 +73,15 @@ public class BodyTalkService {
         return result;
     }
 
-    private Keyword randomKeyword(){
-        int index = random.nextInt(keywordList.size());
-        return keywordList.get(index);
+    private Keyword randomKeyword(Room room) {
+        Keyword keyword;
+        do {
+            int index = random.nextInt(keywordList.size());
+            keyword = keywordList.get(index);
+        } while (room.isKeywordUsed(keyword)); // 중복된 키워드가 선택되면 다시 선택
+
+        room.addKeyword(keyword); // 중복이 아닌 키워드를 Set에 추가
+        return keyword;
     }
 
     public BodyChatMessage chat(BodyChatRequest bodyChatRequest, String roomId) {
