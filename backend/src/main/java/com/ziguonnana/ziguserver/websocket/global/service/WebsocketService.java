@@ -2,6 +2,7 @@ package com.ziguonnana.ziguserver.websocket.global.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +60,7 @@ public class WebsocketService {
                 .avatarcards(new ConcurrentHashMap<>())
                 .posetmp(new ArrayList<>())
                 .isStart(1)
+                .usedKeywords(new HashSet<>())
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
