@@ -27,10 +27,10 @@ public class BodyTalkService {
 
     // 출제자 선정
     // 키워드 타입 전달
-    public synchronized String decideKeywordExplanier(String roomId){
+    public synchronized BodyTalkKeywordResponse decideKeywordExplanier(String roomId){
         Room room = roomRepository.getRoom(roomId);
         int keywordReq = room.getBodyTalkKeywordCnt();
-        if(keywordReq != 0) return "요청 불가";
+        if(keywordReq != 0) return new BodyTalkKeywordResponse("요청 불가", 0);
 
         // 처음 요청일 때만 수행
         room.countBodyTalkKeywordCnt();
@@ -46,7 +46,7 @@ public class BodyTalkService {
             room.cycleInit(); //사이클(라운드) 초기화
             room.initBodyTalkKeywordCnt(); // 키워드 요청 초기화
             room.clearUsedKeywords();
-            return "게임종료";
+            return new BodyTalkKeywordResponse("게임종료", 0);
         }
         int people = room.getPeople();
         int explanierNum = room.getCycle()%people +1; // 출제자 번호(1부터 시작)
@@ -60,7 +60,7 @@ public class BodyTalkService {
         Response response  = Response.ok(CommandType.BODYGAME_EXPLANIER, keyword);
         simpMessagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() + "/" + explanierNum, response);
         log.info(explanierNum + "에게 키워드 전달 : " + keyword);
-        return keyword.getType();
+        return new BodyTalkKeywordResponse(keyword.getType(), explanierNum);
     }
 
     private BodyTalkResult gameEnd(BodyTalkGame bodyTalkGame){
