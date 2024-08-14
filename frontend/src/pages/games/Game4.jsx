@@ -110,7 +110,7 @@ const Wrap = styled.div`
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100vh; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -163,7 +163,7 @@ const PoseItem = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #58FFF5;
+    background-color: #58fff5;
   }
 `;
 
@@ -209,7 +209,7 @@ const RedButton = styled.button`
 
 const BlueButton = styled.button`
   padding: 10px 20px;
-  background-color: #7FA3FF;
+  background-color: #7fa3ff;
   color: white;
   border: none;
   border-radius: 5px;
@@ -479,6 +479,7 @@ const Game4 = () => {
                       setIsFollowPoseSelectModalOpen(true);
                     } else {
                       setTimeout(() => {
+                        dispatch(setGame4Finish());
                         navigate("/icebreaking/games");
                       }, 3000);
                     }
@@ -582,9 +583,13 @@ const Game4 = () => {
               </>
             ) : (
               <>
-                난이도별로 제공되는 포즈를 <br /> 
-                <span style={{ color: "#58FFF5" }}>방장</span>이 선택해주세요. <br />
-                나머지 팀원들은 <span style={{ color: "#58FFF5" }}>잠시</span> 기다려주세요.
+                난이도별로 제공되는 포즈를 <br />
+                <span style={{ color: "#58FFF5" }}>방장</span>이 선택해주세요.{" "}
+                <br />
+                나머지 팀원들은 <span style={{ color: "#58FFF5" }}>
+                  잠시
+                </span>{" "}
+                기다려주세요.
               </>
             )
           }
@@ -702,9 +707,7 @@ const Game4 = () => {
           )}
 
           {showText && (
-            <OverlayText>
-              가이드라인에 맞춰 포즈를 따라해 주세요
-            </OverlayText>
+            <OverlayText>가이드라인에 맞춰 포즈를 따라해 주세요</OverlayText>
           )}
         </div>
         <OpenViduSession token={openViduToken} />
