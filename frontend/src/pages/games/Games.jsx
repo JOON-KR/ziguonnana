@@ -91,8 +91,16 @@ const Games = () => {
     if (client && client.connected && !subscribed) {
       client.subscribe(`/topic/game/${roomId}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
+
+        // 서버 응답 Redux 스토어에 저장
         dispatch(setMessage(parsedMessage.data));
 
+        // 모달 열기 응답 처리
+        if (parsedMessage.commandType === "GAME_MODAL_START" && parsedMessage.data === "END") {
+          setIsEndModalOpen(true); // 모든 클라이언트에서 모달을 엽니다
+        }
+
+        // 게임 타입에 따른 네비게이션 처리
         const gameType = parsedMessage.data;
         if (gameType === "BODY_TALK") {
           navigate("/icebreaking/games/game2");
@@ -119,7 +127,9 @@ const Games = () => {
   };
 
   const handleNext = () => {
-    setIsEndModalOpen(true); // 버튼 클릭 시 모달 열기
+    //모달 열기 전송
+    client.send(`/app/game/${roomId}/start-modal/END`, {});
+    // setIsEndModalOpen(true); // 버튼 클릭 시 모달 열기
   };
 
   return (
