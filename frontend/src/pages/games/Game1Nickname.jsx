@@ -10,28 +10,31 @@ import { useNavigate } from "react-router-dom";
 const Wrap = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* 요소를 세로로 중앙 정렬 */
-  align-items: center;  /* 요소를 가로로 중앙 정렬 */
-  width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  justify-content: center;
+  align-items: center;
+  width: 100vh;
+  height: 100vh;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  padding: 0;
 `;
 
 const BubbleWrap = styled.div`
   display: flex;
-  position: relative; /* 자식 요소의 absolute 포지셔닝을 위해 */
-  justify-content: flex-start; /* 왼쪽 정렬 */
-  align-items: flex-start; /* 상단 정렬 */
+  position: absolute; /* 자식 요소의 absolute 포지셔닝을 위해 */
+  justify-content: flex-start;
+  align-items: flex-start;
   width: 100%;
+  top: 100px;
+  left: 130px;
 `;
 
 const ButtonWrap = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  // margin-top: 10px;
   gap: 20px;
   flex-wrap: wrap;
 `;
@@ -62,14 +65,14 @@ const StyleButton = styled.button`
 const NanaImg = styled.img`
   width: 300px;
   height: auto;
-  margin-top: -50px; /* 상단 마진 조정 */
-  margin-bottom: 20px;
+  margin-top: 80px;
+  margin-left: 250px;
 `;
 
 const SelectedStyleText = styled.div`
   margin-top: 20px;
   padding: 20px 40px;
-  font-size: 24px; /* 폰트 크기 조정 */
+  font-size: 24px;
   font-weight: bold;
   color: white;
   background-color: #ff6347;
@@ -86,7 +89,7 @@ const SelectedStyleText = styled.div`
 const Game1Nickname = () => {
   const navigate = useNavigate();
   const styles = ["중세", "조선", "동물", "미래"];
-  const text = "별명 스타일을 선택하세요";
+  const text = "각자 별명 스타일을 선택해.";
 
   // Redux 상태에서 필요한 값들 가져오기
   const userNo = useSelector((state) => state.auth.userNo); // 현재 사용자의 userNo
