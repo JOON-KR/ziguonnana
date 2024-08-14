@@ -474,7 +474,7 @@ const Game4 = () => {
                     setShowText(false);
                     setShowOverlay(false);
 
-                    if (round < 2) {
+                    if (round < 3) {
                       setRound((prevRound) => prevRound + 1);
                       setIsFollowPoseSelectModalOpen(true);
                     } else {
@@ -696,7 +696,7 @@ const Game4 = () => {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 fontSize: "3rem",
-                color: "white",
+                color: "#FF0000",
               }}
             >
               {countdown}

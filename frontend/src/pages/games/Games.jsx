@@ -173,7 +173,7 @@ const Games = () => {
             }}
           />
         )}
-        <PlanetName style={{ left: "397px", bottom: "65px" }}>
+        <PlanetName style={{ left: "380px", bottom: "65px" }}>
           포즈 따라하기
         </PlanetName>
 
