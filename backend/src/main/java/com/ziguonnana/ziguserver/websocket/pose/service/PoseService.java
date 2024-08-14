@@ -123,15 +123,45 @@ public class PoseService {
 	    }
 
 	    // 6번 하고나면
-	    if (room.getCycle() >= 6) {
+	    if (room.getCycle() >= 3) {
 	        log.info("포즈 종료", room.getCycle());
-	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, true));
+	        PoseResponse result = getBest(room);
+	        room.updatePoseResult(result);
+	        messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, result));
 	        room.cycleInit();
 	        room.countInit();
 	    }
 
 	}
-
+	private PoseResponse getBest(Room room) {
+		List<ConcurrentHashMap<Integer, PoseResponse>> poselist = room.getPosetmp();
+		int people = room.getPeople();
+		int per[] = new int[people+1];
+		int cnt[] = new int[people+1];
+		//각 라운드
+		   for(int i=1; i<=3;i++ ) {
+			   //각 사람
+	        	for(int j=1;j<=room.getPeople();j++) {
+	        		per[j]+=poselist.get(i).get(j).getPercent();
+	        		if(poselist.get(i).get(j).getMessage().equals("성공")) {
+	        			cnt[j]++;
+	        		}
+	        	}
+	        }
+		int index = 1;
+		int max = 0;
+		for(int i=1;i<=people;i++) {
+			if(max<cnt[i]) {
+				index = i;
+				max = cnt[i];
+			}
+		}
+		PoseResponse resp = PoseResponse.builder()
+				.message(room.getPlayers().get(index).getNickname())
+				.percent(per[index]/3)
+				.build();
+		return resp;
+	}
 
 	private Set<List<Integer>> readPointsFromS3(String fileName) {
 		Set<List<Integer>> points = new HashSet<>();

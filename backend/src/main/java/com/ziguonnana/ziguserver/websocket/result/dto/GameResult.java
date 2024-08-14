@@ -1,12 +1,14 @@
 package com.ziguonnana.ziguserver.websocket.result.dto;
 
+import java.util.List;
+
 import com.ziguonnana.ziguserver.websocket.art.dto.AvatarResult;
+import com.ziguonnana.ziguserver.websocket.pose.dto.PoseResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -17,9 +19,10 @@ public class GameResult {
     private int bodyCount;
     private long bodyDuration;
     private int igudongseongCount;
-    private List<String> poseBestList;
+    private PoseResponse poseBest;
     private List<AvatarResult> avatarCards;
     private String shortsURL; // 숏폼 최종 결과 영상 URL
+    private int people; // 인원수
 
     @Override
     public String toString() {
@@ -28,7 +31,7 @@ public class GameResult {
                 ", bodyCount=" + bodyCount +
                 ", bodyDuration=" + bodyDuration +
                 ", igudongseongCount=" + igudongseongCount +
-                ", poseBestList=" + poseBestList +
+                ", poseBest=" + poseBest +
                 ", avatarCards=" + avatarCards +
                 ", shortsURL='" + shortsURL + '\'' +
                 '}';
