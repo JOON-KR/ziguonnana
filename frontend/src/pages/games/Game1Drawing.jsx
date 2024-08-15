@@ -15,7 +15,7 @@ const Wrap = styled.div`
   justify-content: space-between; /* Centering content with equal space around */
   align-items: center;
   width: 100%;
-  height: 100vh;  /* Use entire viewport height */
+  height: 100vh; /* Use entire viewport height */
   padding: 20px; /* Add padding if needed */
   box-sizing: border-box;
 `;
@@ -41,12 +41,12 @@ const DrawingText = styled.h1`
 
 const MintText = styled.span`
   font-size: 25px;
-  color: #10D7CB;
+  color: #10d7cb;
 `;
 
 const PinkText = styled.span`
   font-size: 25px;
-  color: #FF00C7;
+  color: #ff00c7;
 `;
 
 const InfoBox = styled.div`
@@ -189,7 +189,7 @@ const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(5);
   const [targetUser, setTargetUser] = useState(0);
   const [currentUser, setCurrentUser] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -223,7 +223,7 @@ const Game1Drawing = () => {
             setTargetUser(parsedMessages.data.targetUser);
             setCurrentUser(parsedMessages.data.currentUser);
             setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(10);
+            setTimeLeft(5);
             setIsStarted(true);
           } else if (parsedMessages.commandType === "DRAW_PREV") {
             canvasRef.current.loadPaths(parsedMessages.data);
@@ -439,9 +439,7 @@ const Game1Drawing = () => {
               // navigate("/icebreaking/games/gameRecord");
             }}
           >
-            <ButtonText>
-                게임 더보기
-            </ButtonText>
+            <ButtonText>게임 더보기</ButtonText>
             <IconImage src={btnIcon} alt="gamesBtn" />
           </ButtonContainer>
         </AvatarContainer>
@@ -456,7 +454,7 @@ const Game1Drawing = () => {
                       {
                         nicknameList.find(
                           (nicknameItem) => nicknameItem.num === currentUser
-                        )?.nickname                  
+                        )?.nickname
                       }
                     </MintText>
                     님,
