@@ -3,7 +3,8 @@ import styled from "styled-components";
 import mypage_bg from "../../assets/images/mypage_bg.png";
 import avartarIcon from "../../assets/icons/avartar.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const PageWrap = styled.div`
   background-image: url(${mypage_bg});
@@ -13,6 +14,8 @@ const PageWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width:100%;
+  box-sizing: border-box;
 `;
 
 const Header = styled.header`
@@ -133,8 +136,20 @@ const avatars = [
   avartarIcon, avartarIcon, avartarIcon
 ];
 
+
 const GameRecordDetail = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const maxNo = useSelector((state) => state.room.maxNo);
+
+  const { 
+    teamName,  // 팀명
+    bodyCount,  // 몸으로말해요 맞춘 개수
+    bodyDuration,  // 몸으로말해요 걸린시간(초)
+    igudongseongCount,  // 이구동성 맞춘 개수
+    poseBestList,  // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
+    avatarCards,  // 아바타명함(이미지, 특징, 닉네임)
+  } = location.state || {};
 
   const handleRecord = () => {
     navigate("/icebreaking/games/gameRecord");
@@ -145,10 +160,14 @@ const GameRecordDetail = () => {
       <Header>오늘의 게임 기록</Header>
       <BodyContainer>
         <AvartarSection>
-          <Title>우리 팀의 아바타</Title>
+          <Title>{teamName} 팀의 아바타</Title>
           <AvartarContainer>
-            {avatars.map((src, index) => (
-              <AvartarIconImage key={index} src={src} alt={`avatar-${index}`} />
+            {avatarCards.map((avatarCard, index) => (
+              <AvartarIconImage
+                key={index} 
+                src={avatarCard.avatarImage} 
+                alt={`avatar-${index}`} 
+              />
             ))}
           </AvartarContainer>
         </AvartarSection>
@@ -157,17 +176,25 @@ const GameRecordDetail = () => {
           <Title>게임 기록</Title>
             <GameSection>
               <IconImage src={gameRecordIcon} alt="gameRecord" />
-              <GameRecordText>몸으로 말해요 6/6</GameRecordText>
+              {/* 게임 이름 & 몸말맞춘수 & 게임 인원 */}
+              <GameRecordText>몸으로 말해요 {bodyCount}/{maxNo}</GameRecordText>
             </GameSection>
 
             <GameSection>
               <IconImage src={gameRecordIcon} alt="gameRecord" />
-              <GameRecordText>이구동성 게임 4/6</GameRecordText>
+              {/* 게임 이름 & 몸말맞춘수 & 게임 인원 */}
+              <GameRecordText>이구동성 게임 {igudongseongCount}/{maxNo}</GameRecordText>
             </GameSection>
 
             <GameSection>
               <IconImage src={gameRecordIcon} alt="gameRecord" />
-              <GameRecordText>포즈 따라하기 1등!</GameRecordText>
+              <GameRecordText>
+                <>
+                  {/* 누가 1등인지 ?..?? */}
+                  포즈 따라하기 1등!
+                  {poseBestList}
+                </>
+              </GameRecordText>
             </GameSection>
 
             <ButtonContainer>

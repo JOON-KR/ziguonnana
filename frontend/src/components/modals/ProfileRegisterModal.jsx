@@ -4,6 +4,9 @@ import GoogleModal from "../../assets/images/googleModal.png";
 import AquaBtn from "../common/AquaBtn";
 import GrayBtn from "../common/GrayBtn";
 import ProfileNana from "../../assets/icons/ProfileNana.png";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setNicknameList } from "../../store/nicknameSlice";
 
 const BlackBg = styled.div`
   position: fixed;
@@ -46,29 +49,12 @@ const ProfileWrapper = styled.div`
   margin-bottom: 20px;
 `;
 
-const ProfileImageWrapper = styled.div`
-  width: 105px;
-  height: 105px;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
-  margin-right: 20px;
-`;
-
-const ProfileImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const ImageInput = styled.input`
-  display: none;
-`;
-
 const NameWrapper = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
 `;
 
 const Label = styled.label`
@@ -77,7 +63,17 @@ const Label = styled.label`
   font-size: 16px;
   font-weight: bold;
   color: #54595e;
-  margin-bottom: 5px;
+`;
+
+const Text = styled.div`
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #10D7CB;
+`;
+
+const Line = styled.p`
+  margin-bottom: 6px;
 `;
 
 const InputField = styled.input`
@@ -96,17 +92,16 @@ const InputField = styled.input`
   }
 `;
 
-const HashTagWrapper = styled.div`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
 `;
 
 const LabelInputWrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px; /* 입력 필드 사이 간격을 10px로 설정 */
+  margin-bottom: 10px;
 `;
 
 const BtnWrap = styled.div`
@@ -124,6 +119,17 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
   const [hashTag1, setHashTag1] = useState("");
   const [hashTag2, setHashTag2] = useState("");
   const [hashTag3, setHashTag3] = useState("");
+  const userNo = useSelector((state) => state.auth.userNo);
+  const memberId = useSelector((state) => state.auth.memberId);
+  const openviduToken = useSelector((state) => state.auth.openViduToken);
+  const roomId = useSelector((state) => state.room.roomId);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const client = useSelector((state) => state.client.stompClient);
+  const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const nicknameList = useSelector((state) => state.nickname.nicknameList)
+
 
   // 이미지 변경 핸들러
   const handleImageChange = (e) => {
@@ -135,48 +141,67 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
 
   // 프로필 등록 핸들러
   const handleRegister = async () => {
-    const hashTags = [hashTag1, hashTag2, hashTag3].filter(
-      (tag) => tag.trim() !== ""
-    );
-    if (hashTags.length > 3) {
-      alert("해시태그는 최대 3개까지 입력할 수 있습니다.");
-      return;
-    }
     const profileData = {
-      profileImageFile,
-      name,
-      feature: hashTags.join(", "),
+      memberId: memberId,
+      num: userNo,
+      profileImageFile: "",
+      feature: [hashTag1, hashTag2, hashTag3],
+      name: name,
     };
+    
+    console.log("연결 상태 : ", client.connected);
+    
+    // client.subscribe(`/topic/game/${roomId}`, (message) => {
+      //   const parsedMessage = JSON.parse(message.body);
+      //   console.log("방에서 받은 메시지:", parsedMessage);
+      //   if(parsedMessage.data == true)
+      //   setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+      // });
+      
+      // if (client && client.connected) {
+        //   console.log("소켓에 전송할 데이터 : ", profileData);
+        //   client.send(
+          //     `/app/game/${roomId}/profile`,
+          //     {},
+          //     JSON.stringify(profileData)
+          //   );
+          // }
+          
+    // dispatch(setNicknameList(
+    //   [...nicknameList, {"nickname": name, "num": userNo}]
+    // ));
+    // console.log("nicknameList: ",nicknameList)
+
     onRegisterProfile(profileData);
+
+    //이거는 의도적으로 navigate state로 넘겼음. 건들지말것!
+    navigate("/icebreaking", {
+      state: {
+        profileData,
+      },
+    });
   };
 
   return (
     <BlackBg onClick={onClose}>
       <ModalWrap onClick={(e) => e.stopPropagation()}>
-        <Title>프로필에 등록할 정보를 입력하세요.</Title>
-        <ProfileWrapper>
-          <ProfileImageWrapper
-            onClick={() => document.getElementById("imageInput").click()}
-          >
-            <ProfileImage src={profileImage} alt="Profile" />
-            <ImageInput
-              id="imageInput"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </ProfileImageWrapper>
-          <NameWrapper>
-            <Label>이름</Label>
-            <InputField
-              type="text"
-              placeholder="이름을 입력해주세요."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </NameWrapper>
-        </ProfileWrapper>
-        <HashTagWrapper>
+        <Title>👩‍🏫 프로필 정보를 입력하세요.</Title>
+        <Wrapper>
+          <LabelInputWrapper>
+              <Label>이름</Label>
+              <InputField
+                type="text"
+                placeholder="이름을 입력해주세요."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                />
+          </LabelInputWrapper>
+        </Wrapper>
+        <Wrapper>
+          <Text>
+            <Line>자신을 나타낼 수 있는 키워드를 작성해주세요.</Line>
+            <Line>ex) mbti, 취미, 닮은 연예인 등</Line>
+          </Text>
           <LabelInputWrapper>
             <Label>해시태그1</Label>
             <InputField
@@ -204,7 +229,7 @@ const ProfileRegisterModal = ({ onClose, onRegisterProfile }) => {
               onChange={(e) => setHashTag3(e.target.value)}
             />
           </LabelInputWrapper>
-        </HashTagWrapper>
+        </Wrapper>
         <BtnWrap>
           <GrayBtn text="취소" BtnFn={onClose} />
           <AquaBtn text="프로필 등록" BtnFn={handleRegister} />

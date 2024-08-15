@@ -5,11 +5,10 @@ import profileImage1 from "../../assets/icons/p1.PNG";
 import newProfileImage from "../../assets/icons/newProfile.PNG";
 import ProfileRegisterModal from "../../components/modals/ProfileRegisterModal";
 import { getProfileList, createProfile } from "../../api/profile/profileAPI";
-import BASE_URL from "../../api/APIconfig";
+import BASE_URL, { TAMTAM_URL } from "../../api/APIconfig";
 import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import axiosInstance from "../../api/axiosInstance";
 
 // 전체 래퍼 스타일 설정
 const Wrap = styled.div`
@@ -37,10 +36,19 @@ const ProfileWrap = styled.div`
   margin: 0 40px;
 `;
 
+// 버튼 래퍼 스타일 설정
+const ButtonWrap = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin: 0 40px;
+`;
+
 // 서브 타이틀 스타일 설정
 const SubTitle = styled.h3`
   font-size: 36px;
   color: white;
+  margin-bottom: 20px;
 `;
 
 // 프로필 이미지 스타일 설정
@@ -48,13 +56,12 @@ const Image = styled.img`
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  margin-top: 15px;
   cursor: pointer;
 `;
 
 // 태그 리스트 스타일 설정
 const Tags = styled.div`
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
 `;
 
@@ -85,23 +92,34 @@ const HeaderText = styled.h4`
   cursor: pointer;
 `;
 
+// 복사 버튼 스타일 설정
+const CopyButton = styled.button`
+  font-size: 16px;
+  font-weight: bold;
+  padding: 8px 12px;
+  margin-left: 18px;
+  margin-bottom: 14px;
+  background-color: #00ffff;
+  color: #54595e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #00cccc;
+  }
+`;
+
 const ProfilePick = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { roomId, openviduToken } = location.state || {};
-
-  console.log("ProfilePick: Room ID:", roomId);
-  console.log("ProfilePick: OpenVidu Token:", openviduToken);
-
+  const userNo = useSelector((state) => state.auth.userNo);
+  const roomId = useSelector((state) => state.room.roomId);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const token = localStorage.getItem("accessToken");
 
   const [profiles, setProfiles] = useState([]);
   const [isProfileRegisterModalOpen, setIsProfileRegisterModalOpen] =
     useState(false);
   const [gameProfile, setGameProfile] = useState(null);
 
-  const hasMountedRef = useRef(false);
   const stompClientRef = useRef(null);
 
   useEffect(() => {
@@ -119,12 +137,10 @@ const ProfilePick = () => {
     fetchProfiles();
 
     const socket = new SockJS(`${BASE_URL}/ws`);
+    // const socket = new SockJS(`${TAMTAM_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      debug: (str) => {
-        console.log(str);
-      },
     });
 
     stompClientRef.current = stompClient;
@@ -176,13 +192,24 @@ const ProfilePick = () => {
     }
 
     // 프로필 등록 후 IceBreaking 페이지로 이동
-    navigate("/icebreaking", {
-      state: {
-        roomId,
-        openviduToken,
-        profileData,
-      },
-    });
+    // navigate("/icebreaking", {
+    //   state: {
+    //     roomId,
+    //     openviduToken,
+    //     profileData,
+    //   },
+    // });
+  };
+
+  const handleCopyRoomId = () => {
+    navigator.clipboard
+      .writeText(roomId)
+      .then(() => {
+        alert("방 참여 코드가 복사되었습니다.");
+      })
+      .catch((err) => {
+        console.error("방 참여 코드 복사 실패:", err);
+      });
   };
 
   return (
@@ -194,14 +221,17 @@ const ProfilePick = () => {
         />
       )}
 
-      <Header>
-        <HeaderText>마이페이지</HeaderText>
+      {/* <Header>
         <HeaderText>커뮤니티</HeaderText>
-      </Header>
+      </Header> */}
 
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
+      <ButtonWrap>
+        <SubTitle>방 참여 코드 : {roomId}</SubTitle>
+        <CopyButton onClick={handleCopyRoomId}>복사</CopyButton>
+      </ButtonWrap>
 
       <ProfilesContainer>
         {isLoggedIn &&
@@ -224,7 +254,10 @@ const ProfilePick = () => {
           <Image
             src={newProfileImage}
             alt="Profile Image"
-            onClick={() => setIsProfileRegisterModalOpen(true)}
+            onClick={() => {
+              setIsProfileRegisterModalOpen(true);
+              console.log("프로필 유저 번호 : ", userNo);
+            }}
           />
           <Tags>
             {["새로운", "프로필", "만들기"].map((tag, idx) => (

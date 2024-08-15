@@ -67,7 +67,7 @@ const GameModal = ({
         {exImg && <ExImage src={exImg} />}
         <GameInfo>{modalText}</GameInfo>
         <BtnWrap>
-          <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />
+          {RedBtnText && <RedBtn text={RedBtnText} BtnFn={RedBtnFn} />} 
         </BtnWrap>
       </ModalWrap>
     </BlackBg>
