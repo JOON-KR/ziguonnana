@@ -156,10 +156,10 @@ const Games = () => {
           몸으로 말해요
         </PlanetName>
 
-        {!game4Status ? (
+        {!game5Status ? (
           <Planet
-            onClick={() => handleGameSelect("FOLLOW_POSE")}
-            src={frozen_red}
+            onClick={() => handleGameSelect("SHORTS")}
+            src={frozen_gray}
             style={{
               left: "375px",
               bottom: "80px",
@@ -167,7 +167,7 @@ const Games = () => {
           />
         ) : (
           <Planet
-            src={red}
+            src={gray}
             style={{
               left: "375px",
               bottom: "80px",
@@ -177,26 +177,27 @@ const Games = () => {
           />
         )}
         <PlanetName style={{ left: "380px", bottom: "65px" }}>
-          포즈 따라하기
+          숏폼 챌린지
         </PlanetName>
 
-        {!game5Status ? (
+        {!game4Status ? (
           <Planet
-            onClick={() => handleGameSelect("SHORTS")}
-            src={frozen_gray}
+            onClick={() => handleGameSelect("FOLLOW_POSE")}
+            src={frozen_red}
             style={{ right: "190px", top: "15px", height: "120px" }}
           />
         ) : (
           <Planet
-            onClick={() => handleGameSelect("SHORTS")}
-            src={gray}
+            // onClick={() => handleGameSelect("SHORTS")}
+
+            src={red}
             style={{ right: "190px", top: "15px", height: "120px" }}
           />
         )}
         <PlanetName style={{ right: "205px", top: "4px" }}>
-          숏폼 챌린지
+          포즈 따라하기
         </PlanetName>
-
+        {/*  */}
         <Planet
           onClick={handleNext}
           src={earth}
