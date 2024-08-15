@@ -1,5 +1,7 @@
 package com.ziguonnana.ziguserver.domain.article.video.dto;
 
+import java.sql.Timestamp;
+
 import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 
 import lombok.Builder;
@@ -13,7 +15,7 @@ public class VideoArticleResponse {
     private Boolean isDelete;
     private Integer likeCount;
     private Integer viewCount;
-
+    private Timestamp regDate;
     public static VideoArticleResponse from(VideoArticle videoArticle) {
         return VideoArticleResponse.builder()
                 .id(videoArticle.getId())
@@ -22,6 +24,7 @@ public class VideoArticleResponse {
                 .isDelete(videoArticle.getIsDelete())
                 .likeCount(videoArticle.getLikeCount())
                 .viewCount(videoArticle.getViewCount())
+                .regDate(videoArticle.getRegDate())
                 .build();
     }
 }
