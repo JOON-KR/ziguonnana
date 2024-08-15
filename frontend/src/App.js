@@ -1,47 +1,37 @@
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 import "./styles/App.css";
 import Home from "./pages/Home";
-import MyPage from "./pages/MyPage";
+import MyPage from "./pages/user/MyPage";
+import GamePages from "./routes/GamePages";
+import UserPages from "./routes/UserPages";
+import IceBreaking from "./pages/iceBreaking/IceBreaking";
+import Loading from "./pages/iceBreaking/Loading";
+import Intro from "./pages/iceBreaking/Intro";
+import GameRecord from "./pages/games/GameRecord";
+import RoomCreateModal from "./components/modals/RoomCreateModal";
+import TestPage from "./pages/TestPage";
+import PosePage from "./pages/PosePage";
+import KakaoLogin from "./pages/KakaoLogin";
 
 function App() {
-  const navigate = useNavigate();
   return (
     <div className="App">
-      <header className="App-header">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div>
-                <p>
-                  Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <h1>세상에 이런 폰트가 나오다니 천재인듯</h1>
-                <a
-                  className="App-link"
-                  href="https://reactjs.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Learn React
-                </a>
-                <div>
-                  <Link to={"/home"}>홈으로 by Link</Link>
-                </div>
-                <div
-                  onClick={() => {
-                    navigate("/home");
-                  }}
-                >
-                  홈으로 by useNavigate
-                </div>
-              </div>
-            }
-          />
-          <Route path="/home" element={<Home />} />
-          <Route path="/mypage" element={<MyPage />} />
-        </Routes>
-      </header>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/gameRecord" element={<GameRecord />} />
+        <Route path="/user/*" element={<UserPages />} />
+        <Route path="/test" element={<TestPage />} />
+        <Route path="/icebreaking" element={<IceBreaking />}>
+          <Route path="/icebreaking/games/*" element={<GamePages />} />
+          <Route path="" element={<Loading />} />
+          <Route path="intro" element={<Intro />} />
+        </Route>
+        <Route path="/create-room" element={<RoomCreateModal />} />
+        <Route path="/pose" element={<PosePage />} />
+        <Route path="/KakaoLogin" element={<KakaoLogin />} />
+      </Routes>
     </div>
   );
 }

@@ -1,11 +1,28 @@
 import { configureStore } from "@reduxjs/toolkit";
-import salarySlice from "./salary/salarySlice";
+import authSlice from "./authSlice";
+import { roomSlice } from "./roomSlice";
+import clientSlice from "./clientSlice";
+import nicknameSlice from "./nicknameSlice";
+import drawingSlice from "./drawingSlice";
+import questionSlice from "./questionSlice";
+import messageSlice from "./messageSlice";
+import { resultSlice } from "./resultSlice";
 
 const store = configureStore({
-  //사용할 상태들 등록
   reducer: {
-    salary: salarySlice.reducer, //만든 slice를 임포트하고 .reducer을 붙여 등록해야 사용 가능
+    auth: authSlice.reducer,
+    room: roomSlice.reducer,
+    client: clientSlice.reducer,
+    nickname: nicknameSlice.reducer,
+    drawing: drawingSlice.reducer,
+    question: questionSlice.reducer,
+    message: messageSlice.reducer,
+    result: resultSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
 
 export default store;
