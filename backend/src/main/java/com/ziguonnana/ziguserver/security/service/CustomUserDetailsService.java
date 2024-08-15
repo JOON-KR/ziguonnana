@@ -8,8 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ziguonnana.ziguserver.domain.member.Member;
-import com.ziguonnana.ziguserver.domain.member.MemberRepository;
+import com.ziguonnana.ziguserver.domain.member.entity.Member;
+import com.ziguonnana.ziguserver.domain.member.repository.MemberRepository;
 import com.ziguonnana.ziguserver.security.details.CustomUserDetails;
 import com.ziguonnana.ziguserver.security.dto.CustomUserInfo;
 
