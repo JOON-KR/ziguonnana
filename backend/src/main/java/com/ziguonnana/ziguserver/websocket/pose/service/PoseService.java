@@ -139,7 +139,7 @@ public class PoseService {
 		int per[] = new int[people+1];
 		int cnt[] = new int[people+1];
 		//각 라운드
-		   for(int i=1; i<=3;i++ ) {
+		   for(int i=0; i<=2;i++ ) {
 			   //각 사람
 	        	for(int j=1;j<=room.getPeople();j++) {
 	        		per[j]+=poselist.get(i).get(j).getPercent();
