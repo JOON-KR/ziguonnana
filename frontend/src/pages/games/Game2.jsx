@@ -19,7 +19,7 @@ const Wrap = styled.div`
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100vh; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -37,7 +37,7 @@ const HeaderContainer = styled.div`
 const Header = styled.h1`
   color: #ffffff;
   text-decoration-line: underline;
-	text-decoration-thickness: 5px;
+  text-decoration-thickness: 5px;
   text-decoration-color: #58fff5;
   font-size: 40px;
 `;
@@ -151,7 +151,6 @@ const Timer = styled.div`
   text-align: center;
 `;
 
-
 // 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
   const [isBodyTalkWelcomeModalOpen, setIsBodyTalkWelcomeModalOpen] =
@@ -182,7 +181,7 @@ const Game2 = () => {
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
-  const [timeLeft, setTimeLeft] = useState(2400); // 4분 = 240초
+  const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
@@ -343,7 +342,7 @@ const Game2 = () => {
       client.send(`/app/game/${roomId}/bodyTalk/keyword`);
       console.log("키워드 요청요청요청");
     }
-    if (round === 7) {
+    if (round === 3) {
       // 게임 종료 로직
       setIsGameEnded(true);
     } else {
@@ -374,7 +373,7 @@ const Game2 = () => {
   //     userVideoRef.current.srcObject = null; // 스트림이 없을 경우 비디오 요소를 비웁니다.
   //   }
   // }, [localStream, explainerNo, userNo]);
-  
+
   //서브 스트림
   useEffect(() => {
     if (
@@ -386,22 +385,22 @@ const Game2 = () => {
         (sub) => JSON.parse(sub.stream.connection.data).userNo === explainerNo
       );
       if (subscriber) {
-        subscriberVideoRef.current.srcObject = subscriber.stream.getMediaStream();
+        subscriberVideoRef.current.srcObject =
+          subscriber.stream.getMediaStream();
         console.log(
           "서브스크립션 스트림이 비디오 요소에 설정되었습니다.",
           subscriber.stream
         );
       } else {
         console.log("적절한 구독자를 찾을 수 없습니다.");
-        subscriberVideoRef.current.srcObject = null; 
+        subscriberVideoRef.current.srcObject = null;
       }
     } else if (explainerNo !== userNo && subscribers.length === 0) {
       console.log("구독자 스트림이 없거나 찾을 수 없습니다.");
-      subscriberVideoRef.current.srcObject = null; 
+      subscriberVideoRef.current.srcObject = null;
     }
   }, [subscribers, explainerNo, userNo]);
-  
-  
+
   // 타이머 로직
   useEffect(() => {
     if (!isGameEnded && timeLeft > 0) {
@@ -460,7 +459,10 @@ const Game2 = () => {
           }}
           modalText={
             <>
-              한 명은 제시어를 <span style={{ color: "#58FFF5" }}>몸으로 표현</span>하고, <br /> 나머지는 제시어를 <span style={{ color: "#58FFF5" }}>맞추면 </span>
+              한 명은 제시어를{" "}
+              <span style={{ color: "#58FFF5" }}>몸으로 표현</span>하고, <br />{" "}
+              나머지는 제시어를{" "}
+              <span style={{ color: "#58FFF5" }}>맞추면 </span>
               됩니다. <br />
               제한 시간은 4분입니다.
             </>
@@ -492,7 +494,9 @@ const Game2 = () => {
             <Header>{round + 1} 라운드 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
-          <Header2>제시어를 몸으로 표현해주세요! <br /> 마이크는 꺼집니다.</Header2>
+          <Header2>
+            제시어를 몸으로 표현해주세요! <br /> 마이크는 꺼집니다.
+          </Header2>
           <BubbleWrap>
             <SpeechBubble
               type={
@@ -510,7 +514,6 @@ const Game2 = () => {
               <UserVideo ref={subscriberVideoRef} autoPlay muted />
             )}
           </VideoWrapper>
-          
         </>
       ) : (
         <>
@@ -525,8 +528,10 @@ const Game2 = () => {
               </h1>
             )}
           </HeaderContainer>
-          <Header2>화면을 보고 제시어를 맞춰보세요 ! <br />
-          현재 제시어 종류는 <span style={{ color: "#58FFF5" }}>{keywordType} </span> 입니다.
+          <Header2>
+            화면을 보고 제시어를 맞춰보세요 ! <br />
+            현재 제시어 종류는{" "}
+            <span style={{ color: "#58FFF5" }}>{keywordType} </span> 입니다.
           </Header2>
           {/* <SpeechBubble type={`현재 제시어 종류 : ${keywordType}`} /> */}
           {/* <h1>출제자 화면 출력</h1> */}
@@ -537,7 +542,7 @@ const Game2 = () => {
               <UserVideo ref={subscriberVideoRef} autoPlay muted />
             )}
           </VideoWrapper>
-          
+
           <ChatWrap>
             <Input
               type="text"
