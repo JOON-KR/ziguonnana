@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import earth from "../../assets/icons/earth.png";
+import gray from "../../assets/icons/gray.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -12,7 +13,7 @@ const Wrap = styled.div`
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100vh; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -29,7 +30,6 @@ const StyledH2 = styled.h2`
   text-align: center;
   transition: transform 0.3s, box-shadow 0.3s;
 `;
-
 
 // const StyledH2 = styled.h2`
 //   margin-top: 50px;
@@ -264,10 +264,10 @@ const Game5 = () => {
 
   return (
     <Wrap>
-      {isGuideModalOpen && (       
+      {isGuideModalOpen && (
         <GameInfoModal
           onClose={() => setIsGuideModalOpen(false)}
-          planetImg={earth}
+          planetImg={gray}
           planetWidth="180px"
           RedBtnText={"댄스 챌린지"}
           RedBtnFn={handleRedBtnClick}
@@ -275,14 +275,18 @@ const Game5 = () => {
             <>
               숏폼 챌린지에 오신걸 환영합니다 ! <br />
               챌린지 영상을 한 가지 선택 후, <br />
-              <span style={{ color: "#58FFF5" }}>릴레이</span>로 영상을 완성해봅시다!
+              <span style={{ color: "#58FFF5" }}>릴레이</span>로 영상을
+              완성해봅시다!
             </>
           }
         />
       )}
       {!isGuideModalOpen && (
         <>
-          <StyledH2>챌린지할 영상을 <br />💃🏼 선택해주세요. 💃🏼</StyledH2>
+          <StyledH2>
+            챌린지할 영상을 <br />
+            💃🏼 선택해주세요. 💃🏼
+          </StyledH2>
           <VideoContainer>
             <ThumbnailWrapper
               onClick={() =>

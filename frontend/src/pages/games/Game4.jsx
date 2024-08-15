@@ -6,7 +6,7 @@ import GameInfoModal from "../../components/modals/GameInfoModal";
 import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
-import gray from "../../assets/icons/gray.png";
+import red from "../../assets/icons/red.png";
 
 // 각 포즈 이미지와 오버레이 이미지를 가져옵니다
 import pose1 from "../../assets/images/pose1.png";
@@ -266,6 +266,8 @@ const Game4 = () => {
   const [currentSelectedPose, setCurrentSelectedPose] = useState(null); // 임시 포즈 선택을 위한 상태
   const [roundResult, setRoundResult] = useState("");
   const [roundPercentage, setRoundPercentage] = useState(0);
+  const [isGameEnded, setIsGameEnded] = useState(false);
+  const [bestMember, setBestMember] = useState("");
 
   const roomId = useSelector((state) => state.room.roomId); // 룸 ID 상태
   const client = useSelector((state) => state.client.stompClient); // STOMP 클라이언트 상태
@@ -330,7 +332,8 @@ const Game4 = () => {
 
   const endGame = () => {
     dispatch(setGame4Finish());
-    navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
+    client.send(`/app/game/${roomId}/pose/end`);
+    // navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
   };
 
   // 게임 구독 및 메시지 처리
@@ -361,6 +364,11 @@ const Game4 = () => {
             "Received GAME_MODAL_START command, closing all modals..."
           );
           closeAllModals();
+        } else if (parsedMessage.commandType == "POSE_END") {
+          setIsGameEnded(true);
+          setBestMember(parsedMessage.data.message);
+        } else if (parsedMessage.commandType == "POSE_END_TO_GAMES") {
+          navigate("/icebreaking/games");
         }
 
         console.log("Received command:", parsedMessage);
@@ -558,11 +566,15 @@ const Game4 = () => {
 
   return (
     <Wrap>
-      <Title>ROUND : {round} / 3</Title>
+      {isGameEnded ? (
+        <Title>최고의 멤버 : {bestMember}</Title>
+      ) : (
+        <Title>ROUND : {round} / 3</Title>
+      )}
       {/* 게임 환영 모달 */}
       {isFollowPoseWelcomeModalOpen && (
         <GameInfoModal
-          planetImg={gray}
+          planetImg={red}
           planetWidth="150px"
           BlueBtnText={"게임설명 보기"}
           BlueBtnFn={openIsFollowPoseSelectModalOpen}
@@ -723,7 +735,9 @@ const Game4 = () => {
           )}
         </div>
         <OpenViduSession token={openViduToken} />
-        <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
+        {isGameEnded && (
+          <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
+        )}
       </PageWrap>
     </Wrap>
   );

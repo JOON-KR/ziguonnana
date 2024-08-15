@@ -133,15 +133,12 @@ const RoomJoinModal = ({ onClose }) => {
             `/topic/game/${inviteCode}/${memberId}`,
             (message) => {
               const parsedMessage = JSON.parse(message.body);
-              console.log("개별 구독 받은 메시지:", parsedMessage);
+              console.log("룸조인모달 메시지 : ", parsedMessage);
 
               if (parsedMessage.commandType == "ROOM_IS_FULL") {
                 alert("방이 가득찼습니다");
                 navigate("/");
-              } else if (
-                parsedMessage.data &&
-                parsedMessage.data.num !== undefined
-              ) {
+              } else if (parsedMessage.message == "방 참가 완료\n") {
                 dispatch(setUserNo(parsedMessage.data.num));
                 console.log("유저 번호 :", parsedMessage.data.num);
                 setSessionInfo((prevSessionInfo) => ({
