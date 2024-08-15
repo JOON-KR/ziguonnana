@@ -69,7 +69,7 @@ public class AnswerService {
         // 랜덤하게 5개의 질문 선택
         List<SelfIntroductionQuestion> shuffledQuestions = new ArrayList<>(List.of(questions));
         Collections.shuffle(shuffledQuestions);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             questionList.add(shuffledQuestions.get(i).getQuestion());
         }
         QuestionResponse response =	QuestionResponse.builder()
