@@ -121,8 +121,8 @@ public class PoseService {
 	        if (room.getCycle() >= 3) {
 	        	log.info("포즈 종료", room.getCycle());
 	        	PoseResponse result = getBest(room);
-	        	room.updatePoseResult(result);
 	        	messagingTemplate.convertAndSend("/topic/game/" + roomId, Response.ok(CommandType.POSE_END, result));
+	        	room.updatePoseResult(result);
 	        	room.cycleInit();
 	        	room.countInit();
 	        }else {
@@ -139,7 +139,7 @@ public class PoseService {
 		int per[] = new int[people+1];
 		int cnt[] = new int[people+1];
 		//각 라운드
-		   for(int i=0; i<=2;i++ ) {
+		   for(int i=0; i<=2&&i<poselist.size();i++ ) {
 			   //각 사람
 	        	for(int j=1;j<=room.getPeople();j++) {
 	        		per[j]+=poselist.get(i).get(j).getPercent();

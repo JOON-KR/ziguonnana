@@ -19,7 +19,7 @@ public class GameResult {
     private int bodyCount;
     private long bodyDuration;
     private int igudongseongCount;
-    private PoseResponse poseBest;
+    private String poseBest;
     private List<AvatarResult> avatarCards;
     private String shortsURL; // 숏폼 최종 결과 영상 URL
     private int people; // 인원수
