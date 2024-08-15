@@ -277,7 +277,7 @@ const Game4 = () => {
   const [gameStarted, setGameStarted] = useState(false); // 게임 시작 여부 체크
   const [currentSelectedPose, setCurrentSelectedPose] = useState(null); // 임시 포즈 선택을 위한 상태
   const [roundResult, setRoundResult] = useState("");
-  const [roundPercentage, setRoundPercentage] = useState(0);
+  const [roundPercentage, setRoundPercentage] = useState(90);
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [bestMember, setBestMember] = useState("");
 

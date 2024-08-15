@@ -15,7 +15,7 @@ const Container = styled.div`
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100vh; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -247,7 +247,7 @@ const Game5Dance = () => {
       console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
 
       recordedChunks.current = [];
-      const options = { mimeType: "video/webm" };
+      const options = { mimeType: "video/webm;codecs=vp8,opus" };
       const mediaRecorder = new MediaRecorder(
         localStream.getMediaStream(),
         options
@@ -261,7 +261,9 @@ const Game5Dance = () => {
       };
 
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(recordedChunks.current, { type: "video/webm" });
+        const blob = new Blob(recordedChunks.current, {
+          type: "video/webm;codecs=vp8,opus",
+        });
         console.log("녹화된 Blob:", blob);
 
         const formData = new FormData();
