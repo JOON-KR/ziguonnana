@@ -128,7 +128,7 @@ public class ArtService {
         RelayArt relayArt = RelayArt.builder()
                 .art(art)
                 .num(userNo)
-                .keyword(room.getPlayers().get(targetUser).getAnswer().get(room.getCount() - 1))
+                .keyword(room.getPlayers().get(targetUser).getAnswer().get(index))
                 .build();
         artList.add(relayArt);
         // 세이브 카운트 업
