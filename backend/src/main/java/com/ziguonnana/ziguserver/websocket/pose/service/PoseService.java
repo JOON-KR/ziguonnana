@@ -141,7 +141,7 @@ public class PoseService {
 		//각 라운드
 		   for(int i=0; i<=2&&i<poselist.size();i++ ) {
 			   //각 사람
-	        	for(int j=1;j<=room.getPeople();j++) {
+	        	for(int j=1;j<=room.getPeople()&&j<poselist.get(i).size();j++) {
 	        		per[j]+=poselist.get(i).get(j).getPercent();
 	        		if(poselist.get(i).get(j).getMessage().equals("성공")) {
 	        			cnt[j]++;
