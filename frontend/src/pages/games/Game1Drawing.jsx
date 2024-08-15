@@ -203,16 +203,14 @@ const MapButton = styled.button`
     background-color: #00FFFF;
   }
 `;
-
 const HomeIcon = styled.img`
-  position: fixed;
+  position: absolute;
   top:50px;
-  left: 50px;
+  left: 30px;
   width: 30px;
   height: 30px;
   cursor: pointer;
 `;
-
 
 
 const Game1Drawing = () => {
