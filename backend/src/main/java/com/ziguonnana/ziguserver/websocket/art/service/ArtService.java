@@ -146,7 +146,7 @@ public class ArtService {
                 .art(art)
                 .currentUser(userNo + 1 == people ? people : (userNo + 1) % people)
                 .targetUser(targetUser)
-                .keyword(room.getPlayers().get(targetUser).getAnswer().get(room.getCount()))
+                .keyword(room.getPlayers().get(targetUser).getAnswer().get(room.getCount()-1))
                 .build();
 
         log.info("----다음 그림 반환 : targetUser : {}, currentUser : {}, art: {}", response.getTargetUser(), response.getCurrentUser(), response.getArt());
