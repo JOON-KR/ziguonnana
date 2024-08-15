@@ -5,7 +5,7 @@ export const authSlice = createSlice({
   name: "auth",
   initialState: {
     isLoggedIn: false, // 로그인 상태
-    userNo: 1, // 방에 입장한 순서
+    userNo: 0, // 방에 입장한 순서
     memberId: 0, // 오픈비두 연결 시 받은 멤버 ID
     openViduToken: "", // 오픈비두 연결 시 받은 토큰
   },
@@ -21,6 +21,7 @@ export const authSlice = createSlice({
       state.accessToken = null;
     },
     setUserNo: (state, action) => {
+      console.log("Updating userNo:", action.payload);
       state.userNo = action.payload;
     },
     setMemberId: (state, action) => {

@@ -101,7 +101,7 @@ const CopyButton = styled.button`
   margin-left: 18px;
   margin-bottom: 14px;
   background-color: #00ffff;
-  color: #54595E;
+  color: #54595e;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -124,7 +124,6 @@ const ProfilePick = () => {
   const stompClientRef = useRef(null);
 
   useEffect(() => {
-    console.log("프로필 유저 번호 : ", userNo);
     const fetchProfiles = async () => {
       if (isLoggedIn) {
         try {
@@ -204,11 +203,14 @@ const ProfilePick = () => {
   };
 
   const handleCopyRoomId = () => {
-    navigator.clipboard.writeText(roomId).then(() => {
-      alert("방 참여 코드가 복사되었습니다.");
-    }).catch(err => {
-      console.error('방 참여 코드 복사 실패:', err);
-    });
+    navigator.clipboard
+      .writeText(roomId)
+      .then(() => {
+        alert("방 참여 코드가 복사되었습니다.");
+      })
+      .catch((err) => {
+        console.error("방 참여 코드 복사 실패:", err);
+      });
   };
 
   return (
@@ -229,9 +231,7 @@ const ProfilePick = () => {
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요
       </SubTitle>
       <ButtonWrap>
-        <SubTitle>
-          방 참여 코드 : {roomId}
-        </SubTitle>
+        <SubTitle>방 참여 코드 : {roomId}</SubTitle>
         <CopyButton onClick={handleCopyRoomId}>복사</CopyButton>
       </ButtonWrap>
 
@@ -256,7 +256,10 @@ const ProfilePick = () => {
           <Image
             src={newProfileImage}
             alt="Profile Image"
-            onClick={() => setIsProfileRegisterModalOpen(true)}
+            onClick={() => {
+              setIsProfileRegisterModalOpen(true);
+              console.log("프로필 유저 번호 : ", userNo);
+            }}
           />
           <Tags>
             {["새로운", "프로필", "만들기"].map((tag, idx) => (

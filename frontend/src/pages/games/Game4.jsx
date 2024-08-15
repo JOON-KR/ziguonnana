@@ -266,6 +266,7 @@ const Game4 = () => {
   const [currentSelectedPose, setCurrentSelectedPose] = useState(null); // 임시 포즈 선택을 위한 상태
   const [roundResult, setRoundResult] = useState("");
   const [roundPercentage, setRoundPercentage] = useState(0);
+  const [isGameEnded, setIsGameEnded] = useState(false);
 
   const roomId = useSelector((state) => state.room.roomId); // 룸 ID 상태
   const client = useSelector((state) => state.client.stompClient); // STOMP 클라이언트 상태
@@ -361,6 +362,8 @@ const Game4 = () => {
             "Received GAME_MODAL_START command, closing all modals..."
           );
           closeAllModals();
+        } else if (parsedMessage.commandType == "POSE_END") {
+          setIsGameEnded(true);
         }
 
         console.log("Received command:", parsedMessage);

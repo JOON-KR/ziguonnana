@@ -219,9 +219,7 @@ const Games = () => {
           게임 끝내기
         </PlanetName>
 
-        {isEndModalOpen && (
-          <GameEndModal onClose={closeEndModal} style={{ zIndex: 100 }} />
-        )}
+        {isEndModalOpen && <GameEndModal style={{ zIndex: 100 }} />}
       </Wrap>
     </Container>
   );
