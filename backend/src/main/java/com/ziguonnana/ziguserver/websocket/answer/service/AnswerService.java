@@ -40,7 +40,6 @@ public class AnswerService {
 			throw new PlayerException(ErrorCode.PLAYER_NOT_FOUND);
 		player.createAnswer(request.getAnswer());
 		// 해당 룸의 player 정보 업데이트
-		room.getPlayers().put(player.getNum(), player);
 		// 룸 정보 업데이트
 		ConcurrentMap<String, Room> rooms = roomRepository.getAllRooms();
 		rooms.put(roomId, room);
@@ -69,7 +68,7 @@ public class AnswerService {
         // 랜덤하게 5개의 질문 선택
         List<SelfIntroductionQuestion> shuffledQuestions = new ArrayList<>(List.of(questions));
         Collections.shuffle(shuffledQuestions);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             questionList.add(shuffledQuestions.get(i).getQuestion());
         }
         QuestionResponse response =	QuestionResponse.builder()

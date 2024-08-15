@@ -119,6 +119,12 @@ public class ArtService {
         log.info("----그림저장 --- targetUser : {}, currentUser : {}", targetUser, userNo);
         // 현재 전달받은 그림 타겟에 저장
         List<RelayArt> artList = map.get(targetUser);
+        int index = room.getCount() - 1;
+        List<String> answers = room.getPlayers().get(targetUser).getAnswer();
+        
+        if (index >= answers.size() || index <0) {
+        	index = 0;
+        }
         RelayArt relayArt = RelayArt.builder()
                 .art(art)
                 .num(userNo)
@@ -142,11 +148,15 @@ public class ArtService {
             save(roomId, DEFAULT_IMAGE);
             return;
         }
+        index++;
+        if (index >= answers.size() || index <0) {
+        	index = 0;
+        }
         ArtResponse response = ArtResponse.builder()
                 .art(art)
                 .currentUser(userNo + 1 == people ? people : (userNo + 1) % people)
                 .targetUser(targetUser)
-                .keyword(room.getPlayers().get(targetUser).getAnswer().get(room.getCount()-1))
+                .keyword(room.getPlayers().get(targetUser).getAnswer().get(index))
                 .build();
 
         log.info("----다음 그림 반환 : targetUser : {}, currentUser : {}, art: {}", response.getTargetUser(), response.getCurrentUser(), response.getArt());
