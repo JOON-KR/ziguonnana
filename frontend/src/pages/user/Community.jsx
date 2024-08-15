@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useInView } from "react-intersection-observer";
 import VideoModal from "../../components/modals/VideoModal";
-import VideoCard from "../../components/layout/VideoCard";
-import TeamRecordModal from "../../components/modals/TeamRecordModal"; // Import TeamRecordModal
+import TeamRecordModal from "../../components/modals/TeamRecordModal";
 import community_bg from "../../assets/images/community_bg.png";
-import default_profile from "../../assets/images/default_profile.png"; // 기본 프로필 이미지
+import default_profile from "../../assets/images/default_profile.png";
 import MintBtn from "../../components/common/MintBtn";
-import likeIcon from "../../assets/images/like_icon.png"; // 좋아요 아이콘 이미지 경로
+import likeIcon from "../../assets/images/like_icon.png";
+import axios from "axios";
 
 // 페이지 전체를 감싸는 스타일 컴포넌트
 const PageWrap = styled.div`
@@ -32,6 +32,7 @@ const ContentWrapper = styled.div`
   padding-top: 20px;
   margin-top: 37px;
   position: relative;
+
 `;
 
 // 제목과 업로드 버튼을 감싸는 스타일 컴포넌트
@@ -40,11 +41,13 @@ const TitleWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+
 `;
 
 // 페이지 제목 스타일 컴포넌트
 const Title = styled.h2`
-  font-size: 30px;
+  margin-top: 40px;
+  font-size: 35px;
   font-weight: bold;
   color: #58fff5;
 `;
@@ -54,10 +57,10 @@ const UploadButton = styled(MintBtn)`
   width: 100px;
   height: 40px;
   font-size: 16px;
-  margin-top: 100px; /* 위로부터 100px 띄움 */
+  margin-top: 100px;
   position: absolute;
-  top: 20px; /* 제목과의 간격 설정 */
-  right: 0; /* 콘텐츠 영역의 맨 오른쪽에 위치 */
+  top: 20px;
+  right: 0;
 `;
 
 // 버튼 그룹을 감싸는 스타일 컴포넌트
@@ -72,26 +75,58 @@ const ProfileImage = styled.img`
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   object-fit: cover;
 `;
 
-// 비디오 그리드를 감싸는 스타일 컴포넌트
 const VideoGridContainer = styled.div`
   width: 660px;
   height: calc(100vh - 100px);
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-top: 3px;
+  flex-wrap: wrap; /* 여러 줄에 걸쳐 카드를 배치하기 위해 추가 */
+  justify-content: space-between; /* 카드들 간에 균등한 간격을 두기 위해 추가 */
+  gap: 1px; /* 카드들 사이의 간격을 설정 */
 
   /* 스크롤바 숨기기 */
   ::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`;
+
+
+// 각 비디오 카드 스타일
+const VideoCardWrapper = styled.div`
+  width: calc(33.33% - 10px); /* 3개씩 배치 */
+  max-width: 300px; /* 변경: 각 카드의 최대 너비를 설정 */
+  flex-grow: 1; /* 추가: 공간이 있을 경우 카드를 확장 */
+  @media (max-width: 768px) {
+    width: calc(50% - 10px); /* 화면이 좁아지면 2개씩 배치 */
+  }
+  @media (max-width: 480px) {
+    width: 100%; /* 화면이 더 좁아지면 1개씩 배치 */
+  }
+`;
+
+const VideoThumbnail = styled.div`
+  width: 220px;
+  height: 150px;
+  background-color: #eee;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black; /* 검은색 테두리 추가 */
+`;
+
+const StyledVideo = styled.video`
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
 `;
 
 // 배경을 흐리게 하는 스타일 컴포넌트
@@ -108,146 +143,54 @@ const Overlay = styled.div`
   z-index: 1000;
 `;
 
-// Community 컴포넌트 정의
 const Community = () => {
-  // 비디오 목록 상태 관리
-  const [videos, setVideos] = useState([
-    {
-      id: 1,
-      videos: [
-        {
-          url: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
-          likes: 150,
-          date: "2024-07-01",
-        },
-        {
-          url: "https://media.w3.org/2010/05/bunny/trailer.mp4",
-          likes: 200,
-          date: "2024-07-05",
-        },
-        {
-          url: "https://media.w3.org/2010/05/video/movie_300.mp4",
-          likes: 50,
-          date: "2024-07-03",
-        },
-      ],
-    },
-    {
-      id: 2,
-      videos: [
-        {
-          url: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
-          likes: 250,
-          date: "2024-07-02",
-        },
-        {
-          url: "https://media.w3.org/2010/05/bunny/trailer.mp4",
-          likes: 100,
-          date: "2024-07-06",
-        },
-        {
-          url: "https://media.w3.org/2010/05/video/movie_300.mp4",
-          likes: 300,
-          date: "2024-07-04",
-        },
-      ],
-    },
-    {
-      id: 3,
-      videos: [
-        {
-          url: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
-          likes: 180,
-          date: "2024-07-07",
-        },
-        {
-          url: "https://media.w3.org/2010/05/bunny/trailer.mp4",
-          likes: 90,
-          date: "2024-07-08",
-        },
-        {
-          url: "https://media.w3.org/2010/05/video/movie_300.mp4",
-          likes: 60,
-          date: "2024-07-09",
-        },
-      ],
-    },
-  ]);
-
-  // 선택된 비디오 상태 관리 (모달에서 재생할 비디오 URL)
-  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(null);
   const [isTeamRecordVideo, setIsTeamRecordVideo] = useState(false);
-
-  // 로그인 상태 관리
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // 프로필 이미지 상태 관리
   const [profileImage, setProfileImage] = useState(default_profile);
-
-  // 정렬 상태 관리
-  const [sortType, setSortType] = useState("latest"); // "latest" or "popular"
-
-  // useInView 훅을 사용하여 화면에 보이는지 여부를 감지
+  const [sortType, setSortType] = useState("latest");
   const { ref, inView } = useInView();
-
-  // 업로드 모달 상태 관리
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  // 비디오 URL 배열
-  const videoURLs = [
-    "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
-    "https://media.w3.org/2010/05/bunny/trailer.mp4",
-    "https://media.w3.org/2010/05/video/movie_300.mp4",
-    "https://media.w3.org/2010/05/bunny/movie.mp4",
-    "https://media.w3.org/2010/05/sintel/movie.mp4",
-  ];
+  // 비디오 데이터를 가져오는 함수
+  const fetchVideos = async () => {
+    try {
+      const response = await axios.get("https://i11b303.p.ssafy.io/api/v1/article/video");
+      console.log("API Response:", response);
 
-  // 랜덤으로 비디오 URL을 3개 반환하는 함수
-  const getRandomVideos = () => {
-    return Array.from({ length: 3 }, () => ({
-      url: videoURLs[Math.floor(Math.random() * videoURLs.length)],
-      likes: Math.floor(Math.random() * 500), // 랜덤 좋아요 수
-      date: new Date().toISOString().slice(0, 10), // 오늘 날짜
-    }));
+      if (response.data.code === "status(201)") {
+        console.log("Fetched video data:", response.data.data);
+
+        const formattedVideos = response.data.data.map((video) => ({
+          id: video.id,
+          videos: [{
+            url: video.videoUrl,
+            title: video.title,
+            likes: video.likeCount,
+            views: video.viewCount,
+            date: video.regDate ? new Date(video.regDate).toISOString().slice(0, 10) : '',
+          }]
+        }));
+        setVideos(formattedVideos);
+      } else {
+        console.error("Unexpected response code:", response.data.code);
+      }
+    } catch (error) {
+      console.error("Failed to fetch videos:", error);
+    }
   };
 
-  // 더 많은 데이터를 불러오는 함수
-  const fetchMoreData = () => {
-    setVideos((prevVideos) => [
-      ...prevVideos,
-      {
-        id: prevVideos.length + 1,
-        videos: getRandomVideos(),
-      },
-    ]);
-  };
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
-  // inView가 true일 때 더 많은 데이터를 불러옴
   useEffect(() => {
     if (inView) {
       fetchMoreData();
     }
   }, [inView]);
-
-  // 인기순으로 정렬하는 함수
-  const sortVideosByLikes = () => {
-    const sorted = [...videos].sort((a, b) => {
-      const likesA = a.videos.reduce((sum, video) => sum + video.likes, 0);
-      const likesB = b.videos.reduce((sum, video) => sum + video.likes, 0);
-      return likesB - likesA;
-    });
-    setVideos(sorted);
-  };
-
-  // 최신순으로 정렬하는 함수
-  const sortVideosByDate = () => {
-    const sorted = [...videos].sort((a, b) => {
-      const dateA = new Date(a.videos[0].date);
-      const dateB = new Date(b.videos[0].date);
-      return dateB - dateA;
-    });
-    setVideos(sorted);
-  };
 
   useEffect(() => {
     if (sortType === "popular") {
@@ -257,12 +200,57 @@ const Community = () => {
     }
   }, [sortType]);
 
+  const fetchMoreData = () => {
+    // 추가 데이터 불러오기
+  };
+
+  const sortVideosByLikes = () => {
+    const sorted = [...videos].sort((a, b) => {
+      const likesA = a.videos.reduce((sum, video) => sum + video.likes, 0);
+      const likesB = b.videos.reduce((sum, video) => sum + video.likes, 0);
+      return likesB - likesA;
+    });
+    setVideos(sorted);
+  };
+
+  const sortVideosByDate = () => {
+    const sorted = [...videos].sort((a, b) => {
+      const dateA = new Date(a.videos[0].date);
+      const dateB = new Date(b.videos[0].date);
+      return dateB - dateA;
+    });
+    setVideos(sorted);
+  };
+
   const handleVideoModalClose = () => {
-    setSelectedVideo(null);
+    setSelectedVideoIndex(null);
     if (isTeamRecordVideo) {
       setIsUploadModalOpen(true);
       setIsTeamRecordVideo(false);
     }
+  };
+
+  const handleNextVideo = () => {
+    setSelectedVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  };
+
+  const handlePrevVideo = () => {
+    setSelectedVideoIndex((prevIndex) =>
+      prevIndex === 0 ? videos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleScroll = (e) => {
+    if (e.deltaY > 0) {
+      handleNextVideo(); // 스크롤을 내리면 다음 비디오로
+    } else if (e.deltaY < 0) {
+      handlePrevVideo(); // 스크롤을 올리면 이전 비디오로
+    }
+  };
+
+  // 좋아요 후 리스트를 업데이트하는 함수
+  const handleLikeUpdate = async () => {
+    await fetchVideos(); // 비디오 리스트를 다시 불러옴
   };
 
   return (
@@ -270,9 +258,9 @@ const Community = () => {
       <ContentWrapper>
         <TitleWrapper>
           <Title>챌린지 쇼츠</Title>
-          <UploadButton onClick={() => setIsUploadModalOpen(true)}>
+          {/* <UploadButton onClick={() => setIsUploadModalOpen(true)}>
             업로드
-          </UploadButton>
+          </UploadButton> */}
         </TitleWrapper>
         <ProfileImage
           src={isLoggedIn ? profileImage : default_profile}
@@ -282,25 +270,37 @@ const Community = () => {
           <MintBtn onClick={() => setSortType("popular")}>인기순</MintBtn>
           <MintBtn onClick={() => setSortType("latest")}>최신순</MintBtn>
         </ButtonGroup>
+        
         <VideoGridContainer>
-          {videos.map((card) => (
-            <VideoCard
-              key={card.id}
-              videos={card.videos}
-              onClick={(video) => setSelectedVideo(video.url)}
-            />
+          {videos.map((card, index) => (
+            <VideoCardWrapper key={card.id}>
+              <VideoThumbnail onClick={() => setSelectedVideoIndex(index)}>
+                <StyledVideo>
+                  <source
+                    src={card.videos[0].url}
+                    type="video/mp4"
+                  />
+                </StyledVideo>
+              </VideoThumbnail>
+            </VideoCardWrapper>
           ))}
-          <div ref={ref} style={{ height: "20px" }} />
         </VideoGridContainer>
-        {selectedVideo && (
-          <Overlay onClick={handleVideoModalClose}>
+
+
+        {selectedVideoIndex !== null && (
+          <Overlay onClick={handleVideoModalClose} onWheel={handleScroll}>
             <VideoModal
-              video={selectedVideo}
+              videoSrc={videos[selectedVideoIndex].videos[0].url}
+              videoType="video/mp4"
               onClose={handleVideoModalClose}
               likeIcon={likeIcon}
-              title="예시 제목"
-              likeCount={100}
-              showLikeAndTitle={!isTeamRecordVideo} // 팀 레코드 비디오일 때는 좋아요와 제목을 숨김
+              title={videos[selectedVideoIndex].videos[0].title}
+              likeCount={videos[selectedVideoIndex].videos[0].likes}
+              showLikeAndTitle={!isTeamRecordVideo}
+              onNext={handleNextVideo}
+              onPrev={handlePrevVideo}
+              articleId={videos[selectedVideoIndex].id} // 여기에 articleId를 전달
+              onLike={handleLikeUpdate} // 좋아요 후 업데이트를 위한 콜백 전달
             />
           </Overlay>
         )}
@@ -309,7 +309,7 @@ const Community = () => {
             <TeamRecordModal
               onClose={() => setIsUploadModalOpen(false)}
               onVideoSelect={(videoUrl) => {
-                setSelectedVideo(videoUrl);
+                setSelectedVideoIndex(videos.findIndex(v => v.videos[0].url === videoUrl));
                 setIsUploadModalOpen(false);
                 setIsTeamRecordVideo(true);
               }}

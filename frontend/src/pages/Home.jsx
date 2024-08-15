@@ -12,6 +12,7 @@ import { signup } from "../api/signup/signupAPI"; // 회원가입 API 함수 imp
 import { useDispatch, useSelector } from "react-redux";
 import { setLoggedIn, setLoggedOut } from "../store/authSlice";
 import { isAccessTokenExpired } from "../utils/auth";
+import SpeechBubble from "../components/speechBubble/SpeechBubble";
 
 // Home 페이지 전체를 감싸는 스타일 컴포넌트
 const HomeWrap = styled.div`
@@ -36,12 +37,15 @@ const Header = styled.div`
   justify-content: flex-end;
   padding: 20px;
   z-index: 2;
+  margin-right: 50px;
 `;
 
 // 헤더 텍스트 스타일 컴포넌트
 const HeaderText = styled.h4`
   font-size: 28px;
   padding: 0 23px;
+  margin-top: 10px;
+  margin-right: 200px;
   color: white;
   cursor: pointer;
 `;
@@ -88,7 +92,7 @@ const Title = styled.h1`
   font-size: 128px;
   font-weight: 600;
   color: white;
-  margin: 76px 0px;
+  margin: 70px 0px;
   z-index: 2;
 `;
 
@@ -211,6 +215,9 @@ const Home = () => {
     checkToken();
   }, []);
 
+  // 쿠키에 accessToken이 있는지 검증
+  // 로컬스토리지에 토큰 저장
+  // 
   return (
     <HomeWrap>
       {error && <div style={{ color: "red" }}>{error}</div>}
@@ -227,26 +234,6 @@ const Home = () => {
       <Header>
         <HeaderText
           onClick={() => {
-            if (isLoggedIn) {
-              handleLogout();
-            } else {
-              setIsLoginModalOpen(true);
-            }
-          }}
-        >
-          {isLoggedIn ? "로그아웃" : "로그인"}
-        </HeaderText>
-        {isLoggedIn ? (
-          <HeaderText onClick={() => navigate("/MyPage")}>
-            마이페이지
-          </HeaderText>
-        ) : (
-          <HeaderText onClick={() => setIsSignUpModalOpen(true)}>
-            회원가입
-          </HeaderText>
-        )}
-        <HeaderText
-          onClick={() => {
             navigate("/user/community");
           }}
           style={{ marginRight: "12px" }}
@@ -255,6 +242,11 @@ const Home = () => {
         </HeaderText>
       </Header>
       <Wrap>
+        {/* <SpeechBubble
+          text={
+            "hello worldhello worldhello worldhello worldhello worldhello worldhello worldhello worldhello world"
+          }
+        ></SpeechBubble> */}
         <SubTitle>마음속의 얼음을 부수다</SubTitle>
         <Title>지구 ON 나나</Title>
         <BtnWrap>

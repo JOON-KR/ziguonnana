@@ -17,7 +17,7 @@ const getBase64 = (file) => {
 export const createProfile = async ({ name, feature, profileImageFile }) => {
   const base64Image = profileImageFile
     ? await getBase64(profileImageFile)
-    : null;
+    : "no_img";
 
   const profileData = {
     name,

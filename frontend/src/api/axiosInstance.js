@@ -12,7 +12,6 @@ axiosInstance.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`; // 토큰이 있으면 헤더에 토큰 추가
     } else {
-      console.warn("토큰이 없습니다.");
     }
     return config;
   },
