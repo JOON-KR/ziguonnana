@@ -154,8 +154,8 @@ const Timer = styled.div`
 
 const HomeIcon = styled.img`
   position: absolute;
-  top:50px;
-  left: 20px;
+  top:10px;
+  right: 20px;
   width: 30px;
   height: 30px;
   cursor: pointer;
