@@ -8,4 +8,12 @@ import lombok.Getter;
 public class LoadingPlayerInfo {
     private String nickname;
     private int num;
+
+    @Override
+    public String toString() {
+        return "LoadingPlayerInfo{" +
+                "nickname='" + nickname + '\'' +
+                ", num=" + num +
+                '}';
+    }
 }

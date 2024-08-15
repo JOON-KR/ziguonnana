@@ -104,6 +104,7 @@ public class WebsocketService {
         for(Player p : players) {
             loadingPlayerInfos.add(new LoadingPlayerInfo(p.getProfile().getName(), p.getNum()));
         }
+        log.info("모든 사람들 프로필 이름 : " + loadingPlayerInfos);
         Response<List<LoadingPlayerInfo>> response = Response.ok(CommandType.PROFILE_CREATE, loadingPlayerInfos);
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId() ,response);
 

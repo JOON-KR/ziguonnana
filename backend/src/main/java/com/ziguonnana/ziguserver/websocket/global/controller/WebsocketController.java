@@ -85,4 +85,12 @@ public class WebsocketController {
         log.info("=========게임 결과 모달 시작===========");
         return Response.ok(CommandType.GAME_RESULT_MODAL, true);
     }
+
+    // 포즈 따라하기 게임 종료용
+    @MessageMapping("/game/{roomId}/pose/end")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> poseEnd(@DestinationVariable("roomId") String roomId){
+        log.info("포즈 따라하기 종료");
+        return Response.ok(CommandType.POSE_END_TO_GAMES, true);
+    }
 }
