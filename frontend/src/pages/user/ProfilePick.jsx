@@ -56,13 +56,12 @@ const Image = styled.img`
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  margin-top: 15px;
   cursor: pointer;
 `;
 
 // 태그 리스트 스타일 설정
 const Tags = styled.div`
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
 `;
 

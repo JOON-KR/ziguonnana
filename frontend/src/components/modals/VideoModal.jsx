@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
 
 // 모달의 배경을 어둡게 하는 스타일 컴포넌트
 const ModalBackground = styled.div`
@@ -17,7 +18,7 @@ const ModalBackground = styled.div`
 
 // 모달 내용을 감싸는 스타일 컴포넌트
 const ModalContent = styled.div`
-  background: black; /* 검은 배경 */
+  background: black;
   width: 400px;
   height: 700px;
   border-radius: 8px;
@@ -45,7 +46,7 @@ const VideoPlayer = styled.video`
 
 const LikeButton = styled.button`
   position: absolute;
-  top: 350px; /* 위쪽으로 20px 올림 */
+  top: 350px;
   right: 10px;
   width: 40px;
   height: 32px;
@@ -69,7 +70,7 @@ const LikeCount = styled.div`
 
 const Title = styled.h3`
   position: absolute;
-  bottom: 100px; /* 아래에서 100px 위 */
+  bottom: 100px;
   width: 100%;
   text-align: left;
   color: white;
@@ -77,28 +78,51 @@ const Title = styled.h3`
   padding-left: 15px;
 `;
 
-// VideoModal 컴포넌트 정의
 const VideoModal = ({
-  video,
+  videoSrc,
+  videoType = "video/mp4",
   onClose,
   likeIcon,
   title,
   likeCount,
   showLikeAndTitle = true,
+  articleId,
+  onLike, // onLike 콜백 추가
 }) => {
+  const videoRef = useRef(null);
+  const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0; // 비디오 재생 위치를 처음으로 설정
+      videoRef.current.play(); // 비디오를 처음부터 재생
+    }
+  }, [videoSrc]);
+
+  const handleLikeClick = async () => {
+    try {
+      // 좋아요 POST 요청
+      await axios.post("https://i11b303.p.ssafy.io/api/v1/article/like", { articleId });
+      
+      // 성공적으로 요청이 완료되면 리스트를 업데이트하도록 콜백 호출
+      if (onLike) {
+        onLike();
+      }
+    } catch (error) {
+      console.error("Failed to like the video:", error);
+    }
+  };
+
   return (
     <ModalBackground onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <VideoWrapper>
-          <VideoPlayer controls>
-            <source src={video} type="video/mp4" />
-            Your browser does not support the video tag.
-          </VideoPlayer>
+          <VideoPlayer ref={videoRef} src={videoSrc} type={videoType} controls />
         </VideoWrapper>
         {showLikeAndTitle && (
           <>
-            <LikeButton icon={likeIcon} />
-            <LikeCount>{likeCount || 100}</LikeCount>
+            <LikeButton icon={likeIcon} onClick={handleLikeClick} />
+            <LikeCount>{currentLikeCount}</LikeCount>
             <Title>{title}</Title>
           </>
         )}

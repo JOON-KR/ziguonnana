@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const MintBtn = styled.button`
-  background-color: #27b3aa;
+  background-color: #5ddad2;
   color: #f6f8fa; /* 텍스트 색상을 F6F8FA로 설정 */
   font-size: 16px;
   padding: 10px 20px;

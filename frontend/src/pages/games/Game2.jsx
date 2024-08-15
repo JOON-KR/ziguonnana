@@ -11,6 +11,7 @@ import OpenViduSession from "../../components/OpenViduSession";
 import { setGame2Finish } from "../../store/resultSlice";
 import { log } from "@tensorflow/tfjs";
 import btnIcon from "../../assets/icons/aqua_btn.png";
+import homeIcon from "../../assets/icons/home.png"; 
 
 const Wrap = styled.div`
   display: flex;
@@ -150,6 +151,18 @@ const Timer = styled.div`
   font-weight: bold;
   text-align: center;
 `;
+
+const HomeIcon = styled.img`
+  position: absolute;
+  top:50px;
+  left: 20px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+`;
+
+
+
 
 // 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
@@ -433,8 +446,33 @@ const Game2 = () => {
     setIsBodyTalkGuideModalOpen(false);
   };
 
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
+
+
   return (
     <Wrap>
+        <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
       {/* 환영 모달 */}
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
