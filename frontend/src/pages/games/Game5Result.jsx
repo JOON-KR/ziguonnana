@@ -7,7 +7,7 @@ import clear2 from "../../assets/images/clear2.png";
 import nextBtn from "../../assets/icons/next_btn.png";
 import backgroundMusic from "../../assets/audios/icebreaking.mp3";
 import { setGame5Finish } from "../../store/resultSlice";
-import homeIcon from "../../assets/icons/home.png"; 
+import homeIcon from "../../assets/icons/home.png";
 
 const VideoPlayer = styled.video`
   width: 100%;
@@ -92,13 +92,13 @@ const NextButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
-    background-color: #00FFFF;
+    background-color: #00ffff;
   }
 `;
 
 const HomeIcon = styled.img`
   position: fixed;
-  top:50px;
+  top: 50px;
   left: 350px;
   width: 30px;
   height: 30px;
@@ -117,7 +117,7 @@ const Game5Result = () => {
   const [mergeVideoUrl, setMergeVideoUrl] = useState("");
   const [showClear1, setShowClear1] = useState(true);
   const [videoEnded, setVideoEnded] = useState(false); // 비디오 재생 완료 상태
-  const message = "숏폼이 완성될 동안 👻아바타👻를 씌워보세요!";
+  const message = "숏폼이 완성되기까지 최소 1분이 걸립니다";
   const navigate = useNavigate();
   const audioRef = useRef(null); // 오디오 참조
   const dispatch = useDispatch();
@@ -139,13 +139,13 @@ const Game5Result = () => {
         client.send(`/app/game/${roomId}/shorts/merge`, {}, {});
         console.log("send 요청이 전송되었습니다.");
       }, 3000);
-  
+
       return () => clearTimeout(time);
     } else {
       console.log("send 부분에서 문제가 발생함");
     }
   }, [client, roomId]);
-  
+
   // 숏폼 합치기 응답 받기
   useEffect(() => {
     if (client && client.connected) {
@@ -217,17 +217,20 @@ const Game5Result = () => {
     }
   }, [client, roomId, navigate, dispatch]);
 
-
   return (
     <Container>
-       <HomeIcon src={homeIcon} alt="Home" onClick={() => {
-            client.send(`/app/game/${roomId}/game-select`);
-          }}
-        />
+      <HomeIcon
+        src={homeIcon}
+        alt="Home"
+        onClick={() => {
+          client.send(`/app/game/${roomId}/game-select`);
+        }}
+      />
       {mergeVideoUrl ? (
         <>
           <Header textLength={message.length}>
-            우리의 <span style={{ color: "#58FFF5" }}>숏폼</span>이 완성되었습니다! 🛸🪐
+            우리의 <span style={{ color: "#58FFF5" }}>숏폼</span>이
+            완성되었습니다! 🛸🪐
           </Header>
           <VideoPlayer controls autoPlay onEnded={handleVideoEnd}>
             <source src={mergeVideoUrl} type="video/mp4" />

@@ -11,18 +11,19 @@ import recordBtn from "../../assets/icons/aqua_btn.png";
 import gameRecordIcon from "../../assets/icons/game_record.png";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import axios from "axios";
-import avatarImg from "../../assets/icons/avartar.png"
-import homeIcon from "../../assets/icons/home.png"; 
+import avatarImg from "../../assets/icons/avartar.png";
+import homeIcon from "../../assets/icons/home.png";
 import BASEURL from "../../api/APIconfig";
 
 const PageWrap = styled.div`
-   display: flex;
+  /* overflow: auto; */
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 100vh;  /* 뷰포트 높이에 맞추기 */
+  height: 100%; /* 뷰포트 높이에 맞추기 */
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
@@ -51,7 +52,6 @@ const RecordHeader = styled.h1`
   text-align: center;
   margin: 0;
 `;
-
 
 const SectionContainer1 = styled.div`
   display: flex;
@@ -86,10 +86,12 @@ const Section = styled.div`
 `;
 
 const AvatarCardSection = styled.div`
-  width: 400px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  width: 400px;
+  flex-direction: column;
+  /* justify-content: center; */
   align-items: center;
   border-radius: 15px;
   padding: 15px;
@@ -106,16 +108,18 @@ const ArrowButton = styled.button`
   padding: 10px;
   cursor: pointer;
   font-size: 18px;
+  margin-left: 50px;
   border-radius: 50%;
-  position: absolute;
-  top: 50%;
+  /* position: absolute; */
+  /* top: 50%; */
   transform: translateY(-50%);
   z-index: 2;
 
-  ${(props) => (props.left ? "left: -40px;" : "right: -40px;")}
+  /* ${(props) => (props.left ? "left: -40px;" : "right: -40px;")} */
 `;
 
 const RecordSection = styled.div`
+  overflow: auto;
   width: 90%;
   display: flex;
   justify-content: space-between;
@@ -188,7 +192,6 @@ const ModalImage = styled.img`
   margin-bottom: 20px;
 `;
 
-
 const ButtonContainer = styled.div`
   position: relative;
   display: inline-block;
@@ -208,7 +211,7 @@ const ButtonText = styled.span`
   margin-bottom: 10px;
 `;
 
-  const ModalOverlay = styled.div`
+const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -295,9 +298,6 @@ const BlackBtn = styled(Btn)`
   border: 2px solid white;
 `;
 
-
-
-
 const GameRecord = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -315,12 +315,21 @@ const GameRecord = () => {
   const [meetingImageUrl, setMeetingImageUrl] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const { teamName, bodyCount, bodyDuration, igudongseongCount, people, poseBest, shortsURL, avatarCards } = location.state;
+  const {
+    teamName,
+    bodyCount,
+    bodyDuration,
+    igudongseongCount,
+    people,
+    poseBest,
+    shortsURL,
+    avatarCards,
+  } = location.state;
 
   useEffect(() => {
     console.log("전달된 데이터:", location.state);
   }, [location.state]);
-  
+
   useEffect(() => {
     if (client && client.connected) {
       console.log("send:", `/app/game/${roomId}/meeting`);
@@ -332,19 +341,25 @@ const GameRecord = () => {
 
   useEffect(() => {
     if (client && client.connected) {
-      const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const parsedMessage = JSON.parse(message.body);
-        console.log(parsedMessage);
-        if (parsedMessage.commandType === "MEETING_IMAGE" && parsedMessage.message === "SUCCESS") {
-          setMeetingImageUrl(parsedMessage.data);
-          console.log("서버 데이터:", parsedMessage.data);
-          console.log("meetingImageUrl:", meetingImageUrl);
-          subscription.unsubscribe(); // 구독 해제
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessage = JSON.parse(message.body);
+          console.log(parsedMessage);
+          if (
+            parsedMessage.commandType === "MEETING_IMAGE" &&
+            parsedMessage.message === "SUCCESS"
+          ) {
+            setMeetingImageUrl(parsedMessage.data);
+            console.log("서버 데이터:", parsedMessage.data);
+            console.log("meetingImageUrl:", meetingImageUrl);
+            subscription.unsubscribe(); // 구독 해제
+          }
         }
-      });
+      );
     }
-  })
-  
+  });
+
   const handlePicture = () => {
     setShowImageModal(true);
   };
@@ -440,10 +455,9 @@ const GameRecord = () => {
         </ModalOverlay>
       )}
 
-
       {/* 업로드 모달 */}
       {showUploadModal && (
-        <ModalOverlay>  
+        <ModalOverlay>
           <ModalContainer>
             <ModalTitle>영상 업로드</ModalTitle>
             <InputField
@@ -460,11 +474,8 @@ const GameRecord = () => {
             />
             {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
             <StyledVideo>
-                <source
-                  src={shortsURL}
-                  type="video/mp4"
-                />
-              </StyledVideo>
+              <source src={shortsURL} type="video/mp4" />
+            </StyledVideo>
             <ModalButton onClick={handleUploadSubmit} disabled={loading}>
               {loading ? "업로드 중..." : "업로드"}
             </ModalButton>
@@ -485,28 +496,25 @@ const GameRecord = () => {
           </Section>
         </SectionContainer1>
 
-        <AvatarCardSection>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <ArrowButton left onClick={handlePrevClick}>
             {"<"}
           </ArrowButton>
-          <AvatarCard
-            avatarImage={avatarCards[currentIndex].avatarImage}
-            nickname={avatarCards[currentIndex].nickname}
-            features={avatarCards[currentIndex].features}
-          />
+          <AvatarCardSection>
+            <AvatarCard
+              avatarImage={avatarCards[currentIndex].avatarImage}
+              nickname={avatarCards[currentIndex].nickname}
+              features={avatarCards[currentIndex].features}
+            />
+          </AvatarCardSection>
           <ArrowButton onClick={handleNextClick}>{">"}</ArrowButton>
-      </AvatarCardSection>
-{/*       
-        <AvatarCardSection>
-        {avatarCards.map((card, index) => (
-              <AvatarCard
-                key={index}
-                avatarImage={card.avatarImage}
-                nickname={card.nickname}
-                features={card.features}
-              />
-            ))}
-        </AvatarCardSection> */}
+        </div>
       </SectionContainer2>
 
       <RecordSection>
@@ -515,15 +523,25 @@ const GameRecord = () => {
           <Title>👉{poseBest}👈</Title>
         </GameSection>
       </RecordSection>
+      <RecordSection>
+        <RecordTitle>몸으로 말해요 🏅</RecordTitle>
+        <GameSection>
+          <Title>👉{bodyCount} / 3👈</Title>
+        </GameSection>
+      </RecordSection>
+      {/* <RecordSection>
+        <RecordTitle>쇼츠 🏅</RecordTitle>
+        <GameSection>
+          <StyledVideo>
+            <source src={shortsURL} type="video/mp4" />
+          </StyledVideo>
+        </GameSection>
+      </RecordSection> */}
 
       <BtnWrap>
-          <BlackBtn onClick={handlePicture}>
-            단체 사진 보기
-          </BlackBtn>
-          <Btn onClick={handleUploadClick}>
-            숏츠 업로드 하기
-          </Btn>
-        </BtnWrap>
+        <BlackBtn onClick={handlePicture}>단체 사진 보기</BlackBtn>
+        <Btn onClick={handleUploadClick}>숏츠 업로드 하기</Btn>
+      </BtnWrap>
     </PageWrap>
   );
 };
