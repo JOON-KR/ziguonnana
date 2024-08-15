@@ -142,7 +142,7 @@ public class Room {
 				.bodyCount(this.bodyTalkGame.getCorrectCnt()) // 몸으로 말해요 결과
 				.bodyDuration(this.bodyTalkGame.getDurationTime()) // 몸으로 말해요 결과
 				.igudongseongCount(getIgudongseongResult()) // 이구동성 결과
-				.poseBest(this.poseResponse.getMessage())// 포즈 맞추기 결과
+				.poseBest(this.poseResponse == null? "포즈 맞추기 게임을 진행하지 않았습니다!": this.poseResponse.getMessage())// 포즈 맞추기 결과
 				.shortsURL(baseUrl + this.shortsResult) // 숏츠 결과
 				.people(this.people).build();
 	}
