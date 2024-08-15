@@ -17,7 +17,7 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class BodyTalkService {
-    private static final int ROUND = 6;
+    private static final int ROUND = 3;
     private static final int END_TIME = 4 * 60; //게임 시간 4분
 
     private final RoomRepository roomRepository;
