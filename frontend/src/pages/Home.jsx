@@ -37,6 +37,7 @@ const Header = styled.div`
   justify-content: flex-end;
   padding: 20px;
   z-index: 2;
+  margin-right: 50px;
 `;
 
 // 헤더 텍스트 스타일 컴포넌트
@@ -90,7 +91,7 @@ const Title = styled.h1`
   font-size: 128px;
   font-weight: 600;
   color: white;
-  margin: 76px 0px;
+  margin: 70px 0px;
   z-index: 2;
 `;
 

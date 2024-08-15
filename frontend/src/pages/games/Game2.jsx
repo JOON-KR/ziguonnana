@@ -182,7 +182,7 @@ const Game2 = () => {
   const [cmdType, setCmdType] = useState("");
   const [isExplainer, setIsExplainer] = useState(false);
   const [explainerNo, setExplainerNo] = useState(1); // 출제자의 userNo
-  const [timeLeft, setTimeLeft] = useState(2400); // 4분 = 240초
+  const [timeLeft, setTimeLeft] = useState(240); // 4분 = 240초
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [resultData, setResultData] = useState(null); // 결과 데이터 저장
   const dispatch = useDispatch();
@@ -492,17 +492,9 @@ const Game2 = () => {
             <Header>{round + 1} 라운드 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
-          <Header2>제시어를 몸으로 표현해주세요! <br /> 마이크는 꺼집니다.</Header2>
-          <BubbleWrap>
-            <SpeechBubble
-              type={
-                <>
-                  제시어 종류 : {keywordType} <br />
-                </>
-              }
-              word={`제시어 : ${receivedKeyword}`}
-            />
-          </BubbleWrap>
+          <Header2>제시어를 몸으로 표현해주세요! 마이크는 꺼집니다. <br />
+          제시어는 <span style={{ color: "#58FFF5" }}>{receivedKeyword} </span> 입니다.
+          </Header2>
           <VideoWrapper>
             {explainerNo === userNo ? (
               <UserVideo ref={userVideoRef} autoPlay muted />
@@ -510,7 +502,6 @@ const Game2 = () => {
               <UserVideo ref={subscriberVideoRef} autoPlay muted />
             )}
           </VideoWrapper>
-          
         </>
       ) : (
         <>

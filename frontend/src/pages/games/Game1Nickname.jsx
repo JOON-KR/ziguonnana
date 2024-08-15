@@ -20,63 +20,90 @@ const Wrap = styled.div`
   padding: 0;
 `;
 
-const BubbleWrap = styled.div`
+const HeaderContainer = styled.div`
   display: flex;
-  position: absolute; /* 자식 요소의 absolute 포지셔닝을 위해 */
-  justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   width: 100%;
-  top: 100px;
-  left: 130px;
+  margin-bottom: 20px;
+`;
+
+const Header = styled.h1`
+  font-size: 40px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+`;
+const NanaImg = styled.img`
+  width: 120px;
 `;
 
 const ButtonWrap = styled.div`
   display: flex;
+  margin-top: 20px;
   justify-content: center;
   align-items: center;
-  margin-top: 400px;
-  gap: 20px;
+  gap: 40px;
   flex-wrap: wrap;
+  max-width: 800px;
+`;
+
+const StyleCard = styled.div`
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  padding: 30px;
+  width: 200px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const StyleTitle = styled.h2`
+  font-size: 24px;
+  color: #ffffff;
+  margin: 0;
 `;
 
 const StyleButton = styled.button`
-  padding: 16px 32px;
+  padding: 10px 20px;
   font-size: 18px;
   font-weight: bold;
-  color: white;
-  background-color: #58FFF5;
+  color: #ffffff;
+  background-color: #59e0d7;
   border: none;
-  border-radius: 50px;
+  border-radius: 10px;
   cursor: pointer;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s, transform 0.3s;
 
   &:hover {
-    background-color: #ff6347;
-    transform: translateY(-2px);
+    background-color: #f76161;
   }
 
   &:active {
-    background-color: #ff4500;
-    transform: translateY(0);
+    background-color: #f76161;
   }
 `;
 
-const NanaImg = styled.img`
-  width: 300px;
-  height: auto;
-  margin-top: 80px;
-  margin-left: 250px;
-  position: absolute;
-`;
-
 const SelectedStyleText = styled.div`
-  margin-top: 20px;
+  margin-top: 40px;
   padding: 20px 40px;
   font-size: 24px;
   font-weight: bold;
   color: white;
-  background-color: #ff6347;
+  background-color: #f76161;
   border-radius: 10px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -90,7 +117,6 @@ const SelectedStyleText = styled.div`
 const Game1Nickname = () => {
   const navigate = useNavigate();
   const styles = ["중세", "조선", "동물", "미래"];
-  const text = "각자 별명 스타일을 선택해.";
 
   // Redux 상태에서 필요한 값들 가져오기
   const userNo = useSelector((state) => state.auth.userNo); // 현재 사용자의 userNo
@@ -147,21 +173,30 @@ const Game1Nickname = () => {
 
   return (
     <Wrap>
-      <BubbleWrap>
+      {/* <BubbleWrap>
         <SpeechBubble type={text} />
       </BubbleWrap>
-      <NanaImg src={Nana} />
+       */}
+      <HeaderContainer>
+        <Header>
+          별명 스타일을 골라나나!
+        </Header>
+        <NanaImg src={Nana} />
+      </HeaderContainer>
+      
       <ButtonWrap>
         {styles.map((style) => (
-          <StyleButton key={style} onClick={() => handleStyleClick(style)}>
-            {style}
-          </StyleButton>
+          <StyleCard key={style} onClick={() => handleStyleClick(style)}>
+            <StyleTitle>{style}</StyleTitle>
+            <StyleButton>선택</StyleButton>
+          </StyleCard>
         ))}
       </ButtonWrap>
       {selectedStyle && (
-        <SelectedStyleText>{`${selectedStyle} 스타일을 선택하셨습니다`}</SelectedStyleText>
+        <SelectedStyleText>{`${selectedStyle} 스타일을 선택했습니다`}</SelectedStyleText>
       )}
     </Wrap>
+
   );
 };
 

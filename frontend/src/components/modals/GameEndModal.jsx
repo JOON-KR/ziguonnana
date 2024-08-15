@@ -46,6 +46,7 @@ const Title = styled.h2`
   margin-bottom: 30px;
   color: black;
   text-align: center;
+  line-height: 130%;
 `;
 
 const BtnWrap = styled(FlexCenter)`
@@ -74,12 +75,12 @@ const StyledButton = styled.button`
 const GameEndModal = ({ onClose }) => {
   const roomId = useSelector((state) => state.room.roomId);
   const userNo = useSelector((state) => state.auth.userNo);
-  const maxNo = useSelector((state) => state.room.maxNo);
   const [teamName, setTeamName] = useState(""); // 팀명
   const [bodyCount, setBodyCount] = useState(0); // 몸으로말해요 맞춘 개수
   const [bodyDuration, setBodyDuration] = useState(0); // 몸으로말해요 걸린시간(초)
   const [igudongseongCount, setIgudongseongCount] = useState(0); // 이구동성 맞춘 개수
-  const [poseBestList, setPoseBestList] = useState("") // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
+  const [people, setPeople] = useState(0);
+  const [poseBest, setPoseBest] = useState("") // 포즈맞추기 제일 많이 맞춘 사람 이름, ..
   const [shortsURL, setShortsURL] = useState(null); // 숏폼 결과 url
   const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
 
@@ -103,7 +104,8 @@ const GameEndModal = ({ onClose }) => {
             setBodyCount(data.bodyCount);
             setBodyDuration(data.bodyDuration);
             setIgudongseongCount(data.igudongseongCount);
-            setPoseBestList(data.poseBestList);
+            setPeople(data.people);
+            setPoseBest(data.poseBest);
             setShortsURL(data.shortsURL);
             setAvatarCards(data.avatarCards);
             // 모든 클라이언트에서 응답을 처리한 후 결과 페이지로 이동
@@ -113,7 +115,8 @@ const GameEndModal = ({ onClose }) => {
                 bodyCount: data.bodyCount,
                 bodyDuration: data.bodyDuration,
                 igudongseongCount: data.igudongseongCount,
-                poseBestList: data.poseBestList,
+                poseBest: data.poseBest,
+                people: data.people,
                 shortsURL: data.shortsURL,
                 avatarCards: data.avatarCards,
               },
@@ -131,8 +134,8 @@ const GameEndModal = ({ onClose }) => {
 
   const handleNext = () => {
     if (client && client.connected) {
-      console.log("send:", `/app/game/${roomId}/result`);
       client.send(`/app/game/${roomId}/result`, {}, {});
+      console.log("게임모달에서 서버로 send:", `/app/game/${roomId}/result`);
     } else {
       console.warn("send 문제 발생");
     }

@@ -33,12 +33,11 @@ const SkipButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   color: white;
-  background-color: #007bff;
-  border: none;
-  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid white;
+  border-radius: 34px;
   cursor: pointer;
   transition: background-color 0.3s;
-
   &:hover {
     background-color: #0056b3;
   }
@@ -115,7 +114,7 @@ const Introduce = () => {
         <>
           <Image src={introGif} alt="Intro" />
           <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
-          <button onClick={() => navigate("/icebreaking/games/game3")}>
+          {/* <button onClick={() => navigate("/icebreaking/games/game3")}>
             이구동성으로
           </button>
           <button onClick={() => navigate("/icebreaking/games/game2")}>
@@ -123,7 +122,7 @@ const Introduce = () => {
           </button>
           <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
             결과
-          </button>
+          </button> */}
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
