@@ -99,6 +99,22 @@ const AvatarCardSection = styled.div`
   color: white;
 `;
 
+const ArrowButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  ${(props) => (props.left ? "left: -40px;" : "right: -40px;")}
+`;
+
 const RecordSection = styled.div`
   width: 90%;
   display: flex;
@@ -280,6 +296,8 @@ const BlackBtn = styled(Btn)`
 `;
 
 
+
+
 const GameRecord = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -295,6 +313,7 @@ const GameRecord = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [meetingImageUrl, setMeetingImageUrl] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const { teamName, bodyCount, bodyDuration, igudongseongCount, people, poseBest, shortsURL, avatarCards } = location.state;
 
@@ -390,6 +409,18 @@ const GameRecord = () => {
     link.click();
   };
 
+  const handlePrevClick = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? avatarCards.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextClick = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === avatarCards.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
   return (
     <PageWrap>
       <HeaderContainer>
@@ -455,6 +486,18 @@ const GameRecord = () => {
         </SectionContainer1>
 
         <AvatarCardSection>
+          <ArrowButton left onClick={handlePrevClick}>
+            {"<"}
+          </ArrowButton>
+          <AvatarCard
+            avatarImage={avatarCards[currentIndex].avatarImage}
+            nickname={avatarCards[currentIndex].nickname}
+            features={avatarCards[currentIndex].features}
+          />
+          <ArrowButton onClick={handleNextClick}>{">"}</ArrowButton>
+      </AvatarCardSection>
+{/*       
+        <AvatarCardSection>
         {avatarCards.map((card, index) => (
               <AvatarCard
                 key={index}
@@ -463,7 +506,7 @@ const GameRecord = () => {
                 features={card.features}
               />
             ))}
-        </AvatarCardSection>
+        </AvatarCardSection> */}
       </SectionContainer2>
 
       <RecordSection>
