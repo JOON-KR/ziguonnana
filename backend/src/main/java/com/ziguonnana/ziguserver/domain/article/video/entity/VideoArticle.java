@@ -30,9 +30,7 @@ public class VideoArticle {
 
     private String title;
 
-    @ManyToOne
-    @JoinColumn(name = "video_id", nullable = false)
-    private Video video;
+    private String videoUrl;
 
     private Timestamp regDate;
     private Boolean isDelete;
@@ -57,12 +55,12 @@ public class VideoArticle {
         }
     }
 
-    public void update(VideoArticleRequest req, Video video) {
+    public void update(VideoArticleRequest req, String videoUrl) {
         if (req.getTitle() != null) {
             this.title = req.getTitle();
         }
-        if (video != null) {
-            this.video = video;
+        if (videoUrl != null) {
+            this.videoUrl = videoUrl;
         }
         if (req.getIsDelete() != null) {
             this.isDelete = req.getIsDelete();

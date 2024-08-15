@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VideoArticleRequest {
-    private Long videoId;
+    private String videoUrl;
     private String title;
     private Boolean isDelete;
     private Integer likeCount;

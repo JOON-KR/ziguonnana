@@ -137,13 +137,13 @@ public class Room {
 	}
 
 	// 게임 결과 만들기
-	public GameResult makeGameResult() {
+	public GameResult makeGameResult(String baseUrl) {
 		return GameResult.builder().teamName(this.teamName).avatarCards(getAvatarcards()) // 아바타 카드 결과
 				.bodyCount(this.bodyTalkGame.getCorrectCnt()) // 몸으로 말해요 결과
 				.bodyDuration(this.bodyTalkGame.getDurationTime()) // 몸으로 말해요 결과
 				.igudongseongCount(getIgudongseongResult()) // 이구동성 결과
-				.poseBest(this.poseResponse)// 포즈 맞추기 결과
-				.shortsURL(this.shortsResult) // 숏츠 결과
+				.poseBest(this.poseResponse.getMessage())// 포즈 맞추기 결과
+				.shortsURL(baseUrl + this.shortsResult) // 숏츠 결과
 				.people(this.people).build();
 	}
 

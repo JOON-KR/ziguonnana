@@ -53,13 +53,13 @@ public class GameResultService {
 
     public GameResult getGameResult(String roomId) {
         Room room = roomRepository.getRoom(roomId);
-        return room.makeGameResult();
+        return room.makeGameResult(s3BaseURL);
     }
 
     public String processAndUploadAvatarImage(String roomId) {
         try {
             Room room = roomRepository.getRoom(roomId);
-            List<AvatarResult> avatarCards = room.makeGameResult().getAvatarCards();
+            List<AvatarResult> avatarCards = room.makeGameResult(s3BaseURL).getAvatarCards();
 
             // 원본 이미지 로드
             BufferedImage baseImage = ImageIO.read(new URL(s3BaseURL + "RESULT/49047748-c5e9-4576-8261-655e96bc1c27.png"));

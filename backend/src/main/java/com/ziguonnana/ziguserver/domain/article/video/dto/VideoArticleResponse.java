@@ -1,6 +1,5 @@
 package com.ziguonnana.ziguserver.domain.article.video.dto;
 
-import com.ziguonnana.ziguserver.domain.article.video.entity.Video;
 import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 
 import lombok.Builder;
@@ -10,7 +9,7 @@ import lombok.Getter;
 public class VideoArticleResponse {
     private Long id;
     private String title;
-    private Video video;
+    private String videoUrl;
     private Boolean isDelete;
     private Integer likeCount;
     private Integer viewCount;
@@ -19,7 +18,7 @@ public class VideoArticleResponse {
         return VideoArticleResponse.builder()
                 .id(videoArticle.getId())
                 .title(videoArticle.getTitle())
-                .video(videoArticle.getVideo())
+                .videoUrl(videoArticle.getVideoUrl())
                 .isDelete(videoArticle.getIsDelete())
                 .likeCount(videoArticle.getLikeCount())
                 .viewCount(videoArticle.getViewCount())

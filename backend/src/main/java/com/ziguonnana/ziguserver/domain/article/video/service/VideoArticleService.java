@@ -9,10 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ziguonnana.ziguserver.domain.article.video.dto.VideoArticleRequest;
 import com.ziguonnana.ziguserver.domain.article.video.dto.VideoArticleResponse;
-import com.ziguonnana.ziguserver.domain.article.video.entity.Video;
 import com.ziguonnana.ziguserver.domain.article.video.entity.VideoArticle;
 import com.ziguonnana.ziguserver.domain.article.video.repository.VideoArticleRepository;
-import com.ziguonnana.ziguserver.domain.article.video.repository.VideoRepository;
 import com.ziguonnana.ziguserver.exception.ArticleNotFoundException;
 import com.ziguonnana.ziguserver.exception.VideoNotFoundException;
 
@@ -25,13 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class VideoArticleService {
     private final VideoArticleRepository videoArticleRepository;
-    private final VideoRepository videoRepository;
     private final PasswordEncoder encoder;
-    
     public VideoArticleResponse createArticle(VideoArticleRequest articleRequest) {
-        Video video = getVideo(articleRequest.getVideoId());
         VideoArticle videoArticle = VideoArticle.builder()
-                .video(video)
+                .videoUrl(articleRequest.getVideoUrl())
                 .title(articleRequest.getTitle())
                 .likeCount(0)
                 .viewCount(0)
@@ -50,9 +45,7 @@ public class VideoArticleService {
             throw new ArticleNotFoundException("비밀번호가 일치하지 않습니다.");
         }
 
-        Video video = getVideo(articleRequest.getVideoId());
 
-        videoArticle.update(articleRequest, video);
 
         videoArticleRepository.save(videoArticle);
         return VideoArticleResponse.from(videoArticle);
@@ -88,7 +81,4 @@ public class VideoArticleService {
                 .orElseThrow(() -> new ArticleNotFoundException("비디오 아티클을 찾을 수 없습니다."));
     }
 
-    private Video getVideo(Long videoId) {
-        return videoRepository.findById(videoId).orElseThrow(VideoNotFoundException::new);
-    }
 }
