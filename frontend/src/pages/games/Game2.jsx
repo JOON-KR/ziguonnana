@@ -494,19 +494,9 @@ const Game2 = () => {
             <Header>{round + 1} 라운드 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
-          <Header2>
-            제시어를 몸으로 표현해주세요! <br /> 마이크는 꺼집니다.
+          <Header2>제시어를 몸으로 표현해주세요! 마이크는 꺼집니다. <br />
+          제시어는 <span style={{ color: "#58FFF5" }}>{receivedKeyword} </span> 입니다.
           </Header2>
-          <BubbleWrap>
-            <SpeechBubble
-              type={
-                <>
-                  제시어 종류 : {keywordType} <br />
-                </>
-              }
-              word={`제시어 : ${receivedKeyword}`}
-            />
-          </BubbleWrap>
           <VideoWrapper>
             {explainerNo === userNo ? (
               <UserVideo ref={userVideoRef} autoPlay muted />

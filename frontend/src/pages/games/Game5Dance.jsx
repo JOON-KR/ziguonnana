@@ -287,7 +287,7 @@ const Game5Dance = () => {
 
   return (
     <Container>
-      <Title>{currentUserNo} 번째 팀원의 순서입니다.</Title>
+      <Title><span style={{ color: "#58FFF5" }}>{currentUserNo}</span> 번째 팀원의 순서입니다. 👩‍🚀</Title>
       {countdown > 0 && <Countdown>{countdown}</Countdown>}
       <VideoContainer>
         <VideoWrapper>
