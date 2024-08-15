@@ -331,7 +331,8 @@ const Game4 = () => {
 
   const endGame = () => {
     dispatch(setGame4Finish());
-    navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
+    client.send(`/app/game/${roomId}/pose/end`);
+    // navigate("/icebreaking/games"); // 게임 종료 후 페이지 이동
   };
 
   // 게임 구독 및 메시지 처리
@@ -364,6 +365,8 @@ const Game4 = () => {
           closeAllModals();
         } else if (parsedMessage.commandType == "POSE_END") {
           setIsGameEnded(true);
+        } else if (parsedMessage.commandType == "POSE_END_TO_GAMES") {
+          navigate("/icebreaking/games");
         }
 
         console.log("Received command:", parsedMessage);
@@ -726,7 +729,9 @@ const Game4 = () => {
           )}
         </div>
         <OpenViduSession token={openViduToken} />
-        <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
+        {isGameEnded && (
+          <EndGameButton onClick={endGame}>게임 종료</EndGameButton>
+        )}
       </PageWrap>
     </Wrap>
   );
