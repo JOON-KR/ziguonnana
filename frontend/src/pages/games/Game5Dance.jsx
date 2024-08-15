@@ -217,7 +217,7 @@ const Game5Dance = () => {
       console.log("현재 녹화되고 있는 사용자 번호: ", currentUserNo);
 
       recordedChunks.current = [];
-      const options = { mimeType: "video/webm" };
+      const options = { mimeType: "video/webm;codecs=vp8,opus" };
       const mediaRecorder = new MediaRecorder(
         localStream.getMediaStream(),
         options
