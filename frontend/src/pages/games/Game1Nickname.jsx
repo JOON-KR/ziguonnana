@@ -5,6 +5,7 @@ import Nana from "../../assets/icons/nana.png";
 import { useSelector, useDispatch } from "react-redux";
 import { setNicknameList } from "../../store/nicknameSlice";
 import { useNavigate } from "react-router-dom";
+import homeIcon from "../../assets/icons/home.png"; 
 
 // 스타일드 컴포넌트 정의
 const Wrap = styled.div`
@@ -18,6 +19,24 @@ const Wrap = styled.div`
   background-repeat: no-repeat;
   position: relative;
   padding: 0;
+`;
+
+const MapButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #d8d8d8;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid #d8d8d8;
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: #00FFFF;
+  }
 `;
 
 const HeaderContainer = styled.div`
@@ -114,6 +133,16 @@ const SelectedStyleText = styled.div`
   }
 `;
 
+const HomeIcon = styled.img`
+  position: absolute;
+  top:50px;
+  left: 30px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+`;
+
+
 const Game1Nickname = () => {
   const navigate = useNavigate();
   const styles = ["중세", "조선", "동물", "미래"];
@@ -122,6 +151,7 @@ const Game1Nickname = () => {
   const userNo = useSelector((state) => state.auth.userNo); // 현재 사용자의 userNo
   const roomId = useSelector((state) => state.room.roomId); // 현재 방의 roomId
   const stompClient = useSelector((state) => state.client.stompClient); // WebSocket 클라이언트
+  const client = useSelector((state) => state.client.stompClient);
   const dispatch = useDispatch();
 
   const [selectedStyle, setSelectedStyle] = useState(""); // 선택한 스타일 상태
@@ -160,7 +190,6 @@ const Game1Nickname = () => {
           }, 3000); // 3초 후에 이동
         }
       });
-
       // 컴포넌트 언마운트 시 구독 취소
       return () => {
         console.log("Unsubscribing from topic:", `/topic/game/${roomId}`);
@@ -171,12 +200,33 @@ const Game1Nickname = () => {
     }
   }, [stompClient, dispatch, roomId, navigate]);
 
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
+
   return (
     <Wrap>
-      {/* <BubbleWrap>
-        <SpeechBubble type={text} />
-      </BubbleWrap>
-       */}
+
+      <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
       <HeaderContainer>
         <Header>
           별명 스타일을 골라나나!

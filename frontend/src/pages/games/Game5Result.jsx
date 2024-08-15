@@ -7,6 +7,7 @@ import clear2 from "../../assets/images/clear2.png";
 import nextBtn from "../../assets/icons/next_btn.png";
 import backgroundMusic from "../../assets/audios/icebreaking.mp3";
 import { setGame5Finish } from "../../store/resultSlice";
+import homeIcon from "../../assets/icons/home.png"; 
 
 const VideoPlayer = styled.video`
   width: 100%;
@@ -79,12 +80,28 @@ const BottomContainer = styled.div`
 `;
 
 const NextButton = styled.button`
+  position: absolute;
   padding: 10px 20px;
-  font-size: 18px;
-  background-color: #58fff5;
-  color: #54595e;
-  border: none;
-  border-radius: 5px;
+  bottom: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid white;
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: #00FFFF;
+  }
+`;
+
+const HomeIcon = styled.img`
+  position: fixed;
+  top:50px;
+  left: 350px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
 `;
 
@@ -180,8 +197,33 @@ const Game5Result = () => {
     }
   }, []);
 
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
+
+
   return (
     <Container>
+       <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
       {mergeVideoUrl ? (
         <>
           <Header textLength={message.length}>
@@ -192,7 +234,7 @@ const Game5Result = () => {
           </VideoPlayer>
           {videoEnded && (
             <BottomContainer>
-              <NextButton onClick={handleNext}>이동하기</NextButton>
+              {/* <NextButton onClick={handleNext}>이동하기</NextButton> */}
               <NextImage src={nextBtn} alt="Next" onClick={handleNext} />
             </BottomContainer>
           )}

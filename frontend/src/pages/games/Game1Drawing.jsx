@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import { setGame1Finish } from "../../store/resultSlice";
 import btnIcon from "../../assets/icons/aqua_btn.png";
+import homeIcon from "../../assets/icons/home.png"; 
 
 const Wrap = styled.div`
   display: flex;
@@ -185,6 +186,35 @@ const IconImage = styled.img`
   width: 160px;
 `;
 
+const MapButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #d8d8d8;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid #d8d8d8;
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: #00FFFF;
+  }
+`;
+
+const HomeIcon = styled.img`
+  position: fixed;
+  top:50px;
+  left: 50px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+`;
+
+
+
 const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
   const [brushRadius, setBrushRadius] = useState(5);
@@ -267,6 +297,28 @@ const Game1Drawing = () => {
       }
     }
   }, [timeLeft]);
+
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
+
+
 
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
@@ -425,6 +477,10 @@ const Game1Drawing = () => {
   };
   return (
     <Wrap>
+      <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
       {isGameEnded ? (
         <AvatarContainer>
           <AvatarTitle>아바타 명함이 제작되었습니다 🧚‍♀️</AvatarTitle>
