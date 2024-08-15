@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BASE_URL from "../../api/APIconfig";
 import styled from "styled-components";
+import homeIcon from "../../assets/icons/home.png"; 
+import { useDispatch } from "react-redux";
+
 
 const Container = styled.div`
   display: flex;
@@ -64,15 +67,42 @@ const UserVideo = styled.video`
 `;
 
 const NextButton = styled.button`
-  margin-top: 20px;
+  position: absolute;
   padding: 10px 20px;
-  font-size: 18px;
-  background-color: #58fff5;
-  color: #54595e;
-  border: none;
-  border-radius: 5px;
+  bottom: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid white;
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: #00FFFF;
+  }
+`;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+`;
+
+const HomeIcon = styled.img`
+  position: absolute;
+  left: 30px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
 `;
+
+const handleHomeClick = () => {
+  //맵으로 가는 로직 추가
+};
 
 const Game5Dance = () => {
   const roomId = useSelector((state) => state.room.roomId);
@@ -99,7 +129,7 @@ const Game5Dance = () => {
   const [isUploadComplete, setIsUploadComplete] = useState(false); // 업로드 완료 상태
 
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   // 상태가 변경될 때마다 확인
   useEffect(() => {
     if (isRecordingComplete && isUploadComplete) {
@@ -287,12 +317,36 @@ const Game5Dance = () => {
     }
   };
 
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
+
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
+        }
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
+
+
   return (
     <Container>
-      <Title>
-        <span style={{ color: "#58FFF5" }}>{currentUserNo}</span> 번째 팀원의
-        순서입니다. 👩‍🚀
-      </Title>
+      <HeaderContainer>
+        <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+            client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
+        <Title><span style={{ color: "#58FFF5" }}>{currentUserNo}</span> 번째 팀원의 순서입니다. 👩‍🚀</Title>
+      </HeaderContainer>
       {countdown > 0 && <Countdown>{countdown}</Countdown>}
       <VideoContainer>
         <VideoWrapper>

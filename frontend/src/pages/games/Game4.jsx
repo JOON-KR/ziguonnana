@@ -7,6 +7,7 @@ import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
 import red from "../../assets/icons/red.png";
+import homeIcon from "../../assets/icons/home.png"; 
 
 // 각 포즈 이미지와 오버레이 이미지를 가져옵니다
 import pose1 from "../../assets/images/pose1.png";
@@ -247,6 +248,17 @@ const DifficultyLabel = styled.div`
   margin-bottom: 5px;
 `;
 
+
+const HomeIcon = styled.img`
+  position: absolute;
+  top:30px;
+  left: 30px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+`;
+
+
 const Game4 = () => {
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
     useState(true); // 게임 환영 모달 상태
@@ -379,6 +391,28 @@ const Game4 = () => {
       subscription.unsubscribe(); // 컴포넌트가 언마운트 될 때 구독 해제
     };
   }, [client, roomId]);
+
+  
+//맵으로 이동
+useEffect(() => {
+  if (client && client.connected) {
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessages = JSON.parse(message.body);
+
+        if (parsedMessages.commandType === "NANA_MAP") {
+          navigate("/icebreaking/games");
+        }
+      }
+    );
+    client.send(`/app/game/${roomId}/art-start`);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }
+}, [client, roomId, navigate, dispatch]);
+
 
   // selectedPose가 업데이트될 때마다 게임을 시작
   useEffect(() => {
@@ -564,8 +598,13 @@ const Game4 = () => {
     setIsFollowPoseSelectModalOpen(true);
   };
 
+
   return (
     <Wrap>
+       <HomeIcon src={homeIcon} alt="Home" onClick={() => {
+           client.send(`/app/game/${roomId}/game-select`);
+          }}
+        />
       {isGameEnded ? (
         <Title>최고의 멤버 : {bestMember}</Title>
       ) : (

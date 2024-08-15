@@ -44,6 +44,7 @@ const Header = styled.div`
 const HeaderText = styled.h4`
   font-size: 28px;
   padding: 0 23px;
+  margin-top: 10px;
   margin-right: 200px;
   color: white;
   cursor: pointer;

@@ -39,7 +39,7 @@ const SkipButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
-    background-color: #0056b3;
+    background-color: #00FFFF;
   }
 `;
 
@@ -114,15 +114,7 @@ const Introduce = () => {
         <>
           <Image src={introGif} alt="Intro" />
           <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
-          {/* <button onClick={() => navigate("/icebreaking/games/game3")}>
-            이구동성으로
-          </button>
-          <button onClick={() => navigate("/icebreaking/games/game2")}>
-            몸말
-          </button>
-          <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
-            결과
-          </button> */}
+          
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)

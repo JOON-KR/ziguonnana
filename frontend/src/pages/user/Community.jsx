@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useInView } from "react-intersection-observer";
 import VideoModal from "../../components/modals/VideoModal";
-import VideoCard from "../../components/layout/VideoCard";
 import TeamRecordModal from "../../components/modals/TeamRecordModal";
 import community_bg from "../../assets/images/community_bg.png";
 import default_profile from "../../assets/images/default_profile.png";
@@ -25,32 +24,43 @@ const PageWrap = styled.div`
 
 // 콘텐츠를 감싸는 스타일 컴포넌트
 const ContentWrapper = styled.div`
-  width: 50%;
-  max-width: 1000px;  // 최대 너비를 1000px로 제한 (원하는 값으로 설정 가능)
-  min-width: 300px;   // 최소 너비를 300px로 설정하여 너무 작아지지 않도록 함
+  width: calc(100% - 800px); /* 좌우 여백을 합쳐 800px을 제외한 너비 */
+  max-width: 1200px;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding-top: 20px;
   margin-top: 37px;
   position: relative;
-  padding-left: 20px;
-  padding-right: 20px;
+
 `;
 
-// 제목 버튼을 감싸는 스타일 컴포넌트
+// 제목과 업로드 버튼을 감싸는 스타일 컴포넌트
 const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+
 `;
 
 // 페이지 제목 스타일 컴포넌트
 const Title = styled.h2`
-  font-size: 30px;
+  margin-top: 40px;
+  font-size: 35px;
   font-weight: bold;
   color: #58fff5;
+`;
+
+// 업로드 버튼 스타일 컴포넌트
+const UploadButton = styled(MintBtn)`
+  width: 100px;
+  height: 40px;
+  font-size: 16px;
+  margin-top: 100px;
+  position: absolute;
+  top: 20px;
+  right: 0;
 `;
 
 // 버튼 그룹을 감싸는 스타일 컴포넌트
@@ -65,22 +75,21 @@ const ProfileImage = styled.img`
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   object-fit: cover;
 `;
 
-// 비디오 그리드를 감싸는 스타일 컴포넌트
 const VideoGridContainer = styled.div`
-  width: 100%; 
-  max-width: 1000px; 
+  width: 660px;
   height: calc(100vh - 100px);
   overflow-y: auto;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: 3px;
+  align-items: center;
+  flex-wrap: wrap; /* 여러 줄에 걸쳐 카드를 배치하기 위해 추가 */
+  justify-content: space-between; /* 카드들 간에 균등한 간격을 두기 위해 추가 */
+  gap: 1px; /* 카드들 사이의 간격을 설정 */
 
+  /* 스크롤바 숨기기 */
   ::-webkit-scrollbar {
     display: none;
   }
@@ -88,22 +97,39 @@ const VideoGridContainer = styled.div`
   scrollbar-width: none;
 `;
 
+
 // 각 비디오 카드 스타일
 const VideoCardWrapper = styled.div`
   width: calc(33.33% - 10px); /* 3개씩 배치 */
   max-width: 300px; /* 변경: 각 카드의 최대 너비를 설정 */
   flex-grow: 1; /* 추가: 공간이 있을 경우 카드를 확장 */
-  margin-bottom: 15px;
-
   @media (max-width: 768px) {
     width: calc(50% - 10px); /* 화면이 좁아지면 2개씩 배치 */
   }
-
   @media (max-width: 480px) {
     width: 100%; /* 화면이 더 좁아지면 1개씩 배치 */
   }
 `;
 
+const VideoThumbnail = styled.div`
+  width: 220px;
+  height: 150px;
+  background-color: #eee;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black; /* 검은색 테두리 추가 */
+`;
+
+const StyledVideo = styled.video`
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+`;
+
+// 배경을 흐리게 하는 스타일 컴포넌트
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -119,6 +145,7 @@ const Overlay = styled.div`
 
 const Community = () => {
   const [videos, setVideos] = useState([]);
+  const [videoUrl, setVideoUrl] = useState("");
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(null);
   const [isTeamRecordVideo, setIsTeamRecordVideo] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -231,6 +258,9 @@ const Community = () => {
       <ContentWrapper>
         <TitleWrapper>
           <Title>챌린지 쇼츠</Title>
+          {/* <UploadButton onClick={() => setIsUploadModalOpen(true)}>
+            업로드
+          </UploadButton> */}
         </TitleWrapper>
         <ProfileImage
           src={isLoggedIn ? profileImage : default_profile}
@@ -240,17 +270,23 @@ const Community = () => {
           <MintBtn onClick={() => setSortType("popular")}>인기순</MintBtn>
           <MintBtn onClick={() => setSortType("latest")}>최신순</MintBtn>
         </ButtonGroup>
+        
         <VideoGridContainer>
           {videos.map((card, index) => (
             <VideoCardWrapper key={card.id}>
-              <VideoCard
-                videos={card.videos}
-                onClick={() => setSelectedVideoIndex(index)}
-              />
+              <VideoThumbnail onClick={() => setSelectedVideoIndex(index)}>
+                <StyledVideo>
+                  <source
+                    src={card.videos[0].url}
+                    type="video/mp4"
+                  />
+                </StyledVideo>
+              </VideoThumbnail>
             </VideoCardWrapper>
           ))}
-          <div ref={ref} style={{ height: "20px" }} />
         </VideoGridContainer>
+
+
         {selectedVideoIndex !== null && (
           <Overlay onClick={handleVideoModalClose} onWheel={handleScroll}>
             <VideoModal
