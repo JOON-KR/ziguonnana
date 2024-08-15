@@ -222,10 +222,9 @@ const ProfilePick = () => {
         />
       )}
 
-      <Header>
-        <HeaderText>마이페이지</HeaderText>
+      {/* <Header>
         <HeaderText>커뮤니티</HeaderText>
-      </Header>
+      </Header> */}
 
       <SubTitle>
         사용할 <span style={{ color: "#00FFFF" }}>프로필</span>을 골라주세요

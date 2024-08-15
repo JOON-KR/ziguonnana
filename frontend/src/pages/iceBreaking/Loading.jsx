@@ -117,14 +117,6 @@ const Loading = () => {
       <Content>
         <Loader />
       </Content>
-      <button onClick={() => navigate("/icebreaking/games")}>games로</button>
-      <button onClick={() => navigate("/icebreaking/games/game1")}>
-        그리기
-      </button>
-      <button onClick={() => navigate("/icebreaking/games/game2")}>몸말</button>
-      <button onClick={() => navigate("/icebreaking/games/gameRecord")}>
-        결과
-      </button>
     </PageWrap>
   );
 };
