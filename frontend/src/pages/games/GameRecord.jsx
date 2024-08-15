@@ -238,6 +238,7 @@ const ModalButton = styled.button`
   border-radius: 10px;
   cursor: pointer;
   margin-top: 10px;
+  margin-left: 10px;
   &:hover {
     background-color: #45c9c1;
   }
@@ -309,19 +310,24 @@ const GameRecord = () => {
       console.warn("send 문제 발생");
     }
   }, [client, roomId]);
-  
-  const handlePicture = () => {
+
+  useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/topic/game/${roomId}`, (message) => {
         const parsedMessage = JSON.parse(message.body);
-
+        console.log(parsedMessage);
         if (parsedMessage.commandType === "MEETING_IMAGE" && parsedMessage.message === "SUCCESS") {
           setMeetingImageUrl(parsedMessage.data);
-          setShowImageModal(true);
+          console.log("서버 데이터:", parsedMessage.data);
+          console.log("meetingImageUrl:", meetingImageUrl);
           subscription.unsubscribe(); // 구독 해제
         }
       });
     }
+  })
+  
+  const handlePicture = () => {
+    setShowImageModal(true);
   };
 
   const handleCloseImageModal = () => {
