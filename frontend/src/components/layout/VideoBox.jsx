@@ -53,6 +53,8 @@ const VideoBox = ({ index }) => {
       const localUserNo = JSON.parse(localStream.connection.data).userNo;
       if (localUserNo === userNo && videoRef.current) {
         videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림을 비디오 요소에 할당
+        videoRef.current.muted = true; // 자신의 소리를 자신에게서만 음소거
+
         assigned = true;
       }
     }
