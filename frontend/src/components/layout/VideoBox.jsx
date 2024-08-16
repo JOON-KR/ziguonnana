@@ -69,7 +69,7 @@ const VideoBox = ({ index }) => {
 
   return (
     <Box>
-      <Video ref={videoRef} autoPlay muted />
+      <Video ref={videoRef} autoPlay />
       {userNickname && <NameTag>{userNickname}</NameTag>} {/* 닉네임 태그 */}
     </Box>
   );
