@@ -114,7 +114,7 @@ public class ArtService {
             log.info("---- targetUser : {}, currentUser : {}, art: {}", response.getTargetUser(), response.getCurrentUser(), response.getArt());
             // 저장안하고 다음 타겟 및 그릴사람 반환
             messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_RELAY, response));
-            if(room.getCount()==0) room.countUp();
+           room.countUp();
             return;
         }
         log.info("----그림저장 --- targetUser : {}, currentUser : {}", targetUser, userNo);
