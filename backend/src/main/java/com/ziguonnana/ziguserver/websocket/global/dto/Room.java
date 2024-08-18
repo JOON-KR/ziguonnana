@@ -40,6 +40,7 @@ public class Room {
 	private int count;
 	private int isRelay;
 	private String roomId;
+	private boolean artStart;
 	private BodyTalkGame bodyTalkGame;
 	// 몸으로 말해요 키워드 중복체크
 	private Set<Keyword> usedKeywords;
@@ -186,5 +187,8 @@ public class Room {
 	}
 	public void updateAvatar( ConcurrentMap<Integer, AvatarResult> avatarcards) {
 		this.avatarcards = avatarcards;
+	}
+	public void artStart() {
+		this.artStart=true;
 	}
 }

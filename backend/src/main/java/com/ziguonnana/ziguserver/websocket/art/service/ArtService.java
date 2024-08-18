@@ -277,10 +277,13 @@ public class ArtService {
     public void start(String roomId, String image) {
         Room room = roomRepository.getRoom(roomId);
         log.info("이어그리기 시작 요청 =============");
+        if(room.isArtStart())return;
         room.countUp();
+        
         if (room.getCount() >= room.getPeople()) {
             room.countInit();
             room.cycleInit();
+            room.artStart();
             save(roomId, DEFAULT_IMAGE);
         }
     }
