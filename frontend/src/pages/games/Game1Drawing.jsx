@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import AvatarCard from "../../components/avatarCard/AvatarCard";
 import { setGame1Finish } from "../../store/resultSlice";
 import btnIcon from "../../assets/icons/aqua_btn.png";
-import homeIcon from "../../assets/icons/home.png"; 
+import homeIcon from "../../assets/icons/home.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -200,18 +200,17 @@ const MapButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
-    background-color: #00FFFF;
+    background-color: #00ffff;
   }
 `;
 const HomeIcon = styled.img`
   position: absolute;
-  top:50px;
+  top: 50px;
   left: 30px;
   width: 30px;
   height: 30px;
   cursor: pointer;
 `;
-
 
 const Game1Drawing = () => {
   const [brushColor, setBrushColor] = useState("#000000");
@@ -309,14 +308,12 @@ const Game1Drawing = () => {
           }
         }
       );
-      client.send(`/app/game/${roomId}/art-start`);
+      // client.send(`/app/game/${roomId}/art-start`);
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [client, roomId, navigate, dispatch]);
-
-
 
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
@@ -475,10 +472,13 @@ const Game1Drawing = () => {
   };
   return (
     <Wrap>
-      <HomeIcon src={homeIcon} alt="Home" onClick={() => {
-            client.send(`/app/game/${roomId}/game-select`);
-          }}
-        />
+      <HomeIcon
+        src={homeIcon}
+        alt="Home"
+        onClick={() => {
+          client.send(`/app/game/${roomId}/game-select`);
+        }}
+      />
       {isGameEnded ? (
         <AvatarContainer>
           <AvatarTitle>아바타 명함이 제작되었습니다 🧚‍♀️</AvatarTitle>
