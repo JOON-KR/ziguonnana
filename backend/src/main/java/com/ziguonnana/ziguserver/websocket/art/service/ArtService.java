@@ -90,6 +90,7 @@ public class ArtService {
     public void save(String roomId, String art) {
         Room room = roomRepository.getRoom(roomId);
         int cycle = room.getCycle();
+        log.info("{}save요청========", cycle);
         int people = room.getPeople();
         if (cycle >= people) {
             return;
