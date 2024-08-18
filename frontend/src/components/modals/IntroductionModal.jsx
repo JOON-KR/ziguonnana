@@ -98,20 +98,26 @@ const IntroductionModal = ({ onClose, onConfirm }) => {
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
 
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log("방에서 받은 메시지:", parsedMessage);
-      // if (
-      //   parsedMessage.data == true &&
-      //   parsedMessage.commandType == "GAME_START"
-      // )
-      //   navigate("/icebreaking/intro");
-      // // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-      // else if (parsedMessage.message == "질문리스트 전파\n") {
-      //   dispatch(setQuestionList(parsedMessage.data.question));
-      //   console.log(parsedMessage.data.question);
-      // }
-    });
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessage = JSON.parse(message.body);
+        console.log("방에서 받은 메시지:", parsedMessage);
+        // if (
+        //   parsedMessage.data == true &&
+        //   parsedMessage.commandType == "GAME_START"
+        // )
+        //   navigate("/icebreaking/intro");
+        // // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+        // else if (parsedMessage.message == "질문리스트 전파\n") {
+        //   dispatch(setQuestionList(parsedMessage.data.question));
+        //   console.log(parsedMessage.data.question);
+        // }
+      }
+    );
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [client, roomId]);
 
   // useEffect(() => {
