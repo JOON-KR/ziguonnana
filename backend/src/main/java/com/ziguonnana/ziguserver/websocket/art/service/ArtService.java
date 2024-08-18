@@ -278,8 +278,8 @@ public class ArtService {
 
     public void start(String roomId, String image) {
         Room room = roomRepository.getRoom(roomId);
-        log.info("이어그리기 시작 요청 =============");
         if(room.isArtStart())return;
+        log.info("이어그리기 시작 요청 =============");
         room.countUp();
         
         if (room.getCount() >= room.getPeople()) {

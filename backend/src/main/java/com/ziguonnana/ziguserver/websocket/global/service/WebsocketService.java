@@ -63,6 +63,7 @@ public class WebsocketService {
                 .posetmp(new ArrayList<>())
                 .isStart(1)
                 .usedKeywords(new HashSet<>())
+                .artStart(false)
                 .build();
         roomRepository.addRoom(roomId, room);
         roomRepository.addMemberToRoom(request.getMemberId(), roomId);
