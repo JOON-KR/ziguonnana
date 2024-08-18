@@ -114,6 +114,7 @@ public class ArtService {
             // 저장안하고 다음 타겟 및 그릴사람 반환
             messagingTemplate.convertAndSend("/topic/game/" + room.getRoomId(), Response.ok(CommandType.ART_RELAY, response));
             room.countUp();
+            if(!room.isArtStart()) room.artStart();
             return;
         }
         log.info("----그림저장 --- targetUser : {}, currentUser : {}", targetUser, userNo);
@@ -283,7 +284,6 @@ public class ArtService {
         if (room.getCount() >= room.getPeople()) {
             room.countInit();
             room.cycleInit();
-            room.artStart();
             save(roomId, DEFAULT_IMAGE);
         }
     }
