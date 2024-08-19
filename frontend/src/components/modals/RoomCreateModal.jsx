@@ -158,6 +158,9 @@ const RoomCreateModal = ({ onClose }) => {
       // const socket = new SockJS(`${TAMTAM_URL}/ws`);
 
       const client = Stomp.over(socket);
+
+      client.heartbeat.outgoing = 900000; // 15분 (900,000ms) 동안 연결 유지
+      client.heartbeat.incoming = 900000; // 15분 (900,000ms) 동안 연결 유지
       dispatch(setStompClient(client));
 
       client.connect(
