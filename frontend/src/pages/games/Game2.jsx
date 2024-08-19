@@ -11,7 +11,7 @@ import OpenViduSession from "../../components/OpenViduSession";
 import { setGame2Finish } from "../../store/resultSlice";
 import { log } from "@tensorflow/tfjs";
 import btnIcon from "../../assets/icons/aqua_btn.png";
-import homeIcon from "../../assets/icons/home.png"; 
+import homeIcon from "../../assets/icons/home.png";
 
 const Wrap = styled.div`
   display: flex;
@@ -154,15 +154,12 @@ const Timer = styled.div`
 
 const HomeIcon = styled.img`
   position: absolute;
-  top:10px;
+  top: 10px;
   right: 20px;
   width: 30px;
   height: 30px;
   cursor: pointer;
 `;
-
-
-
 
 // 몸으로 말해요 (BodyTalk)
 const Game2 = () => {
@@ -221,6 +218,7 @@ const Game2 = () => {
   };
 
   useEffect(() => {
+    dispatch(setGame2Finish());
     if (explainerNo === userNo) {
       setIsExplainer(true);
       console.log(
@@ -466,13 +464,15 @@ const Game2 = () => {
     }
   }, [client, roomId, navigate, dispatch]);
 
-
   return (
     <Wrap>
-        <HomeIcon src={homeIcon} alt="Home" onClick={() => {
-            client.send(`/app/game/${roomId}/game-select`);
-          }}
-        />
+      <HomeIcon
+        src={homeIcon}
+        alt="Home"
+        onClick={() => {
+          client.send(`/app/game/${roomId}/game-select`);
+        }}
+      />
       {/* 환영 모달 */}
       {isBodyTalkWelcomeModalOpen && (
         <GameInfoModal
@@ -532,8 +532,10 @@ const Game2 = () => {
             <Header>{round + 1} 라운드 출제자</Header>
             <Timer>{formatTime(timeLeft)}</Timer>
           </HeaderContainer>
-          <Header2>제시어를 몸으로 표현해주세요! 마이크는 꺼집니다. <br />
-          제시어는 <span style={{ color: "#58FFF5" }}>{receivedKeyword} </span> 입니다.
+          <Header2>
+            제시어를 몸으로 표현해주세요! 마이크는 꺼집니다. <br />
+            제시어는{" "}
+            <span style={{ color: "#58FFF5" }}>{receivedKeyword} </span> 입니다.
           </Header2>
           <VideoWrapper>
             {explainerNo === userNo ? (
