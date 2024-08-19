@@ -59,10 +59,10 @@ const Introduce = () => {
           const parsedMessage = JSON.parse(message.body);
           const cmd = parsedMessage.commandType;
 
-          if (cmd === "GAME_MODAL_START") {
+          if (cmd === "SKIP") {
             console.log("인트로에서 넘어감");
             skipIntro();
-          } else if (parsedMessage.commandType === "NANA_MAP") {
+          } else if (parsedMessage.commandType === "NICKNAME_START") {
             navigate("/icebreaking/games/game1Nickname");
           }
 
@@ -96,17 +96,17 @@ const Introduce = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  //한번만 보내야됨
-  useEffect(() => {
-    if (gameName !== "") {
-      client.send(`/app/game/${roomId}/game-start/${gameName}`);
-      console.log(`게임 선택 메시지 전송: ${gameName}`);
-    }
-  }, [gameName, client, roomId]);
+  // //한번만 보내야됨
+  // useEffect(() => {
+  //   if (gameName !== "") {
+  //     client.send(`/app/game/${roomId}/game-start/${gameName}`);
+  //     console.log(`게임 선택 메시지 전송: ${gameName}`);
+  //   }
+  // }, [gameName, client, roomId]);
 
-  const handleGameSelect = (name) => {
-    setGameName(name);
-  };
+  // const handleGameSelect = (name) => {
+  //   setGameName(name);
+  // };
 
   return (
     <Wrap>
@@ -117,8 +117,8 @@ const Introduce = () => {
           <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
 
           <SkipButton
-            onClick={() =>
-              client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
+            onClick={
+              () => client.send(`/app/game/${roomId}/start-modal/BODY_TALK`) //SKIP
             }
           >
             Skip
@@ -129,7 +129,7 @@ const Introduce = () => {
           src={firstGame}
           onClick={() => {
             // handleGameSelect("AVATAR");
-            client.send(`/app/game/${roomId}/game-select`);
+            client.send(`/app/game/${roomId}/game-select`); //NICKNAME_START
           }}
           alt="First Game"
         />
@@ -139,3 +139,8 @@ const Introduce = () => {
 };
 
 export default Introduce;
+
+// send : /app/game/{roomId}/SKIP
+// commandType : SKIP
+// send : /app/game/{roomId}/NICKNAME
+// commandType : NICKNAME_START
