@@ -118,7 +118,7 @@ const Introduce = () => {
 
           <SkipButton
             onClick={
-              () => client.send(`/app/game/${roomId}/start-modal/BODY_TALK`) //SKIP
+              () => client.send(`/app/game/${roomId}/start-modal/skip`) //SKIP
             }
           >
             Skip
@@ -129,7 +129,7 @@ const Introduce = () => {
           src={firstGame}
           onClick={() => {
             // handleGameSelect("AVATAR");
-            client.send(`/app/game/${roomId}/game-select`); //NICKNAME_START
+            client.send(`/app/game/${roomId}/nickname`); //NICKNAME_START
           }}
           alt="First Game"
         />
