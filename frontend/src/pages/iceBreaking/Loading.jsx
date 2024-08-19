@@ -48,65 +48,43 @@ const Loading = () => {
   const { profileData } = location.state || {};
 
   useEffect(() => {
+    if (!client || !client.connected) {
+      console.error("STOMP 클라이언트가 연결되어 있지 않습니다.");
+      return;
+    }
+
     console.log("--------------------------------");
     console.log("연결 상태 : ", client.connected);
     console.log("--------------------------------");
 
+    // 단일 구독 설정
     const subscription = client.subscribe(
       `/topic/game/${roomId}`,
       (message) => {
         const parsedMessage = JSON.parse(message.body);
         console.log("방에서 받은 메시지:", parsedMessage);
+
         if (
-          parsedMessage.data == true &&
-          parsedMessage.commandType == "GAME_START"
+          parsedMessage.data === true &&
+          parsedMessage.commandType === "GAME_START"
         ) {
           navigate("/icebreaking/intro");
-          // navigate("/icebreaking/games/game1");
-          // navigate("/test");
-        }
-        // navigate("/icebreaking/games");
-        // setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-        else if (parsedMessage.message == "질문리스트 전파\n") {
+        } else if (parsedMessage.commandType === "PROFILE_CREATE") {
+          console.log("nicknameList: ", parsedMessage.data);
+          dispatch(setNicknameList(parsedMessage.data));
+        } else if (parsedMessage.message === "질문리스트 전파\n") {
           dispatch(setQuestionList(parsedMessage.data.question));
           console.log(parsedMessage.data.question);
         }
       }
     );
 
+    // 메시지 전송
+    console.log("소켓에 전송할 데이터 : ", profileData);
+    client.send(`/app/game/${roomId}/profile`, {}, JSON.stringify(profileData));
+
     client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
 
-    if (client && client.connected) {
-      client.subscribe(`/topic/game/${roomId}`, (message) => {
-        const parsedMessage = JSON.parse(message.body);
-        console.log("방에서 받은 메시지:", parsedMessage);
-        if (parsedMessage.commandType === "PROFILE_CREATE") {
-          console.log("nicknameList: ", parsedMessage.data);
-          dispatch(setNicknameList(parsedMessage.data));
-        }
-        if (
-          parsedMessage.data === true &&
-          parsedMessage.commandType === "GAME_START"
-        ) {
-          navigate("/icebreaking/intro");
-          // navigate("/icebreaking/games/game1");
-        } else if (parsedMessage.message === "질문리스트 전파\n") {
-          dispatch(setQuestionList(parsedMessage.data.question));
-          console.log(parsedMessage.data.question);
-        }
-      });
-
-      console.log("소켓에 전송할 데이터 : ", profileData);
-      client.send(
-        `/app/game/${roomId}/profile`,
-        {},
-        JSON.stringify(profileData)
-      );
-
-      client.send(`/app/game/${roomId}/self-introduction/question`, {}, {});
-    } else {
-      console.error("STOMP 클라이언트가 연결되어 있지 않습니다.");
-    }
     return () => {
       subscription.unsubscribe();
     };
