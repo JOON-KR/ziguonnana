@@ -241,17 +241,17 @@ const Game1Drawing = () => {
       client.connectHeaders = {};
       client.reconnect_delay = 5000; // 재연결 시도 간격 설정
       client.debug = () => {}; // 디버그 로그를 무시
-      client.onclose = handleReconnect; // 연결이 닫힐 때 재연결 시도
+      client.onclose = reconnectSocket; // 연결이 닫힐 때 재연결 시도
 
       if (client.connected) {
         subscribeToGame();
       } else {
-        handleReconnect(); // 연결이 끊어졌을 때 재연결 시도
+        reconnectSocket(); // 연결이 끊어졌을 때 재연결 시도
       }
     }
   }, [client, roomId]);
 
-  const handleReconnect = () => {
+  const reconnectSocket = () => {
     const socket = new SockJS(`${BASE_URL}/ws`);
     const newClient = Stomp.over(socket);
     dispatch(setStompClient(newClient));
@@ -262,8 +262,8 @@ const Game1Drawing = () => {
         console.log("Reconnected successfully");
         subscribeToGame();
       },
-      handleReconnect
-    ); // 재연결 시도
+      reconnectSocket // 재연결 시도
+    );
   };
 
   const subscribeToGame = () => {
@@ -344,7 +344,7 @@ const Game1Drawing = () => {
       // 소켓 연결 상태 확인
       if (!client.connected) {
         console.log("소켓 연결이 끊어졌습니다. 재연결을 시도합니다...");
-        await handleReconnect(); // 재연결 시도
+        await reconnectSocket(); // 재연결 시도
       }
 
       const exportImage = await currentCanvas.exportImage("png");
