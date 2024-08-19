@@ -93,4 +93,16 @@ public class WebsocketController {
         log.info("포즈 따라하기 종료");
         return Response.ok(CommandType.POSE_END_TO_GAMES, true);
     }
+    @MessageMapping("/game/{roomId}/skip")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> skip(@DestinationVariable("roomId") String roomId){
+    	log.info("=============스킵==============");
+    	return Response.ok(CommandType.SKIP, true);
+    }
+    @MessageMapping("/game/{roomId}/nickname")
+    @SendTo("/topic/game/{roomId}")
+    public Response<Boolean> nicknameStart(@DestinationVariable("roomId") String roomId){
+    	log.info("닉네임 시작");
+    	return Response.ok(CommandType.NICKNAME_START, true);
+    }
 }
