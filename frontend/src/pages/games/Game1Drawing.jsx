@@ -370,27 +370,6 @@ const Game1Drawing = () => {
     }
   };
 
-  const handleReconnect = () => {
-    return new Promise((resolve, reject) => {
-      const socket = new SockJS(`${BASE_URL}/ws`);
-      const newClient = Stomp.over(socket);
-      dispatch(setStompClient(newClient));
-
-      newClient.connect(
-        {},
-        () => {
-          console.log("Reconnected successfully");
-          subscribeToGame();
-          resolve(); // 재연결 성공
-        },
-        (error) => {
-          console.log("Reconnection failed", error);
-          reject(error); // 재연결 실패
-        }
-      );
-    });
-  };
-
   const simplifyPath = (path, tolerance = 1.0) => {
     if (!path || path.length <= 2) return path;
 

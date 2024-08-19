@@ -129,7 +129,7 @@ const Introduce = () => {
           src={firstGame}
           onClick={() => {
             // handleGameSelect("AVATAR");
-            client.send(`/app/game/${roomId}/nickname`); //NICKNAME_START
+            client.send(`/app/game/${roomId}/nickname-start`); //NICKNAME_START
           }}
           alt="First Game"
         />
@@ -142,5 +142,5 @@ export default Introduce;
 
 // send : /app/game/{roomId}/SKIP
 // commandType : SKIP
-// send : /app/game/{roomId}/NICKNAME
+// send : /app/game/{roomId}/nickname_start
 // commandType : NICKNAME_START
