@@ -9,6 +9,8 @@ import AvatarCard from "../../components/avatarCard/AvatarCard";
 import { setGame1Finish } from "../../store/resultSlice";
 import btnIcon from "../../assets/icons/aqua_btn.png";
 import homeIcon from "../../assets/icons/home.png";
+import SockJS from "sockjs-client"; // SockJS 모듈 추가
+import Stomp from "stompjs"; // Stomp 모듈 추가
 
 const Wrap = styled.div`
   display: flex;
@@ -224,61 +226,84 @@ const Game1Drawing = () => {
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [lastSentPaths, setLastSentPaths] = useState([]);
   const [isStarted, setIsStarted] = useState(false);
-  const [avatarCards, setAvatarCards] = useState([]); // 아바타명함(이미지, 특징, 닉네임)
+  const [avatarCards, setAvatarCards] = useState([]);
 
   const canvasRef = useRef(null);
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
-  const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (client && client.connected) {
-      const subscription = client.subscribe(
-        `/topic/game/${roomId}`,
-        (message) => {
-          const parsedMessages = JSON.parse(message.body);
+    if (client) {
+      // 연결 상태를 체크하는 이벤트 리스너 추가
+      client.connectHeaders = {};
+      client.reconnect_delay = 5000; // 재연결 시도 간격 설정
+      client.debug = () => {}; // 디버그 로그를 무시
+      client.onclose = handleReconnect; // 연결이 닫힐 때 재연결 시도
 
-          if (parsedMessages.commandType === "AVATAR_CARD") {
-            // AvatarCard
-            setAvatarCards(parsedMessages.data[userNo]);
-            console.log(parsedMessages.data[userNo]);
-          }
-          if (parsedMessages.commandType === "ART_RELAY") {
-            setTargetUser(parsedMessages.data.targetUser);
-            setCurrentUser(parsedMessages.data.currentUser);
-            setKeyword(parsedMessages.data.keyword);
-            setTimeLeft(8);
-            setIsStarted(true);
-          } else if (parsedMessages.commandType === "DRAW_PREV") {
-            canvasRef.current.loadPaths(parsedMessages.data);
-          } else if (parsedMessages.commandType === "ART_END") {
-            setIsGameEnded(true);
-            setCurrentUser(0);
-            canvasRef.current.clearCanvas();
-            setDrawingResult(parsedMessages.data);
-          } else if (parsedMessages.commandType === "ART_CYCLE") {
-            canvasRef.current.clearCanvas();
-          } else if (parsedMessages.commandType === "NANA_MAP") {
-            dispatch(setGame1Finish());
-            navigate("/icebreaking/games");
-          }
-        }
-      );
-
-      client.send(`/app/game/${roomId}/art-start`);
-
-      return () => {
-        subscription.unsubscribe();
-      };
+      if (client.connected) {
+        subscribeToGame();
+      } else {
+        handleReconnect(); // 연결이 끊어졌을 때 재연결 시도
+      }
     }
   }, [client, roomId]);
 
-  // useEffect(() => {
-  //   canvasRef.current.clearCanvas();
-  // }, [targetUser]);
+  const handleReconnect = () => {
+    const socket = new SockJS(`${BASE_URL}/ws`);
+    const newClient = Stomp.over(socket);
+    dispatch(setStompClient(newClient));
+
+    newClient.connect(
+      {},
+      () => {
+        console.log("Reconnected successfully");
+        subscribeToGame();
+      },
+      handleReconnect
+    ); // 재연결 시도
+  };
+
+  const subscribeToGame = () => {
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessages = JSON.parse(message.body);
+
+        if (parsedMessages.commandType === "AVATAR_CARD") {
+          setAvatarCards(parsedMessages.data[userNo]);
+          console.log(parsedMessages.data[userNo]);
+        }
+        if (parsedMessages.commandType === "ART_RELAY") {
+          setTargetUser(parsedMessages.data.targetUser);
+          setCurrentUser(parsedMessages.data.currentUser);
+          setKeyword(parsedMessages.data.keyword);
+          setTimeLeft(8);
+          setIsStarted(true);
+        } else if (parsedMessages.commandType === "DRAW_PREV") {
+          canvasRef.current.loadPaths(parsedMessages.data);
+        } else if (parsedMessages.commandType === "ART_END") {
+          setIsGameEnded(true);
+          setCurrentUser(0);
+          canvasRef.current.clearCanvas();
+          setDrawingResult(parsedMessages.data);
+        } else if (parsedMessages.commandType === "ART_CYCLE") {
+          canvasRef.current.clearCanvas();
+        } else if (parsedMessages.commandType === "NANA_MAP") {
+          dispatch(setGame1Finish());
+          navigate("/icebreaking/games");
+        }
+      }
+    );
+
+    client.send(`/app/game/${roomId}/art-start`);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
 
   useEffect(() => {
     if (!isGameEnded) {
@@ -295,7 +320,6 @@ const Game1Drawing = () => {
     }
   }, [timeLeft]);
 
-  //맵으로 이동
   useEffect(() => {
     if (client && client.connected) {
       const subscription = client.subscribe(
@@ -308,7 +332,6 @@ const Game1Drawing = () => {
           }
         }
       );
-      // client.send(`/app/game/${roomId}/art-start`);
       return () => {
         subscription.unsubscribe();
       };
@@ -318,6 +341,12 @@ const Game1Drawing = () => {
   const handleSendDrawing = async () => {
     const currentCanvas = canvasRef.current;
     if (currentCanvas) {
+      // 소켓 연결 상태 확인
+      if (!client.connected) {
+        console.log("소켓 연결이 끊어졌습니다. 재연결을 시도합니다...");
+        await handleReconnect(); // 재연결 시도
+      }
+
       const exportImage = await currentCanvas.exportImage("png");
       const imageBlob = await (await fetch(exportImage)).blob();
       const formData = new FormData();
@@ -339,6 +368,27 @@ const Game1Drawing = () => {
         );
       }
     }
+  };
+
+  const handleReconnect = () => {
+    return new Promise((resolve, reject) => {
+      const socket = new SockJS(`${BASE_URL}/ws`);
+      const newClient = Stomp.over(socket);
+      dispatch(setStompClient(newClient));
+
+      newClient.connect(
+        {},
+        () => {
+          console.log("Reconnected successfully");
+          subscribeToGame();
+          resolve(); // 재연결 성공
+        },
+        (error) => {
+          console.log("Reconnection failed", error);
+          reject(error); // 재연결 실패
+        }
+      );
+    });
   };
 
   const simplifyPath = (path, tolerance = 1.0) => {
@@ -463,6 +513,7 @@ const Game1Drawing = () => {
     setBrushColor(color);
     setIsEraser(false);
   };
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60)
       .toString()
@@ -470,6 +521,7 @@ const Game1Drawing = () => {
     const seconds = (time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
+
   return (
     <Wrap>
       <HomeIcon
@@ -490,7 +542,6 @@ const Game1Drawing = () => {
           <ButtonContainer
             onClick={() => {
               client.send(`/app/game/${roomId}/game-select`);
-              // navigate("/icebreaking/games/gameRecord");
             }}
           >
             <ButtonText>게임 더보기</ButtonText>
@@ -581,16 +632,8 @@ const Game1Drawing = () => {
           </CanvasWrapper>
         </>
       )}
-      {/* {drawingResult && (
-        <div>
-          <Text>이어그리기 종료 결과</Text>
-          <img src={drawingResult} alt="Drawing Result" />
-        </div>
-      )} */}
     </Wrap>
   );
 };
 
 export default Game1Drawing;
-
-// ("https://ziguonnana.s3.ap-northeast-2.amazonaws.com/realyArt/b0adaf11-9e0f-4d9d-87b3-67cfb3f34ede.png");
