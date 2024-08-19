@@ -118,7 +118,7 @@ const Introduce = () => {
 
           <SkipButton
             onClick={
-              () => client.send(`/app/game/${roomId}/start-modal/skip`) //SKIP
+              () => client.send(`/app/game/${roomId}/skip`) //SKIP
             }
           >
             Skip
