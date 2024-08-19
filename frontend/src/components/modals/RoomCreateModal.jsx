@@ -159,8 +159,8 @@ const RoomCreateModal = ({ onClose }) => {
 
       const client = Stomp.over(socket);
 
-      client.heartbeat.outgoing = 900000; // 15분 (900,000ms) 동안 연결 유지
-      client.heartbeat.incoming = 900000; // 15분 (900,000ms) 동안 연결 유지
+      client.heartbeat.outgoing = 1800000; // 15분 (900,000ms) 동안 연결 유지
+      client.heartbeat.incoming = 1800000; // 15분 (900,000ms) 동안 연결 유지
       dispatch(setStompClient(client));
 
       client.connect(

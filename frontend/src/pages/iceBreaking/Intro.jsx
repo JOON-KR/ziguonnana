@@ -43,6 +43,41 @@ const SkipButton = styled.button`
   }
 `;
 
+function AudioToggleButton() {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const toggleAudio = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  return (
+    <div>
+      <audio ref={audioRef} src={icebreakingBgm} loop />
+      <button
+        onClick={toggleAudio}
+        style={{
+          padding: "10px",
+          borderRadius: "5px",
+          backgroundColor: "#58FFF5",
+          color: "black",
+          fontSize: "16px",
+          marginBottom: "20px",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        {isPlaying ? "노래 끄기" : "노래 켜기"}
+      </button>
+    </div>
+  );
+}
+
 const Introduce = () => {
   const [isStoryFinished, setIsStoryFinished] = useState(false);
   const navigate = useNavigate();
@@ -110,7 +145,8 @@ const Introduce = () => {
 
   return (
     <Wrap>
-      <audio ref={audioRef} src={icebreakingBgm} loop /> {/* 배경 음악 */}
+      {/* <audio ref={audioRef} src={icebreakingBgm} loop /> 배경 음악 */}
+      <AudioToggleButton />
       {!isStoryFinished ? (
         <>
           <Image src={introGif} alt="Intro" />
