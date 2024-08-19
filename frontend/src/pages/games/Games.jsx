@@ -17,7 +17,7 @@ import { setMessage } from "../../store/messageSlice";
 import GameEndModal from "../../components/modals/GameEndModal";
 
 const Container = styled.div`
-  height: auto;
+  height: 70vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

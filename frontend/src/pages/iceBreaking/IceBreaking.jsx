@@ -16,10 +16,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const Wrap = styled.div`
-  
-`;
-
+const Wrap = styled.div``;
 
 const PageWrap = styled.div`
   width: 100%;
@@ -33,10 +30,10 @@ const PageWrap = styled.div`
 const Frame = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   box-sizing: border-box;
-  height: 100%;
+  height: 100vh;
   gap: 16px;
   margin-left: 30px;
   margin-right: 30px;
