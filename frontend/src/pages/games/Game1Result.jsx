@@ -85,17 +85,24 @@ const Game1Result = () => {
   };
 
   useEffect(() => {
-    client.subscribe(`/topic/game/${roomId}`, (message) => {
-      const parsedMessage = JSON.parse(message.body);
+    const subscription = client.subscribe(
+      `/topic/game/${roomId}`,
+      (message) => {
+        const parsedMessage = JSON.parse(message.body);
 
-      const cmd = parsedMessage.commandType;
+        const cmd = parsedMessage.commandType;
 
-      if (cmd == "GAME_MODAL_START") {
-        navigate("/icebreaking/games/game1");
+        if (cmd == "GAME_MODAL_START") {
+          navigate("/icebreaking/games/game1");
+        }
+
+        console.log("키워드 타입 :", parsedMessage);
       }
+    );
 
-      console.log("키워드 타입 :", parsedMessage);
-    });
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [client, roomId]);
 
   return (

@@ -88,7 +88,7 @@ const Loading = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [client, roomId, navigate, profileData, dispatch]);
+  }, [client, roomId]);
 
   return (
     <PageWrap>
