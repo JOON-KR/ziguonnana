@@ -99,7 +99,7 @@ public class WebsocketController {
     	log.info("=============스킵==============");
     	return Response.ok(CommandType.SKIP, true);
     }
-    @MessageMapping("/game/{roomId}/nickname")
+    @MessageMapping("/game/{roomId}/nickname-start")
     @SendTo("/topic/game/{roomId}")
     public Response<Boolean> nicknameStart(@DestinationVariable("roomId") String roomId){
     	log.info("닉네임 시작");
