@@ -45,7 +45,10 @@ public class ArtController {
     public Response<Object> draw(@DestinationVariable("roomId") String roomId, @Payload Draw draw) {
         // DRAW_PREV 커맨드 타입과 받은 데이터를 Response로 감싸서 반환
     	log.info("이어그리기데이터{}",draw);
-    	log.info("이어그리기데이터 x: {}, y:{}",draw.getPaths().getFirst().getX(),draw.getPaths().getFirst().getY());
+    	log.info("이어그리기데이터 x: {}, y:{}", 
+    		    (int) draw.getPaths().getFirst().getX(), 
+    		    (int) draw.getPaths().getFirst().getY());
+
         return Response.ok(CommandType.DRAW_PREV, draw);
     }
     
