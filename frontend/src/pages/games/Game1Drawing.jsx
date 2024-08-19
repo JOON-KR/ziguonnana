@@ -10,7 +10,7 @@ import { setGame1Finish } from "../../store/resultSlice";
 import btnIcon from "../../assets/icons/aqua_btn.png";
 import homeIcon from "../../assets/icons/home.png";
 import SockJS from "sockjs-client"; // SockJS 모듈 추가
-import Stomp from "stompjs"; // Stomp 모듈 추가
+import { Stomp } from "@stomp/stompjs";
 
 const Wrap = styled.div`
   display: flex;

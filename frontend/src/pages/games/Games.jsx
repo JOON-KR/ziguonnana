@@ -15,8 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../store/messageSlice";
 import GameEndModal from "../../components/modals/GameEndModal";
-import SockJS from "sockjs-client"; // SockJS 모듈 추가
-import Stomp from "stompjs"; // Stomp 모듈 추가
 
 const Container = styled.div`
   height: auto;
