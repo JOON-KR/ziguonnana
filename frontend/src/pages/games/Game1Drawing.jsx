@@ -11,6 +11,7 @@ import btnIcon from "../../assets/icons/aqua_btn.png";
 import homeIcon from "../../assets/icons/home.png";
 import SockJS from "sockjs-client"; // SockJS 모듈 추가
 import { Stomp } from "@stomp/stompjs";
+import { setStompClient } from "../../store/clientSlice";
 
 const Wrap = styled.div`
   display: flex;
@@ -232,6 +233,7 @@ const Game1Drawing = () => {
   const userNo = useSelector((state) => state.auth.userNo);
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
+  const nicknameList = useSelector((state) => state.nickname.nicknameList);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -241,17 +243,17 @@ const Game1Drawing = () => {
       client.connectHeaders = {};
       client.reconnect_delay = 5000; // 재연결 시도 간격 설정
       client.debug = () => {}; // 디버그 로그를 무시
-      client.onclose = reconnectSocket; // 연결이 닫힐 때 재연결 시도
+      client.onclose = handleReconnect; // 연결이 닫힐 때 재연결 시도
 
       if (client.connected) {
         subscribeToGame();
       } else {
-        reconnectSocket(); // 연결이 끊어졌을 때 재연결 시도
+        handleReconnect(); // 연결이 끊어졌을 때 재연결 시도
       }
     }
   }, [client, roomId]);
 
-  const reconnectSocket = () => {
+  const handleReconnect = () => {
     const socket = new SockJS(`${BASE_URL}/ws`);
     const newClient = Stomp.over(socket);
     dispatch(setStompClient(newClient));
@@ -262,8 +264,8 @@ const Game1Drawing = () => {
         console.log("Reconnected successfully");
         subscribeToGame();
       },
-      reconnectSocket // 재연결 시도
-    );
+      handleReconnect
+    ); // 재연결 시도
   };
 
   const subscribeToGame = () => {
@@ -344,7 +346,7 @@ const Game1Drawing = () => {
       // 소켓 연결 상태 확인
       if (!client.connected) {
         console.log("소켓 연결이 끊어졌습니다. 재연결을 시도합니다...");
-        await reconnectSocket(); // 재연결 시도
+        await handleReconnect(); // 재연결 시도
       }
 
       const exportImage = await currentCanvas.exportImage("png");
