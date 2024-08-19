@@ -39,7 +39,7 @@ const SkipButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
-    background-color: #00FFFF;
+    background-color: #00ffff;
   }
 `;
 
@@ -60,6 +60,7 @@ const Introduce = () => {
           const cmd = parsedMessage.commandType;
 
           if (cmd === "GAME_MODAL_START") {
+            console.log("인트로에서 넘어감");
             skipIntro();
           } else if (parsedMessage.commandType === "NANA_MAP") {
             navigate("/icebreaking/games/game1Nickname");
@@ -114,7 +115,7 @@ const Introduce = () => {
         <>
           <Image src={introGif} alt="Intro" />
           <button onClick={() => navigate("/icebreaking/games")}>나나맵</button>
-          
+
           <SkipButton
             onClick={() =>
               client.send(`/app/game/${roomId}/start-modal/BODY_TALK`)
