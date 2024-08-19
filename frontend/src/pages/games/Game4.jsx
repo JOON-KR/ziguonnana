@@ -7,7 +7,7 @@ import OpenViduSession from "../../components/OpenViduSession";
 import * as posenet from "@tensorflow-models/posenet";
 import "@tensorflow/tfjs";
 import red from "../../assets/icons/red.png";
-import homeIcon from "../../assets/icons/home.png"; 
+import homeIcon from "../../assets/icons/home.png";
 
 // 각 포즈 이미지와 오버레이 이미지를 가져옵니다
 import pose1 from "../../assets/images/pose1.png";
@@ -248,16 +248,14 @@ const DifficultyLabel = styled.div`
   margin-bottom: 5px;
 `;
 
-
 const HomeIcon = styled.img`
   position: absolute;
-  top:30px;
+  top: 30px;
   left: 30px;
   width: 30px;
   height: 30px;
   cursor: pointer;
 `;
-
 
 const Game4 = () => {
   const [isFollowPoseWelcomeModalOpen, setIsFollowPoseWelcomeModalOpen] =
@@ -350,6 +348,7 @@ const Game4 = () => {
 
   // 게임 구독 및 메시지 처리
   useEffect(() => {
+    dispatch(setGame4Finish());
     console.log("Subscribing to game topic with roomId:", roomId);
     const subscription = client.subscribe(
       `/topic/game/${roomId}`,
@@ -392,27 +391,25 @@ const Game4 = () => {
     };
   }, [client, roomId]);
 
-  
-//맵으로 이동
-useEffect(() => {
-  if (client && client.connected) {
-    const subscription = client.subscribe(
-      `/topic/game/${roomId}`,
-      (message) => {
-        const parsedMessages = JSON.parse(message.body);
+  //맵으로 이동
+  useEffect(() => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(
+        `/topic/game/${roomId}`,
+        (message) => {
+          const parsedMessages = JSON.parse(message.body);
 
-        if (parsedMessages.commandType === "NANA_MAP") {
-          navigate("/icebreaking/games");
+          if (parsedMessages.commandType === "NANA_MAP") {
+            navigate("/icebreaking/games");
+          }
         }
-      }
-    );
-    client.send(`/app/game/${roomId}/art-start`);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }
-}, [client, roomId, navigate, dispatch]);
-
+      );
+      client.send(`/app/game/${roomId}/art-start`);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [client, roomId, navigate, dispatch]);
 
   // selectedPose가 업데이트될 때마다 게임을 시작
   useEffect(() => {
@@ -598,13 +595,15 @@ useEffect(() => {
     setIsFollowPoseSelectModalOpen(true);
   };
 
-
   return (
     <Wrap>
-       <HomeIcon src={homeIcon} alt="Home" onClick={() => {
-           client.send(`/app/game/${roomId}/game-select`);
-          }}
-        />
+      <HomeIcon
+        src={homeIcon}
+        alt="Home"
+        onClick={() => {
+          client.send(`/app/game/${roomId}/game-select`);
+        }}
+      />
       {isGameEnded ? (
         <Title>최고의 멤버 : {bestMember}</Title>
       ) : (

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import GameInfoModal from "../../components/modals/GameInfoModal";
 import earth from "../../assets/icons/earth.png";
 import gray from "../../assets/icons/gray.png";
+import { setGame5Finish } from "../../store/resultSlice";
 
 const Wrap = styled.div`
   display: flex;
@@ -149,6 +150,7 @@ const Game5 = () => {
   const roomId = useSelector((state) => state.room.roomId);
   const client = useSelector((state) => state.client.stompClient);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // 비디오 썸네일 클릭 시 모달 열기
   const handleThumbnailClick = (videoId, videoUrl) => {
@@ -178,6 +180,7 @@ const Game5 = () => {
 
   // 모달 닫는 응답
   useEffect(() => {
+    dispatch(setGame5Finish);
     if (client && client.connected) {
       const subscription = client.subscribe(
         `/topic/game/${roomId}`,
