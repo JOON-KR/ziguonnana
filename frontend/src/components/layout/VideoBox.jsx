@@ -52,7 +52,14 @@ const VideoBox = ({ index }) => {
     if (localStream) {
       const localUserNo = JSON.parse(localStream.connection.data).userNo;
       if (localUserNo === userNo && videoRef.current) {
-        videoRef.current.srcObject = localStream.getMediaStream(); // 로컬 스트림을 비디오 요소에 할당
+        const mediaStream = localStream.getMediaStream();
+        videoRef.current.srcObject = mediaStream; // 로컬 스트림을 비디오 요소에 할당
+
+        // 오디오 트랙을 음소거
+        mediaStream.getAudioTracks().forEach((track) => {
+          track.enabled = false;
+        });
+
         assigned = true;
       }
     }
