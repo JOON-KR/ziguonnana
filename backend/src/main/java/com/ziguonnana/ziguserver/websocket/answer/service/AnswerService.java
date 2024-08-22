@@ -53,7 +53,7 @@ public class AnswerService {
 //			nextGame(roomId);
 		}
 		log.info("player 정보 업데이트 player : " + player);
-		log.info("자기소개 답변 업데이트 room : " + rooms);
+		log.info("자기소개 답변 업데이트 room : " + room);
 	}
 	
 	public void getQuestion(String roomId) {
